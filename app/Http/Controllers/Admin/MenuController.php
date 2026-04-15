@@ -16,10 +16,16 @@ class MenuController extends Controller
     public function index(Request $request): View
     {
         $search = trim($request->string('search')->toString());
+        $viewMode = $request->string('view')->toString();
+
+        if (! in_array($viewMode, ['table', 'card'], true)) {
+            $viewMode = 'table';
+        }
 
         return view('admin.menus.index', [
             'menus' => $this->menuService->paginate(search: $search),
             'search' => $search,
+            'viewMode' => $viewMode,
         ]);
     }
 
