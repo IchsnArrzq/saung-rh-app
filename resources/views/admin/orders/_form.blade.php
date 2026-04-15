@@ -23,14 +23,14 @@
     $orderedAtValue = old('ordered_at');
 
     if ($orderedAtValue === null && isset($order) && $order->ordered_at) {
-        $orderedAtValue = $order->ordered_at->format('Y-m-d\TH:i');
+        $orderedAtValue = $order->ordered_at->format('Y-m-d\\TH:i');
     }
 @endphp
 
 <div class="grid gap-4 md:grid-cols-2">
-    <label class="form-control">
-        <span class="label-text">Meja</span>
-        <select name="table_id" class="select select-bordered">
+    <fieldset class="fieldset">
+        <legend class="fieldset-legend">Meja</legend>
+        <select name="table_id" class="select select-bordered w-full">
             <option value="">Tanpa meja</option>
             @foreach ($tables as $table)
                 <option value="{{ $table->id }}" @selected((string) old('table_id', $order?->table_id) === (string) $table->id)>
@@ -38,43 +38,56 @@
                 </option>
             @endforeach
         </select>
-    </label>
+        @error('table_id')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
-    <label class="form-control">
-        <span class="label-text">Nama Pelanggan</span>
-        <input type="text" name="customer_name" class="input input-bordered" value="{{ old('customer_name', $order?->customer_name) }}">
-    </label>
+    <fieldset class="fieldset">
+        <legend class="fieldset-legend">Nama Pelanggan</legend>
+        <input type="text" name="customer_name" class="input input-bordered w-full" value="{{ old('customer_name', $order?->customer_name) }}">
+        @error('customer_name')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
-    <label class="form-control">
-        <span class="label-text">Status</span>
-        <select name="status" class="select select-bordered" required>
+    <fieldset class="fieldset">
+        <legend class="fieldset-legend">Status</legend>
+        <select name="status" class="select select-bordered w-full" required>
             @foreach ($statusOptions as $status)
                 <option value="{{ $status }}" @selected(old('status', $order?->status ?? 'draft') === $status)>
                     {{ str_replace('_', ' ', $status) }}
                 </option>
             @endforeach
         </select>
-    </label>
+        @error('status')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
-    <label class="form-control">
-        <span class="label-text">Waktu Order</span>
-        <input type="datetime-local" name="ordered_at" class="input input-bordered" value="{{ $orderedAtValue }}">
-    </label>
+    <fieldset class="fieldset">
+        <legend class="fieldset-legend">Waktu Order</legend>
+        <input type="datetime-local" name="ordered_at" class="input input-bordered w-full" value="{{ $orderedAtValue }}">
+        @error('ordered_at')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
-    <label class="form-control">
-        <span class="label-text">Diskon</span>
-        <input type="number" step="0.01" min="0" name="discount" class="input input-bordered" value="{{ old('discount', $order?->discount ?? 0) }}">
-    </label>
+    <fieldset class="fieldset">
+        <legend class="fieldset-legend">Pajak</legend>
+        <input type="number" step="0.01" min="0" name="tax" class="input input-bordered w-full" value="{{ old('tax', $order?->tax ?? 0) }}">
+        @error('tax')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
-    <label class="form-control">
-        <span class="label-text">Pajak</span>
-        <input type="number" step="0.01" min="0" name="tax" class="input input-bordered" value="{{ old('tax', $order?->tax ?? 0) }}">
-    </label>
-
-    <label class="form-control md:col-span-2">
-        <span class="label-text">Catatan</span>
-        <textarea name="notes" class="textarea textarea-bordered" rows="3">{{ old('notes', $order?->notes) }}</textarea>
-    </label>
+    <fieldset class="fieldset md:col-span-2">
+        <legend class="fieldset-legend">Catatan</legend>
+        <textarea name="notes" class="textarea textarea-bordered w-full" rows="3">{{ old('notes', $order?->notes) }}</textarea>
+        @error('notes')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 </div>
 
 <div class="rounded-2xl border border-stone-200 p-4">
@@ -82,6 +95,10 @@
         <h3 class="font-semibold">Item Pesanan</h3>
         <button type="button" id="add-order-item" class="btn btn-xs btn-outline">Tambah Item</button>
     </div>
+
+    @error('items')
+        <p class="label text-error mb-2">{{ $message }}</p>
+    @enderror
 
     <div id="order-items" class="space-y-3">
         @foreach ($baseItems as $index => $item)
@@ -91,9 +108,9 @@
                 $itemPrice = $item['price'] ?? ($selectedMenu->price ?? 0);
             @endphp
             <div class="order-item grid gap-3 rounded-xl border border-stone-200 p-3 md:grid-cols-5" data-index="{{ $index }}">
-                <label class="form-control md:col-span-2">
-                    <span class="label-text text-xs">Menu</span>
-                    <select name="items[{{ $index }}][menu_id]" class="select select-bordered select-sm menu-select">
+                <fieldset class="fieldset md:col-span-2">
+                    <legend class="fieldset-legend text-xs">Menu</legend>
+                    <select name="items[{{ $index }}][menu_id]" class="select select-bordered select-sm menu-select w-full">
                         <option value="">Manual</option>
                         @foreach ($menus as $menu)
                             <option value="{{ $menu->id }}" data-name="{{ $menu->name }}" data-price="{{ $menu->price }}" @selected((string) ($item['menu_id'] ?? '') === (string) $menu->id)>
@@ -101,31 +118,46 @@
                             </option>
                         @endforeach
                     </select>
-                </label>
+                    @error("items.$index.menu_id")
+                        <p class="label text-error">{{ $message }}</p>
+                    @enderror
+                </fieldset>
 
-                <label class="form-control md:col-span-2">
-                    <span class="label-text text-xs">Nama Item</span>
-                    <input type="text" name="items[{{ $index }}][menu_name_snapshot]" class="input input-bordered input-sm item-name"
+                <fieldset class="fieldset md:col-span-2">
+                    <legend class="fieldset-legend text-xs">Nama Item</legend>
+                    <input type="text" name="items[{{ $index }}][menu_name_snapshot]" class="input input-bordered input-sm item-name w-full"
                         value="{{ $itemName }}" required>
-                </label>
+                    @error("items.$index.menu_name_snapshot")
+                        <p class="label text-error">{{ $message }}</p>
+                    @enderror
+                </fieldset>
 
-                <label class="form-control">
-                    <span class="label-text text-xs">Qty</span>
-                    <input type="number" min="1" name="items[{{ $index }}][qty]" class="input input-bordered input-sm"
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend text-xs">Qty</legend>
+                    <input type="number" min="1" name="items[{{ $index }}][qty]" class="input input-bordered input-sm w-full"
                         value="{{ $item['qty'] ?? 1 }}" required>
-                </label>
+                    @error("items.$index.qty")
+                        <p class="label text-error">{{ $message }}</p>
+                    @enderror
+                </fieldset>
 
-                <label class="form-control md:col-span-2">
-                    <span class="label-text text-xs">Harga</span>
-                    <input type="number" min="0" step="0.01" name="items[{{ $index }}][price]" class="input input-bordered input-sm item-price"
+                <fieldset class="fieldset md:col-span-2">
+                    <legend class="fieldset-legend text-xs">Harga</legend>
+                    <input type="number" min="0" step="0.01" name="items[{{ $index }}][price]" class="input input-bordered input-sm item-price w-full"
                         value="{{ $itemPrice }}" required>
-                </label>
+                    @error("items.$index.price")
+                        <p class="label text-error">{{ $message }}</p>
+                    @enderror
+                </fieldset>
 
-                <label class="form-control md:col-span-2">
-                    <span class="label-text text-xs">Catatan</span>
-                    <input type="text" name="items[{{ $index }}][notes]" class="input input-bordered input-sm"
-                        value="{{ $item['notes'] ?? '' }}" placeholder="opsional">
-                </label>
+                <fieldset class="fieldset md:col-span-2">
+                    <legend class="fieldset-legend text-xs">Catatan</legend>
+                    <input type="text" name="items[{{ $index }}][notes]" class="input input-bordered input-sm w-full"
+                        value="{{ $item['notes'] ?? '' }}" placeholder="Catatan item">
+                    @error("items.$index.notes")
+                        <p class="label text-error">{{ $message }}</p>
+                    @enderror
+                </fieldset>
 
                 <div class="md:col-span-1 flex items-end justify-end">
                     <button type="button" class="btn btn-sm btn-error text-white remove-item">Hapus</button>
@@ -137,35 +169,35 @@
 
 <template id="order-item-template">
     <div class="order-item grid gap-3 rounded-xl border border-stone-200 p-3 md:grid-cols-5" data-index="__INDEX__">
-        <label class="form-control md:col-span-2">
-            <span class="label-text text-xs">Menu</span>
-            <select name="items[__INDEX__][menu_id]" class="select select-bordered select-sm menu-select">
+        <fieldset class="fieldset md:col-span-2">
+            <legend class="fieldset-legend text-xs">Menu</legend>
+            <select name="items[__INDEX__][menu_id]" class="select select-bordered select-sm menu-select w-full">
                 <option value="">Manual</option>
                 @foreach ($menus as $menu)
                     <option value="{{ $menu->id }}" data-name="{{ $menu->name }}" data-price="{{ $menu->price }}">{{ $menu->name }}</option>
                 @endforeach
             </select>
-        </label>
+        </fieldset>
 
-        <label class="form-control md:col-span-2">
-            <span class="label-text text-xs">Nama Item</span>
-            <input type="text" name="items[__INDEX__][menu_name_snapshot]" class="input input-bordered input-sm item-name" required>
-        </label>
+        <fieldset class="fieldset md:col-span-2">
+            <legend class="fieldset-legend text-xs">Nama Item</legend>
+            <input type="text" name="items[__INDEX__][menu_name_snapshot]" class="input input-bordered input-sm item-name w-full" required>
+        </fieldset>
 
-        <label class="form-control">
-            <span class="label-text text-xs">Qty</span>
-            <input type="number" min="1" name="items[__INDEX__][qty]" class="input input-bordered input-sm" value="1" required>
-        </label>
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend text-xs">Qty</legend>
+            <input type="number" min="1" name="items[__INDEX__][qty]" class="input input-bordered input-sm w-full" value="1" required>
+        </fieldset>
 
-        <label class="form-control md:col-span-2">
-            <span class="label-text text-xs">Harga</span>
-            <input type="number" min="0" step="0.01" name="items[__INDEX__][price]" class="input input-bordered input-sm item-price" value="0" required>
-        </label>
+        <fieldset class="fieldset md:col-span-2">
+            <legend class="fieldset-legend text-xs">Harga</legend>
+            <input type="number" min="0" step="0.01" name="items[__INDEX__][price]" class="input input-bordered input-sm item-price w-full" value="0" required>
+        </fieldset>
 
-        <label class="form-control md:col-span-2">
-            <span class="label-text text-xs">Catatan</span>
-            <input type="text" name="items[__INDEX__][notes]" class="input input-bordered input-sm" placeholder="opsional">
-        </label>
+        <fieldset class="fieldset md:col-span-2">
+            <legend class="fieldset-legend text-xs">Catatan</legend>
+            <input type="text" name="items[__INDEX__][notes]" class="input input-bordered input-sm w-full" placeholder="Catatan item">
+        </fieldset>
 
         <div class="md:col-span-1 flex items-end justify-end">
             <button type="button" class="btn btn-sm btn-error text-white remove-item">Hapus</button>

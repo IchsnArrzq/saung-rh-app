@@ -24,8 +24,8 @@
 
         <a href="{{ route('payments.index') }}" class="rounded-2xl border border-stone-200 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md">
             <p class="text-xs font-bold uppercase tracking-[0.2em] text-stone-500">Kasir</p>
-            <p class="mt-2 text-lg font-semibold text-stone-900">Split Bill / DP</p>
-            <p class="mt-1 text-sm text-stone-600">Catat pembayaran penuh, DP, atau partial.</p>
+            <p class="mt-2 text-lg font-semibold text-stone-900">Pembayaran</p>
+            <p class="mt-1 text-sm text-stone-600">Catat pembayaran order secara penuh.</p>
         </a>
     </div>
 
@@ -33,9 +33,9 @@
         <h3 class="text-lg font-semibold text-stone-900">Modul Admin Aktif</h3>
         <div class="mt-4 flex flex-wrap gap-2">
             <a href="{{ route('menu-categories.index') }}" class="badge badge-outline p-3">Kategori Menu</a>
-            <a href="{{ route('promotions.index') }}" class="badge badge-outline p-3">Promo</a>
+            <a href="{{ route('table-categories.index') }}" class="badge badge-outline p-3">Kategori Meja</a>
+            <a href="{{ route('table-statuses.index') }}" class="badge badge-outline p-3">Status Meja</a>
             <a href="{{ route('reservations.index') }}" class="badge badge-outline p-3">Reservasi</a>
-            <a href="{{ route('ingredients.index') }}" class="badge badge-outline p-3">Stok Bahan Baku</a>
         </div>
     </div>
 </x-app-layout>

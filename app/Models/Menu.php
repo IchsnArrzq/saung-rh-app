@@ -45,4 +45,9 @@ class Menu extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function reservationItems(): HasMany
+    {
+        return $this->hasMany(ReservationItem::class);
+    }
 }

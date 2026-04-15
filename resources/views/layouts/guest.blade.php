@@ -16,6 +16,7 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 </head>
 
 <body class="min-h-screen bg-stone-800  text-stone-800 " style="font-family: 'Plus Jakarta Sans', sans-serif;">
@@ -43,9 +44,9 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ url('/') }}#promo"
+                            <a href="{{ url('/') }}#highlight"
                                 class="rounded-full px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-white">
-                                Promo
+                                Highlight
                             </a>
                         </li>
                     </ul>
@@ -96,7 +97,7 @@
                     <ul class="mt-3 space-y-2 text-sm text-stone-700">
                         <li><a href="{{ url('/') }}#menu" class="hover:text-emerald-800">Restaurants</a></li>
                         <li><a href="{{ url('/') }}#menu" class="hover:text-emerald-800">Burger Menu</a></li>
-                        <li><a href="{{ url('/') }}#promo" class="hover:text-emerald-800">Chicken Specials</a>
+                        <li><a href="{{ url('/') }}#highlight" class="hover:text-emerald-800">Chicken Specials</a>
                         </li>
                     </ul>
                 </div>
@@ -125,6 +126,7 @@
             </div>
         </footer>
     </div>
+    @livewireScripts
 </body>
 
 </html>

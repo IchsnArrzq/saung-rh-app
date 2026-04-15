@@ -7,12 +7,12 @@ new class extends Component {
     public string $dashboardUrl = '#';
     public string $menuUrl = '#';
     public string $categoryUrl = '#';
+    public string $tableStatusUrl = '#';
+    public string $tableCategoryUrl = '#';
     public string $tableUrl = '#';
-    public string $ingredientUrl = '#';
     public string $orderUrl = '#';
     public string $paymentUrl = '#';
     public string $reservationUrl = '#';
-    public string $promotionUrl = '#';
     public string $dailyReportUrl = '#';
     public string $monthlyReportUrl = '#';
 
@@ -25,19 +25,20 @@ new class extends Component {
         $this->dashboardUrl = Route::has('dashboard') ? route('dashboard') : '#';
         $this->menuUrl = Route::has('menus.index') ? route('menus.index') : '#';
         $this->categoryUrl = Route::has('menu-categories.index') ? route('menu-categories.index') : '#';
+        $this->tableStatusUrl = Route::has('table-statuses.index') ? route('table-statuses.index') : '#';
+        $this->tableCategoryUrl = Route::has('table-categories.index') ? route('table-categories.index') : '#';
         $this->tableUrl = Route::has('tables.index') ? route('tables.index') : '#';
-        $this->ingredientUrl = Route::has('ingredients.index') ? route('ingredients.index') : '#';
         $this->orderUrl = Route::has('orders.index') ? route('orders.index') : '#';
         $this->paymentUrl = Route::has('payments.index') ? route('payments.index') : '#';
         $this->reservationUrl = Route::has('reservations.index') ? route('reservations.index') : '#';
-        $this->promotionUrl = Route::has('promotions.index') ? route('promotions.index') : '#';
         $this->dailyReportUrl = Route::has('reports.daily') ? route('reports.daily') : '#';
         $this->monthlyReportUrl = Route::has('reports.monthly') ? route('reports.monthly') : '#';
 
         $this->masterOpen = request()->routeIs('menus.*')
             || request()->routeIs('menu-categories.*')
-            || request()->routeIs('tables.*')
-            || request()->routeIs('ingredients.*');
+            || request()->routeIs('table-statuses.*')
+            || request()->routeIs('table-categories.*')
+            || request()->routeIs('tables.*');
 
         $this->transactionOpen = request()->routeIs('orders.*')
             || request()->routeIs('payments.*')
@@ -87,14 +88,28 @@ new class extends Component {
                                 <a href="{{ $menuUrl }}"
                                     class="{{ request()->routeIs('menus.*') ? 'text-emerald-800 font-semibold' : 'text-stone-700' }}">
                                     <i class="ri-bowl-line"></i>
-                                    Menu Items
+                                    Menu
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ $categoryUrl }}"
                                     class="{{ request()->routeIs('menu-categories.*') ? 'text-emerald-800 font-semibold' : 'text-stone-700' }}">
                                     <i class="ri-price-tag-3-line"></i>
-                                    Categories
+                                    Menu Categories
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ $tableCategoryUrl }}"
+                                    class="{{ request()->routeIs('table-categories.*') ? 'text-emerald-800 font-semibold' : 'text-stone-700' }}">
+                                    <i class="ri-layout-2-line"></i>
+                                    Table Categories
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ $tableStatusUrl }}"
+                                    class="{{ request()->routeIs('table-statuses.*') ? 'text-emerald-800 font-semibold' : 'text-stone-700' }}">
+                                    <i class="ri-flag-line"></i>
+                                    Table Statuses
                                 </a>
                             </li>
                             <li>
@@ -102,13 +117,6 @@ new class extends Component {
                                     class="{{ request()->routeIs('tables.*') ? 'text-emerald-800 font-semibold' : 'text-stone-700' }}">
                                     <i class="ri-layout-grid-line"></i>
                                     Tables
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ $ingredientUrl }}"
-                                    class="{{ request()->routeIs('ingredients.*') ? 'text-emerald-800 font-semibold' : 'text-stone-700' }}">
-                                    <i class="ri-flask-line"></i>
-                                    Ingredients
                                 </a>
                             </li>
                         </ul>
@@ -146,14 +154,6 @@ new class extends Component {
                             </li>
                         </ul>
                     </details>
-                </li>
-
-                <li>
-                    <a href="{{ $promotionUrl }}"
-                        class="{{ request()->routeIs('promotions.*') ? 'bg-emerald-800 text-amber-50 hover:bg-emerald-700' : 'text-stone-700 hover:bg-amber-100' }}">
-                        <i class="ri-price-tag-2-line text-lg"></i>
-                        <span class="is-drawer-close:hidden">Promotions</span>
-                    </a>
                 </li>
 
                 <li>

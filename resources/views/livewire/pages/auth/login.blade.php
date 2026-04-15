@@ -19,7 +19,11 @@ new #[Layout('layouts.auth')] class extends Component {
 
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $redirectTo = auth()->user()?->hasAnyRole(['superadmin', 'admin'])
+            ? route('dashboard', absolute: false)
+            : route('customer.dashboard', absolute: false);
+
+        $this->redirectIntended(default: $redirectTo, navigate: true);
     }
 }; ?>
 

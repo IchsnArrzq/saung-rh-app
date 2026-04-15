@@ -10,9 +10,9 @@
             <p class="mt-4 text-sm text-emerald-100">
                 Mulai karier kuliner kamu dengan ritme dapur profesional, menu premium, dan tim terbaik.
             </p>
-            <a href="#menu"
+            <a href="{{ route('public.menu.index') }}"
                 class="mt-7 inline-flex items-center rounded-full bg-amber-50 px-5 py-2 text-sm font-semibold text-emerald-900 transition hover:bg-white">
-                Start Writing
+                Lihat Menu
             </a>
 
             <div class="pointer-events-none absolute -bottom-14 -left-10 h-36 w-36 rounded-full border border-amber-300/30"></div>
@@ -36,7 +36,7 @@
             <p class="mt-4 text-sm text-stone-700">
                 Why bother when you can easily mix up a batch at home, lengkap dengan rasa khas Saung RH.
             </p>
-            <a href="#promo"
+            <a href="#highlight"
                 class="mt-7 inline-flex items-center rounded-full border border-stone-300 bg-white px-5 py-2 text-sm font-semibold transition hover:border-stone-500">
                 Read Recipe
             </a>
@@ -45,45 +45,69 @@
         </article>
     </section>
 
-    <section id="menu" class="mt-10 grid gap-6 border-y border-stone-200 py-8 md:grid-cols-3">
-        <article>
-            <div class="mb-3 flex items-center gap-3">
-                <p class="text-2xl font-semibold text-stone-900">Basket of wedges</p>
-                <span class="text-sm font-semibold text-stone-500">35</span>
-            </div>
-            <p class="text-sm text-stone-600">
-                Potato, butter, chili, garlic, dan smoked paprika jadi camilan paling dicari.
-            </p>
-            <a href="#" class="mt-3 inline-flex text-sm font-semibold text-emerald-800 hover:text-emerald-900">
-                Read More +
-            </a>
-        </article>
+    @if (session('success'))
+        <div class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+            {{ session('success') }}
+        </div>
+    @endif
 
-        <article>
-            <div class="mb-3 flex items-center gap-3">
-                <p class="text-2xl font-semibold text-stone-900">Chicken Burgers</p>
-                <span class="text-sm font-semibold text-stone-500">18</span>
-            </div>
-            <p class="text-sm text-stone-600">
-                Chicken smoke, powder egg, dan saus rahasia jadi menu favorit pelanggan.
-            </p>
-            <a href="#" class="mt-3 inline-flex text-sm font-semibold text-emerald-800 hover:text-emerald-900">
-                Read More +
-            </a>
-        </article>
+    @if ($errors->has('menu'))
+        <div class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+            {{ $errors->first('menu') }}
+        </div>
+    @endif
 
-        <article>
-            <div class="mb-3 flex items-center gap-3">
-                <p class="text-2xl font-semibold text-stone-900">Sugar Free</p>
-                <span class="text-sm font-semibold text-stone-500">14</span>
+    <section id="menu" class="mt-10 border-y border-stone-200 py-8">
+        <div class="mb-6 flex flex-wrap items-center gap-3">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.2em] text-stone-500">Menu Makanan</p>
+                <h2 class="mt-2 text-3xl font-semibold text-stone-900 md:text-4xl" style="font-family: 'Playfair Display', serif;">
+                    Pilihan Menu Favorit Saung RH
+                </h2>
             </div>
-            <p class="text-sm text-stone-600">
-                Pilihan minuman rendah gula dengan citrus infused taste untuk teman makan.
-            </p>
-            <a href="#" class="mt-3 inline-flex text-sm font-semibold text-emerald-800 hover:text-emerald-900">
-                Read More +
+
+            <a href="{{ route('public.cart.index') }}"
+                class="ml-auto inline-flex items-center rounded-full bg-amber-300 px-5 py-2 text-sm font-semibold text-stone-900 transition hover:bg-amber-400">
+                Cart ({{ $cartCount }})
             </a>
-        </article>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            @forelse ($menus as $menu)
+                <article class="overflow-hidden rounded-3xl border border-stone-200 bg-white">
+                    <div class="aspect-[4/3] w-full bg-stone-100">
+                        <img src="{{ $menu->image_url ?: 'https://picsum.photos/seed/'.urlencode((string) $menu->id).'/800/600' }}"
+                            alt="{{ $menu->name }}" class="h-full w-full object-cover">
+                    </div>
+
+                    <div class="p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">{{ $menu->category->name ?? 'Menu' }}</p>
+                        <h3 class="mt-1 text-lg font-semibold text-stone-900">{{ $menu->name }}</h3>
+                        <p class="mt-1 text-sm text-stone-600">{{ \Illuminate\Support\Str::limit($menu->description ?: 'Menu favorit restoran.', 72) }}</p>
+                        <p class="mt-3 text-lg font-bold text-emerald-800">Rp {{ number_format((float) $menu->price, 0, ',', '.') }}</p>
+
+                        <form method="POST" action="{{ route('public.menu.cart.store', $menu) }}" class="mt-4">
+                            @csrf
+                            <button type="submit"
+                                class="w-full rounded-full bg-emerald-800 px-4 py-2 text-sm font-semibold text-amber-50 transition hover:bg-emerald-700">
+                                Masukkan ke Cart
+                            </button>
+                        </form>
+                    </div>
+                </article>
+            @empty
+                <p class="col-span-full rounded-2xl border border-dashed border-stone-300 bg-white p-5 text-center text-sm text-stone-500">
+                    Menu belum tersedia.
+                </p>
+            @endforelse
+        </div>
+
+        <div class="mt-6">
+            <a href="{{ route('public.menu.index') }}"
+                class="inline-flex items-center rounded-full border border-stone-300 bg-white px-5 py-2 text-sm font-semibold text-stone-800 transition hover:border-emerald-800 hover:text-emerald-800">
+                Lihat Semua Menu
+            </a>
+        </div>
     </section>
 
     <section class="mt-10 grid gap-6 lg:grid-cols-[1fr_1.1fr]">
@@ -141,7 +165,7 @@
         </article>
     </section>
 
-    <section id="promo" class="mt-10 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+    <section id="highlight" class="mt-10 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
         <article class="rounded-3xl border border-stone-200 bg-amber-50 p-6 md:p-8">
             <h2 class="text-5xl leading-[1.03] text-stone-900 md:text-6xl" style="font-family: 'Playfair Display', serif;">
                 Dive into the delicious corn chicken burger!
@@ -157,8 +181,8 @@
 
             <div class="mt-7 grid gap-4 sm:grid-cols-2">
                 <div class="rounded-2xl bg-emerald-800 p-4 text-amber-50">
-                    <p class="text-sm uppercase tracking-[0.16em] text-amber-100">Hot Promo</p>
-                    <p class="mt-2 text-lg font-semibold">Diskon 25% jam 14.00 - 17.00</p>
+                    <p class="text-sm uppercase tracking-[0.16em] text-amber-100">Hot Menu</p>
+                    <p class="mt-2 text-lg font-semibold">Menu favorit tersedia setiap hari.</p>
                 </div>
                 <div class="rounded-2xl bg-amber-300 p-4 text-stone-900">
                     <p class="text-sm uppercase tracking-[0.16em] text-stone-700">Chef Table</p>
@@ -192,7 +216,7 @@
                 <p class="mt-3 text-sm text-stone-600">
                     Potatoes, butter, olive oil, ground paprika.
                 </p>
-                <a href="#"
+                <a href="{{ route('public.menu.index') }}"
                     class="mt-5 inline-flex rounded-full bg-emerald-800 px-5 py-2 text-sm font-semibold text-amber-50 transition hover:bg-emerald-700">
                     Book Restaurant
                 </a>
@@ -219,7 +243,7 @@
             Fuel your <span class="text-amber-300">stomach</span> in every bite
         </h2>
         <p class="mt-4 max-w-2xl text-sm text-emerald-100">
-            Dapatkan update menu terbaru, resep andalan, dan promo mingguan langsung ke email kamu.
+            Dapatkan update menu terbaru dan resep andalan langsung ke email kamu.
         </p>
 
         <div class="mt-7 flex flex-wrap items-center gap-3">

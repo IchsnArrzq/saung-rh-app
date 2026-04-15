@@ -1,9 +1,11 @@
 <?php
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
@@ -28,11 +30,24 @@ new #[Layout('layouts.auth')] class extends Component
 
         $validated['password'] = Hash::make($validated['password']);
 
-        event(new Registered($user = User::create($validated)));
+        $user = DB::transaction(function () use ($validated) {
+            $user = User::create($validated);
+
+            $customerRole = Role::query()->firstOrCreate([
+                'name' => 'customer',
+                'guard_name' => 'web',
+            ]);
+
+            $user->assignRole($customerRole);
+
+            return $user;
+        });
+
+        event(new Registered($user));
 
         Auth::login($user);
 
-        $this->redirect(route('dashboard', absolute: false), navigate: true);
+        $this->redirect(route('customer.dashboard', absolute: false), navigate: true);
     }
 }; ?>
 

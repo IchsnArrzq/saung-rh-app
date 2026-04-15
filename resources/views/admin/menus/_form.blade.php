@@ -3,14 +3,17 @@
 @endphp
 
 <div class="grid gap-4 md:grid-cols-2">
-    <label class="form-control md:col-span-2">
-        <span class="label-text">Nama Menu</span>
-        <input type="text" name="name" class="input input-bordered" value="{{ old('name', $menu->name) }}" required>
-    </label>
+    <fieldset class="fieldset md:col-span-2">
+        <legend class="fieldset-legend">Nama Menu</legend>
+        <input type="text" name="name" class="input input-bordered w-full" value="{{ old('name', $menu->name) }}" required>
+        @error('name')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
-    <label class="form-control">
-        <span class="label-text">Kategori</span>
-        <select name="menu_category_id" class="select select-bordered">
+    <fieldset class="fieldset">
+        <legend class="fieldset-legend">Kategori</legend>
+        <select name="menu_category_id" class="select select-bordered w-full">
             <option value="">Tanpa kategori</option>
             @foreach ($categories as $category)
                 <option value="{{ $category->id }}" @selected((string) old('menu_category_id', $menu->menu_category_id) === (string) $category->id)>
@@ -18,36 +21,60 @@
                 </option>
             @endforeach
         </select>
-    </label>
+        @error('menu_category_id')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
-    <label class="form-control">
-        <span class="label-text">Harga</span>
-        <input type="number" step="0.01" min="0" name="price" class="input input-bordered" value="{{ old('price', $menu->price ?? 0) }}" required>
-    </label>
+    <fieldset class="fieldset">
+        <legend class="fieldset-legend">Harga</legend>
+        <input type="number" step="0.01" min="0" name="price" class="input input-bordered w-full" value="{{ old('price', $menu->price ?? 0) }}" required>
+        @error('price')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
-    <label class="form-control">
-        <span class="label-text">Slug</span>
-        <input type="text" name="slug" class="input input-bordered" value="{{ old('slug', $menu->slug) }}" placeholder="otomatis jika kosong">
-    </label>
+    <fieldset class="fieldset">
+        <legend class="fieldset-legend">Slug</legend>
+        <input type="text" name="slug" class="input input-bordered w-full" value="{{ old('slug', $menu->slug) }}" placeholder="otomatis jika kosong">
+        @error('slug')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
-    <label class="form-control">
-        <span class="label-text">SKU</span>
-        <input type="text" name="sku" class="input input-bordered" value="{{ old('sku', $menu->sku) }}">
-    </label>
+    <fieldset class="fieldset">
+        <legend class="fieldset-legend">SKU</legend>
+        <input type="text" name="sku" class="input input-bordered w-full" value="{{ old('sku', $menu->sku) }}">
+        @error('sku')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
-    <label class="form-control md:col-span-2">
-        <span class="label-text">URL Gambar</span>
-        <input type="text" name="image_url" class="input input-bordered" value="{{ old('image_url', $menu->image_url) }}" placeholder="https://...">
-    </label>
+    <fieldset class="fieldset md:col-span-2">
+        <legend class="fieldset-legend">URL Gambar</legend>
+        <input type="text" name="image_url" class="input input-bordered w-full" value="{{ old('image_url', $menu->image_url) }}" placeholder="https://...">
+        @error('image_url')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
-    <label class="form-control md:col-span-2">
-        <span class="label-text">Deskripsi</span>
-        <textarea name="description" class="textarea textarea-bordered" rows="4">{{ old('description', $menu->description) }}</textarea>
-    </label>
+    <fieldset class="fieldset md:col-span-2">
+        <legend class="fieldset-legend">Deskripsi</legend>
+        <textarea name="description" class="textarea textarea-bordered w-full" rows="4">{{ old('description', $menu->description) }}</textarea>
+        @error('description')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
-    <label class="label cursor-pointer justify-start gap-3 md:col-span-2">
-        <input type="hidden" name="is_available" value="0">
-        <input type="checkbox" name="is_available" value="1" class="checkbox checkbox-sm" @checked((bool) old('is_available', $menu->is_available ?? true))>
-        <span class="label-text">Menu tersedia</span>
-    </label>
+    <fieldset class="fieldset md:col-span-2">
+        <legend class="fieldset-legend">Ketersediaan</legend>
+        <label class="label cursor-pointer justify-start gap-3 px-0">
+            <input type="hidden" name="is_available" value="0">
+            <input type="checkbox" name="is_available" value="1" class="checkbox checkbox-sm" @checked((bool) old('is_available', $menu->is_available ?? true))>
+            <span class="label-text">Menu tersedia</span>
+        </label>
+        @error('is_available')
+            <p class="label text-error">{{ $message }}</p>
+        @enderror
+    </fieldset>
 </div>

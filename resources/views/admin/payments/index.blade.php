@@ -17,7 +17,6 @@
                 <tr>
                     <th>Order</th>
                     <th>Metode</th>
-                    <th>Tipe</th>
                     <th>Status</th>
                     <th>Jumlah</th>
                     <th class="text-right">Aksi</th>
@@ -28,7 +27,6 @@
                     <tr>
                         <td>{{ $payment->order->order_number ?? '-' }}</td>
                         <td>{{ str_replace('_', ' ', $payment->method) }}</td>
-                        <td>{{ strtoupper($payment->type) }}</td>
                         <td>
                             <span class="badge badge-outline">{{ $payment->status }}</span>
                         </td>
@@ -46,7 +44,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center text-stone-500">Belum ada data pembayaran.</td>
+                        <td colspan="5" class="text-center text-stone-500">Belum ada data pembayaran.</td>
                     </tr>
                 @endforelse
             </tbody>

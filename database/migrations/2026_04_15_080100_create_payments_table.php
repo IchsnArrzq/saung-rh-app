@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('order_id')->constrained('orders')->cascadeOnDelete();
             $table->enum('method', ['cash', 'qris', 'debit_card', 'credit_card', 'transfer', 'ewallet'])->default('cash');
-            $table->enum('type', ['full', 'dp', 'partial'])->default('full');
+            $table->enum('type', ['full'])->default('full');
             $table->enum('status', ['pending', 'paid', 'failed', 'refunded'])->default('paid');
             $table->decimal('amount', 12, 2)->default(0);
             $table->string('reference')->nullable();
