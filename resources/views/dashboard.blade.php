@@ -1,17 +1,41 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
+        <h2 class="text-xl font-semibold">Dashboard Admin</h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    {{ __("You're logged in!") }}
-                </div>
-            </div>
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <a href="{{ route('menus.index') }}" class="rounded-2xl border border-stone-200 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-stone-500">Master</p>
+            <p class="mt-2 text-lg font-semibold text-stone-900">Manajemen Menu</p>
+            <p class="mt-1 text-sm text-stone-600">Kelola menu, harga, dan status tersedia.</p>
+        </a>
+
+        <a href="{{ route('tables.index') }}" class="rounded-2xl border border-stone-200 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-stone-500">Operasional</p>
+            <p class="mt-2 text-lg font-semibold text-stone-900">Manajemen Meja</p>
+            <p class="mt-1 text-sm text-stone-600">Atur status meja dan kapasitas.</p>
+        </a>
+
+        <a href="{{ route('orders.index') }}" class="rounded-2xl border border-stone-200 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-stone-500">Transaksi</p>
+            <p class="mt-2 text-lg font-semibold text-stone-900">Pemesanan Digital</p>
+            <p class="mt-1 text-sm text-stone-600">Input order dan item pesanan pelanggan.</p>
+        </a>
+
+        <a href="{{ route('payments.index') }}" class="rounded-2xl border border-stone-200 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-stone-500">Kasir</p>
+            <p class="mt-2 text-lg font-semibold text-stone-900">Split Bill / DP</p>
+            <p class="mt-1 text-sm text-stone-600">Catat pembayaran penuh, DP, atau partial.</p>
+        </a>
+    </div>
+
+    <div class="mt-6 rounded-2xl border border-stone-200 bg-white p-5">
+        <h3 class="text-lg font-semibold text-stone-900">Modul Admin Aktif</h3>
+        <div class="mt-4 flex flex-wrap gap-2">
+            <a href="{{ route('menu-categories.index') }}" class="badge badge-outline p-3">Kategori Menu</a>
+            <a href="{{ route('promotions.index') }}" class="badge badge-outline p-3">Promo</a>
+            <a href="{{ route('reservations.index') }}" class="badge badge-outline p-3">Reservasi</a>
+            <a href="{{ route('ingredients.index') }}" class="badge badge-outline p-3">Stok Bahan Baku</a>
         </div>
     </div>
 </x-app-layout>

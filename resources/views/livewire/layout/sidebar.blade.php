@@ -8,8 +8,11 @@ new class extends Component {
     public string $menuUrl = '#';
     public string $categoryUrl = '#';
     public string $tableUrl = '#';
+    public string $ingredientUrl = '#';
     public string $orderUrl = '#';
     public string $paymentUrl = '#';
+    public string $reservationUrl = '#';
+    public string $promotionUrl = '#';
     public string $dailyReportUrl = '#';
     public string $monthlyReportUrl = '#';
 
@@ -23,17 +26,27 @@ new class extends Component {
         $this->menuUrl = Route::has('menus.index') ? route('menus.index') : '#';
         $this->categoryUrl = Route::has('menu-categories.index') ? route('menu-categories.index') : '#';
         $this->tableUrl = Route::has('tables.index') ? route('tables.index') : '#';
+        $this->ingredientUrl = Route::has('ingredients.index') ? route('ingredients.index') : '#';
         $this->orderUrl = Route::has('orders.index') ? route('orders.index') : '#';
         $this->paymentUrl = Route::has('payments.index') ? route('payments.index') : '#';
+        $this->reservationUrl = Route::has('reservations.index') ? route('reservations.index') : '#';
+        $this->promotionUrl = Route::has('promotions.index') ? route('promotions.index') : '#';
         $this->dailyReportUrl = Route::has('reports.daily') ? route('reports.daily') : '#';
         $this->monthlyReportUrl = Route::has('reports.monthly') ? route('reports.monthly') : '#';
 
-        $this->masterOpen = request()->routeIs('menus.*') || request()->routeIs('menu-categories.*') || request()->routeIs('tables.*');
-        $this->transactionOpen = request()->routeIs('orders.*') || request()->routeIs('payments.*');
+        $this->masterOpen = request()->routeIs('menus.*')
+            || request()->routeIs('menu-categories.*')
+            || request()->routeIs('tables.*')
+            || request()->routeIs('ingredients.*');
+
+        $this->transactionOpen = request()->routeIs('orders.*')
+            || request()->routeIs('payments.*')
+            || request()->routeIs('reservations.*');
+
         $this->reportOpen = request()->routeIs('reports.*');
     }
 }; ?>
-<div class="drawer-side h-[calc(100vh-1.5rem)]">
+<div class="drawer-side h-[calc(100vh-0.1rem)]">
     <label for="admin-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
     <aside
         class="flex min-h-full max-w-[85vw] flex-col overflow-y-auto overflow-x-auto border-r border-stone-200 bg-base-200 py-5 transition-all duration-1000 is-drawer-close:w-16 is-drawer-open:w-72">
@@ -91,6 +104,13 @@ new class extends Component {
                                     Tables
                                 </a>
                             </li>
+                            <li>
+                                <a href="{{ $ingredientUrl }}"
+                                    class="{{ request()->routeIs('ingredients.*') ? 'text-emerald-800 font-semibold' : 'text-stone-700' }}">
+                                    <i class="ri-flask-line"></i>
+                                    Ingredients
+                                </a>
+                            </li>
                         </ul>
                     </details>
                 </li>
@@ -117,8 +137,23 @@ new class extends Component {
                                     Payments
                                 </a>
                             </li>
+                            <li>
+                                <a href="{{ $reservationUrl }}"
+                                    class="{{ request()->routeIs('reservations.*') ? 'text-emerald-800 font-semibold' : 'text-stone-700' }}">
+                                    <i class="ri-calendar-check-line"></i>
+                                    Reservations
+                                </a>
+                            </li>
                         </ul>
                     </details>
+                </li>
+
+                <li>
+                    <a href="{{ $promotionUrl }}"
+                        class="{{ request()->routeIs('promotions.*') ? 'bg-emerald-800 text-amber-50 hover:bg-emerald-700' : 'text-stone-700 hover:bg-amber-100' }}">
+                        <i class="ri-price-tag-2-line text-lg"></i>
+                        <span class="is-drawer-close:hidden">Promotions</span>
+                    </a>
                 </li>
 
                 <li>
@@ -146,17 +181,5 @@ new class extends Component {
                 </li>
             </ul>
         </nav>
-
-        {{-- <div class="mt-6 rounded-3xl bg-emerald-800 p-5 text-amber-50 is-drawer-close:hidden">
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-emerald-100">Kitchen Status</p>
-            <p class="mt-2 text-2xl leading-tight" style="font-family: 'Playfair Display', serif;">
-                Keep service fast and flavours consistent.
-            </p>
-            <a href="{{ $dashboardUrl }}"
-                class="mt-4 inline-flex items-center gap-2 rounded-full bg-amber-300 px-4 py-2 text-sm font-semibold text-stone-900">
-                <i class="ri-arrow-right-up-line"></i>
-                Open Dashboard
-            </a>
-        </div> --}}
     </aside>
 </div>

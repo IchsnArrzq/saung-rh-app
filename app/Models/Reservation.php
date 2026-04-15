@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class OrderItem extends Model
+class Reservation extends Model
 {
     use HasFactory;
     use HasUuids;
@@ -17,30 +17,24 @@ class OrderItem extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'order_id',
-        'menu_id',
-        'menu_name_snapshot',
-        'qty',
-        'price',
-        'line_total',
+        'table_id',
+        'customer_name',
+        'phone',
+        'pax',
+        'reservation_at',
+        'status',
         'notes',
     ];
 
     protected function casts(): array
     {
         return [
-            'price' => 'decimal:2',
-            'line_total' => 'decimal:2',
+            'reservation_at' => 'datetime',
         ];
     }
 
-    public function order(): BelongsTo
+    public function table(): BelongsTo
     {
-        return $this->belongsTo(Order::class);
-    }
-
-    public function menu(): BelongsTo
-    {
-        return $this->belongsTo(Menu::class);
+        return $this->belongsTo(Table::class);
     }
 }

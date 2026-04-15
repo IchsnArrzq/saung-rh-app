@@ -25,7 +25,7 @@
             <div class="w-full">
                 <a href="{{ url('/') }}" class="inline-flex items-center text-3xl font-semibold text-emerald-800"
                     style="font-family: 'Playfair Display', serif;">
-                    CookBook<span class="text-orange-500">.</span>
+                    SaungRH<span class="text-orange-500">.</span>
                 </a>
 
                 <div class="mt-8">

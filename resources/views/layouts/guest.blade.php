@@ -25,7 +25,7 @@
             <div class="flex flex-wrap items-center gap-3">
                 <a href="{{ url('/') }}" class="mr-auto text-3xl font-semibold leading-none text-emerald-800"
                     style="font-family: 'Playfair Display', serif;">
-                    CookBook<span class="text-orange-500">.</span>
+                    SaungRH<span class="text-orange-500">.</span>
                 </a>
 
                 <nav class="order-3 w-full md:order-none md:w-auto">
@@ -77,7 +77,7 @@
             <div class="grid gap-8 md:grid-cols-4">
                 <div>
                     <p class="text-4xl font-semibold text-emerald-800" style="font-family: 'Playfair Display', serif;">
-                        CookBook<span class="text-orange-500">.</span>
+                        SaungRH<span class="text-orange-500">.</span>
                     </p>
                     <p class="mt-3 text-sm text-stone-700">
                         Menikmati menu favorit dengan rasa hangat rumahan dan presentasi modern.

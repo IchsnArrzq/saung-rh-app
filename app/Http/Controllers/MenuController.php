@@ -2,63 +2,93 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Menu;
+use App\Models\MenuCategory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class MenuController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): View
     {
-        //
+        $menus = Menu::query()
+            ->with('category')
+            ->latest()
+            ->paginate(12);
+
+        return view('admin.menus.index', compact('menus'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(): View
     {
-        //
+        $categories = MenuCategory::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.menus.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        //
+        $validated = $request->validate([
+            'menu_category_id' => ['nullable', 'exists:menu_categories,id'],
+            'name' => ['required', 'string', 'max:150'],
+            'slug' => ['nullable', 'string', 'max:150', Rule::unique('menus', 'slug')],
+            'sku' => ['nullable', 'string', 'max:60', Rule::unique('menus', 'sku')],
+            'description' => ['nullable', 'string'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'image_url' => ['nullable', 'string', 'max:255'],
+            'is_available' => ['nullable', 'boolean'],
+        ]);
+
+        $validated['slug'] = $validated['slug'] ?: Str::slug($validated['name']);
+        $validated['is_available'] = $request->boolean('is_available');
+
+        Menu::create($validated);
+
+        return redirect()->route('menus.index')->with('success', 'Menu berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Menu $menu): View
     {
-        //
+        $categories = MenuCategory::query()
+            ->where('is_active', true)
+            ->orWhere('id', $menu->menu_category_id)
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.menus.edit', compact('menu', 'categories'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Menu $menu): RedirectResponse
     {
-        //
+        $validated = $request->validate([
+            'menu_category_id' => ['nullable', 'exists:menu_categories,id'],
+            'name' => ['required', 'string', 'max:150'],
+            'slug' => ['nullable', 'string', 'max:150', Rule::unique('menus', 'slug')->ignore($menu->id)],
+            'sku' => ['nullable', 'string', 'max:60', Rule::unique('menus', 'sku')->ignore($menu->id)],
+            'description' => ['nullable', 'string'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'image_url' => ['nullable', 'string', 'max:255'],
+            'is_available' => ['nullable', 'boolean'],
+        ]);
+
+        $validated['slug'] = $validated['slug'] ?: Str::slug($validated['name']);
+        $validated['is_available'] = $request->boolean('is_available');
+
+        $menu->update($validated);
+
+        return redirect()->route('menus.index')->with('success', 'Menu berhasil diperbarui.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Menu $menu): RedirectResponse
     {
-        //
-    }
+        $menu->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('menus.index')->with('success', 'Menu berhasil dihapus.');
     }
 }

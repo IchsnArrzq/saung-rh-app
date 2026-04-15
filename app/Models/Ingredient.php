@@ -5,9 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Table extends Model
+class Ingredient extends Model
 {
     use HasFactory;
     use HasUuids;
@@ -17,20 +16,20 @@ class Table extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'code',
         'name',
-        'capacity',
-        'status',
+        'unit',
+        'current_stock',
+        'minimum_stock',
+        'is_active',
         'notes',
     ];
 
-    public function orders(): HasMany
+    protected function casts(): array
     {
-        return $this->hasMany(Order::class);
-    }
-
-    public function reservations(): HasMany
-    {
-        return $this->hasMany(Reservation::class);
+        return [
+            'current_stock' => 'decimal:2',
+            'minimum_stock' => 'decimal:2',
+            'is_active' => 'boolean',
+        ];
     }
 }

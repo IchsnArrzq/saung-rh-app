@@ -2,63 +2,75 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Table;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class TableController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    private const STATUS_OPTIONS = ['available', 'occupied', 'order_in', 'cleaning'];
+
+    public function index(): View
     {
-        //
+        $tables = Table::query()->latest()->paginate(12);
+
+        return view('admin.tables.index', [
+            'tables' => $tables,
+            'statusOptions' => self::STATUS_OPTIONS,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(): View
     {
-        //
+        return view('admin.tables.create', [
+            'statusOptions' => self::STATUS_OPTIONS,
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        //
+        $validated = $request->validate([
+            'code' => ['required', 'string', 'max:40', Rule::unique('tables', 'code')],
+            'name' => ['nullable', 'string', 'max:120'],
+            'capacity' => ['required', 'integer', 'min:1'],
+            'status' => ['required', Rule::in(self::STATUS_OPTIONS)],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        Table::create($validated);
+
+        return redirect()->route('tables.index')->with('success', 'Meja berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Table $table): View
     {
-        //
+        return view('admin.tables.edit', [
+            'table' => $table,
+            'statusOptions' => self::STATUS_OPTIONS,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Table $table): RedirectResponse
     {
-        //
+        $validated = $request->validate([
+            'code' => ['required', 'string', 'max:40', Rule::unique('tables', 'code')->ignore($table->id)],
+            'name' => ['nullable', 'string', 'max:120'],
+            'capacity' => ['required', 'integer', 'min:1'],
+            'status' => ['required', Rule::in(self::STATUS_OPTIONS)],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $table->update($validated);
+
+        return redirect()->route('tables.index')->with('success', 'Meja berhasil diperbarui.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Table $table): RedirectResponse
     {
-        //
-    }
+        $table->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('tables.index')->with('success', 'Meja berhasil dihapus.');
     }
 }
