@@ -15,10 +15,13 @@ new class extends Component {
     public string $reservationUrl = '#';
     public string $dailyReportUrl = '#';
     public string $monthlyReportUrl = '#';
+    public string $adminUsersUrl = '#';
+    public string $customerUsersUrl = '#';
 
     public bool $masterOpen = false;
     public bool $transactionOpen = false;
     public bool $reportOpen = false;
+    public bool $userManagementOpen = false;
 
     public function mount(): void
     {
@@ -33,6 +36,8 @@ new class extends Component {
         $this->reservationUrl = Route::has('reservations.index') ? route('reservations.index') : '#';
         $this->dailyReportUrl = Route::has('reports.daily') ? route('reports.daily') : '#';
         $this->monthlyReportUrl = Route::has('reports.monthly') ? route('reports.monthly') : '#';
+        $this->adminUsersUrl = Route::has('admin-users.index') ? route('admin-users.index') : '#';
+        $this->customerUsersUrl = Route::has('customer-users.index') ? route('customer-users.index') : '#';
 
         $this->masterOpen = request()->routeIs('menus.*')
             || request()->routeIs('menu-categories.*')
@@ -45,6 +50,9 @@ new class extends Component {
             || request()->routeIs('reservations.*');
 
         $this->reportOpen = request()->routeIs('reports.*');
+        
+        $this->userManagementOpen = request()->routeIs('admin-users.*') 
+            || request()->routeIs('customer-users.*');
     }
 }; ?>
 <div class="drawer-side h-[calc(100vh-0.1rem)]">
@@ -179,6 +187,33 @@ new class extends Component {
                         </ul>
                     </details>
                 </li>
+
+                <li>
+                    <details @if ($userManagementOpen) open @endif>
+                        <summary data-tip="User Management"
+                            class="is-drawer-close:tooltip {{ $userManagementOpen ? 'bg-amber-200/80 text-stone-900' : 'text-stone-700 hover:bg-amber-100' }}">
+                            <i class="ri-group-line text-lg"></i>
+                            <span class="is-drawer-close:hidden">User Management</span>
+                        </summary>
+                        <ul class="ms-2 border-l border-stone-200 is-drawer-close:hidden">
+                            <li>
+                                <a href="{{ $adminUsersUrl }}"
+                                    class="{{ request()->routeIs('admin-users.*') ? 'text-emerald-800 font-semibold' : 'text-stone-700' }}">
+                                    <i class="ri-user-settings-line"></i>
+                                    Admin
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ $customerUsersUrl }}"
+                                    class="{{ request()->routeIs('customer-users.*') ? 'text-emerald-800 font-semibold' : 'text-stone-700' }}">
+                                    <i class="ri-user-smile-line"></i>
+                                    Customer
+                                </a>
+                            </li>
+                        </ul>
+                    </details>
+                </li>
+
             </ul>
         </nav>
     </aside>

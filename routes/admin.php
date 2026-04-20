@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\CustomerUserController;
 use App\Http\Controllers\Admin\MenuCategoryController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\OrderController;
@@ -18,6 +20,14 @@ Route::middleware(['auth', 'verified', 'role:superadmin|admin'])
 
         Route::get('tables/{table}/qr', TableQrPage::class)->name('tables.qr');
         Route::patch('tables/{table}/status', [TableController::class, 'updateStatus'])->name('tables.status');
+
+        Route::patch('admin-users/{admin_user}/status', [AdminUserController::class, 'updateStatus'])->name('admin-users.status');
+        Route::resource('admin-users', AdminUserController::class)->except('show');
+
+        Route::patch('customer-users/{customer}/status', [CustomerUserController::class, 'updateStatus'])->name('customer-users.status');
+        Route::resource('customer-users', CustomerUserController::class)
+            ->except('show')
+            ->parameters(['customer-users' => 'customer']);
 
         Route::resource('menus', MenuController::class)->except('show');
         Route::resource('menu-categories', MenuCategoryController::class)
