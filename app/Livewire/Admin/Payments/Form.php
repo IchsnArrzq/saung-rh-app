@@ -5,14 +5,12 @@ namespace App\Livewire\Admin\Payments;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
 
 class Form extends Component
 {
-    use AuthorizesRequests;
 
     /**
      * @var array<int, string>
@@ -47,7 +45,6 @@ class Form extends Component
         $this->payment = $payment;
 
         if ($this->payment) {
-            $this->authorize('update', $this->payment);
 
             $this->order_id = (string) $this->payment->order_id;
             $this->method = (string) $this->payment->method;
@@ -61,7 +58,6 @@ class Form extends Component
             return;
         }
 
-        $this->authorize('create', Payment::class);
     }
 
     public function save()

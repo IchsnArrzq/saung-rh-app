@@ -4,7 +4,6 @@ namespace App\Livewire\Admin\Orders;
 
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -12,7 +11,6 @@ use Livewire\WithPagination;
 
 class Table extends Component
 {
-    use AuthorizesRequests;
     use WithPagination;
 
     #[Url(as: 'search', except: '')]
@@ -20,7 +18,6 @@ class Table extends Component
 
     public function mount(): void
     {
-        $this->authorize('viewAny', Order::class);
     }
 
     public function updatingSearch(): void
@@ -31,7 +28,6 @@ class Table extends Component
     public function delete(string $id): void
     {
         $order = Order::query()->findOrFail($id);
-        $this->authorize('delete', $order);
         $order->delete();
 
         session()->flash('success', 'Order berhasil dihapus.');

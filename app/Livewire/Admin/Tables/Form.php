@@ -6,7 +6,6 @@ use App\Models\Table as DiningTable;
 use App\Models\TableCategory;
 use App\Models\TableStatus;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -14,7 +13,6 @@ use Livewire\Component;
 
 class Form extends Component
 {
-    use AuthorizesRequests;
 
     public ?DiningTable $table = null;
 
@@ -35,7 +33,6 @@ class Form extends Component
         $this->table = $table;
 
         if ($this->table) {
-            $this->authorize('update', $this->table);
 
             $this->code = (string) $this->table->code;
             $this->name = (string) ($this->table->name ?? '');
@@ -47,7 +44,6 @@ class Form extends Component
             return;
         }
 
-        $this->authorize('create', DiningTable::class);
 
         $defaultStatus = TableStatus::query()
             ->where('is_default', true)

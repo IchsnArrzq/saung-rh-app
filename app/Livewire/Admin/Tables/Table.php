@@ -5,7 +5,6 @@ namespace App\Livewire\Admin\Tables;
 use App\Models\Table as DiningTable;
 use App\Models\TableStatus;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
@@ -14,7 +13,6 @@ use Livewire\WithPagination;
 
 class Table extends Component
 {
-    use AuthorizesRequests;
     use WithPagination;
 
     #[Url(as: 'search', except: '')]
@@ -27,7 +25,6 @@ class Table extends Component
 
     public function mount(): void
     {
-        $this->authorize('viewAny', DiningTable::class);
     }
 
     public function updatingSearch(): void
@@ -38,7 +35,6 @@ class Table extends Component
     public function updateStatus(string $tableId): void
     {
         $table = DiningTable::query()->findOrFail($tableId);
-        $this->authorize('update', $table);
 
         $statusId = $this->statusDrafts[$tableId] ?? null;
 
@@ -67,7 +63,6 @@ class Table extends Component
     public function delete(string $id): void
     {
         $table = DiningTable::query()->findOrFail($id);
-        $this->authorize('delete', $table);
         $table->delete();
 
         session()->flash('success', 'Meja berhasil dihapus.');

@@ -5,14 +5,12 @@ namespace App\Livewire\Admin\Reservations;
 use App\Models\Reservation;
 use App\Models\Table;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
 
 class Form extends Component
 {
-    use AuthorizesRequests;
 
     /**
      * @var array<int, string>
@@ -40,7 +38,6 @@ class Form extends Component
         $this->reservation = $reservation;
 
         if ($this->reservation) {
-            $this->authorize('update', $this->reservation);
 
             $this->table_id = (string) ($this->reservation->table_id ?? '');
             $this->customer_name = (string) $this->reservation->customer_name;
@@ -53,7 +50,6 @@ class Form extends Component
             return;
         }
 
-        $this->authorize('create', Reservation::class);
         $this->reservation_at = now()->addHour()->format('Y-m-d\TH:i');
     }
 

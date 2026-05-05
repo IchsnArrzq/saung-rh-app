@@ -6,7 +6,6 @@ use App\Models\Menu;
 use App\Models\MenuCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -14,7 +13,6 @@ use Livewire\Component;
 
 class Form extends Component
 {
-    use AuthorizesRequests;
 
     public ?Menu $menu = null;
 
@@ -39,7 +37,6 @@ class Form extends Component
         $this->menu = $menu;
 
         if ($this->menu) {
-            $this->authorize('update', $this->menu);
 
             $this->menu_category_id = (string) ($this->menu->menu_category_id ?? '');
             $this->name = (string) $this->menu->name;
@@ -53,7 +50,6 @@ class Form extends Component
             return;
         }
 
-        $this->authorize('create', Menu::class);
     }
 
     public function save()

@@ -4,7 +4,6 @@ namespace App\Livewire\Admin\Menus;
 
 use App\Models\Menu;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -12,7 +11,6 @@ use Livewire\WithPagination;
 
 class Table extends Component
 {
-    use AuthorizesRequests;
     use WithPagination;
 
     #[Url(as: 'search', except: '')]
@@ -23,7 +21,6 @@ class Table extends Component
 
     public function mount(): void
     {
-        $this->authorize('viewAny', Menu::class);
 
         if (! in_array($this->viewMode, ['table', 'card'], true)) {
             $this->viewMode = 'table';
@@ -45,7 +42,6 @@ class Table extends Component
     public function delete(string $id): void
     {
         $menu = Menu::query()->findOrFail($id);
-        $this->authorize('delete', $menu);
         $menu->delete();
 
         session()->flash('success', 'Menu berhasil dihapus.');

@@ -3,7 +3,6 @@
 namespace App\Livewire\Admin\MenuCategories;
 
 use App\Models\MenuCategory;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -11,7 +10,6 @@ use Livewire\Component;
 
 class Form extends Component
 {
-    use AuthorizesRequests;
 
     public ?MenuCategory $menuCategory = null;
 
@@ -28,7 +26,6 @@ class Form extends Component
         $this->menuCategory = $menuCategory;
 
         if ($this->menuCategory) {
-            $this->authorize('update', $this->menuCategory);
 
             $this->name = (string) $this->menuCategory->name;
             $this->slug = (string) $this->menuCategory->slug;
@@ -38,7 +35,6 @@ class Form extends Component
             return;
         }
 
-        $this->authorize('create', MenuCategory::class);
     }
 
     public function save()

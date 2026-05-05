@@ -6,7 +6,6 @@ use App\Models\Menu;
 use App\Models\Order;
 use App\Models\Table;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -15,7 +14,6 @@ use Livewire\Component;
 
 class Form extends Component
 {
-    use AuthorizesRequests;
 
     /**
      * @var array<int, string>
@@ -46,7 +44,6 @@ class Form extends Component
         $this->order = $order?->load('items');
 
         if ($this->order) {
-            $this->authorize('update', $this->order);
 
             $this->table_id = (string) ($this->order->table_id ?? '');
             $this->customer_name = (string) ($this->order->customer_name ?? '');
@@ -71,7 +68,6 @@ class Form extends Component
             return;
         }
 
-        $this->authorize('create', Order::class);
         $this->ordered_at = now()->format('Y-m-d\TH:i');
         $this->items = [$this->emptyItem()];
     }

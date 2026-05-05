@@ -3,7 +3,6 @@
 namespace App\Livewire\Admin\TableStatuses;
 
 use App\Models\TableStatus;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -12,7 +11,6 @@ use Livewire\Component;
 
 class Form extends Component
 {
-    use AuthorizesRequests;
 
     /**
      * @var array<int, string>
@@ -38,7 +36,6 @@ class Form extends Component
         $this->tableStatus = $tableStatus;
 
         if ($this->tableStatus) {
-            $this->authorize('update', $this->tableStatus);
 
             $this->name = (string) $this->tableStatus->name;
             $this->key = (string) $this->tableStatus->key;
@@ -50,7 +47,6 @@ class Form extends Component
             return;
         }
 
-        $this->authorize('create', TableStatus::class);
     }
 
     public function save()

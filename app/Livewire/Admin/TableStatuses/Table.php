@@ -4,7 +4,6 @@ namespace App\Livewire\Admin\TableStatuses;
 
 use App\Models\TableStatus;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
@@ -13,7 +12,6 @@ use Livewire\WithPagination;
 
 class Table extends Component
 {
-    use AuthorizesRequests;
     use WithPagination;
 
     /**
@@ -26,7 +24,6 @@ class Table extends Component
 
     public function mount(): void
     {
-        $this->authorize('viewAny', TableStatus::class);
     }
 
     public function updatingSearch(): void
@@ -37,7 +34,6 @@ class Table extends Component
     public function delete(string $id): void
     {
         $tableStatus = TableStatus::query()->findOrFail($id);
-        $this->authorize('delete', $tableStatus);
 
         if (in_array($tableStatus->key, self::RESERVED_KEYS, true)) {
             throw ValidationException::withMessages([

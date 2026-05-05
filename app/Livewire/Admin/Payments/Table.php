@@ -4,7 +4,6 @@ namespace App\Livewire\Admin\Payments;
 
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -12,7 +11,6 @@ use Livewire\WithPagination;
 
 class Table extends Component
 {
-    use AuthorizesRequests;
     use WithPagination;
 
     #[Url(as: 'search', except: '')]
@@ -20,7 +18,6 @@ class Table extends Component
 
     public function mount(): void
     {
-        $this->authorize('viewAny', Payment::class);
     }
 
     public function updatingSearch(): void
@@ -31,7 +28,6 @@ class Table extends Component
     public function delete(string $id): void
     {
         $payment = Payment::query()->findOrFail($id);
-        $this->authorize('delete', $payment);
         $payment->delete();
 
         session()->flash('success', 'Pembayaran berhasil dihapus.');

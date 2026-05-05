@@ -3,7 +3,6 @@
 namespace App\Livewire\Admin\TableCategories;
 
 use App\Models\TableCategory;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -11,7 +10,6 @@ use Livewire\Component;
 
 class Form extends Component
 {
-    use AuthorizesRequests;
 
     public ?TableCategory $tableCategory = null;
 
@@ -30,7 +28,6 @@ class Form extends Component
         $this->tableCategory = $tableCategory;
 
         if ($this->tableCategory) {
-            $this->authorize('update', $this->tableCategory);
 
             $this->name = (string) $this->tableCategory->name;
             $this->slug = (string) $this->tableCategory->slug;
@@ -41,7 +38,6 @@ class Form extends Component
             return;
         }
 
-        $this->authorize('create', TableCategory::class);
     }
 
     public function save()
