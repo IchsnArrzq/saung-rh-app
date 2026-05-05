@@ -21,7 +21,8 @@
 
 <body class="min-h-screen bg-stone-800  text-stone-800 " style="font-family: 'Plus Jakarta Sans', sans-serif;">
     <div
-        class="mx-auto w-full  overflow-hidden rounded-[2.2rem] border border-amber-100/70 bg-amber-50 shadow-[0_28px_90px_rgba(0,0,0,0.35)]">
+        class="mx-auto w-full  overflow-hidden  border border-amber-100/70 bg-amber-50 shadow-[0_28px_90px_rgba(0,0,0,0.35)]">
+        
         <header class="border-b border-stone-200/70 bg-amber-50 px-5 py-4 md:px-8 md:py-5">
             <div class="flex flex-wrap items-center gap-3">
                 <a href="{{ url('/') }}" class="mr-auto text-3xl font-semibold leading-none text-emerald-800"
