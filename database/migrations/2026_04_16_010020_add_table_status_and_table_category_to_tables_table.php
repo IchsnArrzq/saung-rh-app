@@ -13,27 +13,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('table_categories', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('name', 120);
-            $table->string('slug', 150)->unique();
-            $table->text('description')->nullable();
-            $table->unsignedInteger('sort_order')->default(0);
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
-
-        Schema::create('table_statuses', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('key', 60)->unique();
-            $table->string('name', 120);
-            $table->string('color', 40)->nullable();
-            $table->unsignedInteger('sort_order')->default(0);
-            $table->boolean('is_active')->default(true);
-            $table->boolean('is_default')->default(false);
-            $table->timestamps();
-        });
-
         Schema::table('tables', function (Blueprint $table) {
             $table->foreignUuid('table_status_id')->nullable()->after('status')->constrained('table_statuses')->nullOnDelete();
             $table->foreignUuid('table_category_id')->nullable()->after('table_status_id')->constrained('table_categories')->nullOnDelete();
@@ -89,8 +68,6 @@ return new class extends Migration
             $table->dropForeign(['table_category_id']);
             $table->dropColumn(['table_status_id', 'table_category_id']);
         });
-
-        Schema::dropIfExists('table_statuses');
-        Schema::dropIfExists('table_categories');
     }
 };
+
