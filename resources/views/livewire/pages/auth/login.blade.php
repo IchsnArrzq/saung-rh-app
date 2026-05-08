@@ -19,9 +19,20 @@ new #[Layout('layouts.auth')] class extends Component {
 
         Session::regenerate();
 
-        $redirectTo = auth()->user()?->hasAnyRole(['superadmin', 'admin'])
+        $user = auth()->user();
+        $isAdmin = $user?->hasAnyRole(['superadmin', 'admin']) ?? false;
+        $redirectTo = $isAdmin
             ? route('dashboard', absolute: false)
             : route('customer.dashboard', absolute: false);
+
+        $intended = (string) session()->get('url.intended', '');
+        $intendedPath = (string) parse_url($intended, PHP_URL_PATH);
+        $isCustomerPath = str_starts_with($intendedPath, '/customer');
+
+        // Prevent role mismatch redirect loops that end in 403 pages.
+        if ($intendedPath !== '' && (($isAdmin && $isCustomerPath) || (! $isAdmin && ! $isCustomerPath))) {
+            session()->forget('url.intended');
+        }
 
         $this->redirectIntended(default: $redirectTo, navigate: true);
     }
