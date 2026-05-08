@@ -42,9 +42,9 @@ class StatusBoard extends Component
             ->orderBy('sort_order')
             ->orderBy('name')
             ->with([
-                'tables' => function (Builder $query) use ($search): void {
+                'tables' => function ($query) use ($search): void {
                     $query->with(['tableCategory', 'tableStatus'])
-                        ->when($search !== '', function (Builder $tableQuery) use ($search): void {
+                        ->when($search !== '', function ($tableQuery) use ($search): void {
                             $tableQuery->where(function (Builder $inner) use ($search): void {
                                 $inner->where('code', 'like', '%'.$search.'%')
                                     ->orWhere('name', 'like', '%'.$search.'%')
