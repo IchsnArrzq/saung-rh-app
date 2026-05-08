@@ -11,8 +11,10 @@ use App\Http\Controllers\Admin\TableStatusController;
 use App\Livewire\Admin\TableQrPage;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified', 'role:superadmin|admin'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+Route::middleware(['auth', 'verified', 'role:superadmin|admin'])
+    ->prefix('admin')
+    ->group(function () {
+        Route::view('dashboard', 'dashboard')->name('dashboard');
 
     Route::get('tables/{table}/qr', TableQrPage::class)->name('tables.qr');
 

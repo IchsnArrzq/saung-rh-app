@@ -21,7 +21,7 @@ new class extends Component {
         $this->redirect('/', navigate: true);
     }
 }; ?>
-<header class="border-b border-stone-200 bg-amber-50 px-4 py-4 md:px-6">
+<header class="border-b border-base-300 bg-base-100 px-4 py-4 md:px-6">
     <div class="flex items-center gap-3">
 
         <label for="admin-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
@@ -34,22 +34,26 @@ new class extends Component {
             </svg>
         </label>
 
-        <div class="mr-auto">
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-stone-500">Control Room</p>
-            <p class="text-lg font-semibold text-stone-900">Saung RH Admin</p>
+        <div class="mr-auto flex items-center gap-3">
+            <img src="{{ asset('assets/logo-cr-mark.png') }}" alt="CR Cafe & Resto logo mark"
+                class="h-10 w-10 rounded-lg border border-base-300 bg-base-100 p-1 object-contain md:h-11 md:w-11">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Control Room</p>
+                <p class="text-lg font-semibold text-base-content">CR Cafe & Resto Admin</p>
+            </div>
         </div>
 
         <a href="/"
-            class="hidden items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:border-emerald-700 hover:text-emerald-800 md:inline-flex">
+            class="hidden items-center gap-2 rounded-xl border border-base-300 bg-base-100 px-4 py-2 text-sm font-semibold text-stone-700 transition hover:border-secondary hover:text-secondary md:inline-flex">
             <i class="ri-external-link-line text-base"></i>
             <span>Public Site</span>
         </a>
 
         <details class="dropdown dropdown-end">
             <summary
-                class="flex cursor-pointer list-none items-center gap-2 rounded-xl border border-stone-200 bg-white px-2 py-1 pr-3">
+                class="flex cursor-pointer list-none items-center gap-2 rounded-xl border border-base-300 bg-base-100 px-2 py-1 pr-3">
                 <span
-                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-800 text-sm font-bold text-amber-50">
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-content">
                     {{ $initial }}
                 </span>
                 <span class="hidden text-left md:block">
@@ -59,7 +63,7 @@ new class extends Component {
                 </span>
                 <i class="ri-arrow-down-s-line text-xl text-stone-500"></i>
             </summary>
-            <ul class="menu dropdown-content mt-2 w-56 rounded-2xl border border-stone-200 bg-white p-2 shadow-lg">
+            <ul class="menu dropdown-content mt-2 w-56 rounded-2xl border border-base-300 bg-base-100 p-2 shadow-lg">
                 <li>
                     <a href="{{ $profileUrl }}" class="font-medium text-stone-700">
                         <i class="ri-user-3-line"></i>
