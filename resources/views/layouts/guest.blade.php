@@ -14,40 +14,43 @@
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
-    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
 
-<body class="min-h-screen bg-stone-800  text-stone-800 " style="font-family: 'Plus Jakarta Sans', sans-serif;">
+<body class="min-h-screen bg-neutral text-base-content" style="font-family: 'Plus Jakarta Sans', sans-serif;">
     <div
-        class="mx-auto w-full  overflow-hidden  border border-amber-100/70 bg-amber-50 shadow-[0_28px_90px_rgba(0,0,0,0.35)]">
-        
-        <header class="border-b border-stone-200/70 bg-amber-50 px-5 py-4 md:px-8 md:py-5">
+        class="relative mx-auto min-h-screen w-full max-w-[1560px] overflow-hidden border border-base-300 bg-base-100 shadow-[0_30px_100px_rgba(0,0,0,0.35)]">
+        <div
+            class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(39,39,42,0.12),transparent_55%)]">
+        </div>
+
+        <header class="relative z-30 border-b border-base-300/90 bg-base-100/95 px-4 py-4 backdrop-blur md:px-8">
             <div class="flex flex-wrap items-center gap-3">
-                <a href="{{ url('/') }}" class="mr-auto text-3xl font-semibold leading-none text-emerald-800"
-                    style="font-family: 'Playfair Display', serif;">
-                    SaungRH<span class="text-orange-500">.</span>
+                <a href="{{ route('public.home') }}" class="mr-auto inline-flex items-center gap-3" aria-label="CR Cafe & Resto">
+                    <img src="{{ asset('assets/logo-cr-mark.png') }}" alt="CR logo mark"
+                        class="h-10 w-10 rounded-lg border border-base-300 bg-base-100 p-1 object-contain md:h-12 md:w-12">
+                    <img src="{{ asset('assets/logo-cr-cafe-resto.png') }}" alt="CR Cafe & Resto logo" class="h-11 w-auto">
                 </a>
 
                 <nav class="order-3 w-full md:order-none md:w-auto">
-                    <ul class="flex flex-wrap items-center gap-1 md:gap-2">
+                    <ul class="flex flex-wrap items-center gap-2 text-sm font-semibold text-secondary">
                         <li>
-                            <a href="{{ url('/') }}"
-                                class="rounded-full px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-white">
+                            <a href="{{ route('public.home') }}"
+                                class="rounded-full px-4 py-2 transition hover:bg-base-200 hover:text-base-content">
                                 Home
                             </a>
                         </li>
                         <li>
-                            <a href="{{ url('/') }}#menu"
-                                class="rounded-full px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-white">
+                            <a href="{{ route('public.home') }}#menu"
+                                class="rounded-full px-4 py-2 transition hover:bg-base-200 hover:text-base-content">
                                 Menu
                             </a>
                         </li>
                         <li>
-                            <a href="{{ url('/') }}#highlight"
-                                class="rounded-full px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-white">
-                                Highlight
+                            <a href="{{ route('public.home') }}#highlight"
+                                class="rounded-full px-4 py-2 transition hover:bg-base-200 hover:text-base-content">
+                                Highlights
                             </a>
                         </li>
                     </ul>
@@ -56,14 +59,13 @@
                 <div class="flex items-center gap-2">
                     @if (Route::has('login'))
                         <a href="{{ route('login') }}"
-                            class="rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:border-emerald-800 hover:text-emerald-800">
+                            class="btn btn-sm btn-outline border-base-300 bg-base-100 text-base-content hover:border-secondary hover:bg-base-200">
                             Login
                         </a>
                     @endif
 
                     @if (Route::has('register'))
-                        <a href="{{ route('register') }}"
-                            class="rounded-full bg-amber-300 px-4 py-2 text-sm font-semibold text-stone-900 transition hover:bg-amber-400">
+                        <a href="{{ route('register') }}" class="btn btn-sm btn-primary">
                             Register
                         </a>
                     @endif
@@ -71,62 +73,49 @@
             </div>
         </header>
 
-        <main class="px-4 py-5 md:px-8 md:py-7">
+        <main class="relative px-4 py-6 md:px-8 md:py-8">
             {{ $slot }}
         </main>
 
-        <footer class="border-t border-stone-200/70 bg-amber-100/50 px-5 py-10 md:px-8">
+        <footer class="relative border-t border-base-300 bg-base-200/70 px-4 py-10 md:px-8">
             <div class="grid gap-8 md:grid-cols-4">
-                <div>
-                    <p class="text-4xl font-semibold text-emerald-800" style="font-family: 'Playfair Display', serif;">
-                        SaungRH<span class="text-orange-500">.</span>
+                <div class="md:col-span-2">
+                    <div class="inline-flex items-center gap-3">
+                        <img src="{{ asset('assets/logo-cr-mark.png') }}" alt="CR logo mark"
+                            class="h-10 w-10 rounded-lg border border-base-300 bg-base-100 p-1 object-contain">
+                        <p class="text-xl font-semibold text-base-content" style="font-family: 'Playfair Display', serif;">
+                            CR Cafe & Resto
+                        </p>
+                    </div>
+                    <p class="mt-3 max-w-xl text-sm text-secondary">
+                        Menu crafted for balance, texture, and flavor. Built for guests who enjoy clean plating and warm,
+                        honest taste.
                     </p>
-                    <p class="mt-3 text-sm text-stone-700">
-                        Menikmati menu favorit dengan rasa hangat rumahan dan presentasi modern.
-                    </p>
                 </div>
 
                 <div>
-                    <p class="text-sm font-bold uppercase tracking-[0.22em] text-stone-500">Visit Us</p>
-                    <p class="mt-3 text-sm text-stone-700">Jl. Bunga Raya No. 30</p>
-                    <p class="text-sm text-stone-700">Bandung, Indonesia</p>
-                    <p class="mt-3 text-sm font-semibold text-stone-900">Open: 08.00 - 21.00</p>
+                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Visit</p>
+                    <p class="mt-3 text-sm text-base-content">Jl. Bunga Raya No. 30</p>
+                    <p class="text-sm text-base-content">Bandung, Indonesia</p>
+                    <p class="mt-3 text-sm font-semibold text-base-content">08.00 - 21.00</p>
                 </div>
 
                 <div>
-                    <p class="text-sm font-bold uppercase tracking-[0.22em] text-stone-500">Know More</p>
-                    <ul class="mt-3 space-y-2 text-sm text-stone-700">
-                        <li><a href="{{ url('/') }}#menu" class="hover:text-emerald-800">Restaurants</a></li>
-                        <li><a href="{{ url('/') }}#menu" class="hover:text-emerald-800">Burger Menu</a></li>
-                        <li><a href="{{ url('/') }}#highlight" class="hover:text-emerald-800">Chicken Specials</a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div>
-                    <p class="text-sm font-bold uppercase tracking-[0.22em] text-stone-500">Help Centre</p>
-                    <ul class="mt-3 space-y-2 text-sm text-stone-700">
-                        <li>Order</li>
-                        <li>Payment</li>
-                        <li>Tracking</li>
-                        <li>Privacy Policy</li>
-                    </ul>
+                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Connect</p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <span class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">Instagram</span>
+                        <span class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">Facebook</span>
+                        <span class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">YouTube</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="mt-9 border-t border-stone-200 pt-6">
-                <p class="mb-4 text-sm font-semibold text-stone-600">Social Profiles</p>
-                <div class="flex flex-wrap gap-3">
-                    <span class="rounded-full bg-emerald-800 px-5 py-2 text-xs font-semibold text-white">LinkedIn</span>
-                    <span class="rounded-full bg-orange-500 px-5 py-2 text-xs font-semibold text-white">Instagram</span>
-                    <span
-                        class="rounded-full bg-amber-300 px-5 py-2 text-xs font-semibold text-stone-900">Facebook</span>
-                    <span
-                        class="rounded-full bg-stone-200 px-5 py-2 text-xs font-semibold text-stone-700">YouTube</span>
-                </div>
-            </div>
+            <p class="mt-8 border-t border-base-300 pt-5 text-xs text-secondary">
+                &copy; {{ now()->year }} CR Cafe & Resto. All rights reserved.
+            </p>
         </footer>
     </div>
+
     @livewireScripts
 </body>
 
