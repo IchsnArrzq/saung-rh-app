@@ -34,15 +34,9 @@ new class extends Component {
         $this->dailyReportUrl = Route::has('reports.daily') ? route('reports.daily') : '#';
         $this->monthlyReportUrl = Route::has('reports.monthly') ? route('reports.monthly') : '#';
 
-        $this->masterOpen = request()->routeIs('menus.*')
-            || request()->routeIs('menu-categories.*')
-            || request()->routeIs('table-statuses.*')
-            || request()->routeIs('table-categories.*')
-            || request()->routeIs('tables.*');
+        $this->masterOpen = request()->routeIs('menus.*') || request()->routeIs('menu-categories.*') || request()->routeIs('table-statuses.*') || request()->routeIs('table-categories.*') || request()->routeIs('tables.*');
 
-        $this->transactionOpen = request()->routeIs('orders.*')
-            || request()->routeIs('payments.*')
-            || request()->routeIs('reservations.*');
+        $this->transactionOpen = request()->routeIs('orders.*') || request()->routeIs('payments.*') || request()->routeIs('reservations.*');
 
         $this->reportOpen = request()->routeIs('reports.*');
     }
@@ -59,14 +53,13 @@ new class extends Component {
                 <span class="block text-xs font-semibold uppercase tracking-[0.2em] text-secondary whitespace-nowrap">
                     CR Cafe & Resto
                 </span>
-                <span
-                    class="block text-2xl font-semibold text-primary whitespace-nowrap"
+                <span class="block text-2xl font-semibold text-primary whitespace-nowrap"
                     style="font-family: 'Playfair Display', serif;">Admin Panel</span>
             </span>
         </a>
         <div class="divider"></div>
         <nav class="grow">
-            <ul class="menu w-full gap-1 rounded-2xl bg-base-100 p-2">
+            <ul class="menu w-full gap-1 rounded-2xl  p-2">
                 <li>
                     <a href="{{ $dashboardUrl }}" data-tip="Dashboard"
                         class="{{ request()->routeIs('dashboard') ? 'bg-primary text-primary-content hover:bg-neutral' : 'text-stone-700 hover:bg-base-300' }}">

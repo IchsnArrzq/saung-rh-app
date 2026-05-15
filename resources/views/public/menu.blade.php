@@ -1,3 +1,3 @@
 <x-guest-layout>
-    home
+    about
 </x-guest-layout>

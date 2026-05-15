@@ -27,10 +27,10 @@
 
         <header class="relative z-30 border-b border-base-300/90 bg-base-100/95 px-4 py-4 backdrop-blur md:px-8">
             <div class="flex flex-wrap items-center gap-3">
-                <a href="{{ route('public.home') }}" class="mr-auto inline-flex items-center gap-3" aria-label="CR Cafe & Resto">
-                    <img src="{{ asset('assets/logo-cr-mark.png') }}" alt="CR logo mark"
-                        class="h-10 w-10 rounded-lg border border-base-300 bg-base-100 p-1 object-contain md:h-12 md:w-12">
-                    <img src="{{ asset('assets/logo-cr-cafe-resto.png') }}" alt="CR Cafe & Resto logo" class="h-11 w-auto">
+                <a href="{{ route('public.home') }}" class="mr-auto inline-flex items-center gap-3"
+                    aria-label="CR Cafe & Resto">
+                    <img src="{{ asset('assets/logo-cr-cafe-resto.png') }}" alt="CR Cafe & Resto logo"
+                        class="h-11 w-auto">
                 </a>
 
                 <nav class="order-3 w-full md:order-none md:w-auto">
@@ -42,15 +42,9 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('public.home') }}#menu"
+                            <a href="{{ route('public.menu.index') }}#menu"
                                 class="rounded-full px-4 py-2 transition hover:bg-base-200 hover:text-base-content">
                                 Menu
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('public.home') }}#highlight"
-                                class="rounded-full px-4 py-2 transition hover:bg-base-200 hover:text-base-content">
-                                Highlights
                             </a>
                         </li>
                     </ul>
@@ -83,12 +77,14 @@
                     <div class="inline-flex items-center gap-3">
                         <img src="{{ asset('assets/logo-cr-mark.png') }}" alt="CR logo mark"
                             class="h-10 w-10 rounded-lg border border-base-300 bg-base-100 p-1 object-contain">
-                        <p class="text-xl font-semibold text-base-content" style="font-family: 'Playfair Display', serif;">
+                        <p class="text-xl font-semibold text-base-content"
+                            style="font-family: 'Playfair Display', serif;">
                             CR Cafe & Resto
                         </p>
                     </div>
                     <p class="mt-3 max-w-xl text-sm text-secondary">
-                        Menu crafted for balance, texture, and flavor. Built for guests who enjoy clean plating and warm,
+                        Menu crafted for balance, texture, and flavor. Built for guests who enjoy clean plating and
+                        warm,
                         honest taste.
                     </p>
                 </div>
@@ -103,9 +99,12 @@
                 <div>
                     <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Connect</p>
                     <div class="mt-3 flex flex-wrap gap-2">
-                        <span class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">Instagram</span>
-                        <span class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">Facebook</span>
-                        <span class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">YouTube</span>
+                        <span
+                            class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">Instagram</span>
+                        <span
+                            class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">Facebook</span>
+                        <span
+                            class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">YouTube</span>
                     </div>
                 </div>
             </div>
