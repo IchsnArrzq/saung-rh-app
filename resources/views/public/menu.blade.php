@@ -1,3 +1,5 @@
 <x-guest-layout>
-    about
+    <div>
+        
+    </div>
 </x-guest-layout>

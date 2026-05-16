@@ -42,7 +42,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('public.menu.index') }}#menu"
+                            <a href="{{ route('public.menu') }}#menu"
                                 class="rounded-full px-4 py-2 transition hover:bg-base-200 hover:text-base-content">
                                 Menu
                             </a>
