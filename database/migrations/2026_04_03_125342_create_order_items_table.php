@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('order_id')->nullable()->constrained('orders')->cascadeOnDelete();
+            $table->foreignUuid('menu_id')->nullable()->constrained('menus')->nullOnDelete();
+            $table->string('menu_name_snapshot')->nullable();
+            $table->unsignedInteger('qty')->default(1);
+            $table->decimal('price', 12, 2)->default(0);
+            $table->decimal('line_total', 12, 2)->default(0);
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

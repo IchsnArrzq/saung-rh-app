@@ -19,6 +19,7 @@ class Menu extends Model
 
     protected $fillable = [
         'menu_category_id',
+        'menu_status_id',
         'name',
         'slug',
         'sku',
@@ -39,6 +40,11 @@ class Menu extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(MenuCategory::class, 'menu_category_id');
+    }
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(MenuStatus::class, 'menu_status_id');
     }
 
     public function orderItems(): HasMany

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('reservations', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignUuid('table_id')->nullable()->constrained('tables')->nullOnDelete();
             $table->string('customer_name');
             $table->string('phone', 30)->nullable();

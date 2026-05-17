@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('tables', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->string('code')->nullable()->unique();
+            $table->string('name')->nullable();
+            $table->unsignedInteger('capacity')->default(4);
+            $table->enum('status', ['available', 'occupied', 'order_in', 'cleaning'])->default('available');
+            $table->uuid('table_status_id')->nullable();
+            $table->uuid('table_category_id')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

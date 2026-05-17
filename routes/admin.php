@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\MenuCategoryController;
 use App\Http\Controllers\Admin\MenuController;
+use App\Http\Controllers\Admin\MenuStatusController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ReservationController;
@@ -25,6 +26,10 @@ Route::middleware(['auth', 'verified', 'role:superadmin|admin'])
     Route::get('menu-categories', [MenuCategoryController::class, 'index'])->name('menu-categories.index');
     Route::get('menu-categories/create', [MenuCategoryController::class, 'create'])->name('menu-categories.create');
     Route::get('menu-categories/{menuCategory}/edit', [MenuCategoryController::class, 'edit'])->name('menu-categories.edit');
+
+    Route::get('menu-statuses', [MenuStatusController::class, 'index'])->name('menu-statuses.index');
+    Route::get('menu-statuses/create', [MenuStatusController::class, 'create'])->name('menu-statuses.create');
+    Route::get('menu-statuses/{menuStatus}/edit', [MenuStatusController::class, 'edit'])->name('menu-statuses.edit');
 
     Route::get('table-statuses', [TableStatusController::class, 'index'])->name('table-statuses.index');
     Route::get('table-statuses/create', [TableStatusController::class, 'create'])->name('table-statuses.create');

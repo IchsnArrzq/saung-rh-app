@@ -47,7 +47,7 @@ return [
             'icon' => 'ri-restaurant-2-line',
             'items' => [
                 ['label' => 'Menu', 'icon' => 'ri-bowl-line', 'route' => 'menus.index', 'active' => ['menus.*']],
-                ['label' => 'Menu Status', 'icon' => 'ri-checkbox-circle-line', 'route' => 'menus.index', 'active' => ['menus.*']],
+                ['label' => 'Menu Status', 'icon' => 'ri-checkbox-circle-line', 'route' => 'menu-statuses.index', 'active' => ['menu-statuses.*']],
                 ['label' => 'Menu Category', 'icon' => 'ri-price-tag-3-line', 'route' => 'menu-categories.index', 'active' => ['menu-categories.*']],
             ],
         ],
@@ -103,7 +103,7 @@ return [
             'icon' => 'ri-restaurant-2-line',
             'items' => [
                 ['label' => 'Menu', 'icon' => 'ri-bowl-line', 'route' => 'menus.index', 'active' => ['menus.*']],
-                ['label' => 'Menu Status', 'icon' => 'ri-checkbox-circle-line', 'route' => 'menus.index', 'active' => ['menus.*']],
+                ['label' => 'Menu Status', 'icon' => 'ri-checkbox-circle-line', 'route' => 'menu-statuses.index', 'active' => ['menu-statuses.*']],
                 ['label' => 'Menu Category', 'icon' => 'ri-price-tag-3-line', 'route' => 'menu-categories.index', 'active' => ['menu-categories.*']],
             ],
         ],

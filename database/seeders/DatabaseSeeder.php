@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             TableCategorySeeder::class,
             TableSeeder::class,
             MenuCategorySeeder::class,
+            MenuStatusSeeder::class,
             MenuSeeder::class,
             OrderSeeder::class,
             OrderItemSeeder::class,
