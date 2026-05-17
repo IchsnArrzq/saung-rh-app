@@ -40,7 +40,8 @@ class MenuSeeder extends Seeder
                 ->first();
 
             $slug = Str::slug($menuName);
-
+            $imageNumber = random_int(1, 11);
+            $image_url = '/assets/media/stock/food/'.'img-'.$imageNumber.'.jpg';
             Menu::query()->updateOrCreate(
                 ['slug' => $slug],
                 [
@@ -50,7 +51,7 @@ class MenuSeeder extends Seeder
                     'sku' => strtoupper(Str::slug($menuName, '')),
                     'description' => fake()->sentence(12),
                     'price' => $price,
-                    'image_url' => 'https://picsum.photos/seed/'.$slug.'/640/480',
+                    'image_url' => $image_url,
                     'is_available' => fake()->boolean(90),
                 ]
             );

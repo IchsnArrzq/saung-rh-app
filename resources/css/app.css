@@ -48,3 +48,7 @@
     --depth: 1;
     --noise: 0;
 }
+
+html {
+    scrollbar-gutter: stable;
+}

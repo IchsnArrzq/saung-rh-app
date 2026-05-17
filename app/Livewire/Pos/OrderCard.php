@@ -11,9 +11,42 @@ class OrderCard extends Component
 {
     public ?int $activeCategoryId = null;
 
+    /**
+     * @var array<string, mixed>|null
+     */
+    public ?array $selectedMenu = null;
+
     public function setCategory(?int $categoryId = null): void
     {
         $this->activeCategoryId = $categoryId;
+    }
+
+    public function showMenuDetail(string $menuId): void
+    {
+        $menu = Menu::query()
+            ->with(['category:id,name', 'status:id,name,key,color'])
+            ->findOrFail($menuId);
+
+        $this->selectedMenu = [
+            'id' => (string) $menu->id,
+            'name' => (string) $menu->name,
+            'price' => (float) $menu->price,
+            'description' => (string) ($menu->description ?? ''),
+            'image_url' => (string) ($menu->image_url ?? ''),
+            'is_available' => (bool) $menu->is_available,
+            'category_name' => (string) ($menu->category?->name ?? 'Uncategorized'),
+            'status_name' => (string) ($menu->status?->name ?? ($menu->is_available ? 'Tersedia' : 'Tidak Tersedia')),
+            'status_color' => (string) ($menu->status?->color ?? ($menu->is_available ? 'success' : 'error')),
+            'sku' => (string) ($menu->sku ?? '-'),
+        ];
+
+        $this->dispatch('open-modal', 'menu-detail-modal');
+    }
+
+    public function closeMenuDetail(): void
+    {
+        $this->dispatch('close-modal', 'menu-detail-modal');
+        $this->selectedMenu = null;
     }
 
     public function getCategoriesProperty(): Collection
