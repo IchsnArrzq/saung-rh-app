@@ -19,9 +19,20 @@ new #[Layout('layouts.auth')] class extends Component {
 
         Session::regenerate();
 
-        $redirectTo = auth()->user()?->hasAnyRole(['superadmin', 'admin'])
+        $user = auth()->user();
+        $isAdmin = $user?->hasAnyRole(['superadmin', 'admin']) ?? false;
+        $redirectTo = $isAdmin
             ? route('dashboard', absolute: false)
             : route('customer.dashboard', absolute: false);
+
+        $intended = (string) session()->get('url.intended', '');
+        $intendedPath = (string) parse_url($intended, PHP_URL_PATH);
+        $isCustomerPath = str_starts_with($intendedPath, '/customer');
+
+        // Prevent role mismatch redirect loops that end in 403 pages.
+        if ($intendedPath !== '' && (($isAdmin && $isCustomerPath) || (! $isAdmin && ! $isCustomerPath))) {
+            session()->forget('url.intended');
+        }
 
         $this->redirectIntended(default: $redirectTo, navigate: true);
     }
@@ -54,15 +65,15 @@ new #[Layout('layouts.auth')] class extends Component {
         <div class="block mt-4">
             <label for="remember" class="inline-flex items-center">
                 <input wire:model="form.remember" id="remember" type="checkbox"
-                    class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
+                    class="checkbox checkbox-sm checkbox-primary rounded-md"
                     name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
+                <span class="ms-2 text-sm text-stone-600">{{ __('Remember me') }}</span>
             </label>
         </div>
 
         <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
+                <a class="rounded-md text-sm text-stone-600 underline transition hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-base-100"
                     href="{{ route('password.request') }}" wire:navigate>
                     {{ __('Forgot your password?') }}
                 </a>

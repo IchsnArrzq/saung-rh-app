@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
@@ -23,6 +24,8 @@ class AuthenticationTest extends TestCase
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
         $user = User::factory()->create();
+        Role::query()->firstOrCreate(['name' => 'customer', 'guard_name' => 'web']);
+        $user->assignRole('customer');
 
         $component = Volt::test('pages.auth.login')
             ->set('form.email', $user->email)
@@ -32,7 +35,7 @@ class AuthenticationTest extends TestCase
 
         $component
             ->assertHasNoErrors()
-            ->assertRedirect(route('dashboard', absolute: false));
+            ->assertRedirect(route('customer.dashboard', absolute: false));
 
         $this->assertAuthenticated();
     }
@@ -57,6 +60,8 @@ class AuthenticationTest extends TestCase
     public function test_navigation_menu_can_be_rendered(): void
     {
         $user = User::factory()->create();
+        Role::query()->firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $user->assignRole('admin');
 
         $this->actingAs($user);
 

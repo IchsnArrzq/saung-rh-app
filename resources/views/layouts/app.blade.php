@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="autumn">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="cr-cafe-resto">
 
 <head>
     <meta charset="utf-8">
@@ -19,15 +19,15 @@
     @livewireStyles
 </head>
 
-<body class="min-h-screen bg-stone-800 text-stone-800 " style="font-family: 'Plus Jakarta Sans', sans-serif;">
+<body class="min-h-screen bg-neutral text-base-content" style="font-family: 'Plus Jakarta Sans', sans-serif;">
     <div
-        class="drawer min-h-screen border border-amber-100/80 bg-amber-50 shadow-[0_26px_90px_rgba(0,0,0,0.35)] lg:drawer-open">
+        class="drawer min-h-screen border border-base-300 bg-base-100 shadow-[0_26px_90px_rgba(0,0,0,0.35)] lg:drawer-open">
         <input id="admin-drawer" checked type="checkbox" class="drawer-toggle">
         <div class="drawer-content">
             <livewire:layout.navigation />
             @isset($header)
                 <div class="px-4 pt-5 md:px-6">
-                    <div class="rounded-2xl border border-stone-200 bg-white/80 px-5 py-4 text-stone-900">
+                    <div class="rounded-2xl border border-base-300 bg-base-100 px-5 py-4 text-base-content">
                         {{ $header }}
                     </div>
                 </div>
