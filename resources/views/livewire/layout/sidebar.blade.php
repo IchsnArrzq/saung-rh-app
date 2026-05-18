@@ -5,23 +5,6 @@ use Livewire\Volt\Component;
 
 new class extends Component {
     public string $dashboardUrl = '#';
-    public string $menuUrl = '#';
-    public string $categoryUrl = '#';
-    public string $tableStatusUrl = '#';
-    public string $tableCategoryUrl = '#';
-    public string $tableUrl = '#';
-    public string $orderUrl = '#';
-    public string $paymentUrl = '#';
-    public string $reservationUrl = '#';
-    public string $dailyReportUrl = '#';
-    public string $monthlyReportUrl = '#';
-    public string $adminUsersUrl = '#';
-    public string $customerUsersUrl = '#';
-
-    public bool $masterOpen = false;
-    public bool $transactionOpen = false;
-    public bool $reportOpen = false;
-    public bool $userManagementOpen = false;
 
     /** @var array<int, array<string, mixed>> */
     public array $groups = [];
@@ -29,33 +12,6 @@ new class extends Component {
     public function mount(SidebarNavigation $navigation): void
     {
         $this->dashboardUrl = Route::has('dashboard') ? route('dashboard') : '#';
-        $this->menuUrl = Route::has('menus.index') ? route('menus.index') : '#';
-        $this->categoryUrl = Route::has('menu-categories.index') ? route('menu-categories.index') : '#';
-        $this->tableStatusUrl = Route::has('table-statuses.index') ? route('table-statuses.index') : '#';
-        $this->tableCategoryUrl = Route::has('table-categories.index') ? route('table-categories.index') : '#';
-        $this->tableUrl = Route::has('tables.index') ? route('tables.index') : '#';
-        $this->orderUrl = Route::has('orders.index') ? route('orders.index') : '#';
-        $this->paymentUrl = Route::has('payments.index') ? route('payments.index') : '#';
-        $this->reservationUrl = Route::has('reservations.index') ? route('reservations.index') : '#';
-        $this->dailyReportUrl = Route::has('reports.daily') ? route('reports.daily') : '#';
-        $this->monthlyReportUrl = Route::has('reports.monthly') ? route('reports.monthly') : '#';
-        $this->adminUsersUrl = Route::has('admin-users.index') ? route('admin-users.index') : '#';
-        $this->customerUsersUrl = Route::has('customer-users.index') ? route('customer-users.index') : '#';
-
-        $this->masterOpen = request()->routeIs('menus.*')
-            || request()->routeIs('menu-categories.*')
-            || request()->routeIs('table-statuses.*')
-            || request()->routeIs('table-categories.*')
-            || request()->routeIs('tables.*');
-
-        $this->transactionOpen = request()->routeIs('orders.*')
-            || request()->routeIs('payments.*')
-            || request()->routeIs('reservations.*');
-
-        $this->reportOpen = request()->routeIs('reports.*');
-        
-        $this->userManagementOpen = request()->routeIs('admin-users.*') 
-            || request()->routeIs('customer-users.*');
         $this->groups = $navigation->forCurrentUser();
     }
 }; ?>
@@ -92,56 +48,6 @@ new class extends Component {
                         </li>
                         @continue
                     @endif
-
-                <li>
-                    <details @if ($reportOpen) open @endif>
-                        <summary data-tip="Reports"
-                            class="is-drawer-close:tooltip {{ $reportOpen ? 'bg-amber-200/80 text-stone-900' : 'text-stone-700 hover:bg-amber-100' }}">
-                            <i class="ri-bar-chart-box-line text-lg"></i>
-                            <span class="is-drawer-close:hidden">Reports</span>
-                        </summary>
-                        <ul class="ms-2 border-l border-stone-200 is-drawer-close:hidden">
-                            <li>
-                                <a href="{{ $dailyReportUrl }}">
-                                    <i class="ri-calendar-check-line"></i>
-                                    Daily Report
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ $monthlyReportUrl }}">
-                                    <i class="ri-calendar-2-line"></i>
-                                    Monthly Report
-                                </a>
-                            </li>
-                        </ul>
-                    </details>
-                </li>
-
-                <li>
-                    <details @if ($userManagementOpen) open @endif>
-                        <summary data-tip="User Management"
-                            class="is-drawer-close:tooltip {{ $userManagementOpen ? 'bg-amber-200/80 text-stone-900' : 'text-stone-700 hover:bg-amber-100' }}">
-                            <i class="ri-group-line text-lg"></i>
-                            <span class="is-drawer-close:hidden">User Management</span>
-                        </summary>
-                        <ul class="ms-2 border-l border-stone-200 is-drawer-close:hidden">
-                            <li>
-                                <a href="{{ $adminUsersUrl }}"
-                                    class="{{ request()->routeIs('admin-users.*') ? 'text-emerald-800 font-semibold' : 'text-stone-700' }}">
-                                    <i class="ri-user-settings-line"></i>
-                                    Admin
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ $customerUsersUrl }}"
-                                    class="{{ request()->routeIs('customer-users.*') ? 'text-emerald-800 font-semibold' : 'text-stone-700' }}">
-                                    <i class="ri-user-smile-line"></i>
-                                    Customer
-                                </a>
-                            </li>
-                        </ul>
-                    </details>
-                </li>
 
                     <li>
                         <details @if ($group['is_open']) open @endif>

@@ -59,10 +59,12 @@ class SidebarNavigation
     private function resolveItem(array $item): array
     {
         $routeName = $item['route'] ?? null;
-        $patterns = $item['active'] ?? [$routeName];
+        $patterns = collect($item['active'] ?? [$routeName])
+            ->filter(fn ($pattern) => is_string($pattern) && $pattern !== '')
+            ->values();
 
         $item['url'] = $routeName && Route::has($routeName) ? route($routeName) : null;
-        $item['is_active'] = collect($patterns)->contains(fn (string $pattern) => request()->routeIs($pattern));
+        $item['is_active'] = $patterns->contains(fn ($pattern) => request()->routeIs($pattern));
         $item['badge_value'] = $this->resolveBadgeValue($item['badge'] ?? null);
 
         return $item;

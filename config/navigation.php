@@ -66,6 +66,13 @@ return [
                 ['label' => 'User Role & Permission', 'icon' => 'ri-lock-password-line', 'route' => 'settings.roles-permissions', 'active' => ['settings.roles-permissions']],
             ],
         ],
+        [
+            'label' => 'User Management',
+            'icon' => 'ri-group-line',
+            'items' => [
+                ['label' => 'User', 'iconri-user-settings-line'],
+            ],
+        ],
     ],
 
     'admin' => [
