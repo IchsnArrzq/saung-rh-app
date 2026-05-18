@@ -15,7 +15,7 @@ return [
             'open' => true,
             'items' => [
                 ['label' => 'POS Order', 'icon' => 'ri-shopping-basket-line', 'route' => 'pos.order.index', 'active' => ['pos.order.*']],
-                ['label' => 'Offline / Online Order', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*']],
+                ['label' => 'Order', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*']],
                 ['label' => 'Payment', 'icon' => 'ri-wallet-3-line', 'route' => 'payments.index', 'active' => ['payments.*']],
                 ['label' => 'Reservation', 'icon' => 'ri-calendar-check-line', 'route' => 'reservations.index', 'active' => ['reservations.*']],
             ],
@@ -70,7 +70,8 @@ return [
             'label' => 'User Management',
             'icon' => 'ri-group-line',
             'items' => [
-                ['label' => 'User', 'iconri-user-settings-line'],
+                ['label' => 'User', 'icon' => 'ri-user-settings-line', 'route' => 'admin-users.index', 'active' => ['admin-users.index']],
+                ['label' => 'Admin', 'icon' => 'ri-user-smile-line', 'route' => 'customer-users.index', 'active' => ['customer-users.index']],
             ],
         ],
     ],
@@ -121,7 +122,7 @@ return [
             'items' => [
                 ['label' => 'Reservation', 'icon' => 'ri-calendar-check-line', 'route' => 'reservations.index', 'active' => ['reservations.*']],
                 ['label' => 'POS Order', 'icon' => 'ri-shopping-basket-line', 'route' => 'pos.order.index', 'active' => ['pos.order.*'], 'badge' => ['type' => 'dynamic', 'resolver' => 'active_orders']],
-                ['label' => 'Order Offline / Online', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*']],
+                ['label' => 'Order', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*']],
                 ['label' => 'Payment', 'icon' => 'ri-wallet-3-line', 'route' => 'payments.index', 'active' => ['payments.*']],
             ],
         ],
