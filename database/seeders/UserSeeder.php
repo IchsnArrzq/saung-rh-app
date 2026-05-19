@@ -29,6 +29,14 @@ class UserSeeder extends Seeder
         ]);
         $admin->syncRoles(['admin']);
 
+        $cashier = User::query()->firstOrCreate([
+            'email' => 'cashier@example.com',
+        ], [
+            'name' => 'Cashier Saung RH',
+            'password' => Hash::make('password'),
+        ]);
+        $cashier->syncRoles(['cashier']);
+
         User::query()->firstOrCreate([
             'email' => 'test@example.com',
         ], [
