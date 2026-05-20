@@ -20,10 +20,15 @@ new #[Layout('layouts.auth')] class extends Component {
         Session::regenerate();
 
         $user = auth()->user();
-        $isAdmin = $user?->hasAnyRole(['superadmin', 'admin']) ?? false;
-        $redirectTo = $isAdmin
-            ? route('dashboard', absolute: false)
-            : route('customer.dashboard', absolute: false);
+        $isAdmin = $user?->hasAnyRole(['superadmin', 'admin', 'cashier']) ?? false;
+        
+        if ($user?->hasRole('cashier')) {
+            $redirectTo = route('pos.order.index', absolute: false);
+        } else {
+            $redirectTo = $isAdmin
+                ? route('dashboard', absolute: false)
+                : route('customer.dashboard', absolute: false);
+        }
 
         $intended = (string) session()->get('url.intended', '');
         $intendedPath = (string) parse_url($intended, PHP_URL_PATH);

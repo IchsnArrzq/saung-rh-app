@@ -3,7 +3,7 @@
 use App\Http\Controllers\POS\PosOrderController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified', 'role:superadmin|admin|cashier']) 
+Route::middleware(['auth', 'verified', 'role:superadmin|admin|cashier', 'can:orders.manage']) 
     ->prefix('pos')
     ->name('pos.')
     ->group(function () {

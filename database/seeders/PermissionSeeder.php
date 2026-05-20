@@ -21,6 +21,7 @@ class PermissionSeeder extends Seeder
             'orders.manage',
             'payments.manage',
             'reservations.manage',
+            'pos.manage',
             'customer.booking.view',
             'customer.booking.create',
         ];
@@ -41,6 +42,7 @@ class PermissionSeeder extends Seeder
                 'orders.manage',
                 'payments.manage',
                 'reservations.manage',
+                'pos.manage',
             ])
             ->pluck('name')
             ->all();
@@ -50,6 +52,7 @@ class PermissionSeeder extends Seeder
                 'dashboard.view',
                 'orders.manage',
                 'payments.manage',
+                'pos.manage',
             ])
             ->pluck('name')
             ->all();
