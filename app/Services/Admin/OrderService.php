@@ -8,6 +8,7 @@ use App\Models\Table;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -69,6 +70,7 @@ class OrderService
             $total = max($subtotal + $tax, 0);
 
             $order = Order::query()->create([
+                'user_id' => Auth::id(),
                 'table_id' => $validated['table_id'] ?? null,
                 'order_number' => $this->generateOrderNumber(),
                 'customer_name' => $validated['customer_name'] ?? null,
