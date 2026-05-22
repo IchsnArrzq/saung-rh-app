@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Events\OrderCreated;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\Table;
@@ -83,6 +84,10 @@ class OrderService
 
             $order->items()->createMany($items);
         });
+
+        if ($order && in_array($order->status, ['confirmed', 'preparing'])) {
+             OrderCreated::dispatch($order);
+        }
     }
 
     public function update(Request $request, Order $order): void

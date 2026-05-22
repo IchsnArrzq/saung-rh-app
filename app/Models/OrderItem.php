@@ -24,6 +24,7 @@ class OrderItem extends Model
         'price',
         'line_total',
         'notes',
+        'status',
     ];
 
     protected function casts(): array

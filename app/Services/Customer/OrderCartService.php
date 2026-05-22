@@ -2,6 +2,7 @@
 
 namespace App\Services\Customer;
 
+use App\Events\OrderCreated;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\Table;
@@ -234,6 +235,8 @@ class OrderCartService
         });
 
         $this->clearCart($table->id);
+
+        OrderCreated::dispatch($order);
 
         return $order;
     }
