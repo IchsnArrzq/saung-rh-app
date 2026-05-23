@@ -84,5 +84,6 @@ Route::middleware(['auth', 'verified', 'role:superadmin|admin'])
         Route::get('reservations/create', [ReservationController::class, 'create'])->name('reservations.create');
         Route::get('reservations/{reservation}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
 
-        Route::get('reports/daily-report', [ReportController::class, 'dailyReport'])->name('reports.daily-report');
+        Route::get('reports/daily-report', [ReportController::class, 'dailyReport'])->name('reports.daily');
+        Route::get('reports/monthly-report', [ReportController::class, 'monthlyReport'])->name('reports.monthly');
     });
