@@ -6,6 +6,7 @@ require __DIR__.'/landing.php';
 require __DIR__.'/admin.php';
 require __DIR__.'/customer.php';
 require __DIR__.'/pos.php';
+require __DIR__.'/kds.php';
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
