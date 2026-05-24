@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-stone-800">
             {{ __('Laporan Bulanan') }}
@@ -10,4 +10,4 @@
             @livewire('admin.reports.monthly-report-board')
         </div>
     </div>
-</x-app-layout>
+</x-admin-layout>

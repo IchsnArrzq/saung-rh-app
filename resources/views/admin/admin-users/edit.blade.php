@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold">Edit Admin: {{ $admin_user->name }}</h2>
     </x-slot>
@@ -18,4 +18,4 @@
             </div>
         </form>
     </div>
-</x-app-layout>
+</x-admin-layout>

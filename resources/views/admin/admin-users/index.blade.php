@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3">
             <h2 class="text-xl font-semibold">Manajemen Admin</h2>
@@ -74,4 +74,4 @@
             </tbody>
         </table>
     </div>
-</x-app-layout>
+</x-admin-layout>
