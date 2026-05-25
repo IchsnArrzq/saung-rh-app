@@ -39,7 +39,6 @@ new class extends Component {
                 class="h-10 w-10 rounded-lg border border-base-300 bg-base-100 p-1 object-contain md:h-11 md:w-11">
             <div>
                 <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Control Room</p>
-                <p class="text-lg font-semibold text-base-content">CR Cafe & Resto Admin</p>
             </div>
         </div>
 

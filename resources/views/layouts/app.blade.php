@@ -19,7 +19,7 @@
     @livewireStyles
 </head>
 
-<body class="min-h-screen bg-neutral text-base-content" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+<body class="min-h-screen bg-neutral text-base-content antialiased" style="font-family: 'Plus Jakarta Sans', sans-serif;">
     @php
         $activePortal = $portal ?? 'admin';
     @endphp

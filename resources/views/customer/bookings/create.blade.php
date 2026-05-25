@@ -42,7 +42,7 @@
             <div class="rounded-2xl border border-stone-200 p-4">
                 <div class="mb-3 flex items-center justify-between">
                     <h2 class="font-semibold text-stone-900">Pilih Menu</h2>
-                    <button type="button" id="add-booking-item" class="btn btn-xs btn-outline">Tambah Menu</button>
+                    <button type="button" id="add-booking-item" class="btn btn-sm btn-outline">Tambah Menu</button>
                 </div>
 
                 @php

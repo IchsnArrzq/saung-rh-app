@@ -52,7 +52,7 @@
                                         value="{{ $item['qty'] }}" required>
                                     <input type="text" name="notes" class="input input-bordered input-sm w-full"
                                         value="{{ $item['notes'] }}" placeholder="Catatan item">
-                                    <button type="submit" class="btn btn-xs btn-ghost">Update</button>
+                                    <button type="submit" class="btn btn-sm btn-ghost">Update</button>
                                 </form>
                             </td>
                             <td>
@@ -63,7 +63,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <input type="hidden" name="table_id" value="{{ $table->id }}">
-                                    <button type="submit" class="btn btn-xs btn-error text-white"
+                                    <button type="submit" class="btn btn-sm btn-error text-white"
                                         onclick="return confirm('Hapus item ini dari cart?')">
                                         Hapus
                                     </button>

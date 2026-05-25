@@ -48,8 +48,8 @@
                         <td>Rp {{ number_format((float) $order->total, 0, ',', '.') }}</td>
                         <td class="text-right">
                             <div class="inline-flex gap-2">
-                                <a href="{{ route('orders.edit', $order) }}" class="btn btn-xs btn-ghost">Edit</a>
-                                <button type="button" class="btn btn-xs btn-error text-white"
+                                <a href="{{ route('orders.edit', $order) }}" class="btn btn-sm btn-warning">Edit</a>
+                                <button type="button" class="btn btn-sm btn-error text-white"
                                     onclick="if (!confirm('Hapus order ini?')) return false;"
                                     wire:click="delete('{{ $order->id }}')">
                                     Hapus

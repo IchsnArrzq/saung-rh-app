@@ -11,6 +11,7 @@ use Livewire\Component;
 class OrderCard extends Component
 {
     public ?int $activeCategoryId = null;
+    public string $search = '';
 
     /**
      * @var array<string, mixed>|null
@@ -109,10 +110,20 @@ class OrderCard extends Component
 
     public function getMenusProperty(): Collection
     {
+        $search = trim($this->search);
+
         return Menu::query()
             ->with('category:id,name')
             ->where('is_available', true)
             ->when($this->activeCategoryId, fn ($query) => $query->where('menu_category_id', $this->activeCategoryId))
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('name', 'ilike', '%'.$search.'%')
+                        ->orWhere('description', 'ilike', '%'.$search.'%')
+                        ->orWhere('sku', 'ilike', '%'.$search.'%')
+                        ->orWhereHas('category', fn ($category) => $category->where('name', 'ilike', '%'.$search.'%'));
+                });
+            })
             ->orderBy('name')
             ->get();
     }

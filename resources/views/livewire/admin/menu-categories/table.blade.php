@@ -36,8 +36,8 @@
                         </td>
                         <td class="text-right">
                             <div class="inline-flex gap-2">
-                                <a href="{{ route('menu-categories.edit', $category) }}" class="btn btn-xs btn-ghost">Edit</a>
-                                <button type="button" class="btn btn-xs btn-error text-white"
+                                <a href="{{ route('menu-categories.edit', $category) }}" class="btn btn-sm btn-warning">Edit</a>
+                                <button type="button" class="btn btn-sm btn-error text-white"
                                     onclick="if (!confirm('Hapus kategori ini?')) return false;"
                                     wire:click="delete('{{ $category->id }}')">
                                     Hapus

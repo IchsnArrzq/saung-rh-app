@@ -70,11 +70,11 @@
                         </td>
                         <td class="text-right">
                             <div class="inline-flex gap-2">
-                                <a href="{{ route('table-statuses.edit', $tableStatus) }}" class="btn btn-xs btn-ghost">Edit</a>
+                                <a href="{{ route('table-statuses.edit', $tableStatus) }}" class="btn btn-sm btn-warning">Edit</a>
                                 @if (in_array($tableStatus->key, $reservedKeys, true))
-                                    <button type="button" class="btn btn-xs btn-disabled">Sistem</button>
+                                    <button type="button" class="btn btn-sm btn-disabled">Sistem</button>
                                 @else
-                                    <button type="button" class="btn btn-xs btn-error text-white"
+                                    <button type="button" class="btn btn-sm btn-error text-white"
                                         onclick="if (!confirm('Hapus status meja ini?')) return false;"
                                         wire:click="delete('{{ $tableStatus->id }}')">
                                         Hapus

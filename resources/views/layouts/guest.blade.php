@@ -18,7 +18,7 @@
     @livewireStyles
 </head>
 
-<body class="min-h-screen bg-neutral text-base-content" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+<body class="min-h-screen bg-neutral text-base-content antialiased" style="font-family: 'Plus Jakarta Sans', sans-serif;">
     <div
         class="relative mx-auto min-h-screen w-full max-w-[1560px] overflow-hidden border border-base-300 bg-base-100 shadow-[0_30px_100px_rgba(0,0,0,0.35)]">
         <div

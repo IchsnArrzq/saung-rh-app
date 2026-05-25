@@ -24,9 +24,6 @@ new class extends Component {
                 class="h-11 w-11 shrink-0 rounded-xl border border-base-300 bg-base-100 p-1 object-contain transition-all duration-300 is-drawer-open:h-14 is-drawer-open:w-14">
             <span
                 class="overflow-hidden transition-all duration-300 is-drawer-close:max-w-0 is-drawer-close:opacity-0 is-drawer-open:max-w-xs is-drawer-open:opacity-100">
-                <span class="block text-xs font-semibold uppercase tracking-[0.2em] text-secondary whitespace-nowrap">
-                    CR Cafe & Resto
-                </span>
                 <span class="block text-2xl font-semibold text-primary whitespace-nowrap"
                     style="font-family: 'Playfair Display', serif;">Admin Panel</span>
             </span>

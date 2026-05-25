@@ -21,6 +21,12 @@
             @endforeach
         </div>
 
+        <label class="input input-bordered flex items-center gap-2">
+            <i class="ri-search-line text-stone-400"></i>
+            <input type="text" class="grow" wire:model.live.debounce.300ms="search"
+                placeholder="Cari menu, deskripsi, SKU, atau kategori..." />
+        </label>
+
         <div
             @class([
                 'grid gap-2 sm:grid-cols-2',
