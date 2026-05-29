@@ -50,7 +50,7 @@
                     <div class="mt-4 gap-2">
                         <a href="{{ route('menus.edit', $menu) }}" class="btn btn-sm btn-warning">Edit</a>
                         <button type="button" class="btn btn-sm btn-error ml-auto text-white"
-                            onclick="if (!confirm('Hapus menu ini?')) return false;" wire:click="delete('{{ $menu->id }}')">
+                            data-confirm="Hapus menu ini?" wire:click="delete('{{ $menu->id }}')">
                             Hapus
                         </button>
                     </div>
@@ -66,3 +66,4 @@
 
     <div>{{ $menus->links() }}</div>
 </div>
+

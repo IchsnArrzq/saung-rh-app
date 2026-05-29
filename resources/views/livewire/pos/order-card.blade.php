@@ -1,4 +1,10 @@
 <div class="grid gap-4 xl:grid-cols-12">
+    @if (session('success') || $errors->any())
+        <div class="col-span-full">
+            @include('admin.partials.flash')
+        </div>
+    @endif
+
     <div
         @class([
             'space-y-4',
@@ -77,13 +83,61 @@
             <section class="rounded-2xl border border-base-300 bg-base-100 p-4">
                 <div class="mb-4 flex items-center justify-between gap-2">
                     <h3 class="text-xl font-semibold">Order Details</h3>
-                    <button type="button" wire:click="clearCart" class="btn btn-sm btn-outline">
+                    <button type="button" wire:click="clearCart" data-confirm="Reset semua item order ini?"
+                        class="btn btn-sm btn-outline">
                         <i class="ri-delete-bin-line"></i>
                         Reset Order
                     </button>
                 </div>
 
-                <div class="space-y-3">
+                <div class="space-y-3 rounded-xl border border-base-300 bg-base-100 p-3">
+                    <label class="form-control w-full">
+                        <div class="label py-1">
+                            <span class="label-text text-xs font-semibold uppercase tracking-wide text-base-content/70">Meja
+                                (Opsional)</span>
+                        </div>
+                        <select class="select select-bordered w-full" wire:model.defer="tableId">
+                            <option value="">Tanpa meja (take away / online)</option>
+                            @foreach ($tables as $table)
+                                <option value="{{ $table->id }}">
+                                    {{ $table->code }} - {{ $table->name }}
+                                    @if ($table->tableStatus?->name)
+                                        ({{ $table->tableStatus->name }})
+                                    @endif
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('tableId')
+                            <span class="mt-1 text-xs text-error">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label class="form-control w-full">
+                        <div class="label py-1">
+                            <span class="label-text text-xs font-semibold uppercase tracking-wide text-base-content/70">Nama
+                                Customer</span>
+                        </div>
+                        <input type="text" class="input input-bordered w-full" wire:model.defer="customerName"
+                            placeholder="Contoh: Budi / Walk-in customer">
+                        @error('customerName')
+                            <span class="mt-1 text-xs text-error">{{ $message }}</span>
+                        @enderror
+                    </label>
+
+                    <label class="form-control w-full">
+                        <div class="label py-1">
+                            <span class="label-text text-xs font-semibold uppercase tracking-wide text-base-content/70">Catatan
+                                Order</span>
+                        </div>
+                        <textarea class="textarea textarea-bordered w-full" rows="2" wire:model.defer="notes"
+                            placeholder="Catatan tambahan untuk dapur (opsional)"></textarea>
+                        @error('notes')
+                            <span class="mt-1 text-xs text-error">{{ $message }}</span>
+                        @enderror
+                    </label>
+                </div>
+
+                <div class="mt-3 space-y-3">
                     @foreach ($cartItems as $item)
                         <article class="rounded-xl border border-base-300 p-3">
                             <div class="flex items-start justify-between gap-3">
@@ -106,6 +160,7 @@
                                 </div>
 
                                 <button type="button" wire:click="removeCartItem('{{ $item['menu_id'] }}')"
+                                    data-confirm="Hapus item ini dari order?"
                                     class="btn btn-sm btn-error btn-square text-white" aria-label="Hapus item">
                                     <i class="ri-delete-bin-line"></i>
                                 </button>
@@ -135,6 +190,22 @@
                         <span>Sub Total</span>
                         <span>Rp {{ number_format($cartSubtotal, 0, ',', '.') }}</span>
                     </div>
+
+                    @error('cart')
+                        <p class="mt-2 text-xs font-medium text-error">{{ $message }}</p>
+                    @enderror
+
+                    <button type="button" wire:click="placeOrder" wire:loading.attr="disabled" wire:target="placeOrder"
+                        class="btn btn-primary mt-4 w-full">
+                        <span wire:loading.remove wire:target="placeOrder">
+                            <i class="ri-save-2-line"></i>
+                            Simpan Order
+                        </span>
+                        <span wire:loading wire:target="placeOrder" class="inline-flex items-center gap-2">
+                            <span class="loading loading-spinner loading-sm"></span>
+                            Menyimpan...
+                        </span>
+                    </button>
                 </div>
             </section>
         </aside>

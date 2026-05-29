@@ -66,7 +66,7 @@
                                 <a href="{{ route('tables.qr', $table) }}" class="btn btn-sm btn-outline">QR</a>
                                 <a href="{{ route('tables.edit', $table) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
-                                    onclick="if (!confirm('Hapus meja ini?')) return false;"
+                                    data-confirm="Hapus meja ini?"
                                     wire:click="delete('{{ $table->id }}')">
                                     Hapus
                                 </button>
@@ -84,4 +84,5 @@
 
     <div>{{ $tables->links() }}</div>
 </div>
+
 

@@ -57,7 +57,8 @@
                                 <a href="{{ route('admin-users.edit', $user) }}" class="btn btn-sm btn-ghost text-stone-600">Edit</a>
                                 
                                 @if(!$user->hasRole('superadmin'))
-                                    <form action="{{ route('admin-users.destroy', $user) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus admin ini?');" class="inline">
+                                    <form action="{{ route('admin-users.destroy', $user) }}" method="POST"
+                                        data-confirm="Yakin ingin menghapus admin ini?" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-error text-white">Hapus</button>

@@ -10,7 +10,9 @@
         'min-h-screen border border-base-300 bg-base-100 shadow-[0_26px_90px_rgba(0,0,0,0.35)]',
         'drawer lg:drawer-open' => $navigationMenuPreference === 'sidebar',
     ])>
-    <input id="admin-drawer" checked type="checkbox" class="drawer-toggle">
+    @if ($navigationMenuPreference === 'sidebar')
+        <input id="admin-drawer" checked type="checkbox" class="drawer-toggle">
+    @endif
     <div class="drawer-content">
         @include('layouts.portals.admin.partials.topbar')
         @isset($header)

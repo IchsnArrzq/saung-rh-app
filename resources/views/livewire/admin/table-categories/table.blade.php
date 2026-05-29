@@ -53,7 +53,7 @@
                             <div class="inline-flex gap-2">
                                 <a href="{{ route('table-categories.edit', $tableCategory) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
-                                    onclick="if (!confirm('Hapus kategori meja ini?')) return false;"
+                                    data-confirm="Hapus kategori meja ini?"
                                     wire:click="delete('{{ $tableCategory->id }}')">
                                     Hapus
                                 </button>
@@ -71,4 +71,5 @@
 
     <div>{{ $tableCategories->links() }}</div>
 </div>
+
 

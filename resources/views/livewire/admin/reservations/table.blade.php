@@ -48,7 +48,7 @@
                             <div class="inline-flex gap-2">
                                 <a href="{{ route('reservations.edit', $reservation) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
-                                    onclick="if (!confirm('Hapus reservasi ini?')) return false;"
+                                    data-confirm="Hapus reservasi ini?"
                                     wire:click="delete('{{ $reservation->id }}')">
                                     Hapus
                                 </button>
@@ -66,4 +66,5 @@
 
     <div>{{ $reservations->links() }}</div>
 </div>
+
 

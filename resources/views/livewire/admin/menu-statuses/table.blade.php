@@ -75,7 +75,7 @@
                                     <button type="button" class="btn btn-sm btn-disabled">Sistem</button>
                                 @else
                                     <button type="button" class="btn btn-sm btn-error text-white"
-                                        onclick="if (!confirm('Hapus status menu ini?')) return false;"
+                                        data-confirm="Hapus status menu ini?"
                                         wire:click="delete('{{ $menuStatus->id }}')">
                                         Hapus
                                     </button>
@@ -94,3 +94,4 @@
 
     <div>{{ $menuStatuses->links() }}</div>
 </div>
+

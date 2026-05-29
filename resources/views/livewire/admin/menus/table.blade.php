@@ -50,7 +50,7 @@
                             <div class="inline-flex gap-2">
                                 <a href="{{ route('menus.edit', $menu) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
-                                    onclick="if (!confirm('Hapus menu ini?')) return false;"
+                                    data-confirm="Hapus menu ini?"
                                     wire:click="delete('{{ $menu->id }}')">
                                     Hapus
                                 </button>
@@ -68,3 +68,4 @@
 
     <div>{{ $menus->links() }}</div>
 </div>
+

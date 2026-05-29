@@ -45,7 +45,7 @@
                             <div class="inline-flex gap-2">
                                 <a href="{{ route('payments.edit', $payment) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
-                                    onclick="if (!confirm('Hapus pembayaran ini?')) return false;"
+                                    data-confirm="Hapus pembayaran ini?"
                                     wire:click="delete('{{ $payment->id }}')">
                                     Hapus
                                 </button>
@@ -63,4 +63,3 @@
 
     <div>{{ $payments->links() }}</div>
 </div>
-

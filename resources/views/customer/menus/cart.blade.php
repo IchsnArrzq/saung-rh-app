@@ -59,12 +59,12 @@
                                 Rp {{ number_format(((float) $item['price']) * ((int) $item['qty']), 0, ',', '.') }}
                             </td>
                             <td class="text-right">
-                                <form action="{{ route('customer.menus.cart.destroy', $item['menu_id']) }}" method="POST">
+                                <form action="{{ route('customer.menus.cart.destroy', $item['menu_id']) }}" method="POST"
+                                    data-confirm="Hapus item ini dari cart?">
                                     @csrf
                                     @method('DELETE')
                                     <input type="hidden" name="table_id" value="{{ $table->id }}">
-                                    <button type="submit" class="btn btn-sm btn-error text-white"
-                                        onclick="return confirm('Hapus item ini dari cart?')">
+                                    <button type="submit" class="btn btn-sm btn-error text-white">
                                         Hapus
                                     </button>
                                 </form>
@@ -82,7 +82,8 @@
                     <p class="text-xl font-bold text-emerald-800">Total Rp {{ number_format($subtotal, 0, ',', '.') }}</p>
                 </div>
 
-                <form action="{{ route('customer.menus.cart.checkout') }}" method="POST" class="w-full max-w-lg space-y-3">
+                <form action="{{ route('customer.menus.cart.checkout') }}" method="POST"
+                    data-confirm="Kirim pesanan ini ke admin?" class="w-full max-w-lg space-y-3">
                     @csrf
                     <input type="hidden" name="table_id" value="{{ $table->id }}">
                     <fieldset class="fieldset">
@@ -90,8 +91,7 @@
                         <textarea name="notes" class="textarea textarea-bordered w-full" rows="2"
                             placeholder="contoh: utamakan menu tanpa pedas"></textarea>
                     </fieldset>
-                    <button type="submit" class="btn w-full bg-emerald-800 text-amber-50 hover:bg-emerald-700"
-                        onclick="return confirm('Kirim pesanan ini ke admin?')">
+                    <button type="submit" class="btn w-full bg-emerald-800 text-amber-50 hover:bg-emerald-700">
                         Buat Order
                     </button>
                 </form>
