@@ -104,8 +104,8 @@ new class extends Component {
 
     @if ($navigationMenuPreference === 'navbar' && count($groups) > 0)
         <div class="mt-3">
-            <nav class="overflow-x-auto">
-                <ul class="menu menu-horizontal gap-1 rounded-xl border border-base-300 bg-base-100 p-1">
+            <nav class="overflow-visible">
+                <ul class="menu menu-horizontal flex-wrap gap-1 rounded-xl border border-base-300 bg-base-100 p-1">
                     @foreach ($groups as $group)
                         @if (count($group['items']) === 1 && $group['label'] === 'Dashboard')
                             @php($item = $group['items'][0])
@@ -123,14 +123,13 @@ new class extends Component {
                         @endif
 
                         <li>
-                            <details class="dropdown">
+                            <details @if ($group['is_open']) open @endif>
                                 <summary
                                     class="{{ $group['is_open'] ? 'bg-base-300 text-primary font-semibold' : 'text-stone-700 hover:bg-base-300' }}">
                                     <i class="{{ $group['icon'] }}"></i>
                                     {{ $group['label'] }}
                                 </summary>
-                                <ul
-                                    class="menu dropdown-content z-20 mt-1 w-72 rounded-xl border border-base-300 bg-base-100 p-2 shadow-xl">
+                                <ul class="menu z-20 mt-1 w-72 rounded-xl border border-base-300 bg-base-100 p-2 shadow-xl">
                                     @foreach ($group['items'] as $item)
                                         <li>
                                             <a href="{{ $item['url'] }}"
