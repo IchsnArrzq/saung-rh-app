@@ -1,15 +1,29 @@
 <?php
 
 use App\Livewire\Actions\Logout;
+use App\Support\SidebarNavigation;
 use Livewire\Volt\Component;
 
 new class extends Component {
     public $initial;
     public $profileUrl;
-    public function mount(): void
+    public string $settingsUrl = '#';
+    public string $navigationMenuPreference = 'sidebar';
+
+    /** @var array<int, array<string, mixed>> */
+    public array $groups = [];
+
+    public function mount(SidebarNavigation $navigation): void
     {
         $this->initial = strtoupper(substr(auth()->user()->name ?? 'A', 0, 1));
         $this->profileUrl = route('profile');
+        $this->settingsUrl = Route::has('settings.navigation') ? route('settings.navigation') : '#';
+        $this->groups = $navigation->forCurrentUser();
+
+        $preference = (string) (auth()->user()?->navigation_menu_preference ?? 'sidebar');
+        $this->navigationMenuPreference = in_array($preference, ['sidebar', 'navbar'], true)
+            ? $preference
+            : 'sidebar';
     }
     /**
      * Log the current user out of the application.
@@ -24,15 +38,17 @@ new class extends Component {
 <header class="border-b border-base-300 bg-base-100 px-4 py-4 md:px-6">
     <div class="flex items-center gap-3">
 
-        <label for="admin-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
-            <!-- Sidebar toggle icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round" stroke-linecap="round"
-                stroke-width="2" fill="none" stroke="currentColor" class="my-1.5 inline-block size-4">
-                <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path>
-                <path d="M9 4v16"></path>
-                <path d="M14 10l2 2l-2 2"></path>
-            </svg>
-        </label>
+        @if ($navigationMenuPreference === 'sidebar')
+            <label for="admin-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
+                <!-- Sidebar toggle icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round" stroke-linecap="round"
+                    stroke-width="2" fill="none" stroke="currentColor" class="my-1.5 inline-block size-4">
+                    <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path>
+                    <path d="M9 4v16"></path>
+                    <path d="M14 10l2 2l-2 2"></path>
+                </svg>
+            </label>
+        @endif
 
         <div class="mr-auto flex items-center gap-3">
             <img src="{{ asset('assets/logo-cr-mark.png') }}" alt="CR Cafe & Resto logo mark"
@@ -70,7 +86,7 @@ new class extends Component {
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="font-medium text-stone-700">
+                    <a href="{{ $settingsUrl }}" class="font-medium text-stone-700">
                         <i class="ri-settings-3-line"></i>
                         Settings
                     </a>
@@ -85,4 +101,55 @@ new class extends Component {
             </ul>
         </details>
     </div>
+
+    @if ($navigationMenuPreference === 'navbar' && count($groups) > 0)
+        <div class="mt-3">
+            <nav class="overflow-x-auto">
+                <ul class="menu menu-horizontal gap-1 rounded-xl border border-base-300 bg-base-100 p-1">
+                    @foreach ($groups as $group)
+                        @if (count($group['items']) === 1 && $group['label'] === 'Dashboard')
+                            @php($item = $group['items'][0])
+                            <li>
+                                <a href="{{ $item['url'] }}"
+                                    class="{{ $item['is_active'] ? 'bg-primary text-primary-content' : 'text-stone-700 hover:bg-base-300' }}">
+                                    <i class="{{ $item['icon'] }}"></i>
+                                    {{ $item['label'] }}
+                                    @if (!empty($item['badge_value']))
+                                        <span class="badge badge-sm badge-primary">{{ $item['badge_value'] }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                            @continue
+                        @endif
+
+                        <li>
+                            <details class="dropdown">
+                                <summary
+                                    class="{{ $group['is_open'] ? 'bg-base-300 text-primary font-semibold' : 'text-stone-700 hover:bg-base-300' }}">
+                                    <i class="{{ $group['icon'] }}"></i>
+                                    {{ $group['label'] }}
+                                </summary>
+                                <ul
+                                    class="menu dropdown-content z-20 mt-1 w-72 rounded-xl border border-base-300 bg-base-100 p-2 shadow-xl">
+                                    @foreach ($group['items'] as $item)
+                                        <li>
+                                            <a href="{{ $item['url'] }}"
+                                                class="{{ $item['is_active'] ? 'text-primary font-semibold' : 'text-stone-700' }}">
+                                                <i class="{{ $item['icon'] }}"></i>
+                                                {{ $item['label'] }}
+                                                @if (!empty($item['badge_value']))
+                                                    <span
+                                                        class="badge badge-sm badge-primary">{{ $item['badge_value'] }}</span>
+                                                @endif
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </details>
+                        </li>
+                    @endforeach
+                </ul>
+            </nav>
+        </div>
+    @endif
 </header>

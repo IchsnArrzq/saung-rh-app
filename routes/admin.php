@@ -19,6 +19,7 @@ Route::middleware(['auth', 'verified', 'role:superadmin|admin|cashier'])
     ->prefix('admin')
     ->group(function () {
         Route::view('dashboard', 'dashboard')->name('dashboard');
+        Route::view('settings/navigation', 'admin.settings.navigation')->name('settings.navigation');
 
         Route::get('tables/{table}/qr', TableQrPage::class)->name('tables.qr');
         Route::patch('tables/{table}/status', [TableController::class, 'updateStatus'])->name('tables.status');
