@@ -30,6 +30,9 @@
                         Profil
                     </a>
                 </li>
+                <li>
+                    <livewire:customer.logout-button variant="top" />
+                </li>
             </ul>
         </nav>
     </div>
