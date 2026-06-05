@@ -147,7 +147,7 @@ class CartCheckout extends Component
 
         session()->flash('success', 'Booking online berhasil dibuat.');
 
-        return $this->redirectRoute('public.menu.index', navigate: true);
+        return $this->redirectRoute('public.menu', navigate: true);
     }
 
     private function checkoutOffline(array $cart)
@@ -205,7 +205,7 @@ class CartCheckout extends Component
 
         session()->flash('success', 'Pesanan offline berhasil dikirim ke admin.');
 
-        return $this->redirectRoute('public.menu.index', [
+        return $this->redirectRoute('public.menu', [
             'mode' => RestaurantCart::MODE_OFFLINE,
             'table_id' => $table->id,
         ], navigate: true);
