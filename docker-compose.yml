@@ -5,8 +5,8 @@ services:
     env_file:
       - ./.env
     volumes:
-      - ${APP_PATH:-/opt/app/saung-rh}/public:/var/www/html/public
-      - ${APP_STORAGE_PATH:-/opt/data/saung-rh/storage/app}:/var/www/html/storage/app
+      - ${APP_PATH:-/opt/app/saung-rh-app}/public:/var/www/html/public
+      - ${APP_STORAGE_PATH:-/opt/data/saung-rh-app/storage/app}:/var/www/html/storage/app
     build:
       context: ${APP_PATH:-.}
       dockerfile: Dockerfile
@@ -22,9 +22,9 @@ services:
     container_name: saung-rh-nginx-prod
     volumes:
       - /opt/data/certbot/etc:/etc/letsencrypt:ro
-      - ${APP_PATH:-/opt/app/saung-rh}/public:/var/www/html/public:ro
-      - ${APP_STORAGE_PATH:-/opt/data/saung-rh/storage/app}:/var/www/html/storage/app:ro
-      - ${APP_PATH:-/opt/app/saung-rh}/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${APP_PATH:-/opt/app/saung-rh-app}/public:/var/www/html/public:ro
+      - ${APP_STORAGE_PATH:-/opt/data/saung-rh-app/storage/app}:/var/www/html/storage/app:ro
+      - ${APP_PATH:-/opt/app/saung-rh-app}/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     image: nginx:1.27-alpine
     restart: unless-stopped
     depends_on:
