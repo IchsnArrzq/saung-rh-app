@@ -55,7 +55,7 @@
                                         <option value="{{ $status->id }}">{{ $status->name }}</option>
                                     @endforeach
                                 </select>
-                                <button type="button" class="btn btn-xs btn-outline"
+                                <button type="button" class="btn btn-sm btn-outline"
                                     wire:click="updateStatus('{{ $table->id }}')">
                                     Update
                                 </button>
@@ -63,10 +63,10 @@
                         </td>
                         <td class="text-right">
                             <div class="inline-flex gap-2">
-                                <a href="{{ route('tables.qr', $table) }}" class="btn btn-xs btn-outline">QR</a>
-                                <a href="{{ route('tables.edit', $table) }}" class="btn btn-xs btn-ghost">Edit</a>
-                                <button type="button" class="btn btn-xs btn-error text-white"
-                                    onclick="if (!confirm('Hapus meja ini?')) return false;"
+                                <a href="{{ route('tables.qr', $table) }}" class="btn btn-sm btn-outline">QR</a>
+                                <a href="{{ route('tables.edit', $table) }}" class="btn btn-sm btn-warning">Edit</a>
+                                <button type="button" class="btn btn-sm btn-error text-white"
+                                    data-confirm="Hapus meja ini?"
                                     wire:click="delete('{{ $table->id }}')">
                                     Hapus
                                 </button>
@@ -84,4 +84,5 @@
 
     <div>{{ $tables->links() }}</div>
 </div>
+
 

@@ -90,8 +90,8 @@
                                     {{ $table->tableCategory?->name ? 'Kategori: '.$table->tableCategory->name : 'Tanpa kategori' }}
                                 </p>
                                 <div class="mt-3 flex gap-2">
-                                    <a href="{{ route('tables.edit', $table) }}" class="btn btn-xs btn-ghost">Edit</a>
-                                    <a href="{{ route('tables.qr', $table) }}" class="btn btn-xs btn-outline">QR</a>
+                                    <a href="{{ route('tables.edit', $table) }}" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="{{ route('tables.qr', $table) }}" class="btn btn-sm btn-outline">QR</a>
                                 </div>
                             </div>
                         @empty

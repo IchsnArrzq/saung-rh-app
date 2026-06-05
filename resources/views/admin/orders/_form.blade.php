@@ -93,7 +93,7 @@
 <div class="rounded-2xl border border-stone-200 p-4">
     <div class="mb-3 flex items-center justify-between">
         <h3 class="font-semibold">Item Pesanan</h3>
-        <button type="button" id="add-order-item" class="btn btn-xs btn-outline">Tambah Item</button>
+        <button type="button" id="add-order-item" class="btn btn-sm btn-outline">Tambah Item</button>
     </div>
 
     @error('items')

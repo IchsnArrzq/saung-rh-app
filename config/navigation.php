@@ -64,6 +64,7 @@ return [
             'icon' => 'ri-shield-user-line',
             'items' => [
                 ['label' => 'User Role & Permission', 'icon' => 'ri-lock-password-line', 'route' => 'settings.roles-permissions', 'active' => ['settings.roles-permissions']],
+                ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
             ],
         ],
         [
@@ -134,6 +135,13 @@ return [
                 ['label' => 'Monthly Report', 'icon' => 'ri-calendar-2-line', 'route' => 'reports.monthly', 'active' => ['reports.monthly']],
             ],
         ],
+        [
+            'label' => 'Settings',
+            'icon' => 'ri-settings-3-line',
+            'items' => [
+                ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
+            ],
+        ],
     ],
 
     'cashier' => [
@@ -146,6 +154,7 @@ return [
                 ['label' => 'Order', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*'], 'badge' => ['type' => 'dynamic', 'resolver' => 'active_orders']],
                 ['label' => 'Order Item', 'icon' => 'ri-list-check-2', 'route' => 'orders.index', 'active' => ['orders.*']],
                 ['label' => 'Payment', 'icon' => 'ri-wallet-3-line', 'route' => 'payments.index', 'active' => ['payments.*']],
+                ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
             ],
         ],
     ],

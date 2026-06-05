@@ -24,5 +24,8 @@
                 <span>Profil</span>
             </a>
         </li>
+        <li>
+            <livewire:customer.logout-button variant="bottom" />
+        </li>
     </ul>
 </nav>

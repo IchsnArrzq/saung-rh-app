@@ -9,7 +9,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class Table extends Component
+class MenuCard extends Component
 {
     use WithPagination;
 
@@ -46,7 +46,7 @@ class Table extends Component
             ->latest()
             ->paginate(12);
 
-        return view('livewire.admin.menus.table', [
+        return view('livewire.admin.menus.menu-card', [
             'menus' => $menus,
         ]);
     }
