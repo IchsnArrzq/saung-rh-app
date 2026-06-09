@@ -3,6 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Events\OrderCreated;
+use App\Events\OrderUpdated;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\Table;
@@ -115,6 +116,10 @@ class OrderService
             $order->items()->delete();
             $order->items()->createMany($items);
         });
+
+        if (in_array($order->status, ['confirmed', 'preparing'])) {
+             OrderUpdated::dispatch($order);
+        }
     }
 
     public function delete(Order $order): void
