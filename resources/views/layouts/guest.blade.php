@@ -8,17 +8,19 @@
 
     <title>{{ config('app.name', 'Resto App') }}</title>
 
+    @include('layouts.partials.theme-script')
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
 
-<body class="min-h-screen bg-neutral text-base-content" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+<body class="min-h-screen bg-neutral text-base-content antialiased">
     <div
         class="relative mx-auto min-h-screen w-full max-w-[1560px] overflow-hidden border border-base-300 bg-base-100 shadow-[0_30px_100px_rgba(0,0,0,0.35)]">
         <div
@@ -77,8 +79,7 @@
                     <div class="inline-flex items-center gap-3">
                         <img src="{{ asset('assets/logo-cr-mark.png') }}" alt="CR logo mark"
                             class="h-10 w-10 rounded-lg border border-base-300 bg-base-100 p-1 object-contain">
-                        <p class="text-xl font-semibold text-base-content"
-                            style="font-family: 'Playfair Display', serif;">
+                        <p class="text-xl font-semibold text-base-content">
                             CR Cafe & Resto
                         </p>
                     </div>

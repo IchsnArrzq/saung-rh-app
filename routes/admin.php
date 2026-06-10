@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\CustomerUserController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MenuCategoryController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\MenuStatusController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ReservationController;
@@ -14,10 +16,11 @@ use App\Http\Controllers\Admin\TableStatusController;
 use App\Livewire\Admin\TableQrPage;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified', 'role:superadmin|admin'])
+Route::middleware(['auth', 'verified', 'role:superadmin|admin|cashier'])
     ->prefix('admin')
     ->group(function () {
-        Route::view('dashboard', 'dashboard')->name('dashboard');
+        Route::get('dashboard', DashboardController::class)->name('dashboard');
+        Route::view('settings/navigation', 'admin.settings.navigation')->name('settings.navigation');
 
         Route::get('tables/{table}/qr', TableQrPage::class)->name('tables.qr');
         Route::patch('tables/{table}/status', [TableController::class, 'updateStatus'])->name('tables.status');
@@ -82,4 +85,7 @@ Route::middleware(['auth', 'verified', 'role:superadmin|admin'])
         Route::get('reservations', [ReservationController::class, 'index'])->name('reservations.index');
         Route::get('reservations/create', [ReservationController::class, 'create'])->name('reservations.create');
         Route::get('reservations/{reservation}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
+
+        Route::get('reports/daily-report', [ReportController::class, 'dailyReport'])->name('reports.daily');
+        Route::get('reports/monthly-report', [ReportController::class, 'monthlyReport'])->name('reports.monthly');
     });

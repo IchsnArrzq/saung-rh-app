@@ -34,7 +34,7 @@
                     class="btn btn-sm {{ ! $isOffline ? 'bg-emerald-800 text-amber-50 hover:bg-emerald-700' : 'btn-ghost' }}">Online</button>
                 <button type="button" wire:click="setMode('offline')"
                     class="btn btn-sm {{ $isOffline ? 'bg-emerald-800 text-amber-50 hover:bg-emerald-700' : 'btn-ghost' }}">Offline QR</button>
-                <a href="{{ route('public.menu.index', ['mode' => $mode, 'table_id' => $tableId]) }}" class="btn btn-sm btn-ghost">Kembali ke Menu</a>
+                <a href="{{ route('public.menu', ['mode' => $mode, 'table_id' => $tableId]) }}" class="btn btn-sm btn-ghost">Kembali ke Menu</a>
             </div>
         </div>
 

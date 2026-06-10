@@ -16,27 +16,9 @@ class Table extends Component
     #[Url(as: 'search', except: '')]
     public string $search = '';
 
-    #[Url(as: 'view', except: 'table')]
-    public string $viewMode = 'table';
-
-    public function mount(): void
-    {
-
-        if (! in_array($this->viewMode, ['table', 'card'], true)) {
-            $this->viewMode = 'table';
-        }
-    }
-
     public function updatingSearch(): void
     {
         $this->resetPage();
-    }
-
-    public function updatedViewMode(string $value): void
-    {
-        if (! in_array($value, ['table', 'card'], true)) {
-            $this->viewMode = 'table';
-        }
     }
 
     public function delete(string $id): void
@@ -69,4 +51,3 @@ class Table extends Component
         ]);
     }
 }
-

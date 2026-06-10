@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold">Dashboard Admin</h2>
     </x-slot>
@@ -38,4 +38,4 @@
             <a href="{{ route('reservations.index') }}" class="badge badge-outline p-3">Reservasi</a>
         </div>
     </div>
-</x-app-layout>
+</x-admin-layout>

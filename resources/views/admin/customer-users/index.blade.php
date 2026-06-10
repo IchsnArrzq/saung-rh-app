@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3">
             <h2 class="text-xl font-semibold">Manajemen Customer</h2>
@@ -37,12 +37,13 @@
                         </td>
                         <td class="text-right">
                             <div class="inline-flex gap-2">
-                                <a href="{{ route('customer-users.edit', $customer) }}" class="btn btn-xs btn-ghost">Edit</a>
+                                <a href="{{ route('customer-users.edit', $customer) }}" class="btn btn-sm btn-warning">Edit</a>
                                 
-                                <form action="{{ route('customer-users.destroy', $customer) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus customer ini?');" class="inline">
+                                <form action="{{ route('customer-users.destroy', $customer) }}" method="POST"
+                                    data-confirm="Yakin ingin menghapus customer ini?" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-xs btn-error text-white">Hapus</button>
+                                    <button type="submit" class="btn btn-sm btn-error text-white">Hapus</button>
                                 </form>
                             </div>
                         </td>
@@ -55,4 +56,4 @@
             </tbody>
         </table>
     </div>
-</x-app-layout>
+</x-admin-layout>

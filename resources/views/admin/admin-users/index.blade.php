@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3">
             <h2 class="text-xl font-semibold">Manajemen Admin</h2>
@@ -54,13 +54,14 @@
                         </td>
                         <td class="text-right">
                             <div class="inline-flex gap-2">
-                                <a href="{{ route('admin-users.edit', $user) }}" class="btn btn-xs btn-ghost text-stone-600">Edit</a>
+                                <a href="{{ route('admin-users.edit', $user) }}" class="btn btn-sm btn-ghost text-stone-600">Edit</a>
                                 
                                 @if(!$user->hasRole('superadmin'))
-                                    <form action="{{ route('admin-users.destroy', $user) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus admin ini?');" class="inline">
+                                    <form action="{{ route('admin-users.destroy', $user) }}" method="POST"
+                                        data-confirm="Yakin ingin menghapus admin ini?" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-xs btn-error text-white">Hapus</button>
+                                        <button type="submit" class="btn btn-sm btn-error text-white">Hapus</button>
                                     </form>
                                 @endif
                             </div>
@@ -74,4 +75,4 @@
             </tbody>
         </table>
     </div>
-</x-app-layout>
+</x-admin-layout>

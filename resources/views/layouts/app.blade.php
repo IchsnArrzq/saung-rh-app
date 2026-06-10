@@ -8,10 +8,12 @@
 
     <title>{{ config('app.name', 'Admin Resto') }}</title>
 
+    @include('layouts.partials.theme-script')
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
 
@@ -19,25 +21,17 @@
     @livewireStyles
 </head>
 
-<body class="min-h-screen bg-neutral text-base-content" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-    <div
-        class="drawer min-h-screen border border-base-300 bg-base-100 shadow-[0_26px_90px_rgba(0,0,0,0.35)] lg:drawer-open">
-        <input id="admin-drawer" checked type="checkbox" class="drawer-toggle">
-        <div class="drawer-content">
-            <livewire:layout.navigation />
-            @isset($header)
-                <div class="px-4 pt-5 md:px-6">
-                    <div class="rounded-2xl border border-base-300 bg-base-100 px-5 py-4 text-base-content">
-                        {{ $header }}
-                    </div>
-                </div>
-            @endisset
-            <main class="flex-1 px-4 py-5 md:px-6 md:py-6">
-                {{ $slot }}
-            </main>
-        </div>
-        <livewire:layout.sidebar />
-    </div>
+<body class="min-h-screen bg-neutral text-base-content antialiased">
+    @php
+        $activePortal = $portal ?? 'admin';
+    @endphp
+
+    @if ($activePortal === 'customer')
+        @include('layouts.portals.customer.index', ['slot' => $slot])
+    @else
+        @include('layouts.portals.admin.index', ['slot' => $slot, 'header' => $header ?? null])
+    @endif
+
     @livewireScripts
 </body>
 
