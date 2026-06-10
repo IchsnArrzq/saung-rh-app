@@ -27,18 +27,6 @@ new class extends Component {
             <nav class="grow py-16">
                 <ul class="menu w-full gap-1 rounded-2xl p-2">
                     @foreach ($groups as $group)
-                        @if (count($group['items']) === 1 && $group['label'] === 'Dashboard')
-                            @php($item = $group['items'][0])
-                            <li>
-                                <a href="{{ $item['url'] }}" data-tip="{{ $item['label'] }}"
-                                    class="{{ $item['is_active'] ? 'bg-primary text-primary-content hover:bg-neutral' : 'text-stone-700 hover:bg-base-300' }}">
-                                    <i class="{{ $item['icon'] }} text-lg"></i>
-                                    <span class="is-drawer-close:hidden">{{ $item['label'] }}</span>
-                                </a>
-                            </li>
-                            @continue
-                        @endif
-
                         <li>
                             <details @if ($group['is_open']) open @endif>
                                 <summary data-tip="{{ $group['label'] }}"
