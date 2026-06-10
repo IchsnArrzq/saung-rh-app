@@ -55,8 +55,7 @@ return [
             'label' => 'Reporting',
             'icon' => 'ri-bar-chart-box-line',
             'items' => [
-                ['label' => 'Daily Report', 'icon' => 'ri-calendar-check-line', 'route' => 'reports.daily', 'active' => ['reports.daily']],
-                ['label' => 'Monthly Report', 'icon' => 'ri-calendar-2-line', 'route' => 'reports.monthly', 'active' => ['reports.monthly']],
+                ['label' => 'Reports', 'icon' => 'ri-file-chart-line', 'route' => 'reports.index', 'active' => ['reports.index']],
             ],
         ],
         [
@@ -131,8 +130,7 @@ return [
             'label' => 'Reporting',
             'icon' => 'ri-bar-chart-box-line',
             'items' => [
-                ['label' => 'Daily Report', 'icon' => 'ri-calendar-check-line', 'route' => 'reports.daily', 'active' => ['reports.daily']],
-                ['label' => 'Monthly Report', 'icon' => 'ri-calendar-2-line', 'route' => 'reports.monthly', 'active' => ['reports.monthly']],
+                ['label' => 'Reports', 'icon' => 'ri-file-chart-line', 'route' => 'reports.index', 'active' => ['reports.index']],
             ],
         ],
         [
