@@ -62,6 +62,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  
+  reverb:
+    container_name: saung-rh-reverb-prod
+    image: saung-rh-app:prod
+    env_file:
+      - ./.env
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080
+    working_dir: /var/www/html
+    restart: unless-stopped
+    networks:
+      - default
+      - app-network
 
 networks:
   app-network:
