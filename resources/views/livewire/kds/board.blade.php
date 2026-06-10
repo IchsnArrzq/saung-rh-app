@@ -2,18 +2,18 @@
     
     <div class="w-full lg:w-1/4 flex flex-col bg-base-100 shadow-sm rounded-2xl border border-base-300 overflow-hidden h-[400px] lg:h-full">
         <div class="flex p-2 gap-2 border-b border-base-300 bg-base-200">
-            <button wire:click="setActiveTab('ongoing')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all {{ $activeTab === 'ongoing' ? 'bg-base-100 text-base-content shadow border border-base-300' : 'text-secondary hover:text-base-content hover:bg-base-300' }}">
-                ON-GOING <span class="ml-1 bg-base-300 px-2 py-0.5 rounded-full text-[11px]">{{ $this->ongoingOrders->count() }}</span>
+            <button wire:click="setActiveTab('ongoing')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all {{ $activeTab === 'ongoing' ? 'bg-primary text-primary-content shadow' : 'text-secondary hover:text-base-content hover:bg-base-300' }}">
+                ON-GOING <span class="ml-1 px-2 py-0.5 rounded-full text-[11px] {{ $activeTab === 'ongoing' ? 'bg-base-100 text-primary' : 'bg-base-300' }}">{{ $this->ongoingOrders->count() }}</span>
             </button>
-            <button wire:click="setActiveTab('ready')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all {{ $activeTab === 'ready' ? 'bg-base-100 text-base-content shadow border border-base-300' : 'text-secondary hover:text-base-content hover:bg-base-300' }}">
-                READY <span class="ml-1 bg-base-300 px-2 py-0.5 rounded-full text-[11px]">{{ $this->readyOrders->count() }}</span>
+            <button wire:click="setActiveTab('ready')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all {{ $activeTab === 'ready' ? 'bg-primary text-primary-content shadow' : 'text-secondary hover:text-base-content hover:bg-base-300' }}">
+                READY <span class="ml-1 px-2 py-0.5 rounded-full text-[11px] {{ $activeTab === 'ready' ? 'bg-base-100 text-primary' : 'bg-base-300' }}">{{ $this->readyOrders->count() }}</span>
             </button>
-            <button wire:click="setActiveTab('completed')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all {{ $activeTab === 'completed' ? 'bg-base-100 text-base-content shadow border border-base-300' : 'text-secondary hover:text-base-content hover:bg-base-300' }}">
-                SELESAI <span class="ml-1 bg-base-300 px-2 py-0.5 rounded-full text-[11px]">{{ $this->completedOrders->count() }}</span>
+            <button wire:click="setActiveTab('completed')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all {{ $activeTab === 'completed' ? 'bg-primary text-primary-content shadow' : 'text-secondary hover:text-base-content hover:bg-base-300' }}">
+                SELESAI <span class="ml-1 px-2 py-0.5 rounded-full text-[11px] {{ $activeTab === 'completed' ? 'bg-base-100 text-primary' : 'bg-base-300' }}">{{ $this->completedOrders->count() }}</span>
             </button>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-3 space-y-2 bg-base-200/40 min-h-0">
+        <div class="flex-1 overflow-y-auto p-3 space-y-2 bg-base-200 min-h-0">
             @php 
                 if ($activeTab === 'ongoing') {
                     $mainData = $this->ongoingOrders;
@@ -39,7 +39,7 @@
                             <h4 class="font-bold text-base-content text-base">{{ $order->table ? $order->table->name : 'Takeaway' }}</h4>
                             <p class="text-xs font-medium text-secondary mt-0.5">#{{ $order->order_number }}</p>
                         </div>
-                        <span class="px-2.5 py-1 text-[10px] font-bold rounded-md uppercase tracking-wider {{ in_array($order->status, ['confirmed', 'preparing']) ? 'bg-info/10 text-info border border-info/20' : 'bg-success/10 text-success border border-success/20' }}">
+                        <span class="badge {{ in_array($order->status, ['confirmed', 'preparing']) ? 'badge-info' : 'badge-success' }} badge-sm font-bold uppercase tracking-wider">
                             {{ $order->status }}
                         </span>
                     </div>
@@ -63,7 +63,7 @@
     </div>
 
     <div class="w-full lg:w-3/4 flex flex-col bg-base-100 shadow-sm rounded-2xl border border-base-300 overflow-hidden h-[600px] lg:h-full">
-        <div class="flex flex-col sm:flex-row justify-between sm:items-center p-4 border-b border-base-300 bg-base-200/50 gap-3">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center p-4 border-b border-base-300 bg-base-200 gap-3">
             <div>
                 <h3 class="text-lg font-bold text-base-content">
                     @if($activeTab === 'ongoing')
@@ -86,7 +86,7 @@
             </div>
             <div x-data="{ time: '' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('id-ID'), 1000)" class="flex items-center justify-between sm:justify-end space-x-4">
                 <span class="text-sm font-medium text-secondary">{{ \Carbon\Carbon::now()->translatedFormat('d M Y') }}</span>
-                <div class="bg-base-content text-base-100 font-mono px-3 py-1.5 rounded-xl text-sm font-bold shadow-inner tracking-widest" x-text="time"></div>
+                <div class="bg-success text-success-content font-mono px-3 py-1.5 rounded-xl text-sm font-bold shadow-inner tracking-widest" x-text="time"></div>
             </div>
         </div>
 
@@ -94,7 +94,7 @@
             @if($mainData->isEmpty())
                 <div class="flex h-full items-center justify-center py-12">
                     <div class="text-center text-secondary">
-                        <svg class="mx-auto h-12 w-12 text-secondary/50 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                        <svg class="mx-auto h-12 w-12 text-secondary mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                         <p class="text-lg font-medium text-base-content">
                             @if($activeTab === 'ongoing') Dapur Kosong @elseif($activeTab === 'ready') Semua Sudah Diambil @else Belum Ada Selesai @endif
                         </p>
@@ -103,7 +103,7 @@
             @else
                 <div class="flex gap-4 h-full items-stretch w-max pb-2">
                     @foreach($mainData as $order)
-                        <div class="w-[380px] flex-shrink-0 bg-base-100 rounded-2xl shadow-sm border border-base-300 flex flex-col overflow-hidden h-full {{ in_array($order->status, ['ready', 'served']) ? 'border-success shadow-success/10' : '' }}">
+                        <div class="w-[380px] flex-shrink-0 bg-base-100 rounded-2xl shadow-sm border border-base-300 flex flex-col overflow-hidden h-full {{ in_array($order->status, ['ready', 'served']) ? 'border-success' : '' }}">
                             
                             <div class="p-4 border-b border-base-300 bg-base-200">
                                 <div class="flex justify-between items-start mb-3">
@@ -112,13 +112,13 @@
                                         <p class="text-xs font-semibold text-secondary mt-1">#{{ $order->order_number }}</p>
                                     </div>
                                     <div class="text-right">
-                                        <span class="inline-block px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider {{ in_array($order->status, ['confirmed', 'preparing']) ? 'bg-info/10 text-info border border-info/20' : 'bg-success/10 text-success border border-success/20' }}">
+                                        <span class="badge {{ in_array($order->status, ['confirmed', 'preparing']) ? 'badge-info' : 'badge-success' }} font-bold uppercase tracking-wider">
                                             {{ $order->status }}
                                         </span>
                                     </div>
                                 </div>
                                 
-                                <div class="flex items-center justify-between mt-2 pt-3 border-t border-base-300/60">
+                                <div class="flex items-center justify-between mt-2 pt-3 border-t border-base-300">
                                     <span class="text-xs font-medium text-secondary">Waktu Order: {{ $order->ordered_at->format('H:i') }}</span>
                                     @if(in_array($order->status, ['confirmed', 'preparing']))
                                         <div x-data="{ start: '{{ $order->ordered_at->toIso8601String() }}', timeString: '0m 0s' }"
@@ -134,13 +134,13 @@
                                     <button wire:click="markAsReady('{{ $order->id }}')" class="btn btn-neutral btn-sm h-auto py-2.5 flex-1 font-semibold text-sm">
                                         Semua Selesai Dimasak
                                     </button>
-                                    <button wire:click="cancelOrder('{{ $order->id }}')" wire:confirm="Batalkan pesanan ini?" class="btn btn-outline btn-error btn-sm h-auto py-2.5 font-semibold text-sm">
+                                    <button wire:click="cancelOrder('{{ $order->id }}')" data-confirm="Batalkan pesanan ini?" class="btn btn-outline btn-error btn-sm h-auto py-2.5 font-semibold text-sm">
                                         Batal
                                     </button>
                                 </div>
                             @elseif($activeTab === 'ready')
-                                <div class="p-3 bg-success/5 border-b border-base-300 flex gap-2">
-                                    <button wire:click="markOrderAsServed('{{ $order->id }}')" class="btn btn-success text-white btn-sm h-auto py-2.5 flex-1 font-semibold text-sm">
+                                <div class="p-3 bg-base-200 border-b border-base-300 flex gap-2">
+                                    <button wire:click="markOrderAsServed('{{ $order->id }}')" class="btn btn-success btn-sm h-auto py-2.5 flex-1 font-semibold text-sm">
                                         Sudah Diantar
                                     </button>
                                 </div>
@@ -148,7 +148,7 @@
 
                             <div class="flex-1 overflow-y-auto p-3 space-y-3 bg-base-100 min-h-0">
                                 @foreach($order->items as $item)
-                                    <div class="flex flex-col gap-2.5 p-3 rounded-xl border border-base-200 {{ in_array($item->status, ['ready', 'served']) ? 'bg-success/10' : 'bg-base-200/50' }}">
+                                    <div class="flex flex-col gap-2.5 p-3 rounded-xl border {{ in_array($item->status, ['ready', 'served']) ? 'border-success bg-base-100' : 'border-base-300 bg-base-200' }}">
                                         
                                         <div class="flex items-center gap-3 w-full">
                                             <div class="flex-shrink-0 text-center">
@@ -169,7 +169,7 @@
                                                         <button wire:click="markItemAsReady('{{ $order->id }}', '{{ $item->id }}')" class="btn btn-xs btn-outline btn-info">
                                                             Selesai
                                                         </button>
-                                                        <button wire:click="voidItem('{{ $order->id }}', '{{ $item->id }}')" wire:confirm="Hapus item ini dari pesanan?" class="btn btn-xs btn-outline btn-error">
+                                                        <button wire:click="voidItem('{{ $order->id }}', '{{ $item->id }}')" data-confirm="Hapus item ini dari pesanan?" class="btn btn-xs btn-outline btn-error">
                                                             Void
                                                         </button>
                                                     @else
@@ -181,7 +181,7 @@
 
                                         @if($item->notes)
                                             <div class="w-full">
-                                                <p class="w-full text-xs text-error font-medium bg-error/10 px-3 py-2 rounded-md whitespace-normal break-words">
+                                                <p class="w-full text-xs text-error font-medium border border-error bg-base-100 px-3 py-2 rounded-md whitespace-normal break-words">
                                                     Note: {{ $item->notes }}
                                                 </p>
                                             </div>
@@ -191,7 +191,7 @@
                             </div>
 
                             @if($order->notes)
-                                <div class="p-4 bg-warning/10 border-t border-base-300 text-sm text-warning-content dark:text-warning">
+                                <div class="p-4 bg-warning text-warning-content border-t border-base-300 text-sm">
                                     <span class="font-bold">Catatan:</span> {{ $order->notes }}
                                 </div>
                             @endif
