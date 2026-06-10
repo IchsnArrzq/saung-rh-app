@@ -23,8 +23,8 @@ new class extends Component {
     <div class="drawer-side h-[calc(100vh-0.1rem)]">
         <label for="admin-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
         <aside
-            class="flex min-h-full max-w-[85vw] flex-col overflow-y-auto overflow-x-auto  bg-base-200 py-5 is-drawer-close:w-16 is-drawer-open:w-72">
-            <nav class="grow py-16">
+            class="flex min-h-full max-w-[85vw] flex-col overflow-y-auto overflow-x-auto bg-base-200 pt-16 is-drawer-close:w-16 is-drawer-open:w-72">
+            <nav class="grow">
                 <ul class="menu w-full gap-1 rounded-2xl p-2">
                     @foreach ($groups as $group)
                         <li>
@@ -34,10 +34,10 @@ new class extends Component {
                                     <i class="{{ $group['icon'] }} text-lg"></i>
                                     <span class="is-drawer-close:hidden">{{ $group['label'] }}</span>
                                 </summary>
-                                <ul class="ms-2  is-drawer-close:hidden">
+                                <ul class="ms-2 is-drawer-close:hidden">
                                     @foreach ($group['items'] as $item)
                                         <li>
-                                            <a href="{{ $item['url'] }}"
+                                            <a wire:navigate href="{{ $item['url'] }}"
                                                 class="{{ $item['is_active'] ? 'text-primary font-semibold' : 'text-stone-700' }}">
                                                 <i class="{{ $item['icon'] }}"></i>
                                                 {{ $item['label'] }}
