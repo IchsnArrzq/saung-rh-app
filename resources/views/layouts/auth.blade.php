@@ -8,10 +8,12 @@
 
     <title>{{ config('app.name', 'Resto App') }}</title>
 
+    @include('layouts.partials.theme-script')
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
     <!-- Scripts -->
@@ -19,7 +21,7 @@
     @livewireStyles
 </head>
 
-<body class=" bg-neutral text-base-content antialiased" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+<body class=" bg-neutral text-base-content antialiased">
     <main
         class="grid w-full min-h-screen  bg-base-100 shadow-[0_26px_90px_rgba(0,0,0,0.35)] md:grid-cols-[1fr_1.1fr]">
         <section class="flex items-center px-5 py-10 md:px-10">
