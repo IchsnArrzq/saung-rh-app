@@ -43,6 +43,7 @@ RUN apt-get update \
         gd \
         intl \
         opcache \
+        pcntl \
         pdo_pgsql \
         pgsql \
         zip \
