@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\CustomerUserController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MenuCategoryController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\MenuStatusController;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified', 'role:superadmin|admin|cashier'])
     ->prefix('admin')
     ->group(function () {
-        Route::view('dashboard', 'dashboard')->name('dashboard');
+        Route::get('dashboard', DashboardController::class)->name('dashboard');
         Route::view('settings/navigation', 'admin.settings.navigation')->name('settings.navigation');
 
         Route::get('tables/{table}/qr', TableQrPage::class)->name('tables.qr');

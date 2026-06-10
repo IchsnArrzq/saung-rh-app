@@ -35,7 +35,7 @@ new class extends Component {
         $this->redirect('/', navigate: true);
     }
 }; ?>
-<header class="border-b border-base-300 bg-base-100 px-4 py-4 md:px-6">
+<header class=" bg-base-100 px-4 py-4 md:px-6">
     <div class="flex items-center gap-3">
 
         @if ($navigationMenuPreference === 'sidebar')
@@ -51,22 +51,25 @@ new class extends Component {
         @endif
 
         <div class="mr-auto flex items-center gap-3">
-            <img src="{{ asset('assets/logo-cr-mark.png') }}" alt="CR Cafe & Resto logo mark"
-                class="h-10 w-10 rounded-lg border border-base-300 bg-base-100 p-1 object-contain md:h-11 md:w-11">
             <div>
-                <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Control Room</p>
+                <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary"></p>
             </div>
         </div>
 
         <a href="/"
-            class="hidden items-center gap-2 rounded-xl border border-base-300 bg-base-100 px-4 py-2 text-sm font-semibold text-stone-700 transition hover:border-secondary hover:text-secondary md:inline-flex">
+            class="hidden items-center gap-2 rounded-xl bg-base-100 px-4 py-2 text-sm font-semibold text-stone-700 transition hover:text-secondary md:inline-flex">
             <i class="ri-external-link-line text-base"></i>
             <span>Public Site</span>
         </a>
 
+        <button type="button" data-theme-toggle aria-label="Toggle dark mode" aria-pressed="false"
+            class="btn btn-square btn-ghost">
+            <i data-theme-toggle-icon class="ri-moon-line text-xl"></i>
+        </button>
+
         <details class="dropdown dropdown-end">
             <summary
-                class="flex cursor-pointer list-none items-center gap-2 rounded-xl border border-base-300 bg-base-100 px-2 py-1 pr-3">
+                class="flex cursor-pointer list-none items-center gap-2 rounded-xl bg-base-100 px-2 py-1 pr-3">
                 <span
                     class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-content">
                     {{ $initial }}
@@ -78,7 +81,7 @@ new class extends Component {
                 </span>
                 <i class="ri-arrow-down-s-line text-xl text-stone-500"></i>
             </summary>
-            <ul class="menu dropdown-content mt-2 w-56 rounded-2xl border border-base-300 bg-base-100 p-2 shadow-lg">
+            <ul class="menu dropdown-content mt-2 w-56 rounded-2xl bg-base-100 p-2 shadow-lg">
                 <li>
                     <a href="{{ $profileUrl }}" class="font-medium text-stone-700">
                         <i class="ri-user-3-line"></i>
@@ -105,7 +108,7 @@ new class extends Component {
     @if ($navigationMenuPreference === 'navbar' && count($groups) > 0)
         <div class="mt-3">
             <nav class="overflow-visible">
-                <ul class="menu menu-horizontal flex-wrap gap-1 rounded-xl border border-base-300 bg-base-100 p-1">
+                <ul class="menu menu-horizontal flex-wrap gap-1 rounded-xl bg-base-100 p-1">
                     @foreach ($groups as $group)
                         @if (count($group['items']) === 1 && $group['label'] === 'Dashboard')
                             @php($item = $group['items'][0])
@@ -129,7 +132,7 @@ new class extends Component {
                                     <i class="{{ $group['icon'] }}"></i>
                                     {{ $group['label'] }}
                                 </summary>
-                                <ul class="menu z-20 mt-1 w-72 rounded-xl border border-base-300 bg-base-100 p-2 shadow-xl">
+                                <ul class="menu z-20 mt-1 w-72 rounded-xl bg-base-100 p-2 shadow-xl">
                                     @foreach ($group['items'] as $item)
                                         <li>
                                             <a href="{{ $item['url'] }}"

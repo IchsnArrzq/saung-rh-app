@@ -1,7 +1,6 @@
 <header class="border-b border-stone-200 bg-white">
     <div class="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-4 md:px-6">
-        <a href="{{ route('public.home') }}" class="text-2xl font-semibold text-emerald-800"
-            style="font-family: 'Playfair Display', serif;">
+        <a href="{{ route('public.home') }}" class="text-2xl font-semibold text-emerald-800">
             SaungRH<span class="text-orange-500">.</span>
         </a>
 
