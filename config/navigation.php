@@ -12,7 +12,6 @@ return [
         [
             'label' => 'Point Of Sale',
             'icon' => 'ri-restaurant-line',
-            'open' => true,
             'items' => [
                 ['label' => 'POS Order', 'icon' => 'ri-shopping-basket-line', 'route' => 'pos.order.index', 'active' => ['pos.order.*']],
                 ['label' => 'Order', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*']],
@@ -118,7 +117,6 @@ return [
         [
             'label' => 'Reservations & POS',
             'icon' => 'ri-shopping-bag-3-line',
-            'open' => true,
             'items' => [
                 ['label' => 'Reservation', 'icon' => 'ri-calendar-check-line', 'route' => 'reservations.index', 'active' => ['reservations.*']],
                 ['label' => 'POS Order', 'icon' => 'ri-shopping-basket-line', 'route' => 'pos.order.index', 'active' => ['pos.order.*'], 'badge' => ['type' => 'dynamic', 'resolver' => 'active_orders']],
@@ -146,7 +144,6 @@ return [
         [
             'label' => 'POS',
             'icon' => 'ri-shopping-basket-line',
-            'open' => true,
             'items' => [
                 ['label' => 'POS Order', 'icon' => 'ri-shopping-basket-line', 'route' => 'pos.order.index', 'active' => ['pos.order.*']],
                 ['label' => 'Order', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*'], 'badge' => ['type' => 'dynamic', 'resolver' => 'active_orders']],
@@ -161,7 +158,6 @@ return [
         [
             'label' => 'Customer',
             'icon' => 'ri-user-3-line',
-            'open' => true,
             'items' => [
                 ['label' => 'Dashboard', 'icon' => 'ri-dashboard-line', 'route' => 'customer.dashboard', 'active' => ['customer.dashboard']],
                 ['label' => 'Reservation', 'icon' => 'ri-calendar-check-line', 'route' => 'customer.bookings.create', 'active' => ['customer.bookings.*']],
