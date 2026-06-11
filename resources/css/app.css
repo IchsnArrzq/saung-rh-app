@@ -120,6 +120,40 @@ body {
     box-shadow: 0 14px 44px rgb(17 19 21 / 0.06);
 }
 
+[data-theme="cr-cafe-resto"] :where(
+    .input,
+    .select,
+    .textarea,
+    .file-input,
+    input:not([type="button"]):not([type="checkbox"]):not([type="color"]):not([type="file"]):not([type="hidden"]):not([type="radio"]):not([type="range"]):not([type="reset"]):not([type="submit"]),
+    select,
+    textarea
+) {
+    border: 1px solid #dfe3ea;
+}
+
+[data-theme="cr-cafe-resto"] :where(
+    .input,
+    .select,
+    .textarea,
+    .file-input,
+    input:not([type="button"]):not([type="checkbox"]):not([type="color"]):not([type="file"]):not([type="hidden"]):not([type="radio"]):not([type="range"]):not([type="reset"]):not([type="submit"]),
+    select,
+    textarea
+):focus,
+[data-theme="cr-cafe-resto"] :where(
+    .input,
+    .select,
+    .textarea,
+    .file-input,
+    input:not([type="button"]):not([type="checkbox"]):not([type="color"]):not([type="file"]):not([type="hidden"]):not([type="radio"]):not([type="range"]):not([type="reset"]):not([type="submit"]),
+    select,
+    textarea
+):focus-within {
+    border-color: #ff4f55;
+    box-shadow: 0 0 0 3px rgb(255 79 85 / 0.12);
+}
+
 [data-theme="cr-cafe-resto-dark"] body {
     background: #070616;
 }
