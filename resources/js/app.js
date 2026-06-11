@@ -1,4 +1,5 @@
 import './bootstrap';
+import ApexCharts from 'apexcharts';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
@@ -113,3 +114,94 @@ document.addEventListener(
     },
     true,
 );
+
+// Chart Report
+window.ApexCharts = ApexCharts;
+
+document.addEventListener('alpine:init', () => {
+    Alpine.data('salesChartHandler', (initialLabels, initialValues) => ({
+        chart: null,
+
+        init() {
+            this.renderChart(initialLabels, initialValues);
+        },
+
+        renderChart(labels, values) {
+            if (this.chart) {
+                this.chart.destroy();
+                this.chart = null;
+            }
+
+            const hasData = values.some(v => v > 0);
+            if (!hasData) {
+                this.$refs.apexChart.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-stone-500 pt-10 pb-10">
+                        <i class="ri-bar-chart-2-line text-6xl mb-3 text-stone-300"></i>
+                        <p class="font-medium text-lg text-stone-600">Belum ada data penjualan</p>
+                        <p class="text-sm mt-1">Data grafik akan muncul setelah ada transaksi dibayar pada periode ini.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            this.$refs.apexChart.innerHTML = '';
+
+            let options = {
+                series: [{
+                    name: 'Pendapatan',
+                    data: values
+                }],
+                chart: {
+                    type: 'area',
+                    height: 320,
+                    fontFamily: 'Inter, sans-serif',
+                    toolbar: { show: false },
+                    zoom: { enabled: false }
+                },
+                colors: ['#065f46'],
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth', width: 2 },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.4,
+                        opacityTo: 0.05,
+                        stops: [0, 90, 100]
+                    }
+                },
+                xaxis: {
+                    categories: labels,
+                    tooltip: { enabled: false },
+                    labels: { style: { colors: '#62646b' } }
+                },
+                yaxis: {
+                    min: 0,
+                    forceNiceScale: true,
+                    decimalsInFloat: 0,
+                    labels: {
+                        style: { colors: '#62646b' },
+                        formatter: function (value) {
+                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                        }
+                    }
+                },
+                tooltip: {
+                    theme: 'light',
+                    y: {
+                        formatter: function (val) {
+                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(val);
+                        }
+                    }
+                }
+            };
+
+            this.chart = new window.ApexCharts(this.$refs.apexChart, options);
+            this.chart.render();
+        },
+
+        updateChart(labels, values) {
+            this.renderChart(labels, values);
+        }
+    }));
+});

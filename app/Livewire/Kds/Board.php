@@ -13,14 +13,15 @@ class Board extends Component
 {
     public string $activeTab = 'ongoing';
 
-    #[On('echo:kds,OrderCreated')]
+    #[On('echo-private:kds,OrderCreated')]
+    #[On('echo-private:kds,OrderUpdated')]
     public function refreshBoard(): void
     {
     }
 
     public function setActiveTab(string $tab): void
     {
-        if (in_array($tab, ['ongoing', 'completed'])) {
+        if (in_array($tab, ['ongoing', 'ready', 'completed'])) {
             $this->activeTab = $tab;
         }
     }
@@ -32,6 +33,33 @@ class Board extends Component
         if ($order && in_array($order->status, ['confirmed', 'preparing'])) {
             $order->update(['status' => 'ready']);
             $order->items()->update(['status' => 'ready']);
+        }
+    }
+
+    public function markItemAsReady(string $orderId, string $itemId): void
+    {
+        $item = OrderItem::where('order_id', $orderId)->find($itemId);
+        
+        if ($item) {
+            $item->update(['status' => 'ready']);
+            
+            $order = Order::with('items')->find($orderId);
+            $allItemsReady = $order->items->every(fn($i) => $i->status === 'ready');
+            
+            if ($allItemsReady && in_array($order->status, ['confirmed', 'preparing'])) {
+                $order->update(['status' => 'ready']);
+            } elseif ($order->status === 'confirmed') {
+                $order->update(['status' => 'preparing']);
+            }
+        }
+    }
+
+    public function markOrderAsServed(string $orderId): void
+    {
+        $order = Order::find($orderId);
+        if ($order && $order->status === 'ready') {
+            $order->update(['status' => 'served']);
+            $order->items()->update(['status' => 'served']);
         }
     }
 
@@ -74,24 +102,6 @@ class Board extends Component
         }
     }
 
-    public function markItemAsServed(string $orderId, string $itemId): void
-    {
-        $item = OrderItem::where('order_id', $orderId)->find($itemId);
-        
-        if ($item) {
-            $item->update(['status' => 'ready']);
-            
-            $order = Order::with('items')->find($orderId);
-            $allItemsReady = $order->items->every(fn($i) => $i->status === 'ready');
-            
-            if ($allItemsReady && in_array($order->status, ['confirmed', 'preparing'])) {
-                $order->update(['status' => 'ready']);
-            } elseif ($order->status === 'confirmed') {
-                $order->update(['status' => 'preparing']);
-            }
-        }
-    }
-
     #[Computed]
     public function ongoingOrders()
     {
@@ -102,12 +112,22 @@ class Board extends Component
     }
 
     #[Computed]
+    public function readyOrders()
+    {
+        return Order::with(['items', 'table'])
+            ->whereIn('status', ['ready'])
+            ->orderBy('updated_at', 'asc')
+            ->get();
+    }
+
+    #[Computed]
     public function completedOrders()
     {
         return Order::with(['items', 'table'])
-            ->whereIn('status', ['ready', 'served', 'paid'])
-            // ->whereDate('ordered_at', Carbon::today())
+            ->whereIn('status', ['served', 'paid'])
+            ->whereDate('updated_at', Carbon::today())
             ->orderBy('updated_at', 'desc')
+            ->limit(50)
             ->get();
     }
 

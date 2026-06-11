@@ -6,13 +6,8 @@ use App\Http\Controllers\Controller;
 
 class ReportController extends Controller
 {
-    public function dailyReport()
+    public function index()
     {
-        return view('admin.reports.daily-report');
-    }
-
-    public function monthlyReport()
-    {
-        return view('admin.reports.monthly-report');
+        return view('admin.reports.index');
     }
 }
