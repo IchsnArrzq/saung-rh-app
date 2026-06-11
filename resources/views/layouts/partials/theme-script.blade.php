@@ -77,8 +77,8 @@
 
         applyTheme(initialTheme());
 
-        document.addEventListener('DOMContentLoaded', () => applyTheme(currentTheme()));
-        document.addEventListener('livewire:navigated', () => applyTheme(currentTheme()));
+        document.addEventListener('DOMContentLoaded', () => applyTheme(initialTheme()));
+        document.addEventListener('livewire:navigated', () => applyTheme(initialTheme()));
         document.addEventListener('click', (event) => {
             const target = event.target;
 
