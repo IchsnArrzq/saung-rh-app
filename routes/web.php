@@ -9,7 +9,7 @@ require __DIR__.'/pos.php';
 require __DIR__.'/kds.php';
 
 Route::view('profile', 'profile')
-    ->middleware(['auth'])
+    ->middleware(['demo.login', 'auth'])
     ->name('profile');
 
 require __DIR__.'/auth.php';

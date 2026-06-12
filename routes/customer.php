@@ -5,7 +5,7 @@ use App\Http\Controllers\Customer\CustomerDashboardController;
 use App\Http\Controllers\Customer\CustomerMenuCatalogController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified', 'role:customer'])
+Route::middleware(['demo.login', 'auth', 'verified', 'role:customer'])
     ->prefix('customer')
     ->name('customer.')
     ->group(function () {
