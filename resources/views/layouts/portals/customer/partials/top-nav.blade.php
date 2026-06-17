@@ -1,38 +1,50 @@
-<header class="border-b border-stone-200 bg-white">
-    <div class="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-4 md:px-6">
-        <a href="{{ route('public.home') }}" class="text-2xl font-semibold text-emerald-800">
-            SaungRH<span class="text-orange-500">.</span>
+<header class="sticky top-0 z-30 border-b border-base-300 bg-base-100/95 px-4 py-3 backdrop-blur md:px-6">
+    <div class="flex items-center gap-3">
+        <a href="{{ route('public.home') }}" class="flex items-center gap-2 font-bold text-base-content md:hidden">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-box bg-primary text-sm text-primary-content">
+                SR
+            </span>
+            SaungRH
         </a>
 
-        <nav class="ml-auto hidden md:block">
-            <ul class="flex items-center gap-2 text-sm font-semibold">
+        <div class="mr-auto hidden md:block">
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-secondary">Customer Portal</p>
+            <p class="text-sm font-semibold text-base-content">Kelola booking dan pesanan restoran Anda.</p>
+        </div>
+
+        <a href="{{ route('public.home') }}" class="btn btn-ghost btn-sm hidden md:inline-flex">
+            <i class="ri-external-link-line text-base"></i>
+            Public Site
+        </a>
+
+        <button type="button" data-theme-toggle aria-label="Toggle dark mode" aria-pressed="false"
+            class="btn btn-square btn-ghost btn-sm">
+            <i data-theme-toggle-icon class="ri-moon-line text-lg"></i>
+        </button>
+
+        <details class="dropdown dropdown-end">
+            <summary class="flex cursor-pointer list-none items-center gap-2 rounded-box px-1 py-1 hover:bg-base-200">
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-box bg-primary text-sm font-bold text-primary-content">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'C', 0, 1)) }}
+                </span>
+                <span class="hidden min-w-0 text-left md:block">
+                    <span class="block max-w-40 truncate text-sm font-semibold text-base-content">{{ auth()->user()->name ?? 'Customer' }}</span>
+                    <span class="block max-w-40 truncate text-xs text-secondary">{{ auth()->user()->email ?? '-' }}</span>
+                </span>
+                <i class="ri-arrow-down-s-line hidden text-xl text-secondary md:block"></i>
+            </summary>
+
+            <ul class="menu dropdown-content z-40 mt-2 w-60 rounded-box bg-base-100 p-2 shadow-lg">
                 <li>
-                    <a href="{{ route('customer.dashboard') }}"
-                        class="rounded-full px-4 py-2 {{ request()->routeIs('customer.dashboard') ? 'bg-emerald-800 text-amber-50' : 'text-stone-700 hover:bg-stone-100' }}">
-                        Dashboard
+                    <a href="{{ route('profile') }}" class="font-medium text-stone-700">
+                        <i class="ri-user-3-line"></i>
+                        Profile
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('customer.menus.tables') }}"
-                        class="rounded-full px-4 py-2 {{ request()->routeIs('customer.menus.*') ? 'bg-emerald-800 text-amber-50' : 'text-stone-700 hover:bg-stone-100' }}">
-                        Menu
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('customer.bookings.create') }}"
-                        class="rounded-full px-4 py-2 {{ request()->routeIs('customer.bookings.*') ? 'bg-emerald-800 text-amber-50' : 'text-stone-700 hover:bg-stone-100' }}">
-                        Booking
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('profile') }}" class="rounded-full px-4 py-2 text-stone-700 hover:bg-stone-100">
-                        Profil
-                    </a>
-                </li>
-                <li>
-                    <livewire:customer.logout-button variant="top" />
+                    <livewire:customer.logout-button variant="menu" />
                 </li>
             </ul>
-        </nav>
+        </details>
     </div>
 </header>
