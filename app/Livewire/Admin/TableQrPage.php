@@ -18,7 +18,7 @@ class TableQrPage extends Component
 
     public function render()
     {
-        $menuUrl = route('public.menu.index', [
+        $menuUrl = route('public.menu', [
             'mode' => 'offline',
             'table_id' => $this->table->id,
         ]);
