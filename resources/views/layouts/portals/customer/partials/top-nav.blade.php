@@ -1,5 +1,9 @@
 <header class="sticky top-0 z-30 border-b border-base-300 bg-base-100/95 px-4 py-3 backdrop-blur md:px-6">
     <div class="flex items-center gap-3">
+        <label for="customer-drawer" class="btn btn-square btn-ghost btn-sm drawer-button" aria-label="Toggle sidebar">
+            <i class="ri-menu-line text-xl"></i>
+        </label>
+
         <a href="{{ route('public.home') }}" class="flex items-center gap-2 font-bold text-base-content md:hidden">
             <span class="inline-flex h-9 w-9 items-center justify-center rounded-box bg-primary text-sm text-primary-content">
                 SR

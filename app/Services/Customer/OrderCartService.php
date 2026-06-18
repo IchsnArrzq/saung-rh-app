@@ -65,7 +65,7 @@ class OrderCartService
     }
 
     /**
-     * @return array{table:Table,menus:LengthAwarePaginator,cartCount:int,cartSubtotal:float}
+     * @return array{table:Table,menus:LengthAwarePaginator,cartItems:\Illuminate\Support\Collection<int,array{menu_id:string,name:string,image_url:?string,price:float,qty:int,notes:?string}>,cartCount:int,cartSubtotal:float}
      */
     public function menuCatalogData(string $tableId, string $search = '', int $perPage = 12): array
     {
@@ -76,6 +76,7 @@ class OrderCartService
         return [
             'table' => $table,
             'menus' => $menus,
+            'cartItems' => collect($this->cart($table->id))->values(),
             'cartCount' => $this->count($table->id),
             'cartSubtotal' => $this->subtotal($table->id),
         ];

@@ -82,9 +82,9 @@ class CustomerMenuCatalogController extends Controller
         $this->orderCartService->updateCartItem($request, $menuId);
 
         $tableId = $request->string('table_id')->toString();
+        $redirectTo = $request->string('redirect_to')->toString();
 
-        return redirect()
-            ->route('customer.menus.cart.index', ['table_id' => $tableId])
+        return redirect($this->safeRedirectTo($redirectTo, route('customer.menus.cart.index', ['table_id' => $tableId])))
             ->with('success', 'Item cart diperbarui.');
     }
 
@@ -92,13 +92,13 @@ class CustomerMenuCatalogController extends Controller
     {
         $validated = $request->validate([
             'table_id' => ['required', 'exists:tables,id'],
+            'redirect_to' => ['nullable', 'string', 'max:2048'],
         ]);
         $tableId = (string) $validated['table_id'];
 
         $this->orderCartService->removeCartItem($tableId, $menuId);
 
-        return redirect()
-            ->route('customer.menus.cart.index', ['table_id' => $tableId])
+        return redirect($this->safeRedirectTo((string) ($validated['redirect_to'] ?? ''), route('customer.menus.cart.index', ['table_id' => $tableId])))
             ->with('success', 'Item cart dihapus.');
     }
 

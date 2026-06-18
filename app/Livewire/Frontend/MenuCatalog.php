@@ -117,6 +117,46 @@ class MenuCatalog extends Component
         $this->closeDetail();
     }
 
+    public function incrementQty(string $menuId): void
+    {
+        $cart = RestaurantCart::cart();
+
+        if (! isset($cart[$menuId])) {
+            return;
+        }
+
+        RestaurantCart::setQty($menuId, ((int) $cart[$menuId]['qty']) + 1);
+    }
+
+    public function decrementQty(string $menuId): void
+    {
+        $cart = RestaurantCart::cart();
+
+        if (! isset($cart[$menuId])) {
+            return;
+        }
+
+        $qty = (int) $cart[$menuId]['qty'];
+
+        if ($qty <= 1) {
+            RestaurantCart::removeItem($menuId);
+
+            return;
+        }
+
+        RestaurantCart::setQty($menuId, $qty - 1);
+    }
+
+    public function removeItem(string $menuId): void
+    {
+        RestaurantCart::removeItem($menuId);
+    }
+
+    public function clearCart(): void
+    {
+        RestaurantCart::clearCart();
+    }
+
     public function goToCart()
     {
         return $this->redirectRoute('public.cart.index', navigate: true);
@@ -149,6 +189,8 @@ class MenuCatalog extends Component
             'detailMenu' => $detailMenu,
             'selectedTable' => $selectedTable,
             'cartCount' => RestaurantCart::count(),
+            'cartItems' => collect(RestaurantCart::cart())->values(),
+            'cartSubtotal' => RestaurantCart::subtotal(),
         ]);
     }
 
