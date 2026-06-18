@@ -9,9 +9,9 @@
             @csrf
 
             <div class="grid gap-4 md:grid-cols-2">
-                <label class="form-control">
-                    <span class="label-text">Pilih Meja</span>
-                    <select name="table_id" class="select select-bordered" required>
+                <div class="space-y-1.5">
+                    <label for="table_id" class="block text-sm font-semibold text-stone-700">Pilih Meja</label>
+                    <select id="table_id" name="table_id" class="select select-bordered w-full" required>
                         <option value="">Pilih meja</option>
                         @foreach ($tables as $table)
                             <option value="{{ $table->id }}" @selected((string) old('table_id') === (string) $table->id)>
@@ -19,24 +19,24 @@
                             </option>
                         @endforeach
                     </select>
-                </label>
+                </div>
 
-                <label class="form-control">
-                    <span class="label-text">Jumlah Orang</span>
-                    <input type="number" name="pax" min="1" max="30" class="input input-bordered"
+                <div class="space-y-1.5">
+                    <label for="pax" class="block text-sm font-semibold text-stone-700">Jumlah Orang</label>
+                    <input id="pax" type="number" name="pax" min="1" max="30" class="input input-bordered w-full"
                         value="{{ old('pax', 2) }}" required>
-                </label>
+                </div>
 
-                <label class="form-control md:col-span-2">
-                    <span class="label-text">Waktu Reservasi</span>
-                    <input type="datetime-local" name="reservation_at" class="input input-bordered"
+                <div class="space-y-1.5">
+                    <label for="reservation_at" class="block text-sm font-semibold text-stone-700">Waktu Reservasi</label>
+                    <input id="reservation_at" type="datetime-local" name="reservation_at" class="input input-bordered w-full"
                         value="{{ old('reservation_at') }}" required>
-                </label>
+                </div>
 
-                <label class="form-control md:col-span-2">
-                    <span class="label-text">Catatan Reservasi</span>
-                    <textarea name="notes" rows="3" class="textarea textarea-bordered" placeholder="opsional">{{ old('notes') }}</textarea>
-                </label>
+                <div class="space-y-1.5">
+                    <label for="notes" class="block text-sm font-semibold text-stone-700">Catatan Reservasi</label>
+                    <textarea id="notes" name="notes" rows="3" class="textarea textarea-bordered w-full" placeholder="opsional">{{ old('notes') }}</textarea>
+                </div>
             </div>
 
             <div class="rounded-2xl border border-stone-200 p-4">
@@ -51,34 +51,36 @@
 
                 <div id="booking-items" class="space-y-3">
                     @foreach ($oldItems as $index => $item)
-                        <div class="booking-item grid gap-3 rounded-xl border border-stone-200 p-3 md:grid-cols-5" data-index="{{ $index }}">
-                            <label class="form-control md:col-span-3">
-                                <span class="label-text text-xs">Menu</span>
-                                <select name="items[{{ $index }}][menu_id]" class="select select-bordered select-sm" required>
+                        <div class="booking-item rounded-xl border border-stone-200 p-3" data-index="{{ $index }}">
+                            <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_160px_auto] md:items-end">
+                                <div class="space-y-1.5">
+                                    <label class="block text-xs font-semibold text-stone-600">Menu</label>
+                                    <select name="items[{{ $index }}][menu_id]" class="select select-bordered select-sm w-full" required>
                                     <option value="">Pilih menu</option>
                                     @foreach ($menus as $menu)
                                         <option value="{{ $menu->id }}" @selected((string) ($item['menu_id'] ?? '') === (string) $menu->id)>
                                             {{ $menu->name }} - Rp {{ number_format((float) $menu->price, 0, ',', '.') }}
                                         </option>
                                     @endforeach
-                                </select>
-                            </label>
+                                    </select>
+                                </div>
 
-                            <label class="form-control">
-                                <span class="label-text text-xs">Jumlah</span>
-                                <input type="number" min="1" max="20" name="items[{{ $index }}][qty]"
-                                    value="{{ $item['qty'] ?? 1 }}" class="input input-bordered input-sm" required>
-                            </label>
+                                <div class="space-y-1.5">
+                                    <label class="block text-xs font-semibold text-stone-600">Jumlah</label>
+                                    <input type="number" min="1" max="20" name="items[{{ $index }}][qty]"
+                                        value="{{ $item['qty'] ?? 1 }}" class="input input-bordered input-sm w-full" required>
+                                </div>
 
-                            <div class="flex items-end justify-end">
-                                <button type="button" class="btn btn-sm btn-error text-white remove-item">Hapus</button>
+                                <button type="button" class="btn btn-sm btn-error text-white remove-item">
+                                    Hapus
+                                </button>
                             </div>
 
-                            <label class="form-control md:col-span-5">
-                                <span class="label-text text-xs">Catatan Menu</span>
+                            <div class="mt-3 space-y-1.5">
+                                <label class="block text-xs font-semibold text-stone-600">Catatan Menu</label>
                                 <input type="text" name="items[{{ $index }}][notes]" value="{{ $item['notes'] ?? '' }}"
-                                    class="input input-bordered input-sm" placeholder="contoh: kurang gula / ekstra pedas">
-                            </label>
+                                    class="input input-bordered input-sm w-full" placeholder="contoh: kurang gula / ekstra pedas">
+                            </div>
                         </div>
                     @endforeach
                 </div>
@@ -92,31 +94,31 @@
     </section>
 
     <template id="booking-item-template">
-        <div class="booking-item grid gap-3 rounded-xl border border-stone-200 p-3 md:grid-cols-5" data-index="__INDEX__">
-            <label class="form-control md:col-span-3">
-                <span class="label-text text-xs">Menu</span>
-                <select name="items[__INDEX__][menu_id]" class="select select-bordered select-sm" required>
+        <div class="booking-item rounded-xl border border-stone-200 p-3" data-index="__INDEX__">
+            <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_160px_auto] md:items-end">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-stone-600">Menu</label>
+                    <select name="items[__INDEX__][menu_id]" class="select select-bordered select-sm w-full" required>
                     <option value="">Pilih menu</option>
                     @foreach ($menus as $menu)
                         <option value="{{ $menu->id }}">{{ $menu->name }} - Rp {{ number_format((float) $menu->price, 0, ',', '.') }}</option>
                     @endforeach
-                </select>
-            </label>
+                    </select>
+                </div>
 
-            <label class="form-control">
-                <span class="label-text text-xs">Jumlah</span>
-                <input type="number" min="1" max="20" name="items[__INDEX__][qty]" value="1" class="input input-bordered input-sm" required>
-            </label>
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-stone-600">Jumlah</label>
+                    <input type="number" min="1" max="20" name="items[__INDEX__][qty]" value="1" class="input input-bordered input-sm w-full" required>
+                </div>
 
-            <div class="flex items-end justify-end">
                 <button type="button" class="btn btn-sm btn-error text-white remove-item">Hapus</button>
             </div>
 
-            <label class="form-control md:col-span-5">
-                <span class="label-text text-xs">Catatan Menu</span>
+            <div class="mt-3 space-y-1.5">
+                <label class="block text-xs font-semibold text-stone-600">Catatan Menu</label>
                 <input type="text" name="items[__INDEX__][notes]" class="input input-bordered input-sm"
                     placeholder="contoh: kurang gula / ekstra pedas">
-            </label>
+            </div>
         </div>
     </template>
 

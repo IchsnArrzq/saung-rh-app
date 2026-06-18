@@ -82,6 +82,30 @@ class OrderCartService
     }
 
     /**
+     * @return array{table:Table,relatedMenus:Collection<int,Menu>,cartCount:int,cartSubtotal:float}
+     */
+    public function menuDetailData(string $tableId, Menu $menu): array
+    {
+        $table = $this->resolveAvailableTable($tableId);
+
+        $relatedMenus = Menu::query()
+            ->with('category')
+            ->where('is_available', true)
+            ->whereKeyNot($menu->id)
+            ->when($menu->menu_category_id, fn ($query) => $query->where('menu_category_id', $menu->menu_category_id))
+            ->orderBy('name')
+            ->limit(4)
+            ->get();
+
+        return [
+            'table' => $table,
+            'relatedMenus' => $relatedMenus,
+            'cartCount' => $this->count($table->id),
+            'cartSubtotal' => $this->subtotal($table->id),
+        ];
+    }
+
+    /**
      * @return array{table:Table,cartItems:\Illuminate\Support\Collection<int,array{menu_id:string,name:string,image_url:?string,price:float,qty:int,notes:?string}>,subtotal:float,cartCount:int}
      */
     public function cartData(string $tableId): array

@@ -8,11 +8,11 @@
     <section class="rounded-2xl border border-base-300 bg-base-100 p-4 md:p-5">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-2">
-                <label class="input input-bordered flex w-full max-w-md items-center gap-2">
-                    <i class="ri-search-line text-stone-400"></i>
-                    <input type="text" class="grow" wire:model.live.debounce.300ms="search"
+                <div class="relative w-full max-w-md">
+                    <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
+                    <input type="text" class="input input-bordered w-full pl-10" wire:model.live.debounce.300ms="search"
                         placeholder="Cari kode, nama, kategori, kapasitas...">
-                </label>
+                </div>
 
                 <label class="label cursor-pointer justify-start gap-2 px-0">
                     <input type="checkbox" class="checkbox checkbox-sm checkbox-primary"

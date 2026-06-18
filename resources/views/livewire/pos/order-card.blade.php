@@ -27,11 +27,11 @@
             @endforeach
         </div>
 
-        <label class="input input-bordered flex items-center gap-2">
-            <i class="ri-search-line text-stone-400"></i>
-            <input type="text" class="grow" wire:model.live.debounce.300ms="search"
+        <div class="relative">
+            <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
+            <input type="text" class="input input-bordered w-full pl-10" wire:model.live.debounce.300ms="search"
                 placeholder="Cari menu, deskripsi, SKU, atau kategori..." />
-        </label>
+        </div>
 
         <div
             @class([

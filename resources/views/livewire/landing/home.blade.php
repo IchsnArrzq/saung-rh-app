@@ -97,7 +97,10 @@
                         <img src="{{ $menu->image_url ?: asset('assets/media/stock/900x600/12.jpg') }}"
                             alt="{{ $menu->name }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110">
                         
-                        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
+                            <a href="{{ route('public.menu.show', $menu) }}" class="btn btn-sm rounded-lg bg-base-100 border-none text-base-content hover:bg-base-200 shadow-lg font-medium">
+                                <i class="ri-eye-line"></i> Detail
+                            </a>
                             <button type="button" wire:click="quickAdd('{{ $menu->id }}')" class="btn btn-sm rounded-lg bg-success border-none text-success-content hover:brightness-90 shadow-lg font-medium">
                                 <i class="ri-shopping-cart-2-line"></i> Tambah
                             </button>
@@ -112,8 +115,11 @@
                         <h3 class="text-lg font-bold text-base-content leading-tight">{{ $menu->name }}</h3>
                         <p class="mt-2 text-sm text-secondary line-clamp-2 flex-1">{{ $menu->description ?: 'Hidangan khas yang disiapkan segar dengan bahan pilihan.' }}</p>
                         
-                        <div class="mt-5 pt-4 border-t border-base-200 flex items-center justify-between">
+                        <div class="mt-5 pt-4 border-t border-base-200 flex items-center justify-between gap-2">
                             <p class="text-lg font-extrabold text-success">Rp {{ number_format((float) $menu->price, 0, ',', '.') }}</p>
+                            <a href="{{ route('public.menu.show', $menu) }}" class="btn btn-xs btn-ghost">
+                                Detail
+                            </a>
                             <button type="button" wire:click="quickAdd('{{ $menu->id }}')" class="flex h-8 w-8 items-center justify-center rounded-full bg-success/10 text-success hover:bg-success hover:text-success-content transition-colors lg:hidden">
                                 <i class="ri-add-line text-lg font-bold"></i>
                             </button>

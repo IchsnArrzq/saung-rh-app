@@ -4,11 +4,11 @@
     <section class="rounded-2xl border border-stone-200 bg-white p-4 md:p-5">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-2">
-                <label class="input input-bordered flex w-full max-w-md items-center gap-2">
-                    <i class="ri-search-line text-stone-400"></i>
-                    <input type="text" class="grow" wire:model.live.debounce.300ms="search"
+                <div class="relative w-full max-w-md">
+                    <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
+                    <input type="text" class="input input-bordered w-full pl-10" wire:model.live.debounce.300ms="search"
                         placeholder="Cari nama, SKU, kategori...">
-                </label>
+                </div>
                 @if ($search !== '')
                     <button type="button" class="btn btn-sm btn-ghost" wire:click="$set('search', '')">Reset</button>
                 @endif
@@ -47,7 +47,11 @@
                     <p class="mt-3 text-lg font-bold text-emerald-800">Rp
                         {{ number_format((float) $menu->price, 0, ',', '.') }}</p>
 
-                    <div class="mt-4 gap-2">
+                    <div class="mt-4 flex flex-wrap items-center gap-2">
+                        <a href="{{ route('public.menu.show', $menu) }}" target="_blank" rel="noopener"
+                            class="btn btn-sm btn-outline">
+                            Detail
+                        </a>
                         <a href="{{ route('menus.edit', $menu) }}" class="btn btn-sm btn-warning">Edit</a>
                         <button type="button" class="btn btn-sm btn-error ml-auto text-white"
                             data-confirm="Hapus menu ini?" wire:click="delete('{{ $menu->id }}')">
@@ -66,4 +70,3 @@
 
     <div>{{ $menus->links() }}</div>
 </div>
-

@@ -60,7 +60,10 @@
                             <img src="{{ $item['image_url'] ?: 'https://picsum.photos/seed/'.urlencode((string) $item['menu_id']).'/200/160' }}"
                                 alt="{{ $item['name'] }}" class="h-16 w-20 rounded-lg object-cover">
                             <div class="min-w-0 flex-1">
-                                <p class="font-semibold text-stone-900">{{ $item['name'] }}</p>
+                                <a href="{{ route('public.menu.show', ['menu' => $item['menu_id'], 'mode' => $mode, 'table_id' => $tableId]) }}"
+                                    class="font-semibold text-stone-900 hover:text-emerald-800 hover:underline">
+                                    {{ $item['name'] }}
+                                </a>
                                 <p class="text-sm text-stone-500">Rp {{ number_format((float) $item['price'], 0, ',', '.') }}</p>
                                 @if (! empty($item['notes']))
                                     <p class="mt-1 text-xs text-stone-500">Catatan: {{ $item['notes'] }}</p>

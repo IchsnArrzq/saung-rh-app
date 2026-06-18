@@ -37,7 +37,10 @@
                     @foreach ($cartItems as $item)
                         <tr>
                             <td>
-                                <p class="font-semibold text-stone-900">{{ $item['name'] }}</p>
+                                <a href="{{ route('customer.menus.show', ['menu' => $item['menu_id'], 'table_id' => $table->id]) }}"
+                                    class="font-semibold text-stone-900 hover:text-emerald-800 hover:underline">
+                                    {{ $item['name'] }}
+                                </a>
                                 <p class="text-xs text-stone-500">ID Menu: {{ $item['menu_id'] }}</p>
                             </td>
                             <td>Rp {{ number_format((float) $item['price'], 0, ',', '.') }}</td>

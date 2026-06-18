@@ -8,7 +8,7 @@ use Illuminate\Validation\ValidationException;
 
 class PublicCartService
 {
-    public function quickAdd(Menu $menu): void
+    public function quickAdd(Menu $menu, int $qty = 1, ?string $notes = null): void
     {
         if (! $menu->is_available) {
             throw ValidationException::withMessages([
@@ -16,6 +16,6 @@ class PublicCartService
             ]);
         }
 
-        RestaurantCart::addItem($menu, 1);
+        RestaurantCart::addItem($menu, $qty, $notes);
     }
 }

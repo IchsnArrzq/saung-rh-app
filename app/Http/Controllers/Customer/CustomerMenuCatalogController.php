@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
 use App\Services\Customer\OrderCartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,14 +39,30 @@ class CustomerMenuCatalogController extends Controller
         ]);
     }
 
+    public function show(Request $request, Menu $menu): View|RedirectResponse
+    {
+        $tableId = $request->string('table_id')->toString();
+
+        if ($tableId === '') {
+            return redirect()->route('customer.menus.tables');
+        }
+
+        $menu->loadMissing(['category', 'status']);
+
+        return view('customer.menus.show', [
+            'menu' => $menu,
+            ...$this->orderCartService->menuDetailData($tableId, $menu),
+        ]);
+    }
+
     public function addToCart(Request $request): RedirectResponse
     {
         $this->orderCartService->addToCart($request);
 
         $tableId = $request->string('table_id')->toString();
+        $redirectTo = $request->string('redirect_to')->toString();
 
-        return redirect()
-            ->route('customer.menus.index', ['table_id' => $tableId])
+        return redirect($this->safeRedirectTo($redirectTo, route('customer.menus.index', ['table_id' => $tableId])))
             ->with('success', 'Menu ditambahkan ke cart.');
     }
 
@@ -92,5 +109,14 @@ class CustomerMenuCatalogController extends Controller
         return redirect()
             ->route('customer.dashboard')
             ->with('success', 'Pesanan berhasil dibuat dengan nomor '.$order->order_number.'.');
+    }
+
+    private function safeRedirectTo(string $redirectTo, string $fallback): string
+    {
+        if ($redirectTo === '' || ! str_starts_with($redirectTo, '/') || str_starts_with($redirectTo, '//')) {
+            return $fallback;
+        }
+
+        return $redirectTo;
     }
 }

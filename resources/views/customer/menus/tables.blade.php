@@ -8,10 +8,11 @@
         </div>
 
         <form method="GET" class="mt-4 flex flex-wrap items-center gap-2">
-            <label class="input input-bordered flex w-full max-w-md items-center gap-2">
-                <input type="text" class="grow" name="search" value="{{ $search ?? '' }}"
+            <div class="relative w-full max-w-md">
+                <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
+                <input type="text" class="input input-bordered w-full pl-10" name="search" value="{{ $search ?? '' }}"
                     placeholder="Cari kode meja, status, kategori...">
-            </label>
+            </div>
             <button type="submit" class="btn btn-sm bg-stone-900 text-amber-50 hover:bg-stone-700">Cari</button>
             @if (($search ?? '') !== '')
                 <a href="{{ route('customer.menus.tables') }}" class="btn btn-sm btn-ghost">Reset</a>

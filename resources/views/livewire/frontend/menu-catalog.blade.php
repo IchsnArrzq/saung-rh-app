@@ -86,6 +86,10 @@
                     </div>
 
                     <button type="button" wire:click="addDetailToCart"
+                        data-confirm="Tambahkan {{ $detailMenu->name }} ke cart?"
+                        data-confirm-title="Konfirmasi Cart"
+                        data-confirm-yes="Ya, Tambahkan"
+                        data-confirm-no="Batal"
                         class="mt-3 btn bg-emerald-800 text-amber-50 hover:bg-emerald-700">
                         Tambah ke Cart
                     </button>
@@ -109,10 +113,18 @@
                     <p class="mt-3 text-lg font-bold text-emerald-800">Rp {{ number_format((float) $menu->price, 0, ',', '.') }}</p>
 
                     <div class="mt-4 flex items-center gap-2">
+                        <a href="{{ route('public.menu.show', ['menu' => $menu, 'mode' => $mode, 'table_id' => $tableId]) }}"
+                            class="btn btn-sm btn-outline">
+                            Detail
+                        </a>
                         <button type="button" wire:click="showDetail('{{ $menu->id }}')" class="btn btn-sm btn-ghost">
-                            Show
+                            Quick View
                         </button>
                         <button type="button" wire:click="quickAdd('{{ $menu->id }}')"
+                            data-confirm="Tambahkan {{ $menu->name }} ke cart?"
+                            data-confirm-title="Konfirmasi Cart"
+                            data-confirm-yes="Ya, Tambahkan"
+                            data-confirm-no="Batal"
                             class="ml-auto btn btn-sm bg-emerald-800 text-amber-50 hover:bg-emerald-700">
                             Tambah ke Cart
                         </button>

@@ -10,11 +10,11 @@
     <section class="rounded-2xl border border-stone-200 bg-white p-4 md:p-5">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-2">
-                <label class="input input-bordered flex w-full max-w-md items-center gap-2">
-                    <i class="ri-search-line text-stone-400"></i>
-                    <input type="text" class="grow" wire:model.live.debounce.300ms="search"
+                <div class="relative w-full max-w-md">
+                    <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
+                    <input type="text" class="input input-bordered w-full pl-10" wire:model.live.debounce.300ms="search"
                         placeholder="Cari kode, nama, status, kategori, kapasitas...">
-                </label>
+                </div>
                 @if ($search !== '')
                     <button type="button" class="btn btn-sm btn-ghost" wire:click="$set('search', '')">Reset</button>
                 @endif
@@ -84,5 +84,4 @@
 
     <div>{{ $tables->links() }}</div>
 </div>
-
 

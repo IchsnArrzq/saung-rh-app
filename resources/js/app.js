@@ -3,6 +3,8 @@ import ApexCharts from 'apexcharts';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
+window.Swal = Swal;
+
 const defaultConfirmMessage = 'Apakah Anda yakin ingin melanjutkan aksi ini?';
 const destructivePattern = /\b(hapus|delete|remove|destroy|batalkan|cancel)\b/i;
 
@@ -32,6 +34,27 @@ async function askForConfirmation(message, trigger) {
 
     return Boolean(result.isConfirmed);
 }
+
+function showPopupNotification(detail = {}) {
+    const type = detail.type === 'error' ? 'error' : 'success';
+
+    void Swal.fire({
+        title: detail.title || (type === 'error' ? 'Gagal' : 'Berhasil'),
+        text: detail.message || '',
+        icon: type,
+        timer: type === 'success' ? 1800 : undefined,
+        timerProgressBar: type === 'success',
+        buttonsStyling: false,
+        confirmButtonText: 'OK',
+        customClass: {
+            confirmButton: type === 'error' ? 'btn btn-error text-white' : 'btn btn-primary',
+        },
+    });
+}
+
+window.addEventListener('cart-notification', (event) => {
+    showPopupNotification(event.detail || {});
+});
 
 document.addEventListener(
     'submit',

@@ -5,6 +5,7 @@ namespace App\Livewire\Frontend;
 use App\Models\Menu;
 use App\Models\Table;
 use App\Support\RestaurantCart;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -58,35 +59,60 @@ class MenuCatalog extends Component
         $menu = Menu::query()->where('is_available', true)->find($menuId);
 
         if (! $menu) {
-            $this->addError('cart', 'Menu tidak ditemukan atau sedang tidak tersedia.');
+            $message = 'Menu tidak ditemukan atau sedang tidak tersedia.';
+
+            $this->addError('cart', $message);
+            $this->dispatchCartNotification('error', 'Gagal Menambahkan', $message);
 
             return;
         }
 
         RestaurantCart::addItem($menu, 1);
 
-        session()->flash('success', $menu->name.' ditambahkan ke cart.');
+        $message = $menu->name.' ditambahkan ke cart.';
+
+        session()->flash('success', $message);
+        $this->dispatchCartNotification('success', 'Berhasil', $message);
     }
 
     public function addDetailToCart(): void
     {
-        $this->validate([
+        $validator = Validator::make([
+            'detailMenuId' => $this->detailMenuId,
+            'detailQty' => $this->detailQty,
+            'detailNotes' => $this->detailNotes,
+        ], [
             'detailMenuId' => ['required', 'exists:menus,id'],
             'detailQty' => ['required', 'integer', 'min:1', 'max:20'],
             'detailNotes' => ['nullable', 'string', 'max:255'],
         ]);
 
+        if ($validator->fails()) {
+            $message = $validator->errors()->first() ?: 'Data cart tidak valid.';
+
+            $this->setErrorBag($validator->errors());
+            $this->dispatchCartNotification('error', 'Gagal Menambahkan', $message);
+
+            return;
+        }
+
         $menu = Menu::query()->where('is_available', true)->find($this->detailMenuId);
 
         if (! $menu) {
-            $this->addError('cart', 'Menu tidak ditemukan atau sedang tidak tersedia.');
+            $message = 'Menu tidak ditemukan atau sedang tidak tersedia.';
+
+            $this->addError('cart', $message);
+            $this->dispatchCartNotification('error', 'Gagal Menambahkan', $message);
 
             return;
         }
 
         RestaurantCart::addItem($menu, $this->detailQty, trim($this->detailNotes) ?: null);
 
-        session()->flash('success', $menu->name.' ditambahkan ke cart.');
+        $message = $menu->name.' ditambahkan ke cart.';
+
+        session()->flash('success', $message);
+        $this->dispatchCartNotification('success', 'Berhasil', $message);
 
         $this->closeDetail();
     }
@@ -124,5 +150,10 @@ class MenuCatalog extends Component
             'selectedTable' => $selectedTable,
             'cartCount' => RestaurantCart::count(),
         ]);
+    }
+
+    private function dispatchCartNotification(string $type, string $title, string $message): void
+    {
+        $this->dispatch('cart-notification', type: $type, title: $title, message: $message);
     }
 }
