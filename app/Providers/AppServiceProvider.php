@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Payment;
+use App\Observers\PaymentObserver;
 use App\Repositories\Admin\DashboardRepository;
 use App\Repositories\Admin\DashboardRepositoryInterface;
 use Illuminate\Support\Facades\URL;
@@ -22,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Payment::observe(PaymentObserver::class);
+
         if (app()->environment('production')) {
             URL::forceScheme('https');
         }

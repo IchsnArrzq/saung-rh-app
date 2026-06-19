@@ -67,15 +67,26 @@ class OrderCartService
     /**
      * @return array{table:Table,menus:LengthAwarePaginator,cartItems:\Illuminate\Support\Collection<int,array{menu_id:string,name:string,image_url:?string,price:float,qty:int,notes:?string}>,cartCount:int,cartSubtotal:float}
      */
-    public function menuCatalogData(string $tableId, string $search = '', int $perPage = 12): array
+    public function menuCatalogData(string $tableId, string $search = '', ?int $categoryId = null, int $perPage = 24): array
     {
         $table = $this->resolveAvailableTable($tableId);
 
-        $menus = $this->paginateMenus($search, $perPage);
+        $menus = $this->paginateMenus($search, $categoryId, $perPage);
+
+        $categories = \App\Models\MenuCategory::query()
+            ->where('is_active', true)
+            ->withCount(['menus' => fn ($q) => $q->where('is_available', true)])
+            ->orderBy('name')
+            ->get();
+
+        $totalAvailable = Menu::query()->where('is_available', true)->count();
 
         return [
             'table' => $table,
             'menus' => $menus,
+            'categories' => $categories,
+            'activeCategoryId' => $categoryId,
+            'totalAvailable' => $totalAvailable,
             'cartItems' => collect($this->cart($table->id))->values(),
             'cartCount' => $this->count($table->id),
             'cartSubtotal' => $this->subtotal($table->id),
@@ -266,13 +277,14 @@ class OrderCartService
         return $order;
     }
 
-    private function paginateMenus(string $search = '', int $perPage = 12): LengthAwarePaginator
+    private function paginateMenus(string $search = '', ?int $categoryId = null, int $perPage = 24): LengthAwarePaginator
     {
         $search = trim($search);
 
         return Menu::query()
             ->with('category')
             ->where('is_available', true)
+            ->when($categoryId, fn ($query) => $query->where('menu_category_id', $categoryId))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
                     $inner->where('name', 'like', '%'.$search.'%')
@@ -307,6 +319,11 @@ class OrderCartService
     private function cart(string $tableId): array
     {
         return session($this->cartKey($tableId), []);
+    }
+
+    public function emptyCart(string $tableId): void
+    {
+        session()->forget($this->cartKey($tableId));
     }
 
     private function clearCart(string $tableId): void

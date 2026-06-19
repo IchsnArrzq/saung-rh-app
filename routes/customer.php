@@ -16,6 +16,7 @@ Route::middleware(['demo.login', 'auth', 'verified', 'role:customer'])
         Route::get('menu/cart', [CustomerMenuCatalogController::class, 'cart'])->name('menus.cart.index');
         Route::patch('menu/cart/{menuId}', [CustomerMenuCatalogController::class, 'updateCart'])->name('menus.cart.update');
         Route::delete('menu/cart/{menuId}', [CustomerMenuCatalogController::class, 'removeCart'])->name('menus.cart.destroy');
+        Route::delete('menu/cart', [CustomerMenuCatalogController::class, 'clearCart'])->name('menus.cart.clear');
         Route::post('menu/cart/checkout', [CustomerMenuCatalogController::class, 'checkout'])->name('menus.cart.checkout');
         Route::get('menu/{menu}', [CustomerMenuCatalogController::class, 'show'])->name('menus.show');
         Route::get('booking', [CustomerBookingController::class, 'create'])->name('bookings.create');

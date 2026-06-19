@@ -3,6 +3,7 @@
 namespace App\Services\Customer;
 
 use App\Models\Menu;
+use App\Models\MenuCategory;
 use App\Models\Reservation;
 use App\Models\Table;
 use Carbon\Carbon;
@@ -27,7 +28,16 @@ class BookingService
                 ->whereHas('tableStatus', fn ($query) => $query->where('key', 'available'))
                 ->orderBy('code')
                 ->get(),
-            'menus' => Menu::query()->where('is_available', true)->orderBy('name')->get(),
+            'menus' => Menu::query()
+                ->with('category:id,name')
+                ->where('is_available', true)
+                ->orderBy('name')
+                ->get(),
+            'categories' => MenuCategory::query()
+                ->where('is_active', true)
+                ->withCount(['menus' => fn ($q) => $q->where('is_available', true)])
+                ->orderBy('name')
+                ->get(),
         ];
     }
 

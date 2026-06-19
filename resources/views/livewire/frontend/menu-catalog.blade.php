@@ -1,221 +1,207 @@
 <div>
-    @php
-        $isOffline = $mode === 'offline';
-    @endphp
+    @php $isOffline = $mode === 'offline'; @endphp
 
     @if (session('success'))
-        <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+        <div class="mb-4 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-medium text-success">
             {{ session('success') }}
         </div>
     @endif
 
     @error('cart')
-        <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {{ $message }}
-        </div>
+        <div class="mb-4 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">{{ $message }}</div>
     @enderror
 
-    <section class="rounded-3xl border border-stone-200 bg-white p-5 md:p-6">
-        <div class="flex flex-wrap items-center gap-3">
+    {{-- Header --}}
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-4 md:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-semibold text-stone-900">Menu Makanan & Minuman</h1>
-                <p class="mt-1 text-sm text-stone-600">
-                    {{ $isOffline ? 'Mode Offline QR: pilih menu lalu kirim pesanan langsung ke dapur.' : 'Mode Online Booking: pilih menu, lanjut ke cart, lalu booking meja.' }}
+                <h1 class="text-xl font-semibold">Menu Makanan & Minuman</h1>
+                <p class="mt-0.5 text-sm text-base-content/70">
+                    {{ $isOffline ? 'Mode Offline: pilih menu lalu kirim pesanan langsung ke dapur.' : 'Mode Online: pilih menu, lanjutkan ke cart, lalu booking meja.' }}
                 </p>
             </div>
-
-            <div class="ml-auto flex items-center gap-2">
+            <div class="flex items-center gap-2">
                 <button type="button" wire:click="setMode('online')"
-                    class="btn btn-sm {{ ! $isOffline ? 'bg-emerald-800 text-amber-50 hover:bg-emerald-700' : 'btn-ghost' }}">
+                    class="btn btn-sm {{ ! $isOffline ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
                     Online
                 </button>
                 <button type="button" wire:click="setMode('offline')"
-                    class="btn btn-sm {{ $isOffline ? 'bg-emerald-800 text-amber-50 hover:bg-emerald-700' : 'btn-ghost' }}">
+                    class="btn btn-sm {{ $isOffline ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
                     Offline QR
                 </button>
             </div>
         </div>
 
-        <div class="mt-4 grid gap-3 md:grid-cols-[1fr_auto] md:items-center">
-            <label class="form-control">
-                <span class="label-text">Cari Menu</span>
-                <input type="text" wire:model.live.debounce.300ms="search" class="input input-bordered" placeholder="Cari makanan atau minuman...">
-            </label>
-
-            @if ($isOffline && $selectedTable)
-                <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-stone-700">
-                    <p class="font-semibold">Meja Aktif: {{ $selectedTable->code }}</p>
-                    <p>Kapasitas {{ $selectedTable->capacity }} orang</p>
-                </div>
-            @endif
-        </div>
+        @if ($isOffline && $selectedTable)
+            <div class="mt-3 rounded-xl border border-warning/30 bg-warning/10 px-3 py-2 text-sm">
+                <p class="font-semibold">Meja Aktif: {{ $selectedTable->code }}</p>
+                <p class="text-base-content/70">Kapasitas {{ $selectedTable->capacity }} orang</p>
+            </div>
+        @endif
     </section>
 
-    <div class="mt-6 grid gap-5 {{ $cartCount > 0 ? 'xl:grid-cols-[minmax(0,1fr)_380px]' : '' }} xl:items-start">
-        <div class="min-w-0">
-            @if ($detailMenu)
-                <section class="mb-5 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                    <div class="grid gap-4 md:grid-cols-[180px_1fr]">
-                        <img src="{{ $detailMenu->image_url ?: 'https://picsum.photos/seed/'.urlencode((string) $detailMenu->id).'/700/500' }}"
-                            alt="{{ $detailMenu->name }}" class="h-40 w-full rounded-xl object-cover">
+    <div class="mt-4 grid gap-4 xl:grid-cols-12 xl:items-start">
 
-                        <div>
-                            <div class="flex items-start justify-between gap-2">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">{{ $detailMenu->category->name ?? 'Menu' }}</p>
-                                    <h2 class="mt-1 text-xl font-semibold text-stone-900">{{ $detailMenu->name }}</h2>
-                                </div>
-                                <button type="button" wire:click="closeDetail" class="btn btn-sm btn-ghost">Tutup</button>
-                            </div>
+        {{-- Kiri: Kategori + Search + Grid --}}
+        <div @class([
+            'space-y-4',
+            'xl:col-span-7' => $cartCount > 0,
+            'xl:col-span-12' => $cartCount <= 0,
+        ])>
 
-                            <p class="mt-2 text-sm text-stone-600">{{ $detailMenu->description ?: 'Deskripsi menu belum tersedia.' }}</p>
-                            <p class="mt-2 text-lg font-bold text-emerald-800">Rp {{ number_format((float) $detailMenu->price, 0, ',', '.') }}</p>
+            {{-- Filter Kategori --}}
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="button" wire:click="setCategory()"
+                    class="btn btn-sm rounded-full {{ is_null($activeCategoryId) ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
+                    Semua
+                    <span class="badge badge-sm">{{ $totalAvailable }}</span>
+                </button>
+                @foreach ($categories as $category)
+                    <button type="button" wire:click="setCategory({{ $category->id }})"
+                        class="btn btn-sm rounded-full {{ $activeCategoryId === $category->id ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
+                        {{ $category->name }}
+                        <span class="badge badge-sm">{{ $category->menus_count }}</span>
+                    </button>
+                @endforeach
+            </div>
 
-                            <div class="mt-3 grid gap-3 md:grid-cols-2">
-                                <label class="form-control">
-                                    <span class="label-text">Jumlah</span>
-                                    <input type="number" wire:model="detailQty" min="1" max="20" class="input input-bordered">
-                                </label>
+            {{-- Search --}}
+            <div class="relative">
+                <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40"></i>
+                <input type="text" class="input input-bordered w-full pl-10"
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Cari menu, deskripsi, atau SKU...">
+            </div>
 
-                                <label class="form-control md:col-span-2">
-                                    <span class="label-text">Catatan</span>
-                                    <textarea wire:model="detailNotes" rows="2" class="textarea textarea-bordered"
-                                        placeholder="contoh: kurang gula / ekstra pedas"></textarea>
-                                </label>
-                            </div>
-
-                            <button type="button" wire:click="addDetailToCart"
-                                data-confirm="Tambahkan {{ $detailMenu->name }} ke cart?"
-                                data-confirm-title="Konfirmasi Cart"
-                                data-confirm-yes="Ya, Tambahkan"
-                                data-confirm-no="Batal"
-                                class="mt-3 btn bg-emerald-800 text-amber-50 hover:bg-emerald-700">
-                                Tambah ke Cart
-                            </button>
-                        </div>
-                    </div>
-                </section>
-            @endif
-
-            <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 {{ $cartCount > 0 ? '' : '2xl:grid-cols-4' }}">
+            {{-- Grid Menu --}}
+            <div @class([
+                'grid gap-3 sm:grid-cols-2',
+                'xl:grid-cols-2 2xl:grid-cols-3' => $cartCount > 0,
+                'xl:grid-cols-3 2xl:grid-cols-4' => $cartCount <= 0,
+            ])>
                 @forelse ($menus as $menu)
-                    <article class="overflow-hidden rounded-3xl border border-stone-200 bg-white">
-                        <div class="aspect-[4/3] w-full bg-stone-100">
-                            <img src="{{ $menu->image_url ?: 'https://picsum.photos/seed/'.urlencode((string) $menu->id).'/800/600' }}"
-                                alt="{{ $menu->name }}" class="h-full w-full object-cover">
+                    <article class="overflow-hidden rounded-2xl border border-base-200 bg-base-100 shadow-sm">
+                        <div class="relative aspect-[4/3]">
+                            <button type="button" wire:click="showMenuDetail('{{ $menu->id }}')"
+                                class="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/50 text-white opacity-0 transition-opacity hover:opacity-50">
+                                <i class="ri-expand-diagonal-2-line text-2xl"></i>
+                            </button>
+                            @if ($menu->image_url)
+                                <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}"
+                                    class="h-full w-full rounded-2xl object-cover p-1">
+                            @else
+                                <div class="flex h-full items-center justify-center rounded-2xl bg-base-200 text-base-content/40">
+                                    <i class="ri-image-line text-4xl"></i>
+                                </div>
+                            @endif
                         </div>
 
-                        <div class="p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">{{ $menu->category->name ?? 'Menu' }}</p>
-                            <h2 class="mt-1 text-lg font-semibold text-stone-900">{{ $menu->name }}</h2>
-                            <p class="mt-1 text-sm text-stone-600">{{ \Illuminate\Support\Str::limit($menu->description ?: 'Menu favorit restoran.', 80) }}</p>
-                            <p class="mt-3 text-lg font-bold text-emerald-800">Rp {{ number_format((float) $menu->price, 0, ',', '.') }}</p>
-
-                            <div class="mt-4 flex flex-wrap items-center gap-2">
-                                <a href="{{ route('public.menu.show', ['menu' => $menu, 'mode' => $mode, 'table_id' => $tableId]) }}"
-                                    class="btn btn-sm btn-outline">
-                                    Detail
-                                </a>
-                                <button type="button" wire:click="showDetail('{{ $menu->id }}')" class="btn btn-sm btn-ghost">
-                                    Quick View
-                                </button>
+                        <div class="space-y-3 p-4">
+                            <div>
+                                <p class="line-clamp-1 text-base font-semibold">{{ $menu->name }}</p>
+                                <p class="text-xs text-base-content/60">{{ $menu->category?->name ?? 'Uncategorized' }}</p>
+                            </div>
+                            <div class="flex items-center justify-between gap-2">
+                                <p class="text-lg font-semibold">
+                                    Rp {{ number_format((float) $menu->price, 0, ',', '.') }}
+                                </p>
                                 <button type="button" wire:click="quickAdd('{{ $menu->id }}')"
-                                    data-confirm="Tambahkan {{ $menu->name }} ke cart?"
-                                    data-confirm-title="Konfirmasi Cart"
-                                    data-confirm-yes="Ya, Tambahkan"
-                                    data-confirm-no="Batal"
-                                    class="ml-auto btn btn-sm bg-emerald-800 text-amber-50 hover:bg-emerald-700">
-                                    Tambah
+                                    class="btn btn-sm btn-neutral btn-square" aria-label="Tambah ke cart">
+                                    <i class="ri-add-line text-lg"></i>
                                 </button>
                             </div>
                         </div>
                     </article>
                 @empty
-                    <p class="col-span-full rounded-2xl border border-dashed border-stone-300 bg-white p-5 text-center text-sm text-stone-500">
-                        Menu belum tersedia.
-                    </p>
+                    <div class="col-span-full rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center">
+                        <p class="text-base-content/60">Belum ada menu tersedia pada kategori ini.</p>
+                    </div>
                 @endforelse
-            </section>
+            </div>
         </div>
 
+        {{-- Kanan: Order Details --}}
         @if ($cartCount > 0)
-        <aside class="xl:sticky xl:top-5">
-            <section class="rounded-3xl border border-stone-200 bg-white p-4 shadow-sm">
-                <div class="flex items-start justify-between gap-3">
-                    <div>
-                        <h2 class="text-xl font-semibold text-stone-900">Cart Pesanan</h2>
-                        <p class="mt-1 text-sm text-stone-500">
-                            {{ $isOffline ? 'Order dari QR meja.' : 'Lanjutkan untuk booking meja.' }}
-                        </p>
-                    </div>
-                    @if ($cartCount > 0)
-                        <button type="button" wire:click="clearCart" data-confirm="Kosongkan semua item cart?"
-                            class="btn btn-sm btn-ghost text-rose-600">
-                            Reset
-                        </button>
-                    @endif
+        <aside class="xl:col-span-5 xl:sticky xl:top-4">
+            <section class="rounded-2xl border border-base-300 bg-base-100 p-4">
+                <div class="mb-4 flex items-center justify-between gap-2">
+                    <h3 class="text-xl font-semibold">Order Details</h3>
+                    <button type="button" wire:click="clearCart"
+                        data-confirm="Reset semua item order ini?"
+                        class="btn btn-sm btn-outline">
+                        <i class="ri-delete-bin-line"></i> Reset Order
+                    </button>
                 </div>
 
                 @if ($isOffline && $selectedTable)
-                    <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-stone-700">
+                    <div class="mb-3 rounded-xl border border-warning/30 bg-warning/10 px-3 py-2 text-sm">
                         <p class="font-semibold">Meja {{ $selectedTable->code }}</p>
-                        <p>Kapasitas {{ $selectedTable->capacity }} orang</p>
+                        <p class="text-xs text-base-content/60">Kapasitas {{ $selectedTable->capacity }} orang</p>
                     </div>
                 @endif
 
-                <div class="mt-4 space-y-3">
+                {{-- Cart items --}}
+                <div class="space-y-3">
                     @foreach ($cartItems as $item)
-                        <article class="rounded-2xl border border-stone-200 p-3">
-                            <div class="flex items-start gap-3">
-                                <img src="{{ $item['image_url'] ?: 'https://picsum.photos/seed/'.urlencode((string) $item['menu_id']).'/200/160' }}"
-                                    alt="{{ $item['name'] }}" class="h-16 w-20 rounded-xl object-cover">
-                                <div class="min-w-0 flex-1">
-                                    <a href="{{ route('public.menu.show', ['menu' => $item['menu_id'], 'mode' => $mode, 'table_id' => $tableId]) }}"
-                                        class="line-clamp-1 font-semibold text-stone-900 hover:text-emerald-800 hover:underline">
-                                        {{ $item['name'] }}
-                                    </a>
-                                    <p class="mt-1 text-sm text-stone-500">Rp {{ number_format((float) $item['price'], 0, ',', '.') }}</p>
-                                    @if (! empty($item['notes']))
-                                        <p class="mt-1 line-clamp-2 text-xs text-stone-500">Catatan: {{ $item['notes'] }}</p>
-                                    @endif
+                        <article class="rounded-xl border border-base-300 p-3">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-start gap-3">
+                                    <div class="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-base-200">
+                                        @if ($item['image_url'])
+                                            <img src="{{ $item['image_url'] }}" alt="{{ $item['name'] }}"
+                                                class="h-full w-full object-cover">
+                                        @else
+                                            <div class="flex h-full items-center justify-center text-base-content/40">
+                                                <i class="ri-image-line text-xl"></i>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p class="font-medium leading-tight">{{ $item['name'] }}</p>
+                                        <p class="mt-0.5 text-sm text-base-content/60">
+                                            Rp {{ number_format((float) $item['price'], 0, ',', '.') }}
+                                        </p>
+                                        @if (!empty($item['notes']))
+                                            <p class="mt-1 line-clamp-1 text-xs text-base-content/50">{{ $item['notes'] }}</p>
+                                        @endif
+                                    </div>
                                 </div>
                                 <button type="button" wire:click="removeItem('{{ $item['menu_id'] }}')"
                                     data-confirm="Hapus item ini dari cart?"
-                                    class="btn btn-xs btn-ghost text-rose-600">
+                                    class="btn btn-sm btn-error btn-square text-white" aria-label="Hapus item">
                                     <i class="ri-delete-bin-line"></i>
                                 </button>
                             </div>
 
-                            <div class="mt-3 flex items-center justify-between gap-3">
-                                <p class="text-sm font-semibold text-stone-800">
-                                    Rp {{ number_format(((float) $item['price']) * ((int) $item['qty']), 0, ',', '.') }}
-                                </p>
-                                <div class="join">
-                                    <button type="button" wire:click="decrementQty('{{ $item['menu_id'] }}')"
-                                        class="join-item btn btn-sm btn-outline">-</button>
-                                    <span class="join-item flex h-8 min-w-10 items-center justify-center border-y border-stone-300 bg-white px-3 text-sm font-semibold">
-                                        {{ $item['qty'] }}
-                                    </span>
-                                    <button type="button" wire:click="incrementQty('{{ $item['menu_id'] }}')"
-                                        class="join-item btn btn-sm btn-outline">+</button>
-                                </div>
+                            <div class="mt-3 flex items-center justify-end gap-2">
+                                <button type="button" wire:click="decrementQty('{{ $item['menu_id'] }}')"
+                                    class="btn btn-sm btn-outline btn-square">
+                                    <i class="ri-subtract-line"></i>
+                                </button>
+                                <span class="min-w-8 text-center text-lg font-semibold">{{ $item['qty'] }}</span>
+                                <button type="button" wire:click="incrementQty('{{ $item['menu_id'] }}')"
+                                    class="btn btn-sm btn-outline btn-square">
+                                    <i class="ri-add-line"></i>
+                                </button>
                             </div>
                         </article>
                     @endforeach
                 </div>
 
-                <div class="mt-4 border-t border-stone-200 pt-4">
-                    <div class="flex items-center justify-between text-sm text-stone-600">
-                        <span>Total Item</span>
-                        <span class="font-semibold text-stone-900">{{ $cartCount }}</span>
+                {{-- Subtotal --}}
+                <div class="mt-4 border-t border-base-300 pt-4">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-base-content/70">Total Item</span>
+                        <span class="font-medium">{{ $cartCount }}</span>
                     </div>
-                    <div class="mt-2 flex items-center justify-between text-lg font-bold text-stone-900">
-                        <span>Subtotal</span>
+                    <div class="mt-1 flex items-center justify-between text-lg font-semibold">
+                        <span>Sub Total</span>
                         <span>Rp {{ number_format((float) $cartSubtotal, 0, ',', '.') }}</span>
                     </div>
 
-                    <button type="button" wire:click="goToCart" @disabled($cartCount <= 0)
-                        class="btn mt-4 w-full bg-emerald-800 text-amber-50 hover:bg-emerald-700 disabled:bg-stone-200 disabled:text-stone-500">
+                    <button type="button" wire:click="goToCart"
+                        class="btn btn-primary mt-4 w-full">
+                        <i class="ri-shopping-cart-line"></i>
                         Lanjut ke Checkout
                     </button>
                 </div>
@@ -223,4 +209,49 @@
         </aside>
         @endif
     </div>
+
+    {{-- Modal Detail Menu --}}
+    <x-modal name="menu-detail-modal" maxWidth="lg">
+        @if ($selectedMenu)
+            <div class="space-y-4">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h3 class="text-xl font-semibold">{{ $selectedMenu['name'] }}</h3>
+                        <p class="text-sm text-base-content/60">{{ $selectedMenu['category_name'] }}</p>
+                    </div>
+                    <button type="button" wire:click="closeMenuDetail"
+                        class="btn btn-sm btn-ghost btn-circle" aria-label="Tutup">
+                        <i class="ri-close-line text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="aspect-[16/10] overflow-hidden rounded-xl bg-base-200">
+                    @if ($selectedMenu['image_url'] !== '')
+                        <img src="{{ $selectedMenu['image_url'] }}" alt="{{ $selectedMenu['name'] }}"
+                            class="h-full w-full object-cover">
+                    @else
+                        <div class="flex h-full items-center justify-center text-base-content/40">
+                            <i class="ri-image-line text-5xl"></i>
+                        </div>
+                    @endif
+                </div>
+
+                <div>
+                    <p class="text-2xl font-bold">
+                        Rp {{ number_format((float) $selectedMenu['price'], 0, ',', '.') }}
+                    </p>
+                    <p class="mt-2 text-sm leading-relaxed text-base-content/80">
+                        {{ $selectedMenu['description'] !== '' ? $selectedMenu['description'] : 'Belum ada deskripsi menu.' }}
+                    </p>
+                </div>
+
+                <button type="button"
+                    wire:click="quickAdd('{{ $selectedMenu['id'] }}')"
+                    x-on:click="show = false"
+                    class="btn btn-primary w-full">
+                    <i class="ri-add-line"></i> Tambah ke Cart
+                </button>
+            </div>
+        @endif
+    </x-modal>
 </div>

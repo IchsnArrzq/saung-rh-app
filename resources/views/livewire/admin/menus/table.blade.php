@@ -52,6 +52,10 @@
                                     class="btn btn-sm btn-outline">
                                     Detail
                                 </a>
+                                <a href="{{ route('menus.ingredients.edit', $menu) }}" class="btn btn-sm btn-info text-white"
+                                    title="Resep / Bahan">
+                                    <i class="ri-flask-line"></i> Resep
+                                </a>
                                 <a href="{{ route('menus.edit', $menu) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
                                     data-confirm="Hapus menu ini?"

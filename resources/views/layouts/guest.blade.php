@@ -55,18 +55,31 @@
                 </nav>
 
                 <div class="flex items-center gap-2">
-                    @if (Route::has('login'))
-                        <a href="{{ route('login') }}"
-                            class="btn btn-sm btn-outline border-base-300 bg-base-100 text-base-content hover:border-secondary hover:bg-base-200">
-                            Login
+                    @auth
+                        @php
+                            $dashboardRoute = auth()->user()->hasAnyRole(['superadmin', 'admin'])
+                                ? route('dashboard')
+                                : (auth()->user()->hasRole('cashier')
+                                    ? route('pos.order.index')
+                                    : route('customer.dashboard'));
+                        @endphp
+                        <a href="{{ $dashboardRoute }}" class="btn btn-sm btn-primary">
+                            Dashboard
                         </a>
-                    @endif
+                    @else
+                        @if (Route::has('login'))
+                            <a href="{{ route('login') }}"
+                                class="btn btn-sm btn-outline border-base-300 bg-base-100 text-base-content hover:border-secondary hover:bg-base-200">
+                                Login
+                            </a>
+                        @endif
 
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="btn btn-sm btn-primary">
-                            Register
-                        </a>
-                    @endif
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="btn btn-sm btn-primary">
+                                Register
+                            </a>
+                        @endif
+                    @endauth
                 </div>
             </div>
         </header>

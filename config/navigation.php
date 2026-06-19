@@ -51,6 +51,14 @@ return [
             ],
         ],
         [
+            'label' => 'Inventory',
+            'icon' => 'ri-stack-line',
+            'items' => [
+                ['label' => 'Bahan Makanan', 'icon' => 'ri-leaf-line', 'route' => 'ingredients.index', 'active' => ['ingredients.*']],
+                ['label' => 'Stock Opname', 'icon' => 'ri-archive-stack-line', 'route' => 'stock-opnames.index', 'active' => ['stock-opnames.*']],
+            ],
+        ],
+        [
             'label' => 'Reporting',
             'icon' => 'ri-bar-chart-box-line',
             'items' => [
@@ -122,6 +130,14 @@ return [
                 ['label' => 'POS Order', 'icon' => 'ri-shopping-basket-line', 'route' => 'pos.order.index', 'active' => ['pos.order.*'], 'badge' => ['type' => 'dynamic', 'resolver' => 'active_orders']],
                 ['label' => 'Order', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*']],
                 ['label' => 'Payment', 'icon' => 'ri-wallet-3-line', 'route' => 'payments.index', 'active' => ['payments.*']],
+            ],
+        ],
+        [
+            'label' => 'Inventory',
+            'icon' => 'ri-stack-line',
+            'items' => [
+                ['label' => 'Bahan Makanan', 'icon' => 'ri-leaf-line', 'route' => 'ingredients.index', 'active' => ['ingredients.*']],
+                ['label' => 'Stock Opname', 'icon' => 'ri-archive-stack-line', 'route' => 'stock-opnames.index', 'active' => ['stock-opnames.*']],
             ],
         ],
         [

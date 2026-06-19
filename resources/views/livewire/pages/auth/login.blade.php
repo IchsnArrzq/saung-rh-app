@@ -32,10 +32,12 @@ new #[Layout('layouts.auth')] class extends Component {
 
         $intended = (string) session()->get('url.intended', '');
         $intendedPath = (string) parse_url($intended, PHP_URL_PATH);
+        $isAdminPath = str_starts_with($intendedPath, '/admin');
         $isCustomerPath = str_starts_with($intendedPath, '/customer');
 
         // Prevent role mismatch redirect loops that end in 403 pages.
-        if ($intendedPath !== '' && (($isAdmin && $isCustomerPath) || (! $isAdmin && ! $isCustomerPath))) {
+        // Admin tidak boleh diarahkan ke portal customer, dan sebaliknya.
+        if ($intendedPath !== '' && (($isAdmin && $isCustomerPath) || (! $isAdmin && $isAdminPath))) {
             session()->forget('url.intended');
         }
 
@@ -50,18 +52,18 @@ new #[Layout('layouts.auth')] class extends Component {
     <form wire:submit="login">
         <!-- Email Address -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email"
-                required autofocus autocomplete="username" />
+            <x-input-label for="email" :value="__('Email')" class="font-bold" />
+            <x-text-input wire:model="form.email" id="email" class=" block mt-1 w-full" type="email" name="email"
+                required autofocus autocomplete="username" placeholder="email@example.com" />
             <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
         </div>
 
         <!-- Password -->
         <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+            <x-input-label for="password" :value="__('Password')" class="font-bold" />
 
-            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full" type="password"
-                name="password" required autocomplete="current-password" />
+            <x-text-input wire:model="form.password" id="password" class=" block mt-1 w-full" type="password"
+                name="password" required autocomplete="current-password" placeholder="password" />
 
             <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
         </div>
@@ -70,7 +72,7 @@ new #[Layout('layouts.auth')] class extends Component {
         <div class="block mt-4">
             <label for="remember" class="inline-flex items-center">
                 <input wire:model="form.remember" id="remember" type="checkbox"
-                    class="checkbox checkbox-sm checkbox-primary rounded-md"
+                    class="checkbox checkbox-sm checkbox-primary rounded-md border"
                     name="remember">
                 <span class="ms-2 text-sm text-stone-600">{{ __('Remember me') }}</span>
             </label>

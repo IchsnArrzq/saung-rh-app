@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\CustomerUserController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\IngredientController;
 use App\Http\Controllers\Admin\MenuCategoryController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\MenuStatusController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReservationController;
+use App\Http\Controllers\Admin\StockOpnameController;
 use App\Http\Controllers\Admin\TableCategoryController;
 use App\Http\Controllers\Admin\TableController;
 use App\Http\Controllers\Admin\TableStatusController;
@@ -87,4 +89,16 @@ Route::middleware(['demo.login', 'auth', 'verified', 'role:superadmin|admin|cash
         Route::get('reservations/{reservation}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
 
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+
+        // Ingredients (Bahan Makanan)
+        Route::get('ingredients', [IngredientController::class, 'index'])->name('ingredients.index');
+        Route::get('ingredients/create', [IngredientController::class, 'create'])->name('ingredients.create');
+        Route::get('ingredients/{ingredient}/edit', [IngredientController::class, 'edit'])->name('ingredients.edit');
+
+        // Resep per menu
+        Route::get('menus/{menu}/ingredients', [IngredientController::class, 'menuIngredients'])->name('menus.ingredients.edit');
+
+        // Stock Opname
+        Route::get('stock-opnames', [StockOpnameController::class, 'index'])->name('stock-opnames.index');
+        Route::get('stock-opnames/create', [StockOpnameController::class, 'create'])->name('stock-opnames.create');
     });

@@ -32,10 +32,11 @@ class CustomerMenuCatalogController extends Controller
         }
 
         $search = trim($request->string('search')->toString());
+        $categoryId = $request->integer('category_id') ?: null;
 
         return view('customer.menus.index', [
             'search' => $search,
-            ...$this->orderCartService->menuCatalogData($tableId, $search),
+            ...$this->orderCartService->menuCatalogData($tableId, $search, $categoryId),
         ]);
     }
 
@@ -100,6 +101,16 @@ class CustomerMenuCatalogController extends Controller
 
         return redirect($this->safeRedirectTo((string) ($validated['redirect_to'] ?? ''), route('customer.menus.cart.index', ['table_id' => $tableId])))
             ->with('success', 'Item cart dihapus.');
+    }
+
+    public function clearCart(Request $request): RedirectResponse
+    {
+        $tableId = $request->validate(['table_id' => ['required', 'exists:tables,id']])['table_id'];
+
+        $this->orderCartService->emptyCart($tableId);
+
+        return redirect()->route('customer.menus.index', ['table_id' => $tableId])
+            ->with('success', 'Cart dikosongkan.');
     }
 
     public function checkout(Request $request): RedirectResponse

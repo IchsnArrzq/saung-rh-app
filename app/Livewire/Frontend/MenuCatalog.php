@@ -3,8 +3,10 @@
 namespace App\Livewire\Frontend;
 
 use App\Models\Menu;
+use App\Models\MenuCategory;
 use App\Models\Table;
 use App\Support\RestaurantCart;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -16,13 +18,12 @@ class MenuCatalog extends Component
 
     public ?string $tableId = null;
 
-    public ?string $detailMenuId = null;
-
-    public int $detailQty = 1;
-
-    public string $detailNotes = '';
+    public ?int $activeCategoryId = null;
 
     public string $search = '';
+
+    /** @var array<string, mixed>|null */
+    public ?array $selectedMenu = null;
 
     public function mount(): void
     {
@@ -40,18 +41,35 @@ class MenuCatalog extends Component
         $this->tableId = $context['table_id'];
     }
 
-    public function showDetail(string $menuId): void
+    public function setCategory(?int $categoryId = null): void
     {
-        $this->detailMenuId = $menuId;
-        $this->detailQty = 1;
-        $this->detailNotes = '';
+        $this->activeCategoryId = $categoryId;
     }
 
-    public function closeDetail(): void
+    public function showMenuDetail(string $menuId): void
     {
-        $this->detailMenuId = null;
-        $this->detailQty = 1;
-        $this->detailNotes = '';
+        $menu = Menu::query()
+            ->with(['category:id,name', 'status:id,name,key,color'])
+            ->findOrFail($menuId);
+
+        $this->selectedMenu = [
+            'id' => (string) $menu->id,
+            'name' => (string) $menu->name,
+            'price' => (float) $menu->price,
+            'description' => (string) ($menu->description ?? ''),
+            'image_url' => (string) ($menu->image_url ?? ''),
+            'is_available' => (bool) $menu->is_available,
+            'category_name' => (string) ($menu->category?->name ?? 'Uncategorized'),
+            'sku' => (string) ($menu->sku ?? '-'),
+        ];
+
+        $this->dispatch('open-modal', 'menu-detail-modal');
+    }
+
+    public function closeMenuDetail(): void
+    {
+        $this->dispatch('close-modal', 'menu-detail-modal');
+        $this->selectedMenu = null;
     }
 
     public function quickAdd(string $menuId): void
@@ -59,62 +77,12 @@ class MenuCatalog extends Component
         $menu = Menu::query()->where('is_available', true)->find($menuId);
 
         if (! $menu) {
-            $message = 'Menu tidak ditemukan atau sedang tidak tersedia.';
-
-            $this->addError('cart', $message);
-            $this->dispatchCartNotification('error', 'Gagal Menambahkan', $message);
+            $this->addError('cart', 'Menu tidak ditemukan atau sedang tidak tersedia.');
 
             return;
         }
 
         RestaurantCart::addItem($menu, 1);
-
-        $message = $menu->name.' ditambahkan ke cart.';
-
-        session()->flash('success', $message);
-        $this->dispatchCartNotification('success', 'Berhasil', $message);
-    }
-
-    public function addDetailToCart(): void
-    {
-        $validator = Validator::make([
-            'detailMenuId' => $this->detailMenuId,
-            'detailQty' => $this->detailQty,
-            'detailNotes' => $this->detailNotes,
-        ], [
-            'detailMenuId' => ['required', 'exists:menus,id'],
-            'detailQty' => ['required', 'integer', 'min:1', 'max:20'],
-            'detailNotes' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        if ($validator->fails()) {
-            $message = $validator->errors()->first() ?: 'Data cart tidak valid.';
-
-            $this->setErrorBag($validator->errors());
-            $this->dispatchCartNotification('error', 'Gagal Menambahkan', $message);
-
-            return;
-        }
-
-        $menu = Menu::query()->where('is_available', true)->find($this->detailMenuId);
-
-        if (! $menu) {
-            $message = 'Menu tidak ditemukan atau sedang tidak tersedia.';
-
-            $this->addError('cart', $message);
-            $this->dispatchCartNotification('error', 'Gagal Menambahkan', $message);
-
-            return;
-        }
-
-        RestaurantCart::addItem($menu, $this->detailQty, trim($this->detailNotes) ?: null);
-
-        $message = $menu->name.' ditambahkan ke cart.';
-
-        session()->flash('success', $message);
-        $this->dispatchCartNotification('success', 'Berhasil', $message);
-
-        $this->closeDetail();
     }
 
     public function incrementQty(string $menuId): void
@@ -162,40 +130,56 @@ class MenuCatalog extends Component
         return $this->redirectRoute('public.cart.index', navigate: true);
     }
 
-    public function render()
+    public function getCategoriesProperty(): Collection
     {
-        $menus = Menu::query()
-            ->with('category')
+        return MenuCategory::query()
+            ->where('is_active', true)
+            ->withCount(['menus' => fn ($q) => $q->where('is_available', true)])
+            ->orderBy('name')
+            ->get();
+    }
+
+    public function getMenusProperty(): Collection
+    {
+        $search = trim($this->search);
+
+        return Menu::query()
+            ->with('category:id,name')
             ->where('is_available', true)
-            ->when($this->search !== '', function ($query) {
-                $query->where(function ($inner) {
-                    $inner->where('name', 'like', '%'.$this->search.'%')
-                        ->orWhere('description', 'like', '%'.$this->search.'%');
+            ->when($this->activeCategoryId, fn ($q) => $q->where('menu_category_id', $this->activeCategoryId))
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('description', 'like', '%'.$search.'%')
+                        ->orWhere('sku', 'like', '%'.$search.'%')
+                        ->orWhereHas('category', fn ($c) => $c->where('name', 'like', '%'.$search.'%'));
                 });
             })
             ->orderBy('name')
             ->get();
+    }
 
-        $detailMenu = $this->detailMenuId
-            ? Menu::query()->with('category')->find($this->detailMenuId)
-            : null;
+    public function getTotalAvailableProperty(): int
+    {
+        return Menu::query()->where('is_available', true)->count();
+    }
 
+    public function render()
+    {
         $selectedTable = $this->tableId
             ? Table::query()->find($this->tableId)
             : null;
 
         return view('livewire.frontend.menu-catalog', [
-            'menus' => $menus,
-            'detailMenu' => $detailMenu,
+            'categories' => $this->categories,
+            'menus' => $this->menus,
+            'totalAvailable' => $this->totalAvailable,
             'selectedTable' => $selectedTable,
             'cartCount' => RestaurantCart::count(),
             'cartItems' => collect(RestaurantCart::cart())->values(),
             'cartSubtotal' => RestaurantCart::subtotal(),
+            'mode' => $this->mode,
+            'tableId' => $this->tableId,
         ]);
-    }
-
-    private function dispatchCartNotification(string $type, string $title, string $message): void
-    {
-        $this->dispatch('cart-notification', type: $type, title: $title, message: $message);
     }
 }

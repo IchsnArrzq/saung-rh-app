@@ -47,6 +47,11 @@ class Menu extends Model
         return $this->belongsTo(MenuStatus::class, 'menu_status_id');
     }
 
+    public function menuIngredients(): HasMany
+    {
+        return $this->hasMany(MenuIngredient::class);
+    }
+
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
