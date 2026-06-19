@@ -6,6 +6,7 @@ use App\Events\OrderCreated;
 use App\Models\Menu;
 use App\Models\MenuCategory;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Table;
 use App\Models\TableStatus;
 use App\Support\RestaurantCart;
@@ -21,6 +22,8 @@ class OrderCard extends Component
     public ?string $tableId = null;
     public string $customerName = '';
     public string $notes = '';
+    public bool $payNow = true;
+    public string $paymentMethod = 'cash';
 
     /**
      * @var array<string, mixed>|null
@@ -119,6 +122,8 @@ class OrderCard extends Component
             'tableId' => ['nullable', 'exists:tables,id'],
             'customerName' => ['nullable', 'string', 'max:120'],
             'notes' => ['nullable', 'string'],
+            'payNow' => ['boolean'],
+            'paymentMethod' => ['required_if:payNow,true', 'in:cash,qris,debit_card,credit_card,transfer,ewallet'],
         ]);
 
         $cart = RestaurantCart::cart();
@@ -176,6 +181,19 @@ class OrderCard extends Component
 
             $order->items()->createMany($items);
 
+            if ((bool) ($validated['payNow'] ?? false) && $subtotal > 0) {
+                Payment::query()->create([
+                    'order_id' => $order->id,
+                    'method' => $validated['paymentMethod'] ?? 'cash',
+                    'type' => 'full',
+                    'status' => 'paid',
+                    'amount' => $subtotal,
+                    'reference' => 'POS-'.now()->format('Ymd').'-'.Str::upper(Str::random(4)),
+                    'notes' => 'Payment otomatis dari POS.',
+                    'paid_at' => now(),
+                ]);
+            }
+
             if ($table && ($table->tableStatus?->key ?? $table->status) === 'available' && $orderInStatus) {
                 $table->update([
                     'table_status_id' => $orderInStatus->id,
@@ -190,6 +208,8 @@ class OrderCard extends Component
         $this->notes = '';
         $this->customerName = (string) (auth()->user()?->name ?? '');
         $this->tableId = null;
+        $this->payNow = true;
+        $this->paymentMethod = 'cash';
         $this->resetValidation();
 
         OrderCreated::dispatch($order);

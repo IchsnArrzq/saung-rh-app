@@ -135,6 +135,35 @@
                             <span class="mt-1 text-xs text-error">{{ $message }}</span>
                         @enderror
                     </label>
+
+                    <div class="rounded-xl border border-base-300 bg-base-200/60 p-3">
+                        <label class="flex cursor-pointer items-center justify-between gap-3">
+                            <span>
+                                <span class="block text-xs font-semibold uppercase tracking-wide text-base-content/70">Payment</span>
+                                <span class="text-sm font-medium text-base-content">Langsung buat payment</span>
+                            </span>
+                            <input type="checkbox" class="toggle toggle-primary" wire:model.live="payNow">
+                        </label>
+
+                        @if ($payNow)
+                            <label class="form-control mt-3 w-full">
+                                <div class="label py-1">
+                                    <span class="label-text text-xs font-semibold uppercase tracking-wide text-base-content/70">Metode Payment</span>
+                                </div>
+                                <select class="select select-bordered w-full" wire:model.defer="paymentMethod">
+                                    <option value="cash">Cash</option>
+                                    <option value="qris">QRIS</option>
+                                    <option value="debit_card">Debit Card</option>
+                                    <option value="credit_card">Credit Card</option>
+                                    <option value="transfer">Transfer</option>
+                                    <option value="ewallet">E-Wallet</option>
+                                </select>
+                                @error('paymentMethod')
+                                    <span class="mt-1 text-xs text-error">{{ $message }}</span>
+                                @enderror
+                            </label>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="mt-3 space-y-3">

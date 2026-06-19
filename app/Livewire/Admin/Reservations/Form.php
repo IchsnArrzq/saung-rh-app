@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Admin\Reservations;
 
+use App\Models\Menu;
 use App\Models\Reservation;
 use App\Models\Table;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -33,11 +35,19 @@ class Form extends Component
 
     public string $notes = '';
 
+    /**
+     * @var array<int, array{menu_id:string,qty:int|string,notes:string}>
+     */
+    public array $items = [
+        ['menu_id' => '', 'qty' => 1, 'notes' => ''],
+    ];
+
     public function mount(?Reservation $reservation = null): void
     {
         $this->reservation = $reservation;
 
         if ($this->reservation) {
+            $this->reservation->loadMissing('items');
 
             $this->table_id = (string) ($this->reservation->table_id ?? '');
             $this->customer_name = (string) $this->reservation->customer_name;
@@ -46,11 +56,34 @@ class Form extends Component
             $this->reservation_at = (string) ($this->reservation->reservation_at?->format('Y-m-d\TH:i') ?? '');
             $this->status = (string) ($this->reservation->status ?: 'pending');
             $this->notes = (string) ($this->reservation->notes ?? '');
+            $this->items = $this->reservation->items
+                ->map(fn ($item): array => [
+                    'menu_id' => (string) ($item->menu_id ?? ''),
+                    'qty' => (int) $item->qty,
+                    'notes' => (string) ($item->notes ?? ''),
+                ])
+                ->values()
+                ->all() ?: [['menu_id' => '', 'qty' => 1, 'notes' => '']];
 
             return;
         }
 
         $this->reservation_at = now()->addHour()->format('Y-m-d\TH:i');
+    }
+
+    public function addItem(): void
+    {
+        $this->items[] = ['menu_id' => '', 'qty' => 1, 'notes' => ''];
+    }
+
+    public function removeItem(int $index): void
+    {
+        if (count($this->items) <= 1) {
+            return;
+        }
+
+        unset($this->items[$index]);
+        $this->items = array_values($this->items);
     }
 
     public function save()
@@ -60,13 +93,46 @@ class Form extends Component
         $validated['phone'] = $validated['phone'] ?: null;
         $validated['notes'] = $validated['notes'] ?: null;
 
-        if ($this->reservation) {
-            $this->reservation->update($validated);
-            session()->flash('success', 'Reservasi berhasil diperbarui.');
-        } else {
-            Reservation::query()->create($validated);
-            session()->flash('success', 'Reservasi berhasil ditambahkan.');
-        }
+        DB::transaction(function () use ($validated): void {
+            $itemPayload = $validated['items'];
+            unset($validated['items']);
+
+            $reservation = $this->reservation;
+
+            if ($reservation) {
+                $reservation->update($validated);
+            } else {
+                $reservation = Reservation::query()->create($validated);
+            }
+
+            $menuMap = Menu::query()
+                ->whereIn('id', collect($itemPayload)->pluck('menu_id')->filter())
+                ->get()
+                ->keyBy('id');
+
+            $items = collect($itemPayload)
+                ->map(function (array $item) use ($menuMap): array {
+                    $menu = $menuMap->get($item['menu_id']);
+                    $qty = (int) $item['qty'];
+                    $price = (float) ($menu?->price ?? 0);
+
+                    return [
+                        'menu_id' => $menu?->id,
+                        'menu_name_snapshot' => $menu?->name ?? 'Unknown Menu',
+                        'qty' => $qty,
+                        'unit_price' => $price,
+                        'line_total' => $qty * $price,
+                        'notes' => trim((string) ($item['notes'] ?? '')) ?: null,
+                    ];
+                })
+                ->values()
+                ->all();
+
+            $reservation->items()->delete();
+            $reservation->items()->createMany($items);
+        });
+
+        session()->flash('success', $this->reservation ? 'Reservasi berhasil diperbarui.' : 'Reservasi berhasil ditambahkan.');
 
         return $this->redirectRoute('reservations.index', navigate: true);
     }
@@ -84,6 +150,10 @@ class Form extends Component
             'reservation_at' => ['required', 'date'],
             'status' => ['required', Rule::in(self::STATUS_OPTIONS)],
             'notes' => ['nullable', 'string'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.menu_id' => ['required', 'exists:menus,id'],
+            'items.*.qty' => ['required', 'integer', 'min:1', 'max:50'],
+            'items.*.notes' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -103,11 +173,20 @@ class Form extends Component
         return self::STATUS_OPTIONS;
     }
 
+    /**
+     * @return Collection<int, Menu>
+     */
+    public function menus(): Collection
+    {
+        return Menu::query()->where('is_available', true)->orderBy('name')->get();
+    }
+
     public function render(): View
     {
         return view('livewire.admin.reservations.form', [
             'tables' => $this->tables(),
             'statusOptions' => $this->statusOptions(),
+            'menus' => $this->menus(),
         ]);
     }
 }
