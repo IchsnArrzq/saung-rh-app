@@ -47,7 +47,7 @@ class DashboardRepository implements DashboardRepositoryInterface
     public function availableMenus(): int
     {
         return Menu::query()
-            ->where('is_available', true)
+            ->available()
             ->count();
     }
 
@@ -125,7 +125,7 @@ class DashboardRepository implements DashboardRepositoryInterface
     public function unavailableMenus(): int
     {
         return Menu::query()
-            ->where('is_available', false)
+            ->unavailable()
             ->count();
     }
 }

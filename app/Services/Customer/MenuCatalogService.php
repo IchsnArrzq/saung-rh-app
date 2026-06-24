@@ -13,7 +13,7 @@ class MenuCatalogService
 
         return Menu::query()
             ->with('category')
-            ->where('is_available', true)
+            ->available()
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
                     $inner->where('name', 'like', '%'.$search.'%')

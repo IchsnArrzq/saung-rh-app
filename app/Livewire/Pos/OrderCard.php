@@ -43,7 +43,7 @@ class OrderCard extends Component
     public function addToCart(string $menuId): void
     {
         $menu = Menu::query()
-            ->where('is_available', true)
+            ->available()
             ->findOrFail($menuId);
 
         RestaurantCart::addItem($menu, 1);
@@ -149,7 +149,7 @@ class OrderCard extends Component
             $cleanNotes = trim((string) ($validated['notes'] ?? ''));
 
             $order = Order::query()->create([
-                'user_id' => auth()->id(),
+                'cashier_id' => auth()->id(),
                 'table_id' => $table?->id,
                 'order_number' => $this->generateOrderNumber(),
                 'customer_name' => trim((string) ($validated['customerName'] ?? '')) ?: null,
@@ -222,7 +222,7 @@ class OrderCard extends Component
         return MenuCategory::query()
             ->where('is_active', true)
             ->withCount(['menus' => function ($query) {
-                $query->where('is_available', true);
+                $query->available();
             }])
             ->orderBy('name')
             ->get();
@@ -234,7 +234,7 @@ class OrderCard extends Component
 
         return Menu::query()
             ->with('category:id,name')
-            ->where('is_available', true)
+            ->available()
             ->when($this->activeCategoryId, fn ($query) => $query->where('menu_category_id', $this->activeCategoryId))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
@@ -276,7 +276,7 @@ class OrderCard extends Component
         return view('livewire.pos.order-card', [
             'categories' => $this->categories,
             'menus' => $this->menus,
-            'totalAvailableMenus' => Menu::query()->where('is_available', true)->count(),
+            'totalAvailableMenus' => Menu::query()->available()->count(),
             'cartItems' => $this->cartItems,
             'cartCount' => $this->cartCount,
             'cartSubtotal' => $this->cartSubtotal,

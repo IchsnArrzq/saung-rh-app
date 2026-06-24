@@ -53,7 +53,7 @@ class OrderService
 
     public function availableMenus(): Collection
     {
-        return Menu::query()->where('is_available', true)->orderBy('name')->get();
+        return Menu::query()->available()->orderBy('name')->get();
     }
 
     public function withItems(Order $order): Order
@@ -72,7 +72,7 @@ class OrderService
             $total = max($subtotal + $tax, 0);
 
             $order = Order::query()->create([
-                'user_id' => Auth::id(),
+                'cashier_id' => Auth::id(),
                 'table_id' => $validated['table_id'] ?? null,
                 'order_number' => $this->generateOrderNumber(),
                 'customer_name' => $validated['customer_name'] ?? null,

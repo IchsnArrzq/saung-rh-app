@@ -26,6 +26,8 @@ class User extends Authenticatable
         'email',
         'password',
         'is_active',
+        'phone',
+        'status',
         'navigation_menu_preference',
     ];
 

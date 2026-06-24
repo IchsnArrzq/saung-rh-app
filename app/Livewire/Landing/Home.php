@@ -11,7 +11,7 @@ class Home extends Component
 {
     public function quickAdd(string $menuId)
     {
-        $menu = Menu::query()->where('is_available', true)->find($menuId);
+        $menu = Menu::query()->available()->find($menuId);
 
         if (! $menu) {
             $this->addError('cart', 'Menu sedang tidak tersedia.');

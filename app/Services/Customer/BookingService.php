@@ -30,12 +30,12 @@ class BookingService
                 ->get(),
             'menus' => Menu::query()
                 ->with('category:id,name')
-                ->where('is_available', true)
+                ->available()
                 ->orderBy('name')
                 ->get(),
             'categories' => MenuCategory::query()
                 ->where('is_active', true)
-                ->withCount(['menus' => fn ($q) => $q->where('is_available', true)])
+                ->withCount(['menus' => fn ($q) => $q->available()])
                 ->orderBy('name')
                 ->get(),
         ];

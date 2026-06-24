@@ -16,9 +16,11 @@ return new class extends Migration
             $table->string('code')->nullable()->unique();
             $table->string('name')->nullable();
             $table->unsignedInteger('capacity')->default(4);
-            $table->enum('status', ['available', 'occupied', 'order_in', 'cleaning'])->default('available');
-            $table->uuid('table_status_id')->nullable();
-            $table->uuid('table_category_id')->nullable();
+            $table->uuid('table_status_id')->nullable()->index();
+            $table->uuid('table_category_id')->nullable()->index();
+            $table->string('qr_token', 64)->nullable()->unique();
+            $table->unsignedSmallInteger('position_x')->nullable();
+            $table->unsignedSmallInteger('position_y')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
         });

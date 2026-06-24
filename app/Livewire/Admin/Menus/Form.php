@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Menus;
 
 use App\Models\Menu;
 use App\Models\MenuCategory;
+use App\Models\MenuStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
@@ -61,7 +62,7 @@ class Form extends Component
         $validated['description'] = $validated['description'] ?: null;
         $validated['price'] = (float) $validated['price'];
         $validated['image_url'] = $validated['image_url'] ?: null;
-        $validated['is_available'] = (bool) $this->is_available;
+        $validated['menu_status_id'] = $this->resolveMenuStatusId($this->is_available);
 
         if ($this->menu) {
             $this->menu->update($validated);
@@ -95,8 +96,15 @@ class Form extends Component
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'image_url' => ['nullable', 'string', 'max:255'],
-            'is_available' => ['boolean'],
         ];
+    }
+
+    private function resolveMenuStatusId(bool $available): ?string
+    {
+        $key = $available ? 'available' : 'unavailable';
+
+        return MenuStatus::query()->where('key', $key)->value('id')
+            ?? MenuStatus::query()->where('key', 'available')->value('id');
     }
 
     /**

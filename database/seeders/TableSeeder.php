@@ -38,7 +38,6 @@ class TableSeeder extends Seeder
                 [
                     'name' => 'Meja '.str_pad((string) $i, 2, '0', STR_PAD_LEFT),
                     'capacity' => fake()->randomElement([2, 4, 4, 6, 8]),
-                    'status' => $status?->key ?? 'available',
                     'table_status_id' => $status?->id,
                     'table_category_id' => $categoryIds !== []
                         ? $categoryIds[array_rand($categoryIds)]

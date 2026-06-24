@@ -41,7 +41,7 @@ class ReportService
 
         // Pendapatan Per Kasir
         $revenuePerCashier = Order::query()
-            ->join('users', 'orders.user_id', '=', 'users.id')
+            ->join('users', 'orders.cashier_id', '=', 'users.id')
             ->whereBetween('orders.ordered_at', [$start, $end])
             ->where('orders.status', 'paid')
             ->select('users.name', DB::raw('SUM(orders.total) as total_revenue'), DB::raw('COUNT(orders.id) as total_orders'))

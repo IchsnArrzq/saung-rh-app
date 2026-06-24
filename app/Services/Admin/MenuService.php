@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 
 use App\Models\Menu;
 use App\Models\MenuCategory;
+use App\Models\MenuStatus;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -81,8 +82,17 @@ class MenuService
         ]);
 
         $validated['slug'] = $validated['slug'] ?: Str::slug($validated['name']);
-        $validated['is_available'] = $request->boolean('is_available');
+        unset($validated['is_available']);
+        $validated['menu_status_id'] = $this->resolveMenuStatusId($request->boolean('is_available'));
 
         return $validated;
+    }
+
+    private function resolveMenuStatusId(bool $available): ?string
+    {
+        $key = $available ? 'available' : 'unavailable';
+
+        return MenuStatus::query()->where('key', $key)->value('id')
+            ?? MenuStatus::query()->where('key', 'available')->value('id');
     }
 }

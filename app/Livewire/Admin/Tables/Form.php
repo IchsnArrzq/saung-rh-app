@@ -71,7 +71,6 @@ class Form extends Component
             'table_status_id' => $validated['table_status_id'],
             'table_category_id' => $validated['table_category_id'] ?: null,
             'notes' => $validated['notes'] ?: null,
-            'status' => $status->key,
         ];
 
         if ($this->table) {

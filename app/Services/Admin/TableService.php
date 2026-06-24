@@ -114,7 +114,6 @@ class TableService
 
         $table->update([
             'table_status_id' => $status->id,
-            'status' => $status->key,
         ]);
     }
 
@@ -135,15 +134,11 @@ class TableService
             'notes' => ['nullable', 'string'],
         ]);
 
-        $status = TableStatus::query()->find($validated['table_status_id']);
-
-        if (! $status) {
+        if (! TableStatus::query()->whereKey($validated['table_status_id'])->exists()) {
             throw ValidationException::withMessages([
                 'table_status_id' => 'Status meja tidak valid.',
             ]);
         }
-
-        $validated['status'] = $status->key;
 
         return $validated;
     }

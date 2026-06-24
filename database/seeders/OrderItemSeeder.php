@@ -13,7 +13,7 @@ class OrderItemSeeder extends Seeder
      */
     public function run(): void
     {
-        $menuCollection = Menu::query()->where('is_available', true)->get();
+        $menuCollection = Menu::query()->available()->get();
 
         if ($menuCollection->isEmpty()) {
             return;

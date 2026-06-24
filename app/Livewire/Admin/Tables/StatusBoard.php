@@ -27,7 +27,6 @@ class StatusBoard extends Component
 
         $table->update([
             'table_status_id' => $targetStatus->id,
-            'status' => $targetStatus->key,
         ]);
 
         session()->flash('success', "Meja {$table->code} dipindahkan ke status {$targetStatus->name}.");

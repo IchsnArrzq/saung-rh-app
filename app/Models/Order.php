@@ -18,7 +18,8 @@ class Order extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'user_id',
+        'cashier_id',
+        'customer_id',
         'table_id',
         'order_number',
         'customer_name',
@@ -59,6 +60,21 @@ class Order extends Model
 
     public function cashier(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'cashier_id');
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    public function statusLogs(): HasMany
+    {
+        return $this->hasMany(OrderStatusLog::class);
+    }
+
+    public function orderNotes(): HasMany
+    {
+        return $this->hasMany(OrderNote::class);
     }
 }

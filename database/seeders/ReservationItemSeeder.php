@@ -13,7 +13,7 @@ class ReservationItemSeeder extends Seeder
      */
     public function run(): void
     {
-        $menus = Menu::query()->where('is_available', true)->get();
+        $menus = Menu::query()->available()->get();
 
         if ($menus->isEmpty()) {
             return;

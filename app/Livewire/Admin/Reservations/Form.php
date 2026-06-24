@@ -178,7 +178,7 @@ class Form extends Component
      */
     public function menus(): Collection
     {
-        return Menu::query()->where('is_available', true)->orderBy('name')->get();
+        return Menu::query()->available()->orderBy('name')->get();
     }
 
     public function render(): View

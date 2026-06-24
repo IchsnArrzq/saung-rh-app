@@ -24,7 +24,7 @@ class PublicMenuController extends Controller
 
         $relatedMenus = Menu::query()
             ->with('category')
-            ->where('is_available', true)
+            ->available()
             ->whereKeyNot($menu->id)
             ->when($menu->menu_category_id, fn ($query) => $query->where('menu_category_id', $menu->menu_category_id))
             ->orderBy('name')

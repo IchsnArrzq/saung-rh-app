@@ -21,6 +21,10 @@ return new class extends Migration
             $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
+
+        Schema::table('tables', function (Blueprint $table) {
+            $table->foreign('table_status_id')->references('id')->on('table_statuses')->nullOnDelete();
+        });
     }
 
     /**
@@ -28,6 +32,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('tables', function (Blueprint $table) {
+            $table->dropForeign(['table_status_id']);
+        });
+
         Schema::dropIfExists('table_statuses');
     }
 };

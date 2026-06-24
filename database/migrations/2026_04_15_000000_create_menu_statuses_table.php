@@ -21,6 +21,10 @@ return new class extends Migration
             $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
+
+        Schema::table('menus', function (Blueprint $table) {
+            $table->foreign('menu_status_id')->references('id')->on('menu_statuses')->nullOnDelete();
+        });
     }
 
     /**
@@ -28,6 +32,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('menus', function (Blueprint $table) {
+            $table->dropForeign(['menu_status_id']);
+        });
+
         Schema::dropIfExists('menu_statuses');
     }
 };

@@ -19,6 +19,10 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
+
+        Schema::table('menus', function (Blueprint $table) {
+            $table->foreign('menu_category_id')->references('id')->on('menu_categories')->nullOnDelete();
+        });
     }
 
     /**
@@ -26,6 +30,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('menus', function (Blueprint $table) {
+            $table->dropForeign(['menu_category_id']);
+        });
+
         Schema::dropIfExists('menu_categories');
     }
 };

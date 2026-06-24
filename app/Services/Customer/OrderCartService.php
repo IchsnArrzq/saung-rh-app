@@ -75,11 +75,11 @@ class OrderCartService
 
         $categories = \App\Models\MenuCategory::query()
             ->where('is_active', true)
-            ->withCount(['menus' => fn ($q) => $q->where('is_available', true)])
+            ->withCount(['menus' => fn ($q) => $q->available()])
             ->orderBy('name')
             ->get();
 
-        $totalAvailable = Menu::query()->where('is_available', true)->count();
+        $totalAvailable = Menu::query()->available()->count();
 
         return [
             'table' => $table,
@@ -102,7 +102,7 @@ class OrderCartService
 
         $relatedMenus = Menu::query()
             ->with('category')
-            ->where('is_available', true)
+            ->available()
             ->whereKeyNot($menu->id)
             ->when($menu->menu_category_id, fn ($query) => $query->where('menu_category_id', $menu->menu_category_id))
             ->orderBy('name')
@@ -144,7 +144,7 @@ class OrderCartService
         $table = $this->resolveAvailableTable($validated['table_id']);
 
         $menu = Menu::query()
-            ->where('is_available', true)
+            ->available()
             ->find($validated['menu_id']);
 
         if (! $menu) {
@@ -283,7 +283,7 @@ class OrderCartService
 
         return Menu::query()
             ->with('category')
-            ->where('is_available', true)
+            ->available()
             ->when($categoryId, fn ($query) => $query->where('menu_category_id', $categoryId))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {

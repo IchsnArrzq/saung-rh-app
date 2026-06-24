@@ -15,9 +15,13 @@ class MenuSeeder extends Seeder
      */
     public function run(): void
     {
-        $defaultMenuStatusId = MenuStatus::query()
+        $availableStatusId = MenuStatus::query()
             ->where('key', 'available')
             ->value('id');
+
+        $unavailableStatusId = MenuStatus::query()
+            ->where('key', 'unavailable')
+            ->value('id') ?? $availableStatusId;
 
         $menus = [
             ['Nasi Goreng Special', 'Makanan Utama', 35000],
@@ -46,13 +50,13 @@ class MenuSeeder extends Seeder
                 ['slug' => $slug],
                 [
                     'menu_category_id' => $category?->id,
-                    'menu_status_id' => $defaultMenuStatusId,
+                    'menu_status_id' => fake()->boolean(90) ? $availableStatusId : $unavailableStatusId,
                     'name' => $menuName,
                     'sku' => strtoupper(Str::slug($menuName, '')),
                     'description' => fake()->sentence(12),
                     'price' => $price,
                     'image_url' => $image_url,
-                    'is_available' => fake()->boolean(90),
+                    'track' => fake()->boolean(20) ? 'vip' : 'regular',
                 ]
             );
         }

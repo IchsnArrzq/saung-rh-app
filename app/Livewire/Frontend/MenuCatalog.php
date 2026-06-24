@@ -74,7 +74,7 @@ class MenuCatalog extends Component
 
     public function quickAdd(string $menuId): void
     {
-        $menu = Menu::query()->where('is_available', true)->find($menuId);
+        $menu = Menu::query()->available()->find($menuId);
 
         if (! $menu) {
             $this->addError('cart', 'Menu tidak ditemukan atau sedang tidak tersedia.');
@@ -134,7 +134,7 @@ class MenuCatalog extends Component
     {
         return MenuCategory::query()
             ->where('is_active', true)
-            ->withCount(['menus' => fn ($q) => $q->where('is_available', true)])
+            ->withCount(['menus' => fn ($q) => $q->available()])
             ->orderBy('name')
             ->get();
     }
@@ -145,7 +145,7 @@ class MenuCatalog extends Component
 
         return Menu::query()
             ->with('category:id,name')
-            ->where('is_available', true)
+            ->available()
             ->when($this->activeCategoryId, fn ($q) => $q->where('menu_category_id', $this->activeCategoryId))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
@@ -161,7 +161,7 @@ class MenuCatalog extends Component
 
     public function getTotalAvailableProperty(): int
     {
-        return Menu::query()->where('is_available', true)->count();
+        return Menu::query()->available()->count();
     }
 
     public function render()

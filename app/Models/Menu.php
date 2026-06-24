@@ -26,15 +26,46 @@ class Menu extends Model
         'description',
         'price',
         'image_url',
-        'is_available',
+        'track',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_available' => 'boolean',
             'price' => 'decimal:2',
         ];
+    }
+
+    /**
+     * Availability is derived from the menu status (single source of truth).
+     */
+    public function getIsAvailableAttribute(): bool
+    {
+        return optional($this->status)->key === 'available';
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<Menu>  $query
+     */
+    public function scopeAvailable($query)
+    {
+        return $query->whereHas('status', fn ($q) => $q->where('key', 'available'));
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<Menu>  $query
+     */
+    public function scopeUnavailable($query)
+    {
+        return $query->whereDoesntHave('status', fn ($q) => $q->where('key', 'available'));
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<Menu>  $query
+     */
+    public function scopeVip($query)
+    {
+        return $query->where('track', 'vip');
     }
 
     public function category(): BelongsTo

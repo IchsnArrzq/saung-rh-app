@@ -15,7 +15,7 @@ class PublicHomeService
     {
         return Menu::query()
             ->with('category')
-            ->where('is_available', true)
+            ->available()
             ->orderBy('name')
             ->limit($limit)
             ->get();

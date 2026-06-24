@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Payment extends Model
+class OrderStatusLog extends Model
 {
     use HasFactory;
     use HasUuids;
@@ -16,34 +16,22 @@ class Payment extends Model
 
     protected $keyType = 'string';
 
+    public const UPDATED_AT = null;
+
     protected $fillable = [
         'order_id',
-        'method',
-        'type',
         'status',
-        'amount',
-        'reference',
-        'proof_image_path',
-        'verified_by',
-        'notes',
-        'paid_at',
+        'note',
+        'created_by',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'amount' => 'decimal:2',
-            'paid_at' => 'datetime',
-        ];
-    }
 
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-    public function verifiedBy(): BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'verified_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

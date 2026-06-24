@@ -54,7 +54,6 @@ class Table extends Component
 
         $table->update([
             'table_status_id' => $status->id,
-            'status' => $status->key,
         ]);
 
         session()->flash('success', 'Status meja berhasil diperbarui.');
