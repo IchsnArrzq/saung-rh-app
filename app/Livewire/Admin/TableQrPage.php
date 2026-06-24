@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Table;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -13,15 +14,18 @@ class TableQrPage extends Component
 
     public function mount(Table $table): void
     {
+        if (empty($table->qr_token)) {
+            $table->update(['qr_token' => (string) Str::random(24)]);
+        }
+
         $this->table = $table;
     }
 
     public function render()
     {
-        $menuUrl = route('public.menu', [
-            'mode' => 'offline',
-            'table_id' => $this->table->id,
-        ]);
+        // QR now points to the check-in endpoint which binds a table session
+        // (physical-presence validation) before forwarding to the menu.
+        $menuUrl = route('checkin.show', ['token' => $this->table->qr_token]);
 
         $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data='.urlencode($menuUrl);
 

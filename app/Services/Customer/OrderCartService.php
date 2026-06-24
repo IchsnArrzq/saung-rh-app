@@ -258,12 +258,11 @@ class OrderCartService
 
             $order->items()->createMany($items);
 
-            $tableStatusKey = $table->tableStatus?->key ?? $table->status;
+            $tableStatusKey = $table->tableStatus?->key;
 
             if ($tableStatusKey === 'available' && $orderInStatus) {
                 $table->update([
                     'table_status_id' => $orderInStatus->id,
-                    'status' => $orderInStatus->key,
                 ]);
             }
 

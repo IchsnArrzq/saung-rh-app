@@ -3,7 +3,7 @@
 use App\Http\Controllers\KDS\KdsController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['web', 'demo.login', 'auth', 'role:superadmin|admin'])
+Route::middleware(['web', 'demo.login', 'auth', 'role:superadmin|admin|chef|receptionist'])
     ->prefix('admin/kds')
     ->name('kds.')
     ->group(function () {

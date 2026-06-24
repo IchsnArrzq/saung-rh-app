@@ -195,7 +195,6 @@ class CartCheckout extends Component
             if ($table->tableStatus?->key === 'available' && $orderInStatus) {
                 $table->update([
                     'table_status_id' => $orderInStatus->id,
-                    'status' => $orderInStatus->key,
                 ]);
             }
         });

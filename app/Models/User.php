@@ -60,4 +60,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Reservation::class);
     }
+
+    public function tips(): HasMany
+    {
+        return $this->hasMany(Tip::class, 'waiter_id');
+    }
+
+    public function serviceLogs(): HasMany
+    {
+        return $this->hasMany(ServiceLog::class, 'waiter_id');
+    }
 }

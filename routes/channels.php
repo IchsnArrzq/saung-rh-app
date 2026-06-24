@@ -7,5 +7,5 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 });
 
 Broadcast::channel('kds', function ($user) {
-    return $user !== null && $user->hasAnyRole(['superadmin', 'admin']);
+    return $user !== null && $user->hasAnyRole(['superadmin', 'admin', 'chef', 'receptionist']);
 });

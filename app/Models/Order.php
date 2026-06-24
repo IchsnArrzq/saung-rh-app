@@ -77,4 +77,21 @@ class Order extends Model
     {
         return $this->hasMany(OrderNote::class);
     }
+
+    /**
+     * VIP priority is derived from any item belonging to a VIP-track menu.
+     * Falls back to the `vip_items_count` aggregate when present (cheaper for lists).
+     */
+    public function getIsVipAttribute(): bool
+    {
+        if (! is_null($this->getAttributeValue('vip_items_count'))) {
+            return (int) $this->vip_items_count > 0;
+        }
+
+        if ($this->relationLoaded('items')) {
+            return $this->items->contains(fn ($item) => optional($item->menu)->track === 'vip');
+        }
+
+        return false;
+    }
 }

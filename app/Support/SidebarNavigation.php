@@ -31,7 +31,7 @@ class SidebarNavigation
             return 'admin';
         }
 
-        $priority = ['superadmin', 'admin', 'cashier', 'customer'];
+        $priority = ['superadmin', 'admin', 'manager', 'receptionist', 'cashier', 'waiter', 'chef', 'ob', 'customer'];
 
         foreach ($priority as $role) {
             if ($user->hasRole($role)) {

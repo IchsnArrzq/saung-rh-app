@@ -170,6 +170,71 @@ return [
         ],
     ],
 
+    'manager' => [
+        [
+            'label' => 'Manager',
+            'icon' => 'ri-bar-chart-box-line',
+            'items' => [
+                ['label' => 'Dashboard', 'icon' => 'ri-dashboard-line', 'route' => 'manager.dashboard', 'active' => ['manager.dashboard']],
+                ['label' => 'Booking Management', 'icon' => 'ri-calendar-check-line', 'route' => 'receptionist.bookings', 'active' => ['receptionist.bookings']],
+                ['label' => 'F&B Top Analytics', 'icon' => 'ri-bar-chart-box-line', 'route' => 'receptionist.analytics', 'active' => ['receptionist.analytics']],
+                ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
+            ],
+        ],
+    ],
+
+    'receptionist' => [
+        [
+            'label' => 'Resepsionis',
+            'icon' => 'ri-customer-service-2-line',
+            'items' => [
+                ['label' => 'Dashboard', 'icon' => 'ri-dashboard-line', 'route' => 'receptionist.dashboard', 'active' => ['receptionist.dashboard']],
+                ['label' => 'Live Kitchen Monitor', 'icon' => 'ri-radar-line', 'route' => 'kds.index', 'active' => ['kds.*'], 'badge' => ['type' => 'text', 'value' => 'WS']],
+                ['label' => 'Table Map', 'icon' => 'ri-layout-grid-line', 'route' => 'receptionist.table-map', 'active' => ['receptionist.table-map']],
+                ['label' => 'Booking Management', 'icon' => 'ri-calendar-check-line', 'route' => 'receptionist.bookings', 'active' => ['receptionist.bookings']],
+                ['label' => 'Visitor Counter', 'icon' => 'ri-group-line', 'route' => 'receptionist.visitors', 'active' => ['receptionist.visitors']],
+                ['label' => 'F&B Top Analytics', 'icon' => 'ri-bar-chart-box-line', 'route' => 'receptionist.analytics', 'active' => ['receptionist.analytics']],
+                ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
+            ],
+        ],
+    ],
+
+    'waiter' => [
+        [
+            'label' => 'Waiter',
+            'icon' => 'ri-walk-line',
+            'items' => [
+                ['label' => 'Portal Waiter', 'icon' => 'ri-dashboard-line', 'route' => 'waiter.dashboard', 'active' => ['waiter.dashboard']],
+                ['label' => 'Update Status Meja', 'icon' => 'ri-refresh-line', 'route' => 'waiter.tables', 'active' => ['waiter.tables']],
+                ['label' => 'Tips & Service Log', 'icon' => 'ri-hand-coin-line', 'route' => 'waiter.tips', 'active' => ['waiter.tips']],
+                ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
+            ],
+        ],
+    ],
+
+    'chef' => [
+        [
+            'label' => 'Kitchen',
+            'icon' => 'ri-knife-blood-line',
+            'items' => [
+                ['label' => 'KDS Realtime', 'icon' => 'ri-radar-line', 'route' => 'kds.index', 'active' => ['kds.*'], 'badge' => ['type' => 'text', 'value' => 'WS']],
+                ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
+            ],
+        ],
+    ],
+
+    'ob' => [
+        [
+            'label' => 'Office Boy',
+            'icon' => 'ri-brush-line',
+            'items' => [
+                ['label' => 'Portal OB', 'icon' => 'ri-dashboard-line', 'route' => 'ob.dashboard', 'active' => ['ob.dashboard']],
+                ['label' => 'Pembersihan Meja', 'icon' => 'ri-brush-line', 'route' => 'ob.tables', 'active' => ['ob.tables']],
+                ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
+            ],
+        ],
+    ],
+
     'customer' => [
         [
             'label' => 'Customer',

@@ -25,8 +25,10 @@
             @endphp
             
             @forelse($mainData as $order)
-                <div class="bg-base-100 border border-base-300 rounded-xl p-3 shadow-sm relative overflow-hidden">
-                    @if($order->status === 'confirmed')
+                <div class="bg-base-100 rounded-xl p-3 shadow-sm relative overflow-hidden {{ $order->is_vip ? 'border-2 border-warning ring-1 ring-warning/40' : 'border border-base-300' }}">
+                    @if($order->is_vip)
+                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-warning"></div>
+                    @elseif($order->status === 'confirmed')
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-warning"></div>
                     @elseif($order->status === 'preparing')
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-info"></div>
@@ -36,7 +38,12 @@
 
                     <div class="flex justify-between items-start pl-3">
                         <div>
-                            <h4 class="font-bold text-base-content text-base">{{ $order->table ? $order->table->name : 'Takeaway' }}</h4>
+                            <h4 class="font-bold text-base-content text-base flex items-center gap-1.5">
+                                {{ $order->table ? $order->table->name : 'Takeaway' }}
+                                @if($order->is_vip)
+                                    <i class="ri-vip-crown-2-fill text-warning" title="Prioritas VIP"></i>
+                                @endif
+                            </h4>
                             <p class="text-xs font-medium text-secondary mt-0.5">#{{ $order->order_number }}</p>
                         </div>
                         <span class="badge {{ in_array($order->status, ['confirmed', 'preparing']) ? 'badge-info' : 'badge-success' }} badge-sm font-bold uppercase tracking-wider">
@@ -103,8 +110,14 @@
             @else
                 <div class="flex gap-4 h-full items-stretch w-max pb-2">
                     @foreach($mainData as $order)
-                        <div class="w-[380px] flex-shrink-0 bg-base-100 rounded-2xl shadow-sm border border-base-300 flex flex-col overflow-hidden h-full {{ in_array($order->status, ['ready', 'served']) ? 'border-success' : '' }}">
-                            
+                        <div class="w-[380px] flex-shrink-0 bg-base-100 rounded-2xl shadow-sm flex flex-col overflow-hidden h-full {{ $order->is_vip ? 'border-2 border-warning ring-2 ring-warning/30' : (in_array($order->status, ['ready', 'served']) ? 'border border-success' : 'border border-base-300') }}">
+
+                            @if($order->is_vip)
+                                <div class="flex items-center gap-1.5 bg-warning text-warning-content px-4 py-1.5 text-xs font-bold uppercase tracking-wider">
+                                    <i class="ri-vip-crown-2-fill"></i> Prioritas VIP
+                                </div>
+                            @endif
+
                             <div class="p-4 border-b border-base-300 bg-base-200">
                                 <div class="flex justify-between items-start mb-3">
                                     <div>

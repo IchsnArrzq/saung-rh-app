@@ -37,6 +37,24 @@ class UserSeeder extends Seeder
         ]);
         $cashier->syncRoles(['cashier']);
 
+        $staffRoles = [
+            'manager' => 'Manager Saung RH',
+            'receptionist' => 'Resepsionis Saung RH',
+            'waiter' => 'Waiter Saung RH',
+            'chef' => 'Chef Saung RH',
+            'ob' => 'Office Boy Saung RH',
+        ];
+
+        foreach ($staffRoles as $role => $name) {
+            $staff = User::query()->firstOrCreate([
+                'email' => "{$role}@example.com",
+            ], [
+                'name' => $name,
+                'password' => Hash::make('password'),
+            ]);
+            $staff->syncRoles([$role]);
+        }
+
         User::query()->firstOrCreate([
             'email' => 'test@example.com',
         ], [

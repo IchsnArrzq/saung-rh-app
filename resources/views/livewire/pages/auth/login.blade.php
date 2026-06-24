@@ -20,24 +20,27 @@ new #[Layout('layouts.auth')] class extends Component {
         Session::regenerate();
 
         $user = auth()->user();
-        $isAdmin = $user?->hasAnyRole(['superadmin', 'admin', 'cashier']) ?? false;
-        
-        if ($user?->hasRole('cashier')) {
-            $redirectTo = route('pos.order.index', absolute: false);
-        } else {
-            $redirectTo = $isAdmin
-                ? route('dashboard', absolute: false)
-                : route('customer.dashboard', absolute: false);
-        }
+        $isStaff = $user && ! $user->hasRole('customer');
+
+        $redirectTo = match (true) {
+            $user?->hasRole('cashier') => route('pos.order.index', absolute: false),
+            $user?->hasRole('manager') => route('manager.dashboard', absolute: false),
+            $user?->hasRole('receptionist') => route('receptionist.dashboard', absolute: false),
+            $user?->hasRole('waiter') => route('waiter.dashboard', absolute: false),
+            $user?->hasRole('chef') => route('kds.index', absolute: false),
+            $user?->hasRole('ob') => route('ob.dashboard', absolute: false),
+            $user?->hasAnyRole(['superadmin', 'admin']) => route('dashboard', absolute: false),
+            default => route('customer.dashboard', absolute: false),
+        };
 
         $intended = (string) session()->get('url.intended', '');
         $intendedPath = (string) parse_url($intended, PHP_URL_PATH);
-        $isAdminPath = str_starts_with($intendedPath, '/admin');
-        $isCustomerPath = str_starts_with($intendedPath, '/customer');
+        $intendedIsCustomer = str_starts_with($intendedPath, '/customer');
+        $intendedIsStaff = (bool) preg_match('#^/(admin|manager|receptionist|waiter|ob)#', $intendedPath);
 
         // Prevent role mismatch redirect loops that end in 403 pages.
-        // Admin tidak boleh diarahkan ke portal customer, dan sebaliknya.
-        if ($intendedPath !== '' && (($isAdmin && $isCustomerPath) || (! $isAdmin && $isAdminPath))) {
+        // Staf tidak boleh diarahkan ke portal customer, dan sebaliknya.
+        if ($intendedPath !== '' && (($isStaff && $intendedIsCustomer) || (! $isStaff && $intendedIsStaff))) {
             session()->forget('url.intended');
         }
 

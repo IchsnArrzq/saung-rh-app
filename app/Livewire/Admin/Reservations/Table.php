@@ -132,10 +132,9 @@ class Table extends Component
             $reservation->update(['status' => 'seated']);
 
             $table = $reservation->table;
-            if ($table && ($table->tableStatus?->key ?? $table->status) === 'available' && $orderInStatus) {
+            if ($table && $table->tableStatus?->key === 'available' && $orderInStatus) {
                 $table->update([
                     'table_status_id' => $orderInStatus->id,
-                    'status' => $orderInStatus->key,
                 ]);
             }
 

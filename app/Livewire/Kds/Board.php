@@ -105,8 +105,10 @@ class Board extends Component
     #[Computed]
     public function ongoingOrders()
     {
-        return Order::with(['items', 'table'])
+        return Order::with(['items.menu', 'table'])
+            ->withCount($this->vipItemsCount())
             ->whereIn('status', ['confirmed', 'preparing'])
+            ->orderByDesc('vip_items_count') // VIP track jumps the queue
             ->orderBy('ordered_at', 'asc')
             ->get();
     }
@@ -114,7 +116,8 @@ class Board extends Component
     #[Computed]
     public function readyOrders()
     {
-        return Order::with(['items', 'table'])
+        return Order::with(['items.menu', 'table'])
+            ->withCount($this->vipItemsCount())
             ->whereIn('status', ['ready'])
             ->orderBy('updated_at', 'asc')
             ->get();
@@ -123,12 +126,26 @@ class Board extends Component
     #[Computed]
     public function completedOrders()
     {
-        return Order::with(['items', 'table'])
+        return Order::with(['items.menu', 'table'])
+            ->withCount($this->vipItemsCount())
             ->whereIn('status', ['served', 'paid'])
             ->whereDate('updated_at', Carbon::today())
             ->orderBy('updated_at', 'desc')
             ->limit(50)
             ->get();
+    }
+
+    /**
+     * Reusable withCount definition that aggregates the number of VIP-track
+     * items per order so the board can flag/prioritise VIP orders.
+     *
+     * @return array<string, callable>
+     */
+    private function vipItemsCount(): array
+    {
+        return [
+            'items as vip_items_count' => fn ($query) => $query->whereHas('menu', fn ($menu) => $menu->where('track', 'vip')),
+        ];
     }
 
     public function render()
