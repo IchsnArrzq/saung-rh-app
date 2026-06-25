@@ -14,6 +14,12 @@ class InventoryService
      */
     public function deductFromPayment(Payment $payment): void
     {
+        // Deposits (e.g. reservation down payments) carry no order and consume
+        // no inventory — nothing to deduct.
+        if ($payment->type === 'deposit' || is_null($payment->order_id)) {
+            return;
+        }
+
         $payment->load(['order.items.menu.menuIngredients.ingredient']);
 
         DB::transaction(function () use ($payment) {

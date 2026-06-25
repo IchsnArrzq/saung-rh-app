@@ -33,6 +33,9 @@ class DatabaseSeeder extends Seeder
             ReservationSeeder::class,
             ReservationItemSeeder::class,
             Fase3DemoSeeder::class,
+            Fase5DemoSeeder::class,
+            Fase6DemoSeeder::class,
+            SystemSettingsSeeder::class,
         ]);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();

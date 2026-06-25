@@ -20,8 +20,17 @@ return new class extends Migration
             $table->unsignedInteger('pax')->default(1);
             $table->timestamp('reservation_at');
             $table->enum('status', ['pending', 'confirmed', 'seated', 'completed', 'cancelled', 'no_show'])->default('pending');
+            // Down payment / deposit hold (Fase 4)
+            $table->decimal('deposit_amount', 12, 2)->nullable();
+            $table->timestamp('deposit_paid_at')->nullable();
+            $table->timestamp('hold_until')->nullable();
+            $table->timestamp('released_at')->nullable();
+            $table->string('release_reason')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
+
+            $table->index(['status', 'hold_until']);
+            $table->index(['status', 'reservation_at']);
         });
     }
 

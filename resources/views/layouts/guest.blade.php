@@ -9,6 +9,7 @@
     <title>{{ config('app.name', 'Resto App') }}</title>
 
     @include('layouts.partials.theme-script')
+    @include('layouts.partials.pwa-head')
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

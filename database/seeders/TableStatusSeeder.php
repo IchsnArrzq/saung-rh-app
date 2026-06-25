@@ -16,7 +16,8 @@ class TableStatusSeeder extends Seeder
             ['key' => 'available', 'name' => 'Tersedia', 'color' => 'success', 'sort_order' => 1, 'is_active' => true, 'is_default' => true],
             ['key' => 'occupied', 'name' => 'Terisi', 'color' => 'error', 'sort_order' => 2, 'is_active' => true, 'is_default' => false],
             ['key' => 'order_in', 'name' => 'Pesanan Masuk', 'color' => 'warning', 'sort_order' => 3, 'is_active' => true, 'is_default' => false],
-            ['key' => 'cleaning', 'name' => 'Perlu Dibersihkan', 'color' => 'info', 'sort_order' => 4, 'is_active' => true, 'is_default' => false],
+            ['key' => 'reserved', 'name' => 'Direservasi', 'color' => 'secondary', 'sort_order' => 4, 'is_active' => true, 'is_default' => false],
+            ['key' => 'cleaning', 'name' => 'Perlu Dibersihkan', 'color' => 'info', 'sort_order' => 5, 'is_active' => true, 'is_default' => false],
         ];
 
         foreach ($statuses as $status) {

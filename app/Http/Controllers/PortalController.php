@@ -12,10 +12,10 @@ class PortalController extends Controller
             'title' => 'Dashboard Manager',
             'subtitle' => 'Panel kontrol produktivitas staf & analitik bisnis.',
             'modules' => [
-                ['label' => 'Employee Shifting', 'icon' => 'ri-calendar-schedule-line', 'desc' => 'Atur jadwal kerja staf.', 'phase' => 'Fase 6'],
-                ['label' => 'Employee KPI (Top Staff)', 'icon' => 'ri-trophy-line', 'desc' => 'Performa & penilaian pegawai terbaik.', 'phase' => 'Fase 6'],
-                ['label' => 'Customer Analytics (Top Customer)', 'icon' => 'ri-vip-crown-line', 'desc' => 'Pelanggan paling loyal.', 'phase' => 'Fase 6'],
-                ['label' => 'Special Order Approver', 'icon' => 'ri-checkbox-circle-line', 'desc' => 'Approve/Reject special request berbayar.', 'phase' => 'Fase 6'],
+                ['label' => 'Employee Shifting', 'icon' => 'ri-calendar-schedule-line', 'desc' => 'Atur jadwal kerja staf.', 'phase' => 'Aktif', 'route' => 'manager.shifts'],
+                ['label' => 'Employee KPI (Top Staff)', 'icon' => 'ri-trophy-line', 'desc' => 'Performa & penilaian pegawai terbaik.', 'phase' => 'Aktif', 'route' => 'manager.kpi'],
+                ['label' => 'Customer Analytics (Top Customer)', 'icon' => 'ri-vip-crown-line', 'desc' => 'Pelanggan paling loyal.', 'phase' => 'Aktif', 'route' => 'manager.top-customers'],
+                ['label' => 'Special Order Approver', 'icon' => 'ri-checkbox-circle-line', 'desc' => 'Approve/Reject special request.', 'phase' => 'Aktif', 'route' => 'manager.special-requests'],
                 ['label' => 'F&B Top Analytics', 'icon' => 'ri-bar-chart-box-line', 'desc' => 'Menu & minuman terlaris.', 'phase' => 'Aktif', 'route' => 'receptionist.analytics'],
                 ['label' => 'Booking Management', 'icon' => 'ri-calendar-check-line', 'desc' => 'Kelola reservasi masuk.', 'phase' => 'Aktif', 'route' => 'receptionist.bookings'],
             ],
@@ -33,6 +33,7 @@ class PortalController extends Controller
                 ['label' => 'Booking Management', 'icon' => 'ri-calendar-check-line', 'desc' => 'Kelola reservasi masuk.', 'phase' => 'Aktif', 'route' => 'receptionist.bookings'],
                 ['label' => 'Visitor Counter', 'icon' => 'ri-group-line', 'desc' => 'Jumlah pengunjung harian.', 'phase' => 'Aktif', 'route' => 'receptionist.visitors'],
                 ['label' => 'F&B Top Analytics', 'icon' => 'ri-bar-chart-box-line', 'desc' => 'Menu & minuman terlaris.', 'phase' => 'Aktif', 'route' => 'receptionist.analytics'],
+                ['label' => 'Antrean Lagu', 'icon' => 'ri-music-2-line', 'desc' => 'Kelola request lagu/karaoke meja.', 'phase' => 'Aktif', 'route' => 'songs.queue'],
             ],
         ]);
     }
@@ -45,7 +46,8 @@ class PortalController extends Controller
             'modules' => [
                 ['label' => 'Table Status Updater', 'icon' => 'ri-refresh-line', 'desc' => 'Ubah status meja secara instan.', 'phase' => 'Aktif', 'route' => 'waiter.tables'],
                 ['label' => 'Tips & Service Log', 'icon' => 'ri-hand-coin-line', 'desc' => 'Catat layanan & tip.', 'phase' => 'Aktif', 'route' => 'waiter.tips'],
-                ['label' => 'Special Request Handler', 'icon' => 'ri-customer-service-2-line', 'desc' => 'Terima instruksi pelanggan.', 'phase' => 'Fase 6'],
+                ['label' => 'Antrean Lagu', 'icon' => 'ri-music-2-line', 'desc' => 'Kelola request lagu/karaoke meja.', 'phase' => 'Aktif', 'route' => 'songs.queue'],
+                ['label' => 'Special Request Handler', 'icon' => 'ri-customer-service-2-line', 'desc' => 'Terima instruksi pelanggan.', 'phase' => 'Aktif', 'route' => 'waiter.special-requests'],
             ],
         ]);
     }
@@ -120,6 +122,66 @@ class PortalController extends Controller
             'subtitle' => 'Menu & minuman terlaris beserta pendapatan.',
             'icon' => 'ri-bar-chart-box-line',
             'component' => 'staff.receptionist.top-analytics',
+        ]);
+    }
+
+    public function managerShifts(): View
+    {
+        return view('staff.page', [
+            'title' => 'Employee Shifting',
+            'subtitle' => 'Atur jadwal kerja staf per minggu.',
+            'icon' => 'ri-calendar-schedule-line',
+            'component' => 'staff.manager.shift-scheduler',
+        ]);
+    }
+
+    public function managerKpi(): View
+    {
+        return view('staff.page', [
+            'title' => 'Employee KPI',
+            'subtitle' => 'Peringkat pegawai terbaik berdasarkan tip, layanan & permintaan.',
+            'icon' => 'ri-trophy-line',
+            'component' => 'staff.manager.staff-kpi',
+        ]);
+    }
+
+    public function managerTopCustomers(): View
+    {
+        return view('staff.page', [
+            'title' => 'Top Customer',
+            'subtitle' => 'Pelanggan paling loyal berdasarkan belanja.',
+            'icon' => 'ri-vip-crown-line',
+            'component' => 'staff.manager.top-customers',
+        ]);
+    }
+
+    public function managerSpecialRequests(): View
+    {
+        return view('staff.page', [
+            'title' => 'Special Order Approver',
+            'subtitle' => 'Setujui atau tolak permintaan khusus, lalu cocokkan ke waiter.',
+            'icon' => 'ri-checkbox-circle-line',
+            'component' => 'staff.manager.special-request-approver',
+        ]);
+    }
+
+    public function waiterSpecialRequests(): View
+    {
+        return view('staff.page', [
+            'title' => 'Special Request Handler',
+            'subtitle' => 'Permintaan khusus yang ditugaskan kepada Anda.',
+            'icon' => 'ri-customer-service-2-line',
+            'component' => 'staff.waiter.special-request-handler',
+        ]);
+    }
+
+    public function songQueue(): View
+    {
+        return view('staff.page', [
+            'title' => 'Antrean Lagu',
+            'subtitle' => 'Kelola request lagu/karaoke dari meja pelanggan.',
+            'icon' => 'ri-music-2-line',
+            'component' => 'staff.song-queue-board',
         ]);
     }
 

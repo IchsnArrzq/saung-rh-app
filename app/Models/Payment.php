@@ -18,6 +18,7 @@ class Payment extends Model
 
     protected $fillable = [
         'order_id',
+        'reservation_id',
         'method',
         'type',
         'status',
@@ -40,6 +41,11 @@ class Payment extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function reservation(): BelongsTo
+    {
+        return $this->belongsTo(Reservation::class);
     }
 
     public function verifiedBy(): BelongsTo

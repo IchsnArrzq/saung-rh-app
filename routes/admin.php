@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReservationController;
 use App\Http\Controllers\Admin\StockOpnameController;
+use App\Http\Controllers\Admin\SystemController;
 use App\Http\Controllers\Admin\TableCategoryController;
 use App\Http\Controllers\Admin\TableController;
 use App\Http\Controllers\Admin\TableStatusController;
@@ -88,6 +89,13 @@ Route::middleware(['demo.login', 'auth', 'verified', 'role:superadmin|admin|cash
         Route::get('reservations/{reservation}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
 
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+
+        // System administration (superadmin/admin only)
+        Route::middleware('role:superadmin|admin')->prefix('system')->name('system.')->group(function () {
+            Route::get('settings', [SystemController::class, 'settings'])->name('settings');
+            Route::get('payment-accounts', [SystemController::class, 'paymentAccounts'])->name('payment-accounts');
+            Route::get('license', [SystemController::class, 'license'])->name('license');
+        });
 
         // Ingredients (Bahan Makanan)
         Route::get('ingredients', [IngredientController::class, 'index'])->name('ingredients.index');

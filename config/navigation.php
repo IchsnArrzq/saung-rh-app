@@ -81,6 +81,15 @@ return [
                 ['label' => 'Admin', 'icon' => 'ri-user-smile-line', 'route' => 'customer-users.index', 'active' => ['customer-users.index']],
             ],
         ],
+        [
+            'label' => 'System',
+            'icon' => 'ri-settings-4-line',
+            'items' => [
+                ['label' => 'Pengaturan Aplikasi', 'icon' => 'ri-settings-3-line', 'route' => 'system.settings', 'active' => ['system.settings']],
+                ['label' => 'Akun Pembayaran', 'icon' => 'ri-bank-card-line', 'route' => 'system.payment-accounts', 'active' => ['system.payment-accounts']],
+                ['label' => 'Lisensi & Langganan', 'icon' => 'ri-shield-keyhole-line', 'route' => 'system.license', 'active' => ['system.license']],
+            ],
+        ],
     ],
 
     'admin' => [
@@ -151,6 +160,9 @@ return [
             'label' => 'Settings',
             'icon' => 'ri-settings-3-line',
             'items' => [
+                ['label' => 'Pengaturan Aplikasi', 'icon' => 'ri-settings-3-line', 'route' => 'system.settings', 'active' => ['system.settings']],
+                ['label' => 'Akun Pembayaran', 'icon' => 'ri-bank-card-line', 'route' => 'system.payment-accounts', 'active' => ['system.payment-accounts']],
+                ['label' => 'Lisensi & Langganan', 'icon' => 'ri-shield-keyhole-line', 'route' => 'system.license', 'active' => ['system.license']],
                 ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
             ],
         ],
@@ -176,8 +188,13 @@ return [
             'icon' => 'ri-bar-chart-box-line',
             'items' => [
                 ['label' => 'Dashboard', 'icon' => 'ri-dashboard-line', 'route' => 'manager.dashboard', 'active' => ['manager.dashboard']],
+                ['label' => 'Employee Shifting', 'icon' => 'ri-calendar-schedule-line', 'route' => 'manager.shifts', 'active' => ['manager.shifts']],
+                ['label' => 'Employee KPI', 'icon' => 'ri-trophy-line', 'route' => 'manager.kpi', 'active' => ['manager.kpi']],
+                ['label' => 'Top Customer', 'icon' => 'ri-vip-crown-line', 'route' => 'manager.top-customers', 'active' => ['manager.top-customers']],
+                ['label' => 'Special Order Approver', 'icon' => 'ri-checkbox-circle-line', 'route' => 'manager.special-requests', 'active' => ['manager.special-requests']],
                 ['label' => 'Booking Management', 'icon' => 'ri-calendar-check-line', 'route' => 'receptionist.bookings', 'active' => ['receptionist.bookings']],
                 ['label' => 'F&B Top Analytics', 'icon' => 'ri-bar-chart-box-line', 'route' => 'receptionist.analytics', 'active' => ['receptionist.analytics']],
+                ['label' => 'Antrean Lagu', 'icon' => 'ri-music-2-line', 'route' => 'songs.queue', 'active' => ['songs.queue']],
                 ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
             ],
         ],
@@ -194,6 +211,7 @@ return [
                 ['label' => 'Booking Management', 'icon' => 'ri-calendar-check-line', 'route' => 'receptionist.bookings', 'active' => ['receptionist.bookings']],
                 ['label' => 'Visitor Counter', 'icon' => 'ri-group-line', 'route' => 'receptionist.visitors', 'active' => ['receptionist.visitors']],
                 ['label' => 'F&B Top Analytics', 'icon' => 'ri-bar-chart-box-line', 'route' => 'receptionist.analytics', 'active' => ['receptionist.analytics']],
+                ['label' => 'Antrean Lagu', 'icon' => 'ri-music-2-line', 'route' => 'songs.queue', 'active' => ['songs.queue']],
                 ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
             ],
         ],
@@ -207,6 +225,8 @@ return [
                 ['label' => 'Portal Waiter', 'icon' => 'ri-dashboard-line', 'route' => 'waiter.dashboard', 'active' => ['waiter.dashboard']],
                 ['label' => 'Update Status Meja', 'icon' => 'ri-refresh-line', 'route' => 'waiter.tables', 'active' => ['waiter.tables']],
                 ['label' => 'Tips & Service Log', 'icon' => 'ri-hand-coin-line', 'route' => 'waiter.tips', 'active' => ['waiter.tips']],
+                ['label' => 'Permintaan Khusus', 'icon' => 'ri-customer-service-2-line', 'route' => 'waiter.special-requests', 'active' => ['waiter.special-requests']],
+                ['label' => 'Antrean Lagu', 'icon' => 'ri-music-2-line', 'route' => 'songs.queue', 'active' => ['songs.queue']],
                 ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
             ],
         ],

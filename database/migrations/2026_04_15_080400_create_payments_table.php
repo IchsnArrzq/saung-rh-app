@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('order_id')->constrained('orders')->cascadeOnDelete();
+            $table->foreignUuid('order_id')->nullable()->constrained('orders')->cascadeOnDelete();
+            // Deposit payments can attach directly to a reservation (Fase 4)
+            $table->foreignUuid('reservation_id')->nullable()->constrained('reservations')->cascadeOnDelete();
             $table->enum('method', ['cash', 'qris', 'debit_card', 'credit_card', 'transfer', 'ewallet'])->default('cash');
             $table->enum('type', ['full', 'deposit', 'partial'])->default('full');
             $table->enum('status', ['pending', 'paid', 'failed', 'refunded'])->default('paid');

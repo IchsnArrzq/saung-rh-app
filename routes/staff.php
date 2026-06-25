@@ -8,6 +8,13 @@ Route::middleware(['demo.login', 'auth', 'verified'])->group(function () {
         ->prefix('manager')
         ->group(function () {
             Route::get('dashboard', [PortalController::class, 'manager'])->name('manager.dashboard');
+
+            Route::middleware('can:manager.dashboard')->group(function () {
+                Route::get('shifts', [PortalController::class, 'managerShifts'])->name('manager.shifts');
+                Route::get('kpi', [PortalController::class, 'managerKpi'])->name('manager.kpi');
+                Route::get('top-customers', [PortalController::class, 'managerTopCustomers'])->name('manager.top-customers');
+                Route::get('special-requests', [PortalController::class, 'managerSpecialRequests'])->name('manager.special-requests');
+            });
         });
 
     Route::middleware('role:superadmin|admin|receptionist|manager')
@@ -25,6 +32,9 @@ Route::middleware(['demo.login', 'auth', 'verified'])->group(function () {
                 ->get('bookings', [PortalController::class, 'receptionistBookings'])->name('receptionist.bookings');
         });
 
+    Route::middleware('role:superadmin|admin|manager|receptionist|waiter')
+        ->get('song-queue', [PortalController::class, 'songQueue'])->name('songs.queue');
+
     Route::middleware('role:superadmin|admin|waiter')
         ->prefix('waiter')
         ->group(function () {
@@ -33,8 +43,10 @@ Route::middleware(['demo.login', 'auth', 'verified'])->group(function () {
             Route::middleware('can:tables.status.update')
                 ->get('tables', [PortalController::class, 'waiterTables'])->name('waiter.tables');
 
-            Route::middleware('can:waiter.operate')
-                ->get('tips', [PortalController::class, 'waiterTips'])->name('waiter.tips');
+            Route::middleware('can:waiter.operate')->group(function () {
+                Route::get('tips', [PortalController::class, 'waiterTips'])->name('waiter.tips');
+                Route::get('special-requests', [PortalController::class, 'waiterSpecialRequests'])->name('waiter.special-requests');
+            });
         });
 
     Route::middleware('role:superadmin|admin|ob')

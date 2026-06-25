@@ -1,0 +1,25 @@
+{
+    "name": "CR Cafe & Resto",
+    "short_name": "CR Resto",
+    "description": "Smart Cafe & Resto — POS, reservasi, KDS, dan layanan meja pintar.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#ffffff",
+    "theme_color": "#065f46",
+    "icons": [
+        {
+            "src": "/assets/logo-cr-mark.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/assets/logo-cr-cafe-resto.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}

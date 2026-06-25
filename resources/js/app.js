@@ -5,6 +5,15 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 window.Swal = Swal;
 
+// PWA service worker registration (Fase 7)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+            /* registration is best-effort; ignore failures */
+        });
+    });
+}
+
 const defaultConfirmMessage = 'Apakah Anda yakin ingin melanjutkan aksi ini?';
 const destructivePattern = /\b(hapus|delete|remove|destroy|batalkan|cancel)\b/i;
 
