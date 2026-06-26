@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Frontend;
 
+use App\Events\OrderCreated;
 use App\Models\Order;
-use App\Models\Reservation;
 use App\Models\Table;
 use App\Models\TableStatus;
 use App\Support\RestaurantCart;
@@ -13,46 +13,32 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+/**
+ * Public dine-in checkout. A guest orders for the table bound by their QR
+ * check-in (or a table they pick), and the order goes straight to the kitchen.
+ * Table reservations are an account feature handled by the customer portal.
+ */
 #[Layout('layouts.guest')]
 class CartCheckout extends Component
 {
-    public string $mode = RestaurantCart::MODE_ONLINE;
-
     public ?string $tableId = null;
 
-    public ?string $reservationAt = null;
-
-    public int $pax = 2;
-
     public string $customerName = '';
-
-    public string $phone = '';
 
     public string $notes = '';
 
     public function mount(): void
     {
-        $context = RestaurantCart::syncContextFromRequest(request());
+        $context = RestaurantCart::context();
 
-        $this->mode = $context['mode'];
         $this->tableId = $context['table_id'];
         $this->customerName = Auth::user()?->name ?? '';
-    }
-
-    public function setMode(string $mode): void
-    {
-        $context = RestaurantCart::setMode($mode);
-        $this->mode = $context['mode'];
-        $this->tableId = $context['table_id'];
     }
 
     public function selectTable(string $tableId): void
     {
         $this->tableId = $tableId;
-
-        if ($this->mode === RestaurantCart::MODE_OFFLINE) {
-            RestaurantCart::setTableId($tableId);
-        }
+        RestaurantCart::setTableId($tableId);
     }
 
     public function incrementQty(string $menuId): void
@@ -73,6 +59,8 @@ class CartCheckout extends Component
         $currentQty = (int) ($cart[$menuId]['qty'] ?? 0);
 
         if ($currentQty <= 1) {
+            RestaurantCart::removeItem($menuId);
+
             return;
         }
 
@@ -95,80 +83,24 @@ class CartCheckout extends Component
             return null;
         }
 
-        if ($this->mode === RestaurantCart::MODE_OFFLINE) {
-            return $this->checkoutOffline($cart);
-        }
-
-        return $this->checkoutOnline($cart);
-    }
-
-    private function checkoutOnline(array $cart)
-    {
         $this->validate([
             'tableId' => ['required', 'exists:tables,id'],
-            'reservationAt' => ['required', 'date', 'after:now'],
-            'pax' => ['required', 'integer', 'min:1', 'max:30'],
-            'customerName' => ['required', 'string', 'max:120'],
-            'phone' => ['nullable', 'string', 'max:30'],
-            'notes' => ['nullable', 'string'],
-        ]);
-
-        DB::transaction(function () use ($cart): void {
-            $reservation = Reservation::query()->create([
-                'user_id' => Auth::id(),
-                'table_id' => $this->tableId,
-                'customer_name' => $this->customerName,
-                'phone' => $this->phone ?: null,
-                'pax' => $this->pax,
-                'reservation_at' => $this->reservationAt,
-                'status' => 'pending',
-                'notes' => $this->notes ?: null,
-            ]);
-
-            $items = collect($cart)->map(function (array $item): array {
-                $price = (float) $item['price'];
-                $qty = (int) $item['qty'];
-
-                return [
-                    'menu_id' => $item['menu_id'],
-                    'menu_name_snapshot' => $item['name'],
-                    'qty' => $qty,
-                    'unit_price' => $price,
-                    'line_total' => $qty * $price,
-                    'notes' => $item['notes'] ?? null,
-                ];
-            })->values()->all();
-
-            $reservation->items()->createMany($items);
-        });
-
-        RestaurantCart::clearCart();
-        RestaurantCart::setMode(RestaurantCart::MODE_ONLINE);
-
-        session()->flash('success', 'Booking online berhasil dibuat.');
-
-        return $this->redirectRoute('public.menu', navigate: true);
-    }
-
-    private function checkoutOffline(array $cart)
-    {
-        $this->validate([
-            'tableId' => ['required', 'exists:tables,id'],
+            'customerName' => ['nullable', 'string', 'max:120'],
             'notes' => ['nullable', 'string'],
         ]);
 
         $table = Table::query()->with('tableStatus')->findOrFail($this->tableId);
         $orderInStatus = TableStatus::query()->where('key', 'order_in')->first();
 
-        DB::transaction(function () use ($cart, $table, $orderInStatus): void {
+        $order = DB::transaction(function () use ($cart, $table, $orderInStatus): Order {
             $subtotal = collect($cart)->sum(fn (array $item) => ((float) $item['price']) * ((int) $item['qty']));
 
             $order = Order::query()->create([
                 'table_id' => $table->id,
                 'order_number' => $this->generateOrderNumber(),
-                'customer_name' => 'Offline QR - '.$table->code,
+                'customer_name' => $this->customerName !== '' ? $this->customerName : 'Tamu Meja '.$table->code,
                 'status' => 'confirmed',
-                'notes' => trim('Sumber: OFFLINE QR | '.($this->notes ?: '')),
+                'notes' => trim('Sumber: DINE-IN QR | '.($this->notes ?: '')),
                 'subtotal' => $subtotal,
                 'discount' => 0,
                 'tax' => 0,
@@ -192,22 +124,23 @@ class CartCheckout extends Component
 
             $order->items()->createMany($items);
 
-            if ($table->tableStatus?->key === 'available' && $orderInStatus) {
-                $table->update([
-                    'table_status_id' => $orderInStatus->id,
-                ]);
+            // A QR check-in already flips the table to "occupied"; an incoming
+            // order should advance either state to "order_in".
+            if ($orderInStatus && in_array($table->tableStatus?->key, ['available', 'occupied'], true)) {
+                $table->update(['table_status_id' => $orderInStatus->id]);
             }
+
+            return $order;
         });
 
         RestaurantCart::clearCart();
         RestaurantCart::setTableId($table->id);
 
-        session()->flash('success', 'Pesanan offline berhasil dikirim ke admin.');
+        OrderCreated::dispatch($order);
 
-        return $this->redirectRoute('public.menu', [
-            'mode' => RestaurantCart::MODE_OFFLINE,
-            'table_id' => $table->id,
-        ], navigate: true);
+        session()->flash('success', 'Pesanan berhasil dikirim ke dapur.');
+
+        return $this->redirectRoute('public.menu', ['table_id' => $table->id], navigate: true);
     }
 
     public function render()
@@ -222,6 +155,7 @@ class CartCheckout extends Component
             'cartItems' => collect(RestaurantCart::cart())->values(),
             'subtotal' => RestaurantCart::subtotal(),
             'tables' => $tables,
+            'tableId' => $this->tableId,
         ]);
     }
 

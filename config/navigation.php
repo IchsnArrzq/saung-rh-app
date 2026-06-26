@@ -14,6 +14,7 @@ return [
             'icon' => 'ri-restaurant-line',
             'items' => [
                 ['label' => 'POS Order', 'icon' => 'ri-shopping-basket-line', 'route' => 'pos.order.index', 'active' => ['pos.order.*']],
+                ['label' => 'Tagihan Meja', 'icon' => 'ri-cash-line', 'route' => 'pos.bills', 'active' => ['pos.bills']],
                 ['label' => 'Order', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*']],
                 ['label' => 'Payment', 'icon' => 'ri-wallet-3-line', 'route' => 'payments.index', 'active' => ['payments.*']],
                 ['label' => 'Reservation', 'icon' => 'ri-calendar-check-line', 'route' => 'reservations.index', 'active' => ['reservations.*']],
@@ -137,6 +138,7 @@ return [
             'items' => [
                 ['label' => 'Reservation', 'icon' => 'ri-calendar-check-line', 'route' => 'reservations.index', 'active' => ['reservations.*']],
                 ['label' => 'POS Order', 'icon' => 'ri-shopping-basket-line', 'route' => 'pos.order.index', 'active' => ['pos.order.*'], 'badge' => ['type' => 'dynamic', 'resolver' => 'active_orders']],
+                ['label' => 'Tagihan Meja', 'icon' => 'ri-cash-line', 'route' => 'pos.bills', 'active' => ['pos.bills']],
                 ['label' => 'Order', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*']],
                 ['label' => 'Payment', 'icon' => 'ri-wallet-3-line', 'route' => 'payments.index', 'active' => ['payments.*']],
             ],
@@ -174,6 +176,7 @@ return [
             'icon' => 'ri-shopping-basket-line',
             'items' => [
                 ['label' => 'POS Order', 'icon' => 'ri-shopping-basket-line', 'route' => 'pos.order.index', 'active' => ['pos.order.*']],
+                ['label' => 'Tagihan Meja', 'icon' => 'ri-cash-line', 'route' => 'pos.bills', 'active' => ['pos.bills']],
                 ['label' => 'Order', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*'], 'badge' => ['type' => 'dynamic', 'resolver' => 'active_orders']],
                 ['label' => 'Order Item', 'icon' => 'ri-list-check-2', 'route' => 'orders.index', 'active' => ['orders.*']],
                 ['label' => 'Payment', 'icon' => 'ri-wallet-3-line', 'route' => 'payments.index', 'active' => ['payments.*']],
@@ -261,10 +264,9 @@ return [
             'icon' => 'ri-user-3-line',
             'items' => [
                 ['label' => 'Dashboard', 'icon' => 'ri-dashboard-line', 'route' => 'customer.dashboard', 'active' => ['customer.dashboard']],
-                ['label' => 'Reservation', 'icon' => 'ri-calendar-check-line', 'route' => 'customer.bookings.create', 'active' => ['customer.bookings.*']],
-                ['label' => 'Reservation Item', 'icon' => 'ri-list-check-2', 'route' => 'customer.menus.cart.index', 'active' => ['customer.menus.cart.*']],
                 ['label' => 'Pilih Meja', 'icon' => 'ri-layout-grid-line', 'route' => 'customer.menus.tables', 'active' => ['customer.menus.tables']],
-                ['label' => 'Pilih Menu', 'icon' => 'ri-bowl-line', 'route' => 'customer.menus.index', 'active' => ['customer.menus.*']],
+                ['label' => 'Pesan Menu', 'icon' => 'ri-bowl-line', 'route' => 'customer.menus.index', 'active' => ['customer.menus.*']],
+                ['label' => 'Booking', 'icon' => 'ri-calendar-check-line', 'route' => 'customer.bookings.create', 'active' => ['customer.bookings.*']],
             ],
         ],
     ],

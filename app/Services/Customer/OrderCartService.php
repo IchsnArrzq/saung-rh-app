@@ -4,22 +4,40 @@ namespace App\Services\Customer;
 
 use App\Events\OrderCreated;
 use App\Models\Menu;
+use App\Models\MenuCategory;
 use App\Models\Order;
 use App\Models\Table;
 use App\Models\TableStatus;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Backend for the customer dine-in ordering flow. The cart is kept per-table
+ * in the session; checkout creates a confirmed Order and notifies the kitchen.
+ *
+ * All mutating methods take plain parameters so the flow can be driven from a
+ * Livewire component without going through an HTTP Request.
+ */
 class OrderCartService
 {
     private const CART_SESSION_PREFIX = 'customer.order.cart';
 
+    private const ACTIVE_TABLE_KEY = 'customer.order.active_table';
+
     /**
+     * Statuses where a seated party may place (and keep placing) orders. A
+     * fresh pick requires "available", but once seated the table moves to
+     * "occupied"/"order_in" and must still accept additional rounds.
+     */
+    public const ORDERABLE_STATUSES = ['available', 'occupied', 'order_in'];
+
+    /**
+     * Tables grouped by status, for the table-selection screen.
+     *
      * @return array{statuses:Collection<int,TableStatus>,tablesByStatus:\Illuminate\Support\Collection<string,Collection<int,Table>>,unassignedTables:Collection<int,Table>}
      */
     public function tableSelectionData(string $search = ''): array
@@ -65,153 +83,153 @@ class OrderCartService
     }
 
     /**
-     * @return array{table:Table,menus:LengthAwarePaginator,cartItems:\Illuminate\Support\Collection<int,array{menu_id:string,name:string,image_url:?string,price:float,qty:int,notes:?string}>,cartCount:int,cartSubtotal:float}
+     * Catalog data (menus + categories) for the ordering screen. Does not
+     * validate the table, so it is safe to call on every Livewire re-render.
+     *
+     * @return array{menus:LengthAwarePaginator,categories:Collection<int,MenuCategory>,totalAvailable:int}
      */
-    public function menuCatalogData(string $tableId, string $search = '', ?int $categoryId = null, int $perPage = 24): array
+    public function catalog(string $search = '', ?int $categoryId = null, int $perPage = 24): array
     {
-        $table = $this->resolveAvailableTable($tableId);
-
-        $menus = $this->paginateMenus($search, $categoryId, $perPage);
-
-        $categories = \App\Models\MenuCategory::query()
-            ->where('is_active', true)
-            ->withCount(['menus' => fn ($q) => $q->available()])
-            ->orderBy('name')
-            ->get();
-
-        $totalAvailable = Menu::query()->available()->count();
-
         return [
-            'table' => $table,
-            'menus' => $menus,
-            'categories' => $categories,
-            'activeCategoryId' => $categoryId,
-            'totalAvailable' => $totalAvailable,
-            'cartItems' => collect($this->cart($table->id))->values(),
-            'cartCount' => $this->count($table->id),
-            'cartSubtotal' => $this->subtotal($table->id),
+            'menus' => $this->paginateMenus($search, $categoryId, $perPage),
+            'categories' => MenuCategory::query()
+                ->where('is_active', true)
+                ->withCount(['menus' => fn ($q) => $q->available()])
+                ->orderBy('name')
+                ->get(),
+            'totalAvailable' => Menu::query()->available()->count(),
         ];
     }
 
     /**
-     * @return array{table:Table,relatedMenus:Collection<int,Menu>,cartCount:int,cartSubtotal:float}
+     * Resolve a table that is currently free to order on, or null when the
+     * given id is unknown / no longer available.
      */
-    public function menuDetailData(string $tableId, Menu $menu): array
+    public function findAvailableTable(string $tableId): ?Table
     {
-        $table = $this->resolveAvailableTable($tableId);
+        $table = Table::query()->with('tableStatus')->find($tableId);
 
-        $relatedMenus = Menu::query()
-            ->with('category')
-            ->available()
-            ->whereKeyNot($menu->id)
-            ->when($menu->menu_category_id, fn ($query) => $query->where('menu_category_id', $menu->menu_category_id))
-            ->orderBy('name')
-            ->limit(4)
-            ->get();
+        if (! $table) {
+            return null;
+        }
 
-        return [
-            'table' => $table,
-            'relatedMenus' => $relatedMenus,
-            'cartCount' => $this->count($table->id),
-            'cartSubtotal' => $this->subtotal($table->id),
-        ];
+        $statusKey = $table->tableStatus?->key ?? $table->status;
+
+        return $statusKey === 'available' ? $table : null;
     }
 
     /**
-     * @return array{table:Table,cartItems:\Illuminate\Support\Collection<int,array{menu_id:string,name:string,image_url:?string,price:float,qty:int,notes:?string}>,subtotal:float,cartCount:int}
+     * Resolve a table a seated party may order on (available, occupied, or
+     * order_in), or null when it can no longer take orders.
      */
-    public function cartData(string $tableId): array
+    public function findOrderableTable(string $tableId): ?Table
     {
-        $table = $this->resolveAvailableTable($tableId);
+        $table = Table::query()->with('tableStatus')->find($tableId);
 
-        return [
-            'table' => $table,
-            'cartItems' => collect($this->cart($table->id))->values(),
-            'subtotal' => $this->subtotal($table->id),
-            'cartCount' => $this->count($table->id),
-        ];
+        if (! $table) {
+            return null;
+        }
+
+        $statusKey = $table->tableStatus?->key ?? $table->status;
+
+        return in_array($statusKey, self::ORDERABLE_STATUSES, true) ? $table : null;
     }
 
-    public function addToCart(Request $request): void
+    /**
+     * Remember the table the customer is currently seated at, so they can keep
+     * ordering (extra rounds) without re-picking it from the table screen.
+     */
+    public function setActiveTable(string $tableId): void
     {
-        $validated = $request->validate([
-            'table_id' => ['required', 'exists:tables,id'],
-            'menu_id' => ['required', 'exists:menus,id'],
-            'qty' => ['required', 'integer', 'min:1', 'max:20'],
-            'notes' => ['nullable', 'string', 'max:255'],
-        ]);
+        session([self::ACTIVE_TABLE_KEY => $tableId]);
+    }
 
-        $table = $this->resolveAvailableTable($validated['table_id']);
+    public function activeTableId(): ?string
+    {
+        return session(self::ACTIVE_TABLE_KEY);
+    }
 
-        $menu = Menu::query()
-            ->available()
-            ->find($validated['menu_id']);
+    public function forgetActiveTable(): void
+    {
+        session()->forget(self::ACTIVE_TABLE_KEY);
+    }
+
+    public function addItem(string $tableId, string $menuId, int $qty = 1, ?string $notes = null): void
+    {
+        $table = $this->resolveOrderableTable($tableId);
+
+        $menu = Menu::query()->available()->find($menuId);
 
         if (! $menu) {
             throw ValidationException::withMessages([
-                'menu_id' => 'Menu tidak ditemukan atau sedang tidak tersedia.',
+                'cart' => 'Menu tidak ditemukan atau sedang tidak tersedia.',
             ]);
         }
 
         $cart = $this->cart($table->id);
         $existingQty = (int) ($cart[$menu->id]['qty'] ?? 0);
-        $notes = trim((string) ($validated['notes'] ?? ''));
+        $notes = trim((string) $notes);
 
         $cart[$menu->id] = [
             'menu_id' => $menu->id,
             'name' => $menu->name,
             'image_url' => $menu->image_url,
             'price' => (float) $menu->price,
-            'qty' => min($existingQty + ((int) $validated['qty']), 50),
+            'qty' => min($existingQty + max(1, $qty), 50),
             'notes' => $notes !== '' ? $notes : ($cart[$menu->id]['notes'] ?? null),
         ];
 
         session([$this->cartKey($table->id) => $cart]);
     }
 
-    public function updateCartItem(Request $request, string $menuId): void
+    public function setQty(string $tableId, string $menuId, int $qty): void
     {
-        $validated = $request->validate([
-            'table_id' => ['required', 'exists:tables,id'],
-            'qty' => ['required', 'integer', 'min:1', 'max:50'],
-            'notes' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        $table = $this->resolveAvailableTable($validated['table_id']);
-        $cart = $this->cart($table->id);
+        $cart = $this->cart($tableId);
 
         if (! isset($cart[$menuId])) {
-            throw ValidationException::withMessages([
-                'cart' => 'Item cart tidak ditemukan.',
-            ]);
+            return;
         }
 
-        $notes = trim((string) ($validated['notes'] ?? ''));
+        $qty = max(1, min($qty, 50));
+        $cart[$menuId]['qty'] = $qty;
 
-        $cart[$menuId]['qty'] = (int) $validated['qty'];
-        $cart[$menuId]['notes'] = $notes !== '' ? $notes : null;
-
-        session([$this->cartKey($table->id) => $cart]);
+        session([$this->cartKey($tableId) => $cart]);
     }
 
-    public function removeCartItem(string $tableId, string $menuId): void
+    public function setNotes(string $tableId, string $menuId, ?string $notes): void
     {
-        $table = $this->resolveAvailableTable($tableId);
-        $cart = $this->cart($table->id);
+        $cart = $this->cart($tableId);
+
+        if (! isset($cart[$menuId])) {
+            return;
+        }
+
+        $notes = trim((string) $notes);
+        $cart[$menuId]['notes'] = $notes !== '' ? $notes : null;
+
+        session([$this->cartKey($tableId) => $cart]);
+    }
+
+    public function removeItem(string $tableId, string $menuId): void
+    {
+        $cart = $this->cart($tableId);
 
         unset($cart[$menuId]);
 
-        session([$this->cartKey($table->id) => $cart]);
+        session([$this->cartKey($tableId) => $cart]);
     }
 
-    public function checkout(Request $request): Order
+    public function emptyCart(string $tableId): void
     {
-        $validated = $request->validate([
-            'table_id' => ['required', 'exists:tables,id'],
-            'notes' => ['nullable', 'string'],
-        ]);
+        session()->forget($this->cartKey($tableId));
+    }
 
-        $table = $this->resolveAvailableTable($validated['table_id']);
+    /**
+     * Turn the cart into a confirmed order and notify the kitchen.
+     */
+    public function placeOrder(string $tableId, ?string $notes = null): Order
+    {
+        $table = $this->resolveOrderableTable($tableId);
         $cart = $this->cart($table->id);
 
         if ($cart === []) {
@@ -222,7 +240,7 @@ class OrderCartService
 
         $orderInStatus = TableStatus::query()->where('key', 'order_in')->first();
 
-        $order = DB::transaction(function () use ($table, $cart, $validated, $orderInStatus): Order {
+        $order = DB::transaction(function () use ($table, $cart, $notes, $orderInStatus): Order {
             $subtotal = (float) collect($cart)
                 ->sum(fn (array $item) => ((float) $item['price']) * ((int) $item['qty']));
 
@@ -230,8 +248,9 @@ class OrderCartService
                 'table_id' => $table->id,
                 'order_number' => $this->generateOrderNumber(),
                 'customer_name' => Auth::user()?->name,
+                'customer_id' => Auth::id(),
                 'status' => 'confirmed',
-                'notes' => trim('Sumber: CUSTOMER ORDER | '.($validated['notes'] ?? '')),
+                'notes' => trim('Sumber: CUSTOMER ORDER | '.((string) $notes)),
                 'subtotal' => $subtotal,
                 'discount' => 0,
                 'tax' => 0,
@@ -258,22 +277,39 @@ class OrderCartService
 
             $order->items()->createMany($items);
 
-            $tableStatusKey = $table->tableStatus?->key;
-
-            if ($tableStatusKey === 'available' && $orderInStatus) {
-                $table->update([
-                    'table_status_id' => $orderInStatus->id,
-                ]);
+            // A QR check-in already flips the table to "occupied"; an incoming
+            // order should advance either state to "order_in".
+            if ($orderInStatus && in_array($table->tableStatus?->key, ['available', 'occupied'], true)) {
+                $table->update(['table_status_id' => $orderInStatus->id]);
             }
 
             return $order;
         });
 
-        $this->clearCart($table->id);
+        $this->emptyCart($table->id);
 
         OrderCreated::dispatch($order);
 
         return $order;
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int,array{menu_id:string,name:string,image_url:?string,price:float,qty:int,notes:?string}>
+     */
+    public function cartItems(string $tableId): \Illuminate\Support\Collection
+    {
+        return collect($this->cart($tableId))->values();
+    }
+
+    public function cartCount(string $tableId): int
+    {
+        return (int) collect($this->cart($tableId))->sum('qty');
+    }
+
+    public function cartSubtotal(string $tableId): float
+    {
+        return (float) collect($this->cart($tableId))
+            ->sum(fn (array $item) => ((float) $item['price']) * ((int) $item['qty']));
     }
 
     private function paginateMenus(string $search = '', ?int $categoryId = null, int $perPage = 24): LengthAwarePaginator
@@ -293,19 +329,16 @@ class OrderCartService
                 });
             })
             ->orderBy('name')
-            ->paginate($perPage)
-            ->withQueryString();
+            ->paginate($perPage);
     }
 
-    private function resolveAvailableTable(string $tableId): Table
+    private function resolveOrderableTable(string $tableId): Table
     {
-        $table = Table::query()->with('tableStatus')->findOrFail($tableId);
+        $table = $this->findOrderableTable($tableId);
 
-        $statusKey = $table->tableStatus?->key ?? $table->status;
-
-        if ($statusKey !== 'available') {
+        if (! $table) {
             throw ValidationException::withMessages([
-                'table_id' => 'Meja tidak tersedia. Pilih meja lain yang berstatus tersedia.',
+                'table_id' => 'Meja tidak bisa menerima pesanan saat ini. Pilih meja lain.',
             ]);
         }
 
@@ -318,27 +351,6 @@ class OrderCartService
     private function cart(string $tableId): array
     {
         return session($this->cartKey($tableId), []);
-    }
-
-    public function emptyCart(string $tableId): void
-    {
-        session()->forget($this->cartKey($tableId));
-    }
-
-    private function clearCart(string $tableId): void
-    {
-        session()->forget($this->cartKey($tableId));
-    }
-
-    private function count(string $tableId): int
-    {
-        return (int) collect($this->cart($tableId))->sum('qty');
-    }
-
-    private function subtotal(string $tableId): float
-    {
-        return (float) collect($this->cart($tableId))
-            ->sum(fn (array $item) => ((float) $item['price']) * ((int) $item['qty']));
     }
 
     private function cartKey(string $tableId): string

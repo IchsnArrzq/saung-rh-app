@@ -14,8 +14,6 @@ use Livewire\Component;
 #[Layout('layouts.guest')]
 class MenuCatalog extends Component
 {
-    public string $mode = RestaurantCart::MODE_ONLINE;
-
     public ?string $tableId = null;
 
     public ?int $activeCategoryId = null;
@@ -29,15 +27,6 @@ class MenuCatalog extends Component
     {
         $context = RestaurantCart::syncContextFromRequest(request());
 
-        $this->mode = $context['mode'];
-        $this->tableId = $context['table_id'];
-    }
-
-    public function setMode(string $mode): void
-    {
-        $context = RestaurantCart::setMode($mode);
-
-        $this->mode = $context['mode'];
         $this->tableId = $context['table_id'];
     }
 
@@ -178,7 +167,6 @@ class MenuCatalog extends Component
             'cartCount' => RestaurantCart::count(),
             'cartItems' => collect(RestaurantCart::cart())->values(),
             'cartSubtotal' => RestaurantCart::subtotal(),
-            'mode' => $this->mode,
             'tableId' => $this->tableId,
         ]);
     }

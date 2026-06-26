@@ -8,7 +8,6 @@ use App\Models\Reservation;
 use App\Models\Table;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -41,19 +40,13 @@ class BookingService
         ];
     }
 
-    public function createReservation(Request $request): void
+    /**
+     * Create a future table reservation with pre-ordered items.
+     *
+     * @param  array{table_id:string,pax:int,reservation_at:string,notes:?string,items:array<int,array{menu_id:string,qty:int,notes:?string}>}  $validated
+     */
+    public function place(array $validated): Reservation
     {
-        $validated = $request->validate([
-            'table_id' => ['required', 'exists:tables,id'],
-            'pax' => ['required', 'integer', 'min:1', 'max:30'],
-            'reservation_at' => ['required', 'date', 'after:now'],
-            'notes' => ['nullable', 'string'],
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.menu_id' => ['required', 'exists:menus,id'],
-            'items.*.qty' => ['required', 'integer', 'min:1', 'max:20'],
-            'items.*.notes' => ['nullable', 'string'],
-        ]);
-
         $reservationAt = Carbon::parse($validated['reservation_at']);
 
         $tableAlreadyBooked = Reservation::query()
@@ -71,7 +64,7 @@ class BookingService
             ]);
         }
 
-        DB::transaction(function () use ($validated): void {
+        return DB::transaction(function () use ($validated): Reservation {
             $menuMap = Menu::query()
                 ->whereIn('id', collect($validated['items'])->pluck('menu_id'))
                 ->get()
@@ -107,6 +100,8 @@ class BookingService
                 ->all();
 
             $reservation->items()->createMany($items);
+
+            return $reservation;
         });
     }
 }

@@ -1,11 +1,11 @@
 @if (session('success'))
-    <div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+    <div class="mb-5 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-medium text-success">
         {{ session('success') }}
     </div>
 @endif
 
 @if ($errors->any())
-    <div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+    <div class="mb-5 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
         <p class="font-semibold">Periksa kembali input berikut:</p>
         <ul class="mt-2 list-disc pl-5">
             @foreach ($errors->all() as $error)

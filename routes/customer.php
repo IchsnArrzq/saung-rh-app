@@ -1,24 +1,21 @@
 <?php
 
-use App\Http\Controllers\Customer\CustomerBookingController;
-use App\Http\Controllers\Customer\CustomerDashboardController;
-use App\Http\Controllers\Customer\CustomerMenuCatalogController;
+use App\Livewire\Customer\BookingForm;
+use App\Livewire\Customer\Dashboard;
+use App\Livewire\Customer\MenuOrder;
+use App\Livewire\Customer\TablePicker;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['demo.login', 'auth', 'verified', 'role:customer'])
     ->prefix('customer')
     ->name('customer.')
     ->group(function () {
-        Route::get('dashboard', CustomerDashboardController::class)->name('dashboard');
-        Route::get('menu/tables', [CustomerMenuCatalogController::class, 'tables'])->name('menus.tables');
-        Route::get('menu', [CustomerMenuCatalogController::class, 'index'])->name('menus.index');
-        Route::post('menu/cart', [CustomerMenuCatalogController::class, 'addToCart'])->name('menus.cart.store');
-        Route::get('menu/cart', [CustomerMenuCatalogController::class, 'cart'])->name('menus.cart.index');
-        Route::patch('menu/cart/{menuId}', [CustomerMenuCatalogController::class, 'updateCart'])->name('menus.cart.update');
-        Route::delete('menu/cart/{menuId}', [CustomerMenuCatalogController::class, 'removeCart'])->name('menus.cart.destroy');
-        Route::delete('menu/cart', [CustomerMenuCatalogController::class, 'clearCart'])->name('menus.cart.clear');
-        Route::post('menu/cart/checkout', [CustomerMenuCatalogController::class, 'checkout'])->name('menus.cart.checkout');
-        Route::get('menu/{menu}', [CustomerMenuCatalogController::class, 'show'])->name('menus.show');
-        Route::get('booking', [CustomerBookingController::class, 'create'])->name('bookings.create');
-        Route::post('booking', [CustomerBookingController::class, 'store'])->name('bookings.store');
+        Route::get('dashboard', Dashboard::class)->name('dashboard');
+
+        // Dine-in ordering (Livewire full-page): pick a table, then order.
+        Route::get('menu/tables', TablePicker::class)->name('menus.tables');
+        Route::get('menu', MenuOrder::class)->name('menus.index');
+
+        // Advance table reservation with pre-ordered menu.
+        Route::get('booking', BookingForm::class)->name('bookings.create');
     });

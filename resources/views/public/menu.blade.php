@@ -8,19 +8,24 @@
             <h2 class="mb-4 text-lg font-bold">
                 <i class="ri-sparkling-2-line text-primary"></i> Ruang Sosial Meja
             </h2>
-            <div class="grid gap-4 lg:grid-cols-3">
-                <div class="card border border-base-300 bg-base-100 rounded-xl lg:col-span-1">
-                    <div class="card-body p-4">
+
+            <div class="card border border-base-300 bg-base-100 rounded-xl">
+                <div role="tablist" class="tabs tabs-lifted tabs-lg p-2">
+                    <input type="radio" name="social_tabs" role="tab" class="tab font-semibold"
+                        aria-label="💬 Chat" checked />
+                    <div role="tabpanel" class="tab-content border-base-300 bg-base-100 p-4">
                         <livewire:frontend.table-chat />
                     </div>
-                </div>
-                <div class="card border border-base-300 bg-base-100 rounded-xl">
-                    <div class="card-body p-4">
+
+                    <input type="radio" name="social_tabs" role="tab" class="tab font-semibold"
+                        aria-label="🎵 Lagu" />
+                    <div role="tabpanel" class="tab-content border-base-300 bg-base-100 p-4">
                         <livewire:frontend.song-request />
                     </div>
-                </div>
-                <div class="card border border-base-300 bg-base-100 rounded-xl">
-                    <div class="card-body p-4">
+
+                    <input type="radio" name="social_tabs" role="tab" class="tab font-semibold"
+                        aria-label="✨ Permintaan" />
+                    <div role="tabpanel" class="tab-content border-base-300 bg-base-100 p-4">
                         <livewire:frontend.special-request-form />
                     </div>
                 </div>

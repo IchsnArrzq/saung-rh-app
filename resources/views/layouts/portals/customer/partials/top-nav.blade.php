@@ -40,7 +40,7 @@
 
             <ul class="menu dropdown-content z-40 mt-2 w-60 rounded-box bg-base-100 p-2 shadow-lg">
                 <li>
-                    <a href="{{ route('profile') }}" class="font-medium text-stone-700">
+                    <a href="{{ route('profile') }}" class="font-medium text-base-content">
                         <i class="ri-user-3-line"></i>
                         Profile
                     </a>

@@ -18,6 +18,14 @@ class PosOrderController extends Controller
     }
 
     /**
+     * Cashier worklist of dine-in bills that still owe money.
+     */
+    public function bills(): View
+    {
+        return view('pos.bills');
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create(): View

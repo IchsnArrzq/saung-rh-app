@@ -7,5 +7,6 @@ Route::middleware(['demo.login', 'auth', 'verified', 'role:superadmin|admin|cash
     ->prefix('admin/pos')
     ->name('pos.')
     ->group(function () {
+        Route::get('bills', [PosOrderController::class, 'bills'])->name('bills');
         Route::resource('order', PosOrderController::class);
     });

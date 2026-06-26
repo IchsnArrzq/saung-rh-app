@@ -50,7 +50,6 @@ Route::middleware(['demo.login', 'auth', 'verified', 'role:superadmin|admin|cash
         Route::resource('orders', OrderController::class)->except('show');
         Route::resource('payments', PaymentController::class)->except('show');
         Route::resource('reservations', ReservationController::class)->except('show');
-        Route::get('tables/{table}/qr', TableQrPage::class)->name('tables.qr');
 
         Route::get('menus', [MenuController::class, 'index'])->name('menus.index');
         Route::get('menus/create', [MenuController::class, 'create'])->name('menus.create');
