@@ -3,7 +3,8 @@
 
     <aside class="flex min-h-full w-72 max-w-[85vw] flex-col bg-base-200 px-3 py-4">
         <a href="{{ route('public.home') }}" class="flex items-center gap-3 rounded-box px-3 py-2">
-            <span class="inline-flex h-10 w-10 items-center justify-center rounded-box bg-primary text-lg font-bold text-primary-content">
+            <span
+                class="inline-flex h-10 w-10 items-center justify-center rounded-box bg-primary text-lg font-bold text-primary-content">
                 SR
             </span>
             <span>
@@ -48,12 +49,14 @@
         <div class="border-t border-base-300 pt-3">
             <a href="{{ route('profile') }}"
                 class="flex items-center gap-3 rounded-box px-3 py-2 text-sm font-semibold text-base-content hover:bg-base-300">
-                <span class="inline-flex h-9 w-9 items-center justify-center rounded-box bg-base-100 text-sm font-bold text-primary">
+                <span
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-box bg-base-100 text-sm font-bold text-primary">
                     {{ strtoupper(substr(auth()->user()->name ?? 'C', 0, 1)) }}
                 </span>
                 <span class="min-w-0">
                     <span class="block truncate">{{ auth()->user()->name ?? 'Customer' }}</span>
-                    <span class="block truncate text-xs font-medium text-secondary">{{ auth()->user()->email ?? '-' }}</span>
+                    <span
+                        class="block truncate text-xs font-medium text-secondary">{{ auth()->user()->email ?? '-' }}</span>
                 </span>
             </a>
         </div>

@@ -23,7 +23,17 @@ new class extends Component {
     <div class="drawer-side h-[calc(100vh-0.1rem)]">
         <label for="admin-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
         <aside
-            class="flex min-h-full max-w-[85vw] flex-col overflow-y-auto overflow-x-auto bg-base-200 pt-16 is-drawer-close:w-16 is-drawer-open:w-72">
+            class="flex min-h-full max-w-[85vw] flex-col overflow-y-auto overflow-x-auto bg-base-200 is-drawer-close:w-16 is-drawer-open:w-72 ">
+            <a href="{{ route('public.home') }}" class="flex items-center gap-3 rounded-box px-3 py-2">
+                <span
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-box bg-primary text-lg font-bold text-primary-content">
+                    SR
+                </span>
+                <span>
+                    <span class="block text-lg font-bold text-base-content">SaungRH</span>
+                    <span class="block text-xs font-medium text-secondary">Admin Portal</span>
+                </span>
+            </a>
             <nav class="grow">
                 <ul class="menu w-full gap-1 rounded-2xl p-2">
                     @foreach ($groups as $group)
