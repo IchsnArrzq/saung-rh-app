@@ -23,6 +23,21 @@ class ChatService
         return Redis::connection(config('chat.redis_connection', 'default'));
     }
 
+    /**
+     * Whether the chat backend (Redis) is reachable. When it is not, the rest of
+     * the page must keep working — chat simply renders an "unavailable" state.
+     */
+    public function available(): bool
+    {
+        try {
+            $this->redis()->ping();
+
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
     private function prefix(): string
     {
         return (string) config('chat.key_prefix', 'chat:lobby');
@@ -60,7 +75,11 @@ class ChatService
      */
     public function messages(): array
     {
-        $raw = $this->redis()->lrange($this->messagesKey(), 0, -1);
+        try {
+            $raw = $this->redis()->lrange($this->messagesKey(), 0, -1);
+        } catch (\Throwable $e) {
+            return [];
+        }
 
         return array_values(array_filter(array_map(
             fn ($json) => json_decode((string) $json, true),
@@ -70,7 +89,11 @@ class ChatService
 
     public function isBlocked(string $tableId): bool
     {
-        return (bool) $this->redis()->sismember($this->blockedKey(), $tableId);
+        try {
+            return (bool) $this->redis()->sismember($this->blockedKey(), $tableId);
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     /**
@@ -103,12 +126,16 @@ class ChatService
             'at' => now()->toIso8601String(),
         ];
 
-        $redis = $this->redis();
         $key = $this->messagesKey();
 
-        $redis->rpush($key, json_encode($message));
-        $redis->ltrim($key, -(int) config('chat.max_messages', 100), -1);
-        $redis->expire($key, $this->ttlSeconds());
+        try {
+            $redis = $this->redis();
+            $redis->rpush($key, json_encode($message));
+            $redis->ltrim($key, -(int) config('chat.max_messages', 100), -1);
+            $redis->expire($key, $this->ttlSeconds());
+        } catch (\Throwable $e) {
+            throw new RuntimeException('Obrolan sedang tidak tersedia. Coba lagi nanti.');
+        }
 
         return $message;
     }

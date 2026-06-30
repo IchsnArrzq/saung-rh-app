@@ -12,6 +12,9 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     working_dir: /var/www/html
+    depends_on:
+      redis:
+        condition: service_healthy
     expose:
       - "9000"
     networks:
@@ -74,6 +77,22 @@ services:
     networks:
       - default
       - app-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: saung-rh-redis-prod
+    restart: unless-stopped
+    # Lightweight persistence; chat is TTL'd so this only smooths over restarts.
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - ${REDIS_DATA_PATH:-/opt/data/saung-rh-app/redis}:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   app-network:

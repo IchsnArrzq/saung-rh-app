@@ -4,6 +4,11 @@
             <i class="ri-qr-scan-2-line"></i>
             <span>Scan QR meja Anda untuk ikut mengobrol antar-meja.</span>
         </div>
+    @elseif (! $available)
+        <div class="alert alert-warning text-sm">
+            <i class="ri-chat-off-line"></i>
+            <span>Obrolan antar-meja sedang tidak tersedia. Anda tetap dapat memesan menu seperti biasa.</span>
+        </div>
     @else
         <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-semibold"><i class="ri-chat-3-line text-primary"></i> Obrolan Antar-Meja</span>

@@ -72,9 +72,12 @@ class TableChat extends Component
 
     public function render(ChatService $chat): View
     {
+        $available = $chat->available();
+
         return view('livewire.frontend.table-chat', [
-            'messages' => $this->tableId ? $chat->messages() : [],
-            'blocked' => $this->tableId ? $chat->isBlocked($this->tableId) : false,
+            'available' => $available,
+            'messages' => $this->tableId && $available ? $chat->messages() : [],
+            'blocked' => $this->tableId && $available ? $chat->isBlocked($this->tableId) : false,
         ]);
     }
 }
