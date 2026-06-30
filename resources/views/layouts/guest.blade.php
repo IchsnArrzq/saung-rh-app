@@ -108,8 +108,8 @@
 
                 <div>
                     <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Visit</p>
-                    <p class="mt-3 text-sm text-base-content">Jl. Bunga Raya No. 30</p>
-                    <p class="text-sm text-base-content">Bandung, Indonesia</p>
+                    <p class="mt-3 text-sm text-base-content">Kp. Paku Haji, Tobat, Kec. Balaraja, Kabupaten Tangerang</p>
+                    <p class="text-sm text-base-content">Banten, Indonesia</p>
                     <p class="mt-3 text-sm font-semibold text-base-content">08.00 - 21.00</p>
                 </div>
 
