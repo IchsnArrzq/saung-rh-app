@@ -67,8 +67,11 @@
                                 <a href="{{ route('tables.edit', $table) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
                                     data-confirm="Hapus meja ini?"
-                                    wire:click="delete('{{ $table->id }}')">
-                                    Hapus
+                                    wire:click="delete('{{ $table->id }}')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="delete('{{ $table->id }}')">
+                                    <span wire:loading.remove wire:target="delete('{{ $table->id }}')">Hapus</span>
+                                    <span wire:loading wire:target="delete('{{ $table->id }}')" class="loading loading-spinner loading-xs"></span>
                                 </button>
                             </div>
                         </td>

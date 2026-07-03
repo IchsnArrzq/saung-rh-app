@@ -13,9 +13,15 @@ class ChatMessagePosted implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
+     * Broadcasts to every table taking part in the conversation. A room message
+     * carries just the one table; a DM carries both. Each client subscribes only
+     * to its own table channel, so a table sees a conversation only when it is a
+     * participant.
+     *
+     * @param  array<int, string>  $tableIds
      * @param  array<string, mixed>  $message
      */
-    public function __construct(public array $message)
+    public function __construct(public array $tableIds, public array $message)
     {
     }
 
@@ -24,8 +30,12 @@ class ChatMessagePosted implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        // Public lobby — QR guests are not authenticated users.
-        return [new Channel('chat.lobby')];
+        // Public per-table channels — QR guests are not authenticated users, so
+        // channels are scoped by table id only.
+        return array_map(
+            fn (string $tableId): Channel => new Channel('chat.table.'.$tableId),
+            array_values(array_unique($this->tableIds)),
+        );
     }
 
     /**

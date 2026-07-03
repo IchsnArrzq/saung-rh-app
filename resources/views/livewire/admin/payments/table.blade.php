@@ -46,8 +46,11 @@
                                 <a href="{{ route('payments.edit', $payment) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
                                     data-confirm="Hapus pembayaran ini?"
-                                    wire:click="delete('{{ $payment->id }}')">
-                                    Hapus
+                                    wire:click="delete('{{ $payment->id }}')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="delete('{{ $payment->id }}')">
+                                    <span wire:loading.remove wire:target="delete('{{ $payment->id }}')">Hapus</span>
+                                    <span wire:loading wire:target="delete('{{ $payment->id }}')" class="loading loading-spinner loading-xs"></span>
                                 </button>
                             </div>
                         </td>

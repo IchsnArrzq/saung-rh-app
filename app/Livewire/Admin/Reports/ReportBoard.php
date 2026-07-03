@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin\Reports;
 
 use App\Exports\SalesReportExport;
-use App\Services\Admin\ReportService;
+use App\Services\Admin\ReportServiceInterface;
 use Carbon\Carbon;
 use Livewire\Component;
 use Maatwebsite\Excel\Facades\Excel;
@@ -52,7 +52,7 @@ class ReportBoard extends Component
         return Excel::download(new SalesReportExport($this->startDate, $this->endDate), $fileName);
     }
 
-    public function render(ReportService $reportService)
+    public function render(ReportServiceInterface $reportService)
     {
         $data = $reportService->getReportData($this->startDate, $this->endDate);
 

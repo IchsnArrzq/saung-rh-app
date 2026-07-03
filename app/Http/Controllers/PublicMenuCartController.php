@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
-use App\Services\Landing\PublicCartService;
+use App\Services\Landing\PublicCartServiceInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class PublicMenuCartController extends Controller
 {
-    public function __construct(private readonly PublicCartService $publicCartService) {}
+    public function __construct(private readonly PublicCartServiceInterface $publicCartService) {}
 
     public function store(Request $request, Menu $menu): RedirectResponse
     {

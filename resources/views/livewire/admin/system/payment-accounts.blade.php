@@ -31,7 +31,12 @@
                         <td>
                             <div class="flex justify-end gap-1">
                                 <button wire:click="edit('{{ $account->id }}')" class="btn btn-xs btn-ghost"><i class="ri-pencil-line"></i></button>
-                                <button wire:click="delete('{{ $account->id }}')" data-confirm="Hapus akun ini?" class="btn btn-xs btn-ghost text-error"><i class="ri-delete-bin-line"></i></button>
+                                <button wire:click="delete('{{ $account->id }}')" data-confirm="Hapus akun ini?"
+                                    wire:loading.attr="disabled" wire:target="delete('{{ $account->id }}')"
+                                    class="btn btn-xs btn-ghost text-error">
+                                    <i class="ri-delete-bin-line" wire:loading.remove wire:target="delete('{{ $account->id }}')"></i>
+                                    <span class="loading loading-spinner loading-xs" wire:loading wire:target="delete('{{ $account->id }}')"></span>
+                                </button>
                             </div>
                         </td>
                     </tr>

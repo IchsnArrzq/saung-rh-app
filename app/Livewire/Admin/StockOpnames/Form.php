@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin\StockOpnames;
 
 use App\Models\Ingredient;
-use App\Services\Admin\InventoryService;
+use App\Services\Admin\InventoryServiceInterface;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -17,7 +17,7 @@ class Form extends Component
 
     public string $notes = '';
 
-    public function save(InventoryService $inventoryService)
+    public function save(InventoryServiceInterface $inventoryService)
     {
         $this->validate([
             'ingredient_id' => ['required', 'exists:ingredients,id'],

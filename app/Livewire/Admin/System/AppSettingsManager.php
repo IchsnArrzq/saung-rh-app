@@ -3,11 +3,11 @@
 namespace App\Livewire\Admin\System;
 
 use App\Models\AppSetting;
-use App\Services\Settings\AppSettings;
+use App\Services\Settings\AppSettingsInterface;
 use Illuminate\View\View;
 use Livewire\Component;
 
-class AppSettingsManager extends Component
+class AppSettingsInterfaceManager extends Component
 {
     /**
      * key => value map bound to the form inputs.
@@ -21,7 +21,7 @@ class AppSettingsManager extends Component
         $this->values = AppSetting::query()->pluck('value', 'key')->map(fn ($v) => (string) $v)->all();
     }
 
-    public function save(AppSettings $settings): void
+    public function save(AppSettingsInterface $settings): void
     {
         $settings->setMany($this->values);
 

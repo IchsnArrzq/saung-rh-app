@@ -119,7 +119,7 @@
                     <textarea wire:model="notes" rows="3" class="textarea textarea-bordered w-full" placeholder="opsional"></textarea>
                 </label>
 
-                <button type="button" wire:click="checkout" wire:confirm="Kirim pesanan ini ke dapur?"
+                <button type="button" wire:click="checkout" data-confirm="Kirim pesanan ini ke dapur?"
                     class="btn btn-primary w-full">
                     <i class="ri-send-plane-2-line"></i> Kirim Pesanan ke Dapur
                 </button>

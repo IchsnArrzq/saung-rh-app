@@ -59,8 +59,11 @@
                                 <a href="{{ route('menus.edit', $menu) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
                                     data-confirm="Hapus menu ini?"
-                                    wire:click="delete('{{ $menu->id }}')">
-                                    Hapus
+                                    wire:click="delete('{{ $menu->id }}')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="delete('{{ $menu->id }}')">
+                                    <span wire:loading.remove wire:target="delete('{{ $menu->id }}')">Hapus</span>
+                                    <span wire:loading wire:target="delete('{{ $menu->id }}')" class="loading loading-spinner loading-xs"></span>
                                 </button>
                             </div>
                         </td>

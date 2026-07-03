@@ -3,8 +3,8 @@
 namespace App\Livewire\Pos;
 
 use App\Models\Order;
-use App\Services\Admin\PaymentService;
-use App\Services\Pos\BillingService;
+use App\Services\Admin\PaymentServiceInterface;
+use App\Services\Pos\BillingServiceInterface;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
@@ -30,7 +30,7 @@ class TableBills extends Component
         $this->dispatch('close-modal', 'settle-bill-modal');
     }
 
-    public function settle(BillingService $billing): void
+    public function settle(BillingServiceInterface $billing): void
     {
         $order = Order::query()->with('payments')->find($this->payOrderId);
 
@@ -52,7 +52,7 @@ class TableBills extends Component
         session()->flash('success', 'Tagihan '.$order->order_number.' lunas — Rp '.number_format((float) $payment->amount, 0, ',', '.').'.');
     }
 
-    public function render(BillingService $billing)
+    public function render(BillingServiceInterface $billing)
     {
         $bills = $billing->openBills($this->search);
 
@@ -63,7 +63,7 @@ class TableBills extends Component
         return view('livewire.pos.table-bills', [
             'bills' => $bills,
             'totalOutstanding' => $bills->sum('outstanding'),
-            'methods' => PaymentService::METHOD_OPTIONS,
+            'methods' => PaymentServiceInterface::METHOD_OPTIONS,
             'payBill' => $payBill,
         ]);
     }

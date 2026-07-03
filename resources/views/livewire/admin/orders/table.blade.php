@@ -65,8 +65,11 @@
                                 <a href="{{ route('orders.edit', $order) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
                                     data-confirm="Hapus order ini?"
-                                    wire:click="delete('{{ $order->id }}')">
-                                    Hapus
+                                    wire:click="delete('{{ $order->id }}')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="delete('{{ $order->id }}')">
+                                    <span wire:loading.remove wire:target="delete('{{ $order->id }}')">Hapus</span>
+                                    <span wire:loading wire:target="delete('{{ $order->id }}')" class="loading loading-spinner loading-xs"></span>
                                 </button>
                             </div>
                         </td>

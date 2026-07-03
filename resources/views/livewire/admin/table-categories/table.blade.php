@@ -54,8 +54,11 @@
                                 <a href="{{ route('table-categories.edit', $tableCategory) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
                                     data-confirm="Hapus kategori meja ini?"
-                                    wire:click="delete('{{ $tableCategory->id }}')">
-                                    Hapus
+                                    wire:click="delete('{{ $tableCategory->id }}')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="delete('{{ $tableCategory->id }}')">
+                                    <span wire:loading.remove wire:target="delete('{{ $tableCategory->id }}')">Hapus</span>
+                                    <span wire:loading wire:target="delete('{{ $tableCategory->id }}')" class="loading loading-spinner loading-xs"></span>
                                 </button>
                             </div>
                         </td>

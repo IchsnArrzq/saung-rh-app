@@ -76,8 +76,11 @@
                                 @else
                                     <button type="button" class="btn btn-sm btn-error text-white"
                                         data-confirm="Hapus status menu ini?"
-                                        wire:click="delete('{{ $menuStatus->id }}')">
-                                        Hapus
+                                        wire:click="delete('{{ $menuStatus->id }}')"
+                                        wire:loading.attr="disabled"
+                                        wire:target="delete('{{ $menuStatus->id }}')">
+                                        <span wire:loading.remove wire:target="delete('{{ $menuStatus->id }}')">Hapus</span>
+                                        <span wire:loading wire:target="delete('{{ $menuStatus->id }}')" class="loading loading-spinner loading-xs"></span>
                                     </button>
                                 @endif
                             </div>

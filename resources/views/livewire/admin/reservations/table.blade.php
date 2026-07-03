@@ -68,8 +68,11 @@
                                 <a href="{{ route('reservations.edit', $reservation) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
                                     data-confirm="Hapus reservasi ini?"
-                                    wire:click="delete('{{ $reservation->id }}')">
-                                    Hapus
+                                    wire:click="delete('{{ $reservation->id }}')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="delete('{{ $reservation->id }}')">
+                                    <span wire:loading.remove wire:target="delete('{{ $reservation->id }}')">Hapus</span>
+                                    <span wire:loading wire:target="delete('{{ $reservation->id }}')" class="loading loading-spinner loading-xs"></span>
                                 </button>
                             </div>
                         </td>

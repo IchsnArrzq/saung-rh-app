@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Customer;
 
-use App\Services\Customer\OrderCartService;
+use App\Services\Customer\OrderCartServiceInterface;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -11,7 +11,7 @@ class TablePicker extends Component
 {
     public string $search = '';
 
-    public function selectTable(string $tableId, OrderCartService $service): void
+    public function selectTable(string $tableId, OrderCartServiceInterface $service): void
     {
         if (! $service->findAvailableTable($tableId)) {
             session()->flash('warning', 'Meja tersebut sudah tidak tersedia.');
@@ -23,7 +23,7 @@ class TablePicker extends Component
         $this->redirectRoute('customer.menus.index', ['table_id' => $tableId], navigate: true);
     }
 
-    public function render(OrderCartService $service)
+    public function render(OrderCartServiceInterface $service)
     {
         $activeId = $service->activeTableId();
 

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Staff\Manager;
 
-use App\Services\Manager\ManagerAnalyticsService;
+use App\Services\Manager\ManagerAnalyticsServiceInterface;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -19,7 +19,7 @@ class TopCustomers extends Component
         }
     }
 
-    public function render(ManagerAnalyticsService $analytics): View
+    public function render(ManagerAnalyticsServiceInterface $analytics): View
     {
         $customers = $analytics->topCustomers($this->range);
 

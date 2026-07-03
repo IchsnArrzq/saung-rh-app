@@ -135,7 +135,8 @@
 
                 @error('settle')<p class="text-sm text-error">{{ $message }}</p>@enderror
 
-                <button type="button" wire:click="settle" wire:confirm="Konfirmasi pembayaran tagihan ini?"
+                <button type="button" wire:click="settle" data-confirm="Konfirmasi pembayaran tagihan ini?"
+                    data-confirm-title="Konfirmasi Pembayaran" data-confirm-yes="Ya, Bayar"
                     class="btn btn-primary w-full">
                     <i class="ri-checkbox-circle-line"></i> Konfirmasi Pembayaran
                 </button>

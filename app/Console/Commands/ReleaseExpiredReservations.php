@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Services\Reservations\ReservationReleaseService;
+use App\Services\Reservations\ReservationReleaseServiceInterface;
 use Illuminate\Console\Command;
 
 class ReleaseExpiredReservations extends Command
@@ -11,7 +11,7 @@ class ReleaseExpiredReservations extends Command
 
     protected $description = 'Cancel reservations past their deposit hold or no-show grace window and release the tables they held';
 
-    public function handle(ReservationReleaseService $service): int
+    public function handle(ReservationReleaseServiceInterface $service): int
     {
         $result = $service->releaseExpired();
 

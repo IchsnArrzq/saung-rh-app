@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Table;
-use App\Services\Customer\CheckInService;
+use App\Services\Customer\CheckInServiceInterface;
 use App\Support\TableSessionContext;
 use Illuminate\Http\RedirectResponse;
 
 class CheckInController extends Controller
 {
-    public function __invoke(string $token, CheckInService $service): RedirectResponse
+    public function __invoke(string $token, CheckInServiceInterface $service): RedirectResponse
     {
         $table = Table::query()
             ->with('tableStatus')

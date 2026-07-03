@@ -115,7 +115,8 @@
                     <div class="mb-4 flex items-center justify-between gap-2">
                         <h3 class="text-xl font-semibold">Pesanan Anda</h3>
                         <button type="button" wire:click="clearCart"
-                            wire:confirm="Reset semua item pesanan ini?"
+                            data-confirm="Reset semua item pesanan ini?" data-confirm-variant="danger"
+                            data-confirm-title="Reset Pesanan" data-confirm-yes="Ya, Reset"
                             class="btn btn-sm btn-outline">
                             <i class="ri-delete-bin-line"></i> Reset
                         </button>
@@ -149,7 +150,7 @@
                                         </div>
                                     </div>
                                     <button type="button" wire:click="removeItem('{{ $item['menu_id'] }}')"
-                                        wire:confirm="Hapus item ini dari pesanan?"
+                                        data-confirm="Hapus item ini dari pesanan?"
                                         class="btn btn-sm btn-error btn-square text-white" aria-label="Hapus item">
                                         <i class="ri-delete-bin-line"></i>
                                     </button>
@@ -189,7 +190,7 @@
                         </div>
 
                         <button type="button" wire:click="checkout"
-                            wire:confirm="Kirim pesanan ini ke dapur?"
+                            data-confirm="Kirim pesanan ini ke dapur?"
                             class="btn btn-primary mt-4 w-full">
                             <i class="ri-send-plane-2-line"></i>
                             Kirim Pesanan ke Dapur

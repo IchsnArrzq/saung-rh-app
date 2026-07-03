@@ -3,7 +3,7 @@
 namespace App\Livewire\Staff\Manager;
 
 use App\Models\Shift;
-use App\Services\Manager\ShiftService;
+use App\Services\Manager\ShiftServiceInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -39,7 +39,7 @@ class ShiftScheduler extends Component
         $this->weekAnchor = Carbon::parse($this->weekAnchor)->addWeek()->toDateString();
     }
 
-    public function save(ShiftService $shifts): void
+    public function save(ShiftServiceInterface $shifts): void
     {
         $this->validate([
             'userId' => ['required', 'exists:users,id'],
@@ -55,13 +55,13 @@ class ShiftScheduler extends Component
         session()->flash('shift_status', 'Shift berhasil dijadwalkan.');
     }
 
-    public function deleteShift(ShiftService $shifts, string $id): void
+    public function deleteShift(ShiftServiceInterface $shifts, string $id): void
     {
         $shifts->delete(Shift::query()->findOrFail($id));
         session()->flash('shift_status', 'Shift dihapus.');
     }
 
-    public function render(ShiftService $shifts): View
+    public function render(ShiftServiceInterface $shifts): View
     {
         $anchor = Carbon::parse($this->weekAnchor);
 

@@ -67,8 +67,11 @@
                                 <a href="{{ route('ingredients.edit', $ingredient) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
                                     data-confirm="Hapus bahan ini?"
-                                    wire:click="delete('{{ $ingredient->id }}')">
-                                    Hapus
+                                    wire:click="delete('{{ $ingredient->id }}')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="delete('{{ $ingredient->id }}')">
+                                    <span wire:loading.remove wire:target="delete('{{ $ingredient->id }}')">Hapus</span>
+                                    <span wire:loading wire:target="delete('{{ $ingredient->id }}')" class="loading loading-spinner loading-xs"></span>
                                 </button>
                             </div>
                         </td>
