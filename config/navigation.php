@@ -78,8 +78,8 @@ return [
             'label' => 'User Management',
             'icon' => 'ri-group-line',
             'items' => [
-                ['label' => 'User', 'icon' => 'ri-user-settings-line', 'route' => 'admin-users.index', 'active' => ['admin-users.index']],
-                ['label' => 'Admin', 'icon' => 'ri-user-smile-line', 'route' => 'customer-users.index', 'active' => ['customer-users.index']],
+                ['label' => 'Admin & Kasir', 'icon' => 'ri-user-settings-line', 'route' => 'admin-users.index', 'active' => ['admin-users.index']],
+                ['label' => 'Customer', 'icon' => 'ri-user-smile-line', 'route' => 'customer-users.index', 'active' => ['customer-users.index']],
             ],
         ],
         [

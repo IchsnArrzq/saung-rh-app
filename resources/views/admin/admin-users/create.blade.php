@@ -1,6 +1,6 @@
 <x-admin-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold">Tambah Admin Baru</h2>
+        <h2 class="text-xl font-semibold">Tambah Akun Admin / Kasir</h2>
     </x-slot>
 
     @include('admin.partials.flash')
@@ -12,7 +12,7 @@
             @include('admin.admin-users._form')
 
             <div class="flex gap-2 pt-4">
-                <button type="submit" class="btn bg-emerald-800 text-amber-50 hover:bg-emerald-700">Simpan Admin</button>
+                <button type="submit" class="btn bg-emerald-800 text-amber-50 hover:bg-emerald-700">Simpan Akun</button>
                 <a href="{{ route('admin-users.index') }}" class="btn btn-ghost">Batal</a>
             </div>
         </form>

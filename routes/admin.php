@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReservationController;
+use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\StockOpnameController;
 use App\Http\Controllers\Admin\SystemController;
 use App\Http\Controllers\Admin\TableCategoryController;
@@ -94,6 +95,12 @@ Route::middleware(['demo.login', 'auth', 'verified', 'role:superadmin|admin|cash
             Route::get('settings', [SystemController::class, 'settings'])->name('settings');
             Route::get('payment-accounts', [SystemController::class, 'paymentAccounts'])->name('payment-accounts');
             Route::get('license', [SystemController::class, 'license'])->name('license');
+        });
+
+        // Roles & Permissions management (superadmin only)
+        Route::middleware('role:superadmin')->prefix('settings')->name('settings.')->group(function () {
+            Route::get('roles-permissions', [RolePermissionController::class, 'index'])->name('roles-permissions');
+            Route::patch('roles-permissions/{role}', [RolePermissionController::class, 'update'])->name('roles-permissions.update');
         });
 
         // Ingredients (Bahan Makanan)

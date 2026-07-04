@@ -19,6 +19,20 @@
         @enderror
     </fieldset>
 
+    @if(! $admin_user->hasRole('superadmin'))
+        @php($currentRole = old('role', $admin_user->roles->pluck('name')->first() ?? 'admin'))
+        <fieldset class="fieldset md:col-span-2">
+            <legend class="fieldset-legend">Role</legend>
+            <select name="role" class="select select-bordered w-full" required>
+                <option value="admin" @selected($currentRole === 'admin')>Admin</option>
+                <option value="cashier" @selected($currentRole === 'cashier')>Kasir</option>
+            </select>
+            @error('role')
+                <p class="label text-error">{{ $message }}</p>
+            @enderror
+        </fieldset>
+    @endif
+
     <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ isset($admin_user->id) ? 'Password (Kosongkan jika tidak diubah)' : 'Password' }}</legend>
         <input type="password" name="password" class="input input-bordered w-full" autocomplete="new-password" {{ isset($admin_user->id) ? '' : 'required' }}>

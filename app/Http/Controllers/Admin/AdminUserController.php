@@ -11,7 +11,7 @@ class AdminUserController extends Controller
 {
     public function index()
     {
-        $users = User::role(['admin', 'superadmin'])->latest()->get();
+        $users = User::role(['admin', 'superadmin', 'cashier'])->latest()->get();
         return view('admin.admin-users.index', compact('users'));
     }
 
@@ -26,14 +26,20 @@ class AdminUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'role' => ['required', 'in:admin,cashier'],
         ]);
+
+        $role = $validated['role'];
+        unset($validated['role']);
 
         $validated['is_active'] = $request->has('is_active');
 
         $user = User::create($validated);
-        $user->assignRole('admin');
+        $user->assignRole($role);
 
-        return redirect()->route('admin-users.index')->with('success', 'Akun Admin berhasil ditambahkan.');
+        $label = $role === 'cashier' ? 'Kasir' : 'Admin';
+
+        return redirect()->route('admin-users.index')->with('success', "Akun {$label} berhasil ditambahkan.");
     }
 
     public function edit(User $admin_user)
@@ -59,7 +65,15 @@ class AdminUserController extends Controller
 
         $admin_user->update($validated);
 
-        return redirect()->route('admin-users.index')->with('success', 'Data Admin berhasil diperbarui.');
+        // Superadmin role is protected and cannot be reassigned.
+        if (! $admin_user->hasRole('superadmin')) {
+            $roleData = $request->validate([
+                'role' => ['required', 'in:admin,cashier'],
+            ]);
+            $admin_user->syncRoles([$roleData['role']]);
+        }
+
+        return redirect()->route('admin-users.index')->with('success', 'Data berhasil diperbarui.');
     }
 
     public function destroy(User $admin_user)
