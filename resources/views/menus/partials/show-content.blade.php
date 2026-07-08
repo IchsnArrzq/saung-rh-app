@@ -8,8 +8,16 @@
     $cartSubtotal = $cartSubtotal ?? null;
     $seedBase = abs(crc32((string) $menu->id));
     $stockImage = fn (int $offset): string => asset('assets/media/stock/900x600/'.(($seedBase + $offset) % 27 + 1).'.jpg');
-    $heroImage = $menu->image_url ?: $stockImage(0);
-    $galleryImages = [$heroImage, $stockImage(1), $stockImage(2)];
+    $mediaImages = $menu->images;
+    $menuVideo = $menu->videos->first();
+    $heroImage = $menu->display_image_url ?: $stockImage(0);
+    $galleryImages = $mediaImages->isNotEmpty()
+        ? $mediaImages->pluck('url')->all()
+        : [$heroImage, $stockImage(1), $stockImage(2)];
+    // Ensure at least 3 tiles for the desktop layout below.
+    while (count($galleryImages) < 3) {
+        $galleryImages[] = $stockImage(count($galleryImages));
+    }
     $backUrl = $isCustomer
         ? route('customer.menus.index', ['table_id' => $table?->id])
         : route('public.menu', ['mode' => $mode, 'table_id' => $tableId]);
@@ -53,14 +61,20 @@
                         <img src="{{ $image }}" alt="{{ $menu->name }}" class="aspect-[4/3] h-full w-full object-cover">
                     </div>
                 @endforeach
-                <div class="relative w-[86vw] shrink-0 snap-center overflow-hidden rounded-2xl border border-base-300 bg-base-200">
-                    <img src="{{ $heroImage }}" alt="{{ $menu->name }} video preview" class="aspect-[4/3] h-full w-full object-cover brightness-75">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="flex h-14 w-14 items-center justify-center rounded-full bg-base-100/90 text-2xl text-primary shadow-lg">
-                            <i class="ri-play-fill"></i>
-                        </span>
+                @if ($menuVideo)
+                    <div class="w-[86vw] shrink-0 snap-center overflow-hidden rounded-2xl border border-base-300 bg-base-900">
+                        <video src="{{ $menuVideo->url }}" controls class="aspect-[4/3] h-full w-full object-cover"></video>
                     </div>
-                </div>
+                @else
+                    <div class="relative w-[86vw] shrink-0 snap-center overflow-hidden rounded-2xl border border-base-300 bg-base-200">
+                        <img src="{{ $heroImage }}" alt="{{ $menu->name }} video preview" class="aspect-[4/3] h-full w-full object-cover brightness-75">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="flex h-14 w-14 items-center justify-center rounded-full bg-base-100/90 text-2xl text-primary shadow-lg">
+                                <i class="ri-play-fill"></i>
+                            </span>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div class="hidden grid-cols-[1.4fr_0.8fr] gap-3 md:grid">
@@ -72,14 +86,20 @@
                     <div class="overflow-hidden rounded-2xl border border-base-300 bg-base-200">
                         <img src="{{ $galleryImages[1] }}" alt="{{ $menu->name }}" class="aspect-[4/3] h-full w-full object-cover">
                     </div>
-                    <div class="relative overflow-hidden rounded-2xl border border-base-300 bg-base-200">
-                        <img src="{{ $galleryImages[2] }}" alt="{{ $menu->name }}" class="aspect-[4/3] h-full w-full object-cover brightness-75">
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <span class="flex h-14 w-14 items-center justify-center rounded-full bg-base-100/90 text-2xl text-primary shadow-lg">
-                                <i class="ri-play-fill"></i>
-                            </span>
+                    @if ($menuVideo)
+                        <div class="overflow-hidden rounded-2xl border border-base-300 bg-base-900">
+                            <video src="{{ $menuVideo->url }}" controls class="aspect-[4/3] h-full w-full object-cover"></video>
                         </div>
-                    </div>
+                    @else
+                        <div class="relative overflow-hidden rounded-2xl border border-base-300 bg-base-200">
+                            <img src="{{ $galleryImages[2] }}" alt="{{ $menu->name }}" class="aspect-[4/3] h-full w-full object-cover brightness-75">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="flex h-14 w-14 items-center justify-center rounded-full bg-base-100/90 text-2xl text-primary shadow-lg">
+                                    <i class="ri-play-fill"></i>
+                                </span>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
 

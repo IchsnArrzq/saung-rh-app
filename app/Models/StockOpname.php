@@ -6,8 +6,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Physical stock count document (header). Holds the count session; the actual
+ * per-ingredient counts live in StockOpnameItem.
+ */
 class StockOpname extends Model
 {
     use HasFactory;
@@ -18,38 +22,40 @@ class StockOpname extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'ingredient_id',
-        'type',
-        'qty_before',
-        'qty_change',
-        'qty_after',
-        'reference_type',
-        'reference_id',
+        'code',
+        'opname_date',
+        'status',
         'notes',
         'user_id',
+        'posted_at',
+        'posted_by',
     ];
 
     protected function casts(): array
     {
         return [
-            'qty_before' => 'decimal:3',
-            'qty_change' => 'decimal:3',
-            'qty_after' => 'decimal:3',
+            'opname_date' => 'date',
+            'posted_at' => 'datetime',
         ];
     }
 
-    public function ingredient(): BelongsTo
+    public function items(): HasMany
     {
-        return $this->belongsTo(Ingredient::class);
-    }
-
-    public function reference(): MorphTo
-    {
-        return $this->morphTo();
+        return $this->hasMany(StockOpnameItem::class);
     }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function postedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'posted_by');
+    }
+
+    public function isPosted(): bool
+    {
+        return $this->status === 'posted';
     }
 }

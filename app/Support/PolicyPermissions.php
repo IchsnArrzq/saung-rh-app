@@ -3,7 +3,9 @@
 namespace App\Support;
 
 use App\Models\AppSetting;
+use App\Models\Customer;
 use App\Models\Ingredient;
+use App\Models\Media;
 use App\Models\Menu;
 use App\Models\MenuCategory;
 use App\Models\MenuIngredient;
@@ -15,15 +17,22 @@ use App\Models\OrderStatusLog;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
 use App\Models\Permission;
+use App\Models\Purchase;
+use App\Models\PurchaseItem;
 use App\Models\Reservation;
 use App\Models\ReservationItem;
 use App\Models\Role;
+use App\Models\Sale;
+use App\Models\SaleItem;
 use App\Models\ServiceLog;
 use App\Models\Shift;
 use App\Models\SongRequest;
 use App\Models\SpecialRequest;
+use App\Models\StockMovement;
 use App\Models\StockOpname;
+use App\Models\StockOpnameItem;
 use App\Models\Subscription;
+use App\Models\Supplier;
 use App\Models\Table;
 use App\Models\TableCategory;
 use App\Models\TableSession;
@@ -43,7 +52,9 @@ class PolicyPermissions
 {
     public static array $models = [
         AppSetting::class,
+        Customer::class,
         Ingredient::class,
+        Media::class,
         Menu::class,
         MenuCategory::class,
         MenuIngredient::class,
@@ -55,15 +66,22 @@ class PolicyPermissions
         Payment::class,
         PaymentAccount::class,
         Permission::class,
+        Purchase::class,
+        PurchaseItem::class,
         Reservation::class,
         ReservationItem::class,
         Role::class,
+        Sale::class,
+        SaleItem::class,
         ServiceLog::class,
         Shift::class,
         SongRequest::class,
         SpecialRequest::class,
+        StockMovement::class,
         StockOpname::class,
+        StockOpnameItem::class,
         Subscription::class,
+        Supplier::class,
         Table::class,
         TableCategory::class,
         TableSession::class,

@@ -24,7 +24,7 @@ class Form extends Component
 
     public function mount(?Ingredient $ingredient = null): void
     {
-        $this->ingredient = $ingredient;
+        $this->ingredient = $ingredient?->exists ? $ingredient : null;
 
         if ($this->ingredient) {
             $this->name = (string) $this->ingredient->name;

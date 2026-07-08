@@ -30,7 +30,7 @@ class Form extends Component
 
     public function mount(?DiningTable $table = null): void
     {
-        $this->table = $table;
+        $this->table = $table?->exists ? $table : null;
 
         if ($this->table) {
 

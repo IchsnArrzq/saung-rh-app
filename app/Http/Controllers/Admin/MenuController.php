@@ -24,4 +24,11 @@ class MenuController extends Controller
             'menu' => $menu,
         ]);
     }
+
+    public function media(Menu $menu): View
+    {
+        return view('admin.menus.media', [
+            'menu' => $menu,
+        ]);
+    }
 }

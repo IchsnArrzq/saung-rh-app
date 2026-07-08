@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMedia;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Menu extends Model
 {
     use HasFactory;
+    use HasMedia;
     use HasUuids;
 
     public $incrementing = false;
@@ -34,6 +36,15 @@ class Menu extends Model
         return [
             'price' => 'decimal:2',
         ];
+    }
+
+    /**
+     * Primary display image URL: prefers the media library, falls back to the
+     * legacy single image_url column so existing menus keep working.
+     */
+    public function getDisplayImageUrlAttribute(): ?string
+    {
+        return $this->primaryImage()?->url ?? ($this->image_url ?: null);
     }
 
     /**

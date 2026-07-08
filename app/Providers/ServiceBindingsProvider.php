@@ -6,6 +6,14 @@ use App\Services\Admin\DashboardServiceImplement;
 use App\Services\Admin\DashboardServiceInterface;
 use App\Services\Admin\InventoryServiceImplement;
 use App\Services\Admin\InventoryServiceInterface;
+use App\Services\Admin\MediaServiceImplement;
+use App\Services\Admin\MediaServiceInterface;
+use App\Services\Admin\PurchaseServiceImplement;
+use App\Services\Admin\PurchaseServiceInterface;
+use App\Services\Admin\SaleServiceImplement;
+use App\Services\Admin\SaleServiceInterface;
+use App\Services\Admin\StockOpnameServiceImplement;
+use App\Services\Admin\StockOpnameServiceInterface;
 use App\Services\Admin\MenuCategoryServiceImplement;
 use App\Services\Admin\MenuCategoryServiceInterface;
 use App\Services\Admin\MenuServiceImplement;
@@ -73,6 +81,10 @@ class ServiceBindingsProvider extends ServiceProvider
     {
         $this->app->bind(DashboardServiceInterface::class, DashboardServiceImplement::class);
         $this->app->bind(InventoryServiceInterface::class, InventoryServiceImplement::class);
+        $this->app->bind(MediaServiceInterface::class, MediaServiceImplement::class);
+        $this->app->bind(StockOpnameServiceInterface::class, StockOpnameServiceImplement::class);
+        $this->app->bind(PurchaseServiceInterface::class, PurchaseServiceImplement::class);
+        $this->app->bind(SaleServiceInterface::class, SaleServiceImplement::class);
         $this->app->bind(MenuCategoryServiceInterface::class, MenuCategoryServiceImplement::class);
         $this->app->bind(MenuServiceInterface::class, MenuServiceImplement::class);
         $this->app->bind(OrderServiceInterface::class, OrderServiceImplement::class);

@@ -56,6 +56,10 @@
                                     title="Resep / Bahan">
                                     <i class="ri-flask-line"></i> Resep
                                 </a>
+                                <a href="{{ route('menus.media.edit', $menu) }}" class="btn btn-sm btn-neutral text-white"
+                                    title="Gambar & Video">
+                                    <i class="ri-image-line"></i> Media
+                                </a>
                                 <a href="{{ route('menus.edit', $menu) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <button type="button" class="btn btn-sm btn-error text-white"
                                     data-confirm="Hapus menu ini?"

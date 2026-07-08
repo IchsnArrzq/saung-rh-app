@@ -4,7 +4,8 @@ namespace App\Services\Admin;
 
 use App\Models\Ingredient;
 use App\Models\Payment;
-use App\Models\StockOpname;
+use App\Models\StockMovement;
+use Illuminate\Database\Eloquent\Model;
 
 interface InventoryServiceInterface
 {
@@ -14,12 +15,17 @@ interface InventoryServiceInterface
     public function deductFromPayment(Payment $payment): void;
 
     /**
-     * Tambah stok (pembelian bahan).
+     * Tambah stok (mis. pembelian bahan). Opsional dikaitkan ke dokumen sumber.
      */
-    public function addStock(Ingredient $ingredient, float $qty, string $notes = ''): StockOpname;
+    public function addStock(Ingredient $ingredient, float $qty, string $notes = '', ?Model $reference = null): StockMovement;
 
     /**
-     * Koreksi stok (penyesuaian stok opname).
+     * Kurangi stok (mis. penjualan/pemakaian). Opsional dikaitkan ke dokumen sumber.
      */
-    public function adjustStock(Ingredient $ingredient, float $newQty, string $notes = ''): StockOpname;
+    public function reduceStock(Ingredient $ingredient, float $qty, string $notes = '', ?Model $reference = null): StockMovement;
+
+    /**
+     * Koreksi stok ke nilai baru (penyesuaian stok opname).
+     */
+    public function adjustStock(Ingredient $ingredient, float $newQty, string $notes = '', ?Model $reference = null): StockMovement;
 }

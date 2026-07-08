@@ -41,7 +41,7 @@ class Form extends Component
 
     public function mount(?Order $order = null): void
     {
-        $this->order = $order?->load('items');
+        $this->order = $order?->exists ? $order->load('items') : null;
 
         if ($this->order) {
 

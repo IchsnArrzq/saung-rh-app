@@ -25,7 +25,7 @@ class Form extends Component
 
     public function mount(?TableCategory $tableCategory = null): void
     {
-        $this->tableCategory = $tableCategory;
+        $this->tableCategory = $tableCategory?->exists ? $tableCategory : null;
 
         if ($this->tableCategory) {
 

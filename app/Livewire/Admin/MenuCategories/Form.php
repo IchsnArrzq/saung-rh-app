@@ -23,7 +23,7 @@ class Form extends Component
 
     public function mount(?MenuCategory $menuCategory = null): void
     {
-        $this->menuCategory = $menuCategory;
+        $this->menuCategory = $menuCategory?->exists ? $menuCategory : null;
 
         if ($this->menuCategory) {
 

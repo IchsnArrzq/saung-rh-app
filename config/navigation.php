@@ -57,6 +57,24 @@ return [
             'items' => [
                 ['label' => 'Bahan Makanan', 'icon' => 'ri-leaf-line', 'route' => 'ingredients.index', 'active' => ['ingredients.*']],
                 ['label' => 'Stock Opname', 'icon' => 'ri-archive-stack-line', 'route' => 'stock-opnames.index', 'active' => ['stock-opnames.*']],
+                ['label' => 'Riwayat Stok', 'icon' => 'ri-history-line', 'route' => 'stock-movements.index', 'active' => ['stock-movements.*']],
+            ],
+        ],
+        [
+            'label' => 'Kontak',
+            'icon' => 'ri-contacts-book-line',
+            'items' => [
+                ['label' => 'Supplier', 'icon' => 'ri-truck-line', 'route' => 'suppliers.index', 'active' => ['suppliers.*']],
+                ['label' => 'Pelanggan', 'icon' => 'ri-user-heart-line', 'route' => 'customers.index', 'active' => ['customers.*']],
+            ],
+        ],
+        [
+            'label' => 'Pembelian & Penjualan',
+            'icon' => 'ri-exchange-box-line',
+            'items' => [
+                ['label' => 'Pembelian', 'icon' => 'ri-shopping-cart-2-line', 'route' => 'purchases.index', 'active' => ['purchases.*']],
+                ['label' => 'Penjualan', 'icon' => 'ri-hand-coin-line', 'route' => 'sales.index', 'active' => ['sales.*']],
+                ['label' => 'Stok', 'icon' => 'ri-database-2-line', 'route' => 'stock.index', 'active' => ['stock.index']],
             ],
         ],
         [
@@ -149,6 +167,24 @@ return [
             'items' => [
                 ['label' => 'Bahan Makanan', 'icon' => 'ri-leaf-line', 'route' => 'ingredients.index', 'active' => ['ingredients.*']],
                 ['label' => 'Stock Opname', 'icon' => 'ri-archive-stack-line', 'route' => 'stock-opnames.index', 'active' => ['stock-opnames.*']],
+                ['label' => 'Riwayat Stok', 'icon' => 'ri-history-line', 'route' => 'stock-movements.index', 'active' => ['stock-movements.*']],
+            ],
+        ],
+        [
+            'label' => 'Kontak',
+            'icon' => 'ri-contacts-book-line',
+            'items' => [
+                ['label' => 'Supplier', 'icon' => 'ri-truck-line', 'route' => 'suppliers.index', 'active' => ['suppliers.*']],
+                ['label' => 'Pelanggan', 'icon' => 'ri-user-heart-line', 'route' => 'customers.index', 'active' => ['customers.*']],
+            ],
+        ],
+        [
+            'label' => 'Pembelian & Penjualan',
+            'icon' => 'ri-exchange-box-line',
+            'items' => [
+                ['label' => 'Pembelian', 'icon' => 'ri-shopping-cart-2-line', 'route' => 'purchases.index', 'active' => ['purchases.*']],
+                ['label' => 'Penjualan', 'icon' => 'ri-hand-coin-line', 'route' => 'sales.index', 'active' => ['sales.*']],
+                ['label' => 'Stok', 'icon' => 'ri-database-2-line', 'route' => 'stock.index', 'active' => ['stock.index']],
             ],
         ],
         [

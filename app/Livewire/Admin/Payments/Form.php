@@ -42,7 +42,7 @@ class Form extends Component
 
     public function mount(?Payment $payment = null): void
     {
-        $this->payment = $payment;
+        $this->payment = $payment?->exists ? $payment : null;
 
         if ($this->payment) {
 

@@ -5,15 +5,18 @@ namespace App\Livewire\Admin\Menus;
 use App\Models\Menu;
 use App\Models\MenuCategory;
 use App\Models\MenuStatus;
+use App\Services\Admin\MediaServiceInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class Form extends Component
 {
+    use WithFileUploads;
 
     public ?Menu $menu = null;
 
@@ -33,9 +36,19 @@ class Form extends Component
 
     public bool $is_available = true;
 
+    /**
+     * Staged image uploads (persisted on save). Kept separate from existing
+     * media so the same form works on both the create and edit routes.
+     *
+     * @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile>
+     */
+    public array $newImages = [];
+
+    public $newVideo = null;
+
     public function mount(?Menu $menu = null): void
     {
-        $this->menu = $menu;
+        $this->menu = $menu?->exists ? $menu : null;
 
         if ($this->menu) {
 
@@ -53,7 +66,63 @@ class Form extends Component
 
     }
 
-    public function save()
+    public function updatedNewImages(): void
+    {
+        $this->validate(
+            ['newImages.*' => ['image', 'max:4096']],
+            [],
+            ['newImages.*' => 'gambar'],
+        );
+    }
+
+    public function updatedNewVideo(): void
+    {
+        $this->validate(
+            ['newVideo' => ['nullable', 'file', 'mimetypes:video/mp4,video/webm,video/ogg', 'max:51200']],
+            [],
+            ['newVideo' => 'video'],
+        );
+    }
+
+    public function removeNewImage(int $index): void
+    {
+        unset($this->newImages[$index]);
+        $this->newImages = array_values($this->newImages);
+    }
+
+    public function removeNewVideo(): void
+    {
+        $this->newVideo = null;
+    }
+
+    /**
+     * Delete an already-saved media item immediately (edit route only).
+     */
+    public function deleteMedia(string $mediaId, MediaServiceInterface $mediaService): void
+    {
+        if (! $this->menu) {
+            return;
+        }
+
+        $media = $this->menu->media()->find($mediaId);
+
+        if ($media) {
+            $mediaService->delete($media);
+            session()->flash('success', 'Media berhasil dihapus.');
+        }
+    }
+
+    public function setPrimary(string $mediaId, MediaServiceInterface $mediaService): void
+    {
+        if (! $this->menu) {
+            return;
+        }
+
+        $mediaService->setPrimaryImage($this->menu, $mediaId);
+        session()->flash('success', 'Gambar utama diperbarui.');
+    }
+
+    public function save(MediaServiceInterface $mediaService)
     {
         $validated = $this->validate($this->rules());
         $validated['slug'] = Str::slug($validated['slug'] ?: $validated['name']);
@@ -64,13 +133,30 @@ class Form extends Component
         $validated['image_url'] = $validated['image_url'] ?: null;
         $validated['menu_status_id'] = $this->resolveMenuStatusId($this->is_available);
 
+        // Media fields are handled separately, not stored on the menu row.
+        unset($validated['newImages'], $validated['newVideo']);
+
         if ($this->menu) {
             $this->menu->update($validated);
-            session()->flash('success', 'Menu berhasil diperbarui.');
+            $menu = $this->menu;
+            $message = 'Menu berhasil diperbarui.';
         } else {
-            Menu::query()->create($validated);
-            session()->flash('success', 'Menu berhasil ditambahkan.');
+            $menu = Menu::query()->create($validated);
+            $message = 'Menu berhasil ditambahkan.';
         }
+
+        foreach ($this->newImages as $file) {
+            $mediaService->addImage($menu, $file);
+        }
+
+        if ($this->newVideo) {
+            $mediaService->addVideo($menu, $this->newVideo);
+        }
+
+        $this->newImages = [];
+        $this->newVideo = null;
+
+        session()->flash('success', $message);
 
         return $this->redirectRoute('menus.index', navigate: true);
     }
@@ -96,6 +182,9 @@ class Form extends Component
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'image_url' => ['nullable', 'string', 'max:255'],
+            'newImages' => ['nullable', 'array'],
+            'newImages.*' => ['image', 'max:4096'],
+            'newVideo' => ['nullable', 'file', 'mimetypes:video/mp4,video/webm,video/ogg', 'max:51200'],
         ];
     }
 
@@ -123,6 +212,8 @@ class Form extends Component
     {
         return view('livewire.admin.menus.form', [
             'categories' => $this->categories(),
+            'existingImages' => $this->menu ? $this->menu->images()->get() : collect(),
+            'existingVideos' => $this->menu ? $this->menu->videos()->get() : collect(),
         ]);
     }
 }

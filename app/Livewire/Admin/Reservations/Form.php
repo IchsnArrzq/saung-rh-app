@@ -44,7 +44,7 @@ class Form extends Component
 
     public function mount(?Reservation $reservation = null): void
     {
-        $this->reservation = $reservation;
+        $this->reservation = $reservation?->exists ? $reservation : null;
 
         if ($this->reservation) {
             $this->reservation->loadMissing('items');

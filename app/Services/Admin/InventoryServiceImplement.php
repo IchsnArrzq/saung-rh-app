@@ -4,7 +4,8 @@ namespace App\Services\Admin;
 
 use App\Models\Ingredient;
 use App\Models\Payment;
-use App\Models\StockOpname;
+use App\Models\StockMovement;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class InventoryServiceImplement implements InventoryServiceInterface
@@ -35,7 +36,7 @@ class InventoryServiceImplement implements InventoryServiceInterface
 
                     $ingredient->update(['stock' => $qtyAfter]);
 
-                    StockOpname::query()->create([
+                    StockMovement::query()->create([
                         'ingredient_id' => $ingredient->id,
                         'type' => 'out',
                         'qty_before' => $qtyBefore,
@@ -54,46 +55,60 @@ class InventoryServiceImplement implements InventoryServiceInterface
     /**
      * Tambah stok (pembelian bahan).
      */
-    public function addStock(Ingredient $ingredient, float $qty, string $notes = ''): StockOpname
+    public function addStock(Ingredient $ingredient, float $qty, string $notes = '', ?Model $reference = null): StockMovement
     {
-        return DB::transaction(function () use ($ingredient, $qty, $notes) {
+        return DB::transaction(function () use ($ingredient, $qty, $notes, $reference) {
             $qtyBefore = (float) $ingredient->stock;
             $qtyAfter = $qtyBefore + $qty;
 
             $ingredient->update(['stock' => $qtyAfter]);
 
-            return StockOpname::query()->create([
-                'ingredient_id' => $ingredient->id,
-                'type' => 'in',
-                'qty_before' => $qtyBefore,
-                'qty_change' => $qty,
-                'qty_after' => $qtyAfter,
-                'notes' => $notes ?: 'Penambahan stok',
-                'user_id' => auth()->id(),
-            ]);
+            return $this->record($ingredient, 'in', $qtyBefore, $qty, $qtyAfter, $notes ?: 'Penambahan stok', $reference);
+        });
+    }
+
+    /**
+     * Kurangi stok (pemakaian / penjualan).
+     */
+    public function reduceStock(Ingredient $ingredient, float $qty, string $notes = '', ?Model $reference = null): StockMovement
+    {
+        return DB::transaction(function () use ($ingredient, $qty, $notes, $reference) {
+            $qtyBefore = (float) $ingredient->stock;
+            $qtyAfter = max(0, $qtyBefore - $qty);
+
+            $ingredient->update(['stock' => $qtyAfter]);
+
+            return $this->record($ingredient, 'out', $qtyBefore, -$qty, $qtyAfter, $notes ?: 'Pengurangan stok', $reference);
         });
     }
 
     /**
      * Koreksi stok (penyesuaian stok opname).
      */
-    public function adjustStock(Ingredient $ingredient, float $newQty, string $notes = ''): StockOpname
+    public function adjustStock(Ingredient $ingredient, float $newQty, string $notes = '', ?Model $reference = null): StockMovement
     {
-        return DB::transaction(function () use ($ingredient, $newQty, $notes) {
+        return DB::transaction(function () use ($ingredient, $newQty, $notes, $reference) {
             $qtyBefore = (float) $ingredient->stock;
             $qtyChange = $newQty - $qtyBefore;
 
             $ingredient->update(['stock' => $newQty]);
 
-            return StockOpname::query()->create([
-                'ingredient_id' => $ingredient->id,
-                'type' => 'adjustment',
-                'qty_before' => $qtyBefore,
-                'qty_change' => $qtyChange,
-                'qty_after' => $newQty,
-                'notes' => $notes ?: 'Koreksi stok opname',
-                'user_id' => auth()->id(),
-            ]);
+            return $this->record($ingredient, 'adjustment', $qtyBefore, $qtyChange, $newQty, $notes ?: 'Koreksi stok opname', $reference);
         });
+    }
+
+    private function record(Ingredient $ingredient, string $type, float $before, float $change, float $after, string $notes, ?Model $reference): StockMovement
+    {
+        return StockMovement::query()->create([
+            'ingredient_id' => $ingredient->id,
+            'type' => $type,
+            'qty_before' => $before,
+            'qty_change' => $change,
+            'qty_after' => $after,
+            'reference_type' => $reference ? $reference->getMorphClass() : null,
+            'reference_id' => $reference?->getKey(),
+            'notes' => $notes,
+            'user_id' => auth()->id(),
+        ]);
     }
 }

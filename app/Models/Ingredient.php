@@ -40,9 +40,14 @@ class Ingredient extends Model
         return $this->hasMany(MenuIngredient::class);
     }
 
-    public function stockOpnames(): HasMany
+    public function stockMovements(): HasMany
     {
-        return $this->hasMany(StockOpname::class);
+        return $this->hasMany(StockMovement::class);
+    }
+
+    public function opnameItems(): HasMany
+    {
+        return $this->hasMany(StockOpnameItem::class);
     }
 
     public function isLowStock(): bool

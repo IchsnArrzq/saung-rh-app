@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Admin\StockOpnames;
 
-use App\Models\Ingredient;
 use App\Models\StockOpname;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
@@ -17,47 +16,54 @@ class Table extends Component
     #[Url(as: 'search', except: '')]
     public string $search = '';
 
-    #[Url(as: 'type', except: '')]
-    public string $typeFilter = '';
-
-    #[Url(as: 'ingredient', except: '')]
-    public string $ingredientFilter = '';
+    #[Url(as: 'status', except: '')]
+    public string $statusFilter = '';
 
     public function updatingSearch(): void
     {
         $this->resetPage();
     }
 
-    public function updatingTypeFilter(): void
+    public function updatingStatusFilter(): void
     {
         $this->resetPage();
     }
 
-    public function updatingIngredientFilter(): void
+    public function delete(string $id): void
     {
-        $this->resetPage();
+        $opname = StockOpname::query()->findOrFail($id);
+
+        if ($opname->isPosted()) {
+            session()->flash('error', 'Opname yang sudah diposting tidak bisa dihapus.');
+
+            return;
+        }
+
+        $opname->delete();
+
+        session()->flash('success', 'Draft opname berhasil dihapus.');
     }
 
     public function render(): View
     {
         $search = trim($this->search);
 
-        $records = StockOpname::query()
-            ->with(['ingredient', 'user'])
-            ->when($this->typeFilter !== '', fn (Builder $q) => $q->where('type', $this->typeFilter))
-            ->when($this->ingredientFilter !== '', fn (Builder $q) => $q->where('ingredient_id', $this->ingredientFilter))
+        $opnames = StockOpname::query()
+            ->withCount('items')
+            ->with('user')
+            ->when($this->statusFilter !== '', fn (Builder $q) => $q->where('status', $this->statusFilter))
             ->when($search !== '', function (Builder $q) use ($search): void {
                 $q->where(function (Builder $inner) use ($search): void {
-                    $inner->where('notes', 'like', '%'.$search.'%')
-                        ->orWhereHas('ingredient', fn (Builder $i) => $i->where('name', 'like', '%'.$search.'%'));
+                    $inner->where('code', 'like', '%'.$search.'%')
+                        ->orWhere('notes', 'like', '%'.$search.'%');
                 });
             })
+            ->latest('opname_date')
             ->latest()
             ->paginate(15);
 
         return view('livewire.admin.stock-opnames.table', [
-            'records' => $records,
-            'ingredients' => Ingredient::query()->orderBy('name')->get(),
+            'opnames' => $opnames,
         ]);
     }
 }

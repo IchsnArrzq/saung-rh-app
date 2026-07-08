@@ -32,7 +32,7 @@ class Form extends Component
 
     public function mount(?MenuStatus $menuStatus = null): void
     {
-        $this->menuStatus = $menuStatus;
+        $this->menuStatus = $menuStatus?->exists ? $menuStatus : null;
 
         if ($this->menuStatus) {
             $this->name = (string) $this->menuStatus->name;

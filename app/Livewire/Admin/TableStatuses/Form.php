@@ -33,7 +33,7 @@ class Form extends Component
 
     public function mount(?TableStatus $tableStatus = null): void
     {
-        $this->tableStatus = $tableStatus;
+        $this->tableStatus = $tableStatus?->exists ? $tableStatus : null;
 
         if ($this->tableStatus) {
 
