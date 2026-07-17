@@ -22,6 +22,8 @@
     },
     "dependencies": {
         "apexcharts": "^5.14.0",
-        "sweetalert2": "^11.26.25"
+        "flatpickr": "^4.6.13",
+        "sweetalert2": "^11.26.25",
+        "tom-select": "^2.6.2"
     }
 }

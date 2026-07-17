@@ -197,38 +197,242 @@ body {
     box-shadow: none !important;
 }
 
-/* Sidebar: thin scrollbar that stays hidden until the sidebar is hovered. */
+/* Sidebar: the native scrollbar is removed from the layout entirely and drawn
+   by floating-scrollbar.js as an overlay thumb instead. A native scrollbar --
+   even a thin one -- takes width out of the container's content box, which is
+   what made the menu shift when a group expanded. No gutter is reserved here;
+   the overlay never occupies layout space, so nothing around it moves. */
 .sidebar-scroll {
-    scrollbar-width: thin;                       /* Firefox */
-    scrollbar-color: transparent transparent;
-}
-
-.sidebar-scroll:hover {
-    scrollbar-color: rgb(17 19 21 / 0.25) transparent;
+    scrollbar-width: none;                       /* Firefox */
+    -ms-overflow-style: none;                    /* legacy Edge */
 }
 
 .sidebar-scroll::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.floating-scrollbar-thumb {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
     width: 6px;
-    height: 6px;
-}
-
-.sidebar-scroll::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.sidebar-scroll::-webkit-scrollbar-thumb {
-    background-color: transparent;
     border-radius: 9999px;
+    background-color: rgb(17 19 21 / 0.28);
+    opacity: 0;
+    cursor: grab;
+    transition: opacity 0.25s ease, background-color 0.15s ease;
+    will-change: transform;
 }
 
-.sidebar-scroll:hover::-webkit-scrollbar-thumb {
-    background-color: rgb(17 19 21 / 0.25);
+.floating-scrollbar-thumb.is-visible {
+    opacity: 1;
 }
 
-[data-theme="cr-cafe-resto-dark"] .sidebar-scroll:hover {
-    scrollbar-color: rgb(255 255 255 / 0.25) transparent;
+.floating-scrollbar-thumb:hover,
+.floating-scrollbar-thumb.is-dragging {
+    background-color: rgb(17 19 21 / 0.45);
 }
 
-[data-theme="cr-cafe-resto-dark"] .sidebar-scroll:hover::-webkit-scrollbar-thumb {
-    background-color: rgb(255 255 255 / 0.25);
+.floating-scrollbar-thumb.is-dragging {
+    cursor: grabbing;
+}
+
+[data-theme="cr-cafe-resto-dark"] .floating-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.28);
+}
+
+[data-theme="cr-cafe-resto-dark"] .floating-scrollbar-thumb:hover,
+[data-theme="cr-cafe-resto-dark"] .floating-scrollbar-thumb.is-dragging {
+    background-color: rgb(255 255 255 / 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .floating-scrollbar-thumb {
+        transition: none;
+    }
+}
+
+/* Tom Select: adopt daisyUI's field tokens so an enhanced <select> is
+   indistinguishable from a native `.select`. */
+.ts-wrapper {
+    --ts-height: 3rem;
+}
+
+.ts-wrapper.single .ts-control,
+.ts-wrapper.multi .ts-control {
+    min-height: var(--ts-height);
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #dfe3ea;
+    border-radius: var(--radius-field, 0.5rem);
+    background: var(--color-base-100);
+    background-image: none;
+    color: var(--color-base-content);
+    box-shadow: none;
+    font-size: 0.875rem;
+}
+
+.ts-wrapper.single.input-active .ts-control {
+    background: var(--color-base-100);
+}
+
+.ts-wrapper.focus .ts-control {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgb(255 79 85 / 0.12);
+}
+
+.ts-wrapper.disabled .ts-control {
+    opacity: 0.5;
+}
+
+.ts-wrapper .ts-control > input,
+.ts-wrapper .ts-control > .item {
+    color: var(--color-base-content);
+}
+
+.ts-wrapper .ts-control::after {
+    border-color: var(--color-secondary) transparent transparent;
+}
+
+.ts-dropdown {
+    z-index: 70;
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 0.75rem);
+    background: var(--color-base-100);
+    color: var(--color-base-content);
+    box-shadow: 0 14px 44px rgb(17 19 21 / 0.12);
+    margin-top: 0.25rem;
+    overflow: hidden;
+}
+
+.ts-dropdown .option {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.ts-dropdown .active {
+    background: var(--color-base-200);
+    color: var(--color-base-content);
+}
+
+.ts-dropdown .selected,
+.ts-dropdown .option.selected.active {
+    background: var(--color-primary);
+    color: var(--color-primary-content);
+}
+
+.ts-dropdown .no-results {
+    padding: 0.5rem 0.75rem;
+    color: var(--color-secondary);
+    font-size: 0.875rem;
+}
+
+.ts-wrapper.multi .ts-control > div {
+    border-radius: var(--radius-selector, 0.5rem);
+    background: var(--color-primary);
+    color: var(--color-primary-content);
+}
+
+/* Match daisyUI's `select-sm`/`select-xs` when the original field carried it. */
+.ts-wrapper.ts-sm {
+    --ts-height: 2rem;
+}
+
+.ts-wrapper.ts-sm .ts-control {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+[data-theme="cr-cafe-resto-dark"] .ts-wrapper.single .ts-control,
+[data-theme="cr-cafe-resto-dark"] .ts-wrapper.multi .ts-control {
+    border-color: var(--color-base-300);
+}
+
+[data-theme="cr-cafe-resto-dark"] .ts-dropdown {
+    box-shadow: none;
+}
+
+/* flatpickr: same treatment against the daisyUI palette. */
+.flatpickr-calendar {
+    border-radius: var(--radius-box, 0.75rem);
+    background: var(--color-base-100);
+    box-shadow: 0 14px 44px rgb(17 19 21 / 0.12);
+    border: 1px solid var(--color-base-300);
+}
+
+.flatpickr-calendar.arrowTop::before,
+.flatpickr-calendar.arrowTop::after {
+    border-bottom-color: var(--color-base-100);
+}
+
+.flatpickr-calendar.arrowBottom::before,
+.flatpickr-calendar.arrowBottom::after {
+    border-top-color: var(--color-base-100);
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-weekdays,
+span.flatpickr-weekday {
+    background: var(--color-base-100);
+    color: var(--color-base-content);
+    fill: var(--color-base-content);
+}
+
+span.flatpickr-weekday {
+    color: var(--color-secondary);
+    font-weight: 600;
+}
+
+.flatpickr-months .flatpickr-prev-month svg,
+.flatpickr-months .flatpickr-next-month svg {
+    fill: var(--color-base-content);
+}
+
+.flatpickr-day {
+    color: var(--color-base-content);
+    border-radius: var(--radius-selector, 0.5rem);
+}
+
+.flatpickr-day:hover,
+.flatpickr-day.prevMonthDay:hover,
+.flatpickr-day.nextMonthDay:hover {
+    background: var(--color-base-200);
+    border-color: transparent;
+}
+
+.flatpickr-day.today {
+    border-color: var(--color-primary);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-primary-content);
+}
+
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+    color: var(--color-secondary);
+    opacity: 0.5;
+}
+
+.flatpickr-time input,
+.flatpickr-time .flatpickr-time-separator,
+.flatpickr-time .flatpickr-am-pm {
+    background: var(--color-base-100);
+    color: var(--color-base-content);
+}
+
+.flatpickr-time input:hover,
+.flatpickr-time input:focus,
+.flatpickr-time .flatpickr-am-pm:hover {
+    background: var(--color-base-200);
+}
+
+[data-theme="cr-cafe-resto-dark"] .flatpickr-calendar {
+    box-shadow: none;
 }

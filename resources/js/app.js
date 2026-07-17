@@ -1,4 +1,6 @@
 import './bootstrap';
+import './enhance';
+import './floating-scrollbar';
 import ApexCharts from 'apexcharts';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';

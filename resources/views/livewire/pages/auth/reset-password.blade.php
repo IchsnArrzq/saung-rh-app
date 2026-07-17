@@ -70,36 +70,40 @@ new #[Layout('layouts.auth')] class extends Component
 }; ?>
 
 <div>
-    <form wire:submit="resetPassword">
+    <!-- Heading -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-stone-900">Atur ulang password</h1>
+        <p class="mt-1 text-sm text-stone-500">Buat password baru untuk akun Anda.</p>
+    </div>
+
+    <form wire:submit="resetPassword" class="space-y-4">
         <!-- Email Address -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
+            <x-input-label for="email" :value="__('Email')" class="font-bold" />
             <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input wire:model="password" id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
+        <div>
+            <x-input-label for="password" :value="__('Password baru')" class="font-bold" />
+            <x-password-input wire:model="password" id="password" class="block mt-1 w-full" name="password" required autocomplete="new-password" placeholder="Minimal 8 karakter" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
         <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input wire:model="password_confirmation" id="password_confirmation" class="block mt-1 w-full"
-                          type="password"
-                          name="password_confirmation" required autocomplete="new-password" />
-
+        <div>
+            <x-input-label for="password_confirmation" :value="__('Konfirmasi Password')" class="font-bold" />
+            <x-password-input wire:model="password_confirmation" id="password_confirmation" class="block mt-1 w-full"
+                name="password_confirmation" required autocomplete="new-password" placeholder="Ulangi password baru" />
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Reset Password') }}
-            </x-primary-button>
-        </div>
+        <x-primary-button class="w-full justify-center" wire:target="resetPassword" wire:loading.attr="disabled">
+            <span wire:loading.remove wire:target="resetPassword">{{ __('Simpan password baru') }}</span>
+            <span wire:loading wire:target="resetPassword" class="inline-flex items-center gap-2">
+                <span class="loading loading-spinner loading-xs"></span> {{ __('Menyimpan...') }}
+            </span>
+        </x-primary-button>
     </form>
 </div>

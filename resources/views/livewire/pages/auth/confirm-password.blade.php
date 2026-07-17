@@ -34,29 +34,28 @@ new #[Layout('layouts.auth')] class extends Component
 }; ?>
 
 <div>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
+    <!-- Heading -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-stone-900">Konfirmasi password</h1>
+        <p class="mt-1 text-sm text-stone-500">
+            Ini adalah area aman. Silakan konfirmasi password Anda sebelum melanjutkan.
+        </p>
     </div>
 
-    <form wire:submit="confirmPassword">
+    <form wire:submit="confirmPassword" class="space-y-4">
         <!-- Password -->
         <div>
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input wire:model="password"
-                          id="password"
-                          class="block mt-1 w-full"
-                          type="password"
-                          name="password"
-                          required autocomplete="current-password" />
-
+            <x-input-label for="password" :value="__('Password')" class="font-bold" />
+            <x-password-input wire:model="password" id="password" class="block mt-1 w-full"
+                name="password" required autocomplete="current-password" placeholder="Masukkan password" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <div class="flex justify-end mt-4">
-            <x-primary-button>
-                {{ __('Confirm') }}
-            </x-primary-button>
-        </div>
+        <x-primary-button class="w-full justify-center" wire:target="confirmPassword" wire:loading.attr="disabled">
+            <span wire:loading.remove wire:target="confirmPassword">{{ __('Konfirmasi') }}</span>
+            <span wire:loading wire:target="confirmPassword" class="inline-flex items-center gap-2">
+                <span class="loading loading-spinner loading-xs"></span> {{ __('Memproses...') }}
+            </span>
+        </x-primary-button>
     </form>
 </div>

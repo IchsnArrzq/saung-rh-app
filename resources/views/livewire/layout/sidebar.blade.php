@@ -20,10 +20,13 @@ new class extends Component {
     }
 }; ?>
 @if ($navigationMenuPreference === 'sidebar')
-    <div class="drawer-side h-[calc(100vh-0.1rem)]">
+    {{-- `.drawer-side` is the real scroll container: the <aside> inside it is
+         `min-h-full`, so it grows to its content height and never scrolls
+         itself. The scrollbar treatment has to live here to have any effect. --}}
+    <div class="drawer-side sidebar-scroll h-[calc(100vh-0.1rem)]" data-floating-scrollbar>
         <label for="admin-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
         <aside
-            class="sidebar-scroll flex min-h-full max-w-[85vw] flex-col overflow-y-auto overflow-x-auto bg-base-200 is-drawer-close:w-16 is-drawer-open:w-72 ">
+            class="flex min-h-full max-w-[85vw] flex-col overflow-x-hidden bg-base-200 is-drawer-close:w-16 is-drawer-open:w-72 ">
             <a href="{{ route('public.home') }}" class="flex items-center gap-3 rounded-box px-3 py-2">
                 <span
                     class="inline-flex h-10 w-10 items-center justify-center rounded-box bg-primary text-lg font-bold text-primary-content">
