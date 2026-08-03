@@ -4,29 +4,18 @@
 
 You are a Senior Laravel Architect and Laravel Expert.
 
-You are building a Restaurant Management System using:
+Building a Restaurant Management System using:
 
 * Laravel 12+
 * Livewire 3
-* TailwindCSS
-* daisyUI
+* TailwindCSS + daisyUI
 * MySQL/PostgreSQL
-* Repository Pattern
-* Service Pattern
-* Use Case Pattern
-* Action Pattern
+* Repository Pattern, Service Pattern, UseCase Pattern, Action Pattern
 
-Your goal:
+Goal: Clean, Modular, Reusable, Maintainable, Context-Aware, Agent-Friendly, Production Ready.
 
-* Clean
-* Modular
-* Reusable
-* Maintainable
-* Context-Aware
-* Agent-Friendly
-* Production Ready
-
-Avoid unnecessary complexity.
+Avoid unnecessary complexity. When in doubt, choose the simpler solution
+(see Decision Table at the end of this file).
 
 ---
 
@@ -34,69 +23,51 @@ Avoid unnecessary complexity.
 
 ## 1. Do Not Over Engineer
 
-Every layer must have a clear responsibility.
+Every layer must have a clear responsibility, AND every abstraction must
+solve a real problem that exists NOW — not one that might exist someday.
 
 Bad:
-
 Controller → Service → Manager → Processor → Repository
 
 Good:
-
 Controller → UseCase → Action → Service → Repository
 
-Only add a layer if it solves a real problem.
-
----
+This applies to interfaces too — see Service section.
 
 ## 2. Feature First Structure
 
-Organize by business domain.
-
-Example:
-
 app/
 ├── Domains/
-│   ├── Menu/
-│   ├── Order/
-│   ├── Reservation/
-│   ├── Kitchen/
-│   ├── Inventory/
-│   ├── Customer/
-│   └── Employee/
+│ ├── Menu/
+│ ├── Order/
+│ ├── Reservation/
+│ ├── Kitchen/
+│ ├── Inventory/
+│ ├── Customer/
+│ └── Employee/
 
-Avoid large generic folders.
+
+Avoid large generic folders. Domains do NOT import each other's classes
+directly — cross-domain communication happens via Events (see
+ARCHITECTURE.md § Domain Dependencies).
 
 ---
 
 # Architecture
 
-## Request Flow
+## Write Flow (create/update/delete/approve/cancel)
 
-HTTP Request
+HTTP Request → Controller → UseCase → Action → Service → Repository → Database
 
-↓
 
-Controller
+## Read Flow (listing, filter, dashboard, catalog display)
 
-↓
+HTTP Request → Controller → QueryUseCase → Repository → Database
 
-UseCase
 
-↓
-
-Action
-
-↓
-
-Service
-
-↓
-
-Repository
-
-↓
-
-Database
+- No Action for pure read.
+- No transaction boundary needed.
+- `QueryUseCase` only: accept filter params → call Repository → return DTO/Collection.
 
 ---
 
@@ -104,137 +75,102 @@ Database
 
 ## Controller
 
-Controller is only a wrapper.
+Wrapper only. Authorization, request validation, call UseCase/QueryUseCase, return response.
+No business logic.
 
-Responsibilities:
+OrderController@index → OrderIndexQueryUseCase
+OrderController@store → CreateOrderUseCase
 
-* Authorization
-* Request validation
-* Calling UseCase
-* Returning response
-
-Never place business logic inside controller.
-
-Example:
-
-OrderController@index
-OrderController@create
-OrderController@store
-
----
 
 ## UseCase
 
-UseCase orchestrates business flow.
+Orchestrates ONE complete business flow. Transaction boundary lives here.
 
-Example:
-
+```php
 CreateOrderUseCase
+DB::transaction(function () {
+    // calls Action(s)
+});
+```
 
-Responsibilities:
+**Merge rule:** if a UseCase only ever calls exactly ONE Action, and that
+Action is not reused anywhere else, don't create a separate Action file —
+put the logic directly in the UseCase. Only extract to Action once it's
+called from ≥2 places (see `CalculateOrderTotalAction`, which IS reused
+by both `CreateOrderUseCase` and `UpdateOrderUseCase` — that one earns
+its own file).
 
-* Coordinate actions
-* Handle transaction boundaries
-* Execute workflow
+## QueryUseCase (NEW)
 
-No database query directly.
+For read-only flows. Thin — no business rule, no transaction.
 
----
+GetOrderListQueryUseCase
+GetKitchenQueueQueryUseCase
+GetMenuCatalogQueryUseCase
+
 
 ## Action
 
-Actions contain a single business operation.
-
-Examples:
+One business operation, reusable across ≥2 UseCases.
 
 CreateOrderAction
-
 CalculateOrderTotalAction
-
 UpdateStockAction
-
 GenerateInvoiceAction
 
-Rule:
 
-One action = one responsibility
-
----
+Rule: one action = one responsibility. If it's never reused, it doesn't
+need to exist as a separate class (fold into the calling UseCase).
 
 ## Service
 
-Services contain reusable domain logic.
-
-Examples:
+Domain calculations, shared business rules, integrations.
 
 OrderService
-
 InventoryService
-
 PricingService
 
-Responsibilities:
 
-* Domain calculations
-* Shared business rules
-* Integrations
+**Interface rule (revised):** only bind an interface when multiple
+implementations are realistically expected — e.g.:
 
-Services must use interfaces.
+PaymentServiceInterface → CashPaymentService / QrisPaymentService / TransferPaymentService
+NotificationServiceInterface → WhatsappNotificationService / EmailNotificationService
 
-Example:
 
-OrderServiceInterface
-OrderService
-
-Bind via Service Provider.
-
----
+For services with exactly one implementation forever (e.g. `PricingService`,
+`InventoryService`), inject the concrete class directly. Don't create an
+interface "just in case" — that's the overengineering Core Principle #1
+warns against.
 
 ## Repository
 
-Repositories are data access layer.
+Query, persist, return models. No business logic.
 
-Responsibilities:
+OrderRepositoryInterface → OrderRepository
 
-* Query database
-* Persist data
-* Return models
 
-Never place business logic here.
-
-Example:
-
-OrderRepositoryInterface
-
-OrderRepository
-
----
+(Repository interfaces ARE worth keeping broadly, since swapping data
+source or mocking in tests is a real, common need — unlike most Services.)
 
 ## DTO
 
-Use DTO only when:
+Required at:
+- Controller → UseCase / QueryUseCase (if payload has >3 fields, or type-safety matters)
+- UseCase → Action (same threshold)
 
-* Payload is large
-* Multiple layers need same data
-* Request data becomes complex
+Not required at:
+- Action → Repository (Eloquent Model / array / primitive is fine)
 
-Do not create DTO for simple CRUD.
+Don't create DTO for simple single-field CRUD.
 
 ---
 
 # Dependency Injection
 
-Always bind interfaces.
-
-Example:
-
-OrderServiceInterface
-→ OrderService
-
-OrderRepositoryInterface
-→ OrderRepository
-
-Never inject concrete implementation when interface exists.
+Bind interfaces only for Repository (always) and Service (only when
+multiple implementations are real — see above). Never inject concrete
+implementation when a genuine interface exists.
 
 ---
 
@@ -242,95 +178,45 @@ Never inject concrete implementation when interface exists.
 
 ## Repository Owns Queries
 
-Allowed:
-
-OrderRepository
-
-Forbidden:
-
-Controller::where()
-
-Livewire::where()
-
-Service::where()
-
----
+Allowed: `OrderRepository::where(...)`
+Forbidden: `Controller::where()`, `Livewire::where()`, `Service::where()`
 
 ## Prevent N+1
 
-Always eager load relationships.
-
-Use:
-
-with()
-
-load()
-
-loadMissing()
-
----
+Always eager load: `with()`, `load()`, `loadMissing()`.
 
 ## Transactions
 
-Use transaction in UseCase layer.
-
-Example:
-
-CreateOrderUseCase
-
-DB::transaction(function () {
-...
-});
-
-Do not create nested transactions unnecessarily.
+Transaction boundary lives in UseCase (write flow only). No nested
+transactions unless unavoidable.
 
 ---
 
 # Route Organization
 
-Never put all routes in web.php
-
-Organize by business module.
+Never put all routes in `web.php`. Organize by module:
 
 routes/
-
 ├── web.php
-├── admin/
-│   ├── orders.php
-│   ├── menus.php
-│   ├── inventory.php
-│   └── employees.php
-├── cashier/
-│   ├── orders.php
-│   └── payments.php
-├── kitchen/
-│   └── kitchen.php
-└── customer/
-└── reservations.php
+├── admin/{orders,menus,inventory,employees}.php
+├── cashier/{orders,payments}.php
+├── kitchen/kitchen.php
+└── customer/reservations.php
 
-web.php only loads route files.
 
-Example:
-
-require **DIR**.'/admin/orders.php';
+`web.php` only loads route files.
 
 ---
 
 # View Organization
 
-Blade views are wrappers only.
+Blade views are wrappers only:
 
-Example:
-
-resources/views/admin/orders/index.blade.php
-
-Contains:
-
+```blade
 <livewire:admin.orders.table />
+```
 
-No business logic.
-
-No large UI implementation.
+No business logic, no large UI implementation in Blade.
 
 ---
 
@@ -338,322 +224,192 @@ No large UI implementation.
 
 ## One Component One Purpose
 
-Examples:
-
 Orders/Table
-
 Orders/Form
-
 Orders/Detail
 
-Avoid:
+Avoid: `Orders/Management`
 
-Orders/Management
+## Query Rule
 
----
+Never query database directly in `render()`.
 
-## Separate Lifecycle
+```php
+// Bad
+render() { return Order::paginate(); }
 
-Structure:
+// Good
+render() { return $this->getOrderListQueryUseCase->handle($this->filters); }
+```
 
+## Lifecycle Structure
+
+```php
 class OrderTable extends Component
 {
-// Properties
-
-```
-// Lifecycle
-
-mount()
-
-hydrate()
-
-boot()
-
-rendering()
-
-rendered()
-
-// Events
-
-// Actions
-
-// Custom Methods
-
-// Render
+    // Properties
+    // Lifecycle: mount(), hydrate(), boot(), rendering(), rendered()
+    // Events
+    // Actions
+    // Custom Methods
+    // Render
+}
 ```
 
-}
+## Naming
 
----
-
-## Naming Convention
-
-OrderTable
-
-OrderForm
-
-OrderDetail
-
-Avoid:
-
-OrderManager
-
-OrderHandler
-
----
-
-## Livewire Query Rule
-
-Never query database directly in render().
-
-Bad:
-
-render()
-{
-return Order::paginate();
-}
-
-Use Service / Repository.
+`OrderTable`, `OrderForm`, `OrderDetail` — not `OrderManager`, `OrderHandler`.
 
 ---
 
 # Validation
 
-Validation belongs to:
+**Format validation** (required, email, numeric, max length): Form Request
+or Livewire Form Object. Never duplicate rules across layers.
 
-Form Request
+**Business rule validation** (stock available, table available, approval
+limit): Policy, called from UseCase — NOT from Livewire/FormRequest.
 
-or
-
-Livewire Form Object
-
-Never duplicate validation rules.
+Rule of thumb: does checking this require a DB query or state lookup?
+→ Policy, not Livewire.
 
 ---
 
 # Authorization
 
-Use Policies.
+Use Policies. Permission naming convention: `{module}.{action}`.
 
-Examples:
+order.create
+order.cancel
+reservation.approve
+payment.process
 
-OrderPolicy
+Gate::authorize('order.cancel', $order);
 
-MenuPolicy
 
-InventoryPolicy
+Never hardcode role checks (`if(auth()->user()->role === 'admin')`).
 
-Never hardcode role checks.
+---
 
-Bad:
+# State Machine / Status Handling
 
-if(auth()->user()->role === 'admin')
+Order, Reservation, Table, and Kitchen statuses are **hardcoded Enums +
+Policy-based transition rules** — NOT database-driven Workflow.
 
-Good:
+```php
+enum OrderStatus: string {
+    case Draft = 'draft';
+    case Submitted = 'submitted';
+    case Completed = 'completed';
+    case Cancelled = 'cancelled';
+}
+```
 
-Gate::authorize()
+This is a deliberate choice: this is a single-tenant system where business
+flow doesn't need to change per client without a deploy. If that ever
+changes (e.g. multi-branch with different approval flows), migrate to a
+DB-driven Workflow table at that point — don't build that flexibility
+preemptively.
 
-Policy
+Full state diagram per domain: see `docs/design/{domain}.md`.
 
-Permission
+---
+
+# Audit Log
+
+Written automatically via Model Observer / Event Listener at the
+Infrastructure layer — never written manually inside an Action.
+Each domain registers which models are audited; no audit logic inside
+UseCase/Action.
 
 ---
 
 # UI Rules
 
-## Use DaisyUI First
+## DaisyUI First
 
-Prefer:
+Prefer `btn`, `card`, `table`, `modal`, `drawer`, `badge`, `alert`,
+`dropdown` before custom Tailwind.
 
-btn
+Bad: <div class="bg-white rounded-lg shadow px-6 py-4 border">
+Good: <div class="card bg-base-100">
 
-card
-
-table
-
-modal
-
-drawer
-
-badge
-
-alert
-
-dropdown
-
-Before creating custom Tailwind components.
-
----
 
 ## Consistency
 
-Use same pattern everywhere.
-
-Example:
-
-Index Page
-
-* Header
-* Filters
-* Table
-* Pagination
-
-Create Page
-
-* Header
-* Form
-* Actions
-
-Edit Page
-
-* Header
-* Form
-* Actions
-
----
-
-## Avoid Tailwind Noise
-
-Bad:
-
-<div class="bg-white rounded-lg shadow px-6 py-4 border">
-
-Good:
-
-<div class="card bg-base-100">
+Index: Header → Filters → Table → Pagination
+Create/Edit: Header → Form → Actions
 
 ---
 
 # Error Handling
 
-Never swallow exceptions.
-
-Log meaningful context.
-
-Example:
-
-order_id
-
-user_id
-
-branch_id
-
-action
-
-Avoid generic logs.
-
----
-
-# Observability
-
-Important business actions should be logged.
-
-Examples:
-
-Order Created
-
-Order Cancelled
-
-Stock Updated
-
-Reservation Confirmed
-
-Payment Received
+Never swallow exceptions. Log with context: `order_id`, `user_id`,
+`branch_id`, `action`. Avoid generic logs.
 
 ---
 
 # Testing
 
-Priority:
-
-1. UseCase Test
-2. Action Test
-3. Service Test
-4. Feature Test
-
+Priority: UseCase/QueryUseCase → Action → Service → Feature test.
 Avoid testing repositories directly unless necessary.
 
 ---
 
 # Performance
 
-Always consider:
-
-* eager loading
-* pagination
-* caching
-* indexes
-
-Never load entire table unnecessarily.
+Eager loading, pagination, caching, indexes. Never load a full table
+unnecessarily.
 
 ---
 
 # Naming Rules
 
-Use business names.
-
-Good:
-
-CreateOrderUseCase
-
-UpdateInventoryAction
-
-MenuRepository
-
-ReservationService
-
-Bad:
-
-DataManager
-
-HelperService
-
-GeneralRepository
-
-CommonUtility
+Business names: `CreateOrderUseCase`, `GetOrderListQueryUseCase`,
+`UpdateInventoryAction`, `MenuRepository`, `ReservationService`.
+Avoid: `DataManager`, `HelperService`, `GeneralRepository`, `CommonUtility`.
 
 ---
 
 # Restaurant Modules
 
-Core modules:
+Dashboard, Menu, Category, Order, Order Item, Reservation, Table, Kitchen,
+Inventory, Purchase, Supplier, Customer, Employee, Shift, Payment,
+Promotion, Report, Settings — same architecture applies to all.
 
-* Dashboard
-* Menu
-* Category
-* Order
-* Order Item
-* Reservation
-* Table
-* Kitchen
-* Inventory
-* Purchase
-* Supplier
-* Customer
-* Employee
-* Shift
-* Payment
-* Promotion
-* Report
-* Settings
+---
 
-Follow same architecture for all modules.
+# Decision Table
+
+| Question | Answer |
+|---|---|
+| Is this UI? | Presentation (Controller/View/Livewire) |
+| Is this a read/listing without state change? | QueryUseCase → Repository |
+| Is this one complete business flow that changes state? | UseCase |
+| Is this a small operation reused in ≥2 places? | Action |
+| Is this a core business rule (stock check, table availability, approval limit)? | Domain (Policy/Enum) |
+| Is this database access? | Repository |
+| Is this a technical integration (payment gateway, WA, WebSocket)? | Service (interface only if ≥2 real implementations) |
+| Does the status/flow need to change without a deploy, per client? | Not needed here — hardcoded Enum + Policy (see State Machine section) |
+| Can admin toggle behavior without code (feature flag, tax %)? | Configuration |
+| Is this a business reference list (Menu Category, Table Category)? | Master Data |
 
 ---
 
 # AI Agent Rules
 
-When generating code:
-
 1. Follow existing module structure.
-2. Reuse service before creating new one.
-3. Reuse repository before creating new query.
-4. Reuse action before creating business logic.
-5. Do not duplicate validation.
-6. Do not duplicate UI components.
+2. Reuse Service before creating a new one.
+3. Reuse Repository before creating a new query.
+4. Reuse Action before creating new business logic — but don't extract an
+   Action for something used only once (see UseCase merge rule).
+5. Don't duplicate validation (format in FormRequest, business rule in Policy).
+6. Don't duplicate UI components.
 7. Keep controllers thin.
-8. Keep Livewire focused.
+8. Keep Livewire focused, reads go through QueryUseCase.
 9. Prefer composition over inheritance.
 10. Keep code readable over clever.
+11. Before generating anything, check it against the Decision Table above.
+12. If genuinely ambiguous, ask — don't assume.
 
 Always choose simplicity when multiple solutions are valid.
