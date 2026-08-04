@@ -4,7 +4,7 @@ namespace App\Livewire\Pos;
 
 use App\Domains\Order\QueryUseCases\GetOpenBillsQueryUseCase;
 use App\Domains\Order\UseCases\SettleBillUseCase;
-use App\Services\Admin\PaymentService;
+use App\Domains\Payment\Enums\PaymentMethod;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
@@ -57,7 +57,7 @@ class TableBills extends Component
         return view('livewire.pos.table-bills', [
             'bills' => $bills,
             'totalOutstanding' => $bills->sum('outstanding'),
-            'methods' => PaymentService::METHOD_OPTIONS,
+            'methods' => PaymentMethod::cases(),
             'payBill' => $payBill,
         ]);
     }

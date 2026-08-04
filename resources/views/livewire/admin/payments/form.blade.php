@@ -22,7 +22,7 @@
                 <legend class="fieldset-legend">Metode</legend>
                 <select class="select select-bordered w-full" wire:model.defer="method" required>
                     @foreach ($methodOptions as $methodOption)
-                        <option value="{{ $methodOption }}">{{ str_replace('_', ' ', $methodOption) }}</option>
+                        <option value="{{ $methodOption->value }}">{{ $methodOption->label() }}</option>
                     @endforeach
                 </select>
                 @error('method')
@@ -40,7 +40,7 @@
                 <legend class="fieldset-legend">Status</legend>
                 <select class="select select-bordered w-full" wire:model.defer="status" required>
                     @foreach ($statusOptions as $statusOption)
-                        <option value="{{ $statusOption }}">{{ ucfirst($statusOption) }}</option>
+                        <option value="{{ $statusOption->value }}">{{ $statusOption->label() }}</option>
                     @endforeach
                 </select>
                 @error('status')

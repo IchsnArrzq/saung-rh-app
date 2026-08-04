@@ -3,6 +3,8 @@
 namespace App\Livewire\Admin\Orders;
 
 use App\Domains\Order\QueryUseCases\GetOrderListQueryUseCase;
+use App\Domains\Payment\Enums\PaymentMethod;
+use App\Domains\Payment\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Support\Str;
@@ -108,9 +110,9 @@ class Table extends Component
 
         Payment::query()->create([
             'order_id' => $order->id,
-            'method' => 'cash',
+            'method' => PaymentMethod::Cash->value,
             'type' => 'full',
-            'status' => 'paid',
+            'status' => PaymentStatus::Paid->value,
             'amount' => $remainingTotal,
             'reference' => 'PAY-'.now()->format('Ymd').'-'.Str::upper(Str::random(4)),
             'notes' => 'Dibuat dari tombol payment order table.',

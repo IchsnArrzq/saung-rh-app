@@ -276,7 +276,32 @@ Urutan by dependency (daun→akar) agar Events antar-domain rapi:
       write ter-rollback (set `sold_out` → `is_available=false` & masuk `scopeUnavailable`, toggle balik);
       **7 komponen Livewire di-render** (Menus Table/Form/MenuCard, OrderCard, MenuCatalog, Landing Home,
       MenuIngredients Form). `route:list` 144→**141**, `view:cache` + `npm run build` sukses.
-- [ ] C3. **Payment** (+PaymentStatus Enum; audit interface poly di sini)
+- [x] C3. **Payment** (+PaymentStatus & PaymentMethod Enum) — ✅ SELESAI (2026-08-04)
+      **Pre-flight:** method `PaymentService` **dead** (yang dipakai cuma konstantanya) → dihapus.
+      **Tidak ada migrasi data:** `payments.status`/`method` sejak awal kolom string biasa, tak pernah
+      ada tabel lookup — jadi C3 jauh lebih ringan dari C1/C2.
+      **Dibangun:** `app/Domains/Payment/` — `PaymentStatus` (pending/paid/failed/refunded, +`isSettled()`),
+      `PaymentMethod` (6 metode, +`label()`), `PaymentRepository`(+Interface), `GetPaymentListQueryUseCase`.
+      **Duplikasi yang dihapus:** konstanta di `PaymentService` **dan** salinannya di
+      `Livewire/Admin/Payments/Form`, **plus** peta label metode yang di-hardcode di
+      `livewire/pos/table-bills.blade.php`. Form admin dulu menampilkan label mentah
+      (`str_replace('_',' ')` / `ucfirst`) — kini label Indonesia dari Enum.
+      **Consumer dialihkan:** `SettleBillUseCase` (todo C3 ditutup), `TableBills`+blade, `Payments/Form`+blade,
+      `Payments/Table`→QueryUseCase, `PaymentObserver`, `ReservationDepositService`, `Admin/Orders/Table`,
+      `Pos/OrderCard`, `OrderBillingService`, `OrderRepository`.
+      ⚠️ **BUG LAMA DITEMUKAN & DIPERBAIKI (penting):** `stock_movements.reference_id` dibuat lewat
+      `$table->nullableMorphs('reference')` → kolom **bigint**, padahal semua model referensi
+      (Payment/Purchase/Sale/StockOpname) memakai **UUID**. Akibatnya **pemotongan stok otomatis akan
+      selalu gagal** (`invalid input syntax for type bigint`) begitu ada resep menu. Selama ini tak
+      ketahuan karena DB belum punya bahan/resep, sehingga loop `deductFromPayment` tak pernah jalan.
+      Diperbaiki migrasi `fix_stock_movements_reference_id_type` (tabel 0 baris → aman; indeks lama masih
+      bernama `stock_opnames_*` sisa rename, di-drop eksplisit).
+      **Verifikasi RUNTIME:** enum + label + `isSettled`; repository (18 payment, search, sumSettled=202.020);
+      openBills lewat OrderBillingService; **rantai stok end-to-end di transaksi ter-rollback** — bahan
+      stok 100 + resep 2/porsi + order 3 porsi → payment `paid` → **stok 94, 1 stock_movement `out` −6,
+      ref_type=Payment**; payment `pending` **tidak** memotong; `pending→paid` (hook `updated`) memotong.
+      5 komponen Livewire di-render (label Indonesia muncul). `route:list` 141 tetap, `view:cache` +
+      `npm run build` sukses.
 - [ ] C4. **Reservation** (+ReservationStatus Enum)
 - [ ] C5. **Kitchen** (KDS — sebagian besar QueryUseCase + Events)
 - [ ] C6. **Inventory** (Ingredient/Stock/Purchase/Supplier/Sale — domain terbesar)

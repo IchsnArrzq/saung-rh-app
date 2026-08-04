@@ -3,6 +3,8 @@
 namespace App\Livewire\Pos;
 
 use App\Domains\Menu\Enums\MenuAvailability;
+use App\Domains\Payment\Enums\PaymentMethod;
+use App\Domains\Payment\Enums\PaymentStatus;
 use App\Events\OrderCreated;
 use App\Models\Menu;
 use App\Models\MenuCategory;
@@ -185,9 +187,9 @@ class OrderCard extends Component
             if ((bool) ($validated['payNow'] ?? false) && $subtotal > 0) {
                 Payment::query()->create([
                     'order_id' => $order->id,
-                    'method' => $validated['paymentMethod'] ?? 'cash',
+                    'method' => $validated['paymentMethod'] ?? PaymentMethod::Cash->value,
                     'type' => 'full',
-                    'status' => 'paid',
+                    'status' => PaymentStatus::Paid->value,
                     'amount' => $subtotal,
                     'reference' => 'POS-'.now()->format('Ymd').'-'.Str::upper(Str::random(4)),
                     'notes' => 'Payment otomatis dari POS.',

@@ -1,11 +1,4 @@
 <div class="space-y-5">
-    @php
-        $methodLabels = [
-            'cash' => 'Tunai', 'qris' => 'QRIS', 'debit_card' => 'Kartu Debit',
-            'credit_card' => 'Kartu Kredit', 'transfer' => 'Transfer', 'ewallet' => 'E-Wallet',
-        ];
-    @endphp
-
     @if (session('success'))
         <div class="rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-medium text-success">
             {{ session('success') }}
@@ -125,9 +118,9 @@
                     <p class="mb-2 text-sm font-medium">Metode Pembayaran</p>
                     <div class="grid grid-cols-3 gap-2">
                         @foreach ($methods as $m)
-                            <button type="button" wire:click="$set('method', '{{ $m }}')"
-                                class="btn btn-sm {{ $method === $m ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
-                                {{ $methodLabels[$m] ?? $m }}
+                            <button type="button" wire:click="$set('method', '{{ $m->value }}')"
+                                class="btn btn-sm {{ $method === $m->value ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
+                                {{ $m->label() }}
                             </button>
                         @endforeach
                     </div>

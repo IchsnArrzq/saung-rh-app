@@ -2,6 +2,7 @@
 
 namespace App\Domains\Order\Services;
 
+use App\Domains\Payment\Enums\PaymentStatus;
 use App\Models\Order;
 use Illuminate\Support\Collection;
 
@@ -17,7 +18,7 @@ class OrderBillingService
     public function paidAmount(Order $order): float
     {
         return (float) $order->payments
-            ->where('status', 'paid')
+            ->where('status', PaymentStatus::Paid->value)
             ->sum('amount');
     }
 

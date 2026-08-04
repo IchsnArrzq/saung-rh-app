@@ -2,6 +2,7 @@
 
 namespace App\Services\Reservations;
 
+use App\Domains\Payment\Enums\PaymentStatus;
 use App\Models\Payment;
 use App\Models\Reservation;
 use App\Models\User;
@@ -24,7 +25,7 @@ class ReservationDepositService
             $payment = $reservation->payments()->create([
                 'method' => $method,
                 'type' => 'deposit',
-                'status' => 'paid',
+                'status' => PaymentStatus::Paid->value,
                 'amount' => $amount,
                 'proof_image_path' => $proofImagePath,
                 'verified_by' => $verifiedBy?->id,

@@ -7,8 +7,9 @@ use App\Domains\Order\Repositories\OrderRepositoryInterface;
 use App\Domains\Order\Services\OrderBillingService;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Domains\Payment\Enums\PaymentMethod;
+use App\Domains\Payment\Enums\PaymentStatus;
 use App\Domains\Table\UseCases\ReleaseTableUseCase;
-use App\Services\Admin\PaymentService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -21,7 +22,6 @@ use Illuminate\Validation\ValidationException;
  * payment attached; this is the cashier's way to take the money regardless of
  * who created the order.
  *
- * @todo Fase C3 — swap PaymentService::METHOD_OPTIONS for a PaymentMethod enum.
  * @todo Fase D — release the table by dispatching an event the Table domain
  *       listens to, instead of calling TableTurnoverService across the boundary
  *       (ARCHITECTURE.md § Domain Dependencies).
@@ -36,7 +36,7 @@ class SettleBillUseCase
 
     public function handle(string $orderId, string $method): Payment
     {
-        if (! in_array($method, PaymentService::METHOD_OPTIONS, true)) {
+        if (! PaymentMethod::tryFrom($method)) {
             throw ValidationException::withMessages([
                 'method' => 'Metode pembayaran tidak valid.',
             ]);
@@ -69,7 +69,7 @@ class SettleBillUseCase
             $payment = $order->payments()->create([
                 'method' => $method,
                 'type' => 'full',
-                'status' => 'paid',
+                'status' => PaymentStatus::Paid->value,
                 'amount' => $outstanding,
                 'reference' => 'BILL-'.now()->format('Ymd').'-'.Str::upper(Str::random(4)),
                 'verified_by' => Auth::id(),

@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin\Payments;
 
+use App\Domains\Payment\Enums\PaymentMethod;
+use App\Domains\Payment\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Collection;
@@ -11,16 +13,6 @@ use Livewire\Component;
 
 class Form extends Component
 {
-
-    /**
-     * @var array<int, string>
-     */
-    private const METHOD_OPTIONS = ['cash', 'qris', 'debit_card', 'credit_card', 'transfer', 'ewallet'];
-
-    /**
-     * @var array<int, string>
-     */
-    private const STATUS_OPTIONS = ['pending', 'paid', 'failed', 'refunded'];
 
     public ?Payment $payment = null;
 
@@ -63,7 +55,8 @@ class Form extends Component
     public function save()
     {
         $validated = $this->validate($this->rules());
-        $validated['paid_at'] = $validated['paid_at'] ?: ($validated['status'] === 'paid' ? now() : null);
+        $validated['paid_at'] = $validated['paid_at']
+            ?: (PaymentStatus::tryFrom($validated['status'])?->isSettled() ? now() : null);
         $validated['reference'] = $validated['reference'] ?: null;
         $validated['notes'] = $validated['notes'] ?: null;
 
@@ -85,9 +78,9 @@ class Form extends Component
     {
         return [
             'order_id' => ['required', 'exists:orders,id'],
-            'method' => ['required', Rule::in(self::METHOD_OPTIONS)],
+            'method' => ['required', Rule::in(PaymentMethod::values())],
             'type' => ['required', Rule::in(['full'])],
-            'status' => ['required', Rule::in(self::STATUS_OPTIONS)],
+            'status' => ['required', Rule::in(PaymentStatus::values())],
             'amount' => ['required', 'numeric', 'min:0'],
             'reference' => ['nullable', 'string', 'max:120'],
             'notes' => ['nullable', 'string'],
@@ -104,19 +97,19 @@ class Form extends Component
     }
 
     /**
-     * @return array<int, string>
+     * @return array<int, PaymentMethod>
      */
     public function methodOptions(): array
     {
-        return self::METHOD_OPTIONS;
+        return PaymentMethod::cases();
     }
 
     /**
-     * @return array<int, string>
+     * @return array<int, PaymentStatus>
      */
     public function statusOptions(): array
     {
-        return self::STATUS_OPTIONS;
+        return PaymentStatus::cases();
     }
 
     public function render(): View

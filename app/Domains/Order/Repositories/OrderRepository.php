@@ -3,6 +3,7 @@
 namespace App\Domains\Order\Repositories;
 
 use App\Domains\Order\Enums\OrderStatus;
+use App\Domains\Payment\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -17,7 +18,7 @@ class OrderRepository implements OrderRepositoryInterface
         return Order::query()
             ->with('table')
             ->withCount('items')
-            ->withSum(['payments as paid_total' => fn (Builder $query) => $query->where('status', 'paid')], 'amount')
+            ->withSum(['payments as paid_total' => fn (Builder $query) => $query->where('status', PaymentStatus::Paid->value)], 'amount')
             ->tap(fn (Builder $query) => $this->applySearch($query, $search))
             ->latest()
             ->paginate($perPage)
