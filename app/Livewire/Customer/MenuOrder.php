@@ -4,7 +4,7 @@ namespace App\Livewire\Customer;
 
 use App\Models\Menu;
 use App\Models\Table;
-use App\Services\Customer\OrderCartServiceInterface;
+use App\Services\Customer\OrderCartService;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -30,7 +30,7 @@ class MenuOrder extends Component
 
     public string $orderNotes = '';
 
-    public function mount(OrderCartServiceInterface $service): void
+    public function mount(OrderCartService $service): void
     {
         $tableId = (string) request()->query('table_id', '');
 
@@ -88,7 +88,7 @@ class MenuOrder extends Component
         $this->selectedMenu = null;
     }
 
-    public function addFromDetail(OrderCartServiceInterface $service): void
+    public function addFromDetail(OrderCartService $service): void
     {
         if (! $this->selectedMenu) {
             return;
@@ -100,12 +100,12 @@ class MenuOrder extends Component
         session()->flash('success', 'Menu ditambahkan ke cart.');
     }
 
-    public function quickAdd(string $menuId, OrderCartServiceInterface $service): void
+    public function quickAdd(string $menuId, OrderCartService $service): void
     {
         $service->addItem($this->tableId, $menuId, 1);
     }
 
-    public function incrementQty(string $menuId, OrderCartServiceInterface $service): void
+    public function incrementQty(string $menuId, OrderCartService $service): void
     {
         $current = $this->currentQty($service, $menuId);
 
@@ -114,7 +114,7 @@ class MenuOrder extends Component
         }
     }
 
-    public function decrementQty(string $menuId, OrderCartServiceInterface $service): void
+    public function decrementQty(string $menuId, OrderCartService $service): void
     {
         $current = $this->currentQty($service, $menuId);
 
@@ -127,24 +127,24 @@ class MenuOrder extends Component
         $service->setQty($this->tableId, $menuId, $current - 1);
     }
 
-    public function removeItem(string $menuId, OrderCartServiceInterface $service): void
+    public function removeItem(string $menuId, OrderCartService $service): void
     {
         $service->removeItem($this->tableId, $menuId);
     }
 
-    public function clearCart(OrderCartServiceInterface $service): void
+    public function clearCart(OrderCartService $service): void
     {
         $service->emptyCart($this->tableId);
     }
 
-    private function currentQty(OrderCartServiceInterface $service, string $menuId): int
+    private function currentQty(OrderCartService $service, string $menuId): int
     {
         $item = $service->cartItems($this->tableId)->firstWhere('menu_id', $menuId);
 
         return (int) ($item['qty'] ?? 0);
     }
 
-    public function checkout(OrderCartServiceInterface $service)
+    public function checkout(OrderCartService $service)
     {
         try {
             $service->placeOrder($this->tableId, $this->orderNotes);
@@ -161,7 +161,7 @@ class MenuOrder extends Component
         return $this->redirectRoute('customer.menus.index', ['table_id' => $this->tableId], navigate: true);
     }
 
-    public function render(OrderCartServiceInterface $service)
+    public function render(OrderCartService $service)
     {
         $catalog = $service->catalog($this->search, $this->activeCategoryId);
 

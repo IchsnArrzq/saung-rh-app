@@ -18,21 +18,29 @@
                 @foreach ($positioned as $cell)
                     @php
                         $t = $cell['model'];
-                        $color = $t->tableStatus?->color;
+                        $status = \App\Domains\Table\Enums\TableStatus::tryFrom((string) $t->status);
                         $isSelected = $selectedTableId === $t->id;
+                        // Full class names per branch — Tailwind cannot scan interpolated ones.
+                        // (The old code injected the token straight into `border-color`,
+                        // which was never valid CSS, so the colours never showed.)
+                        [$tileClass, $textClass, $dotClass] = match ($status?->color()) {
+                            'success' => ['border-success bg-success/10', 'text-success', 'bg-success'],
+                            'error' => ['border-error bg-error/10', 'text-error', 'bg-error'],
+                            'warning' => ['border-warning bg-warning/10', 'text-warning', 'bg-warning'],
+                            'info' => ['border-info bg-info/10', 'text-info', 'bg-info'],
+                            'secondary' => ['border-secondary bg-secondary/10', 'text-secondary', 'bg-secondary'],
+                            default => ['border-base-300 bg-base-200', 'text-base-content/60', 'bg-base-content/40'],
+                        };
                     @endphp
                     <button
                         wire:click="selectTable('{{ $t->id }}')"
-                        class="absolute flex flex-col items-center justify-center rounded-xl border-2 text-center transition hover:scale-105 {{ $isSelected ? 'ring-2 ring-primary ring-offset-2' : '' }}"
-                        style="left: {{ $cell['x'] * 150 }}px; top: {{ $cell['y'] * 120 }}px; width: 130px; height: 100px;
-                            border-color: {{ $color ?: '#d1d5db' }};
-                            background: {{ $color ? $color.'22' : '#f9fafb' }};">
+                        class="absolute flex flex-col items-center justify-center rounded-xl border-2 text-center transition hover:scale-105 {{ $tileClass }} {{ $isSelected ? 'ring-2 ring-primary ring-offset-2' : '' }}"
+                        style="left: {{ $cell['x'] * 150 }}px; top: {{ $cell['y'] * 120 }}px; width: 130px; height: 100px;">
                         <span class="font-bold text-sm">{{ $t->code }}</span>
                         <span class="text-[11px] text-secondary leading-tight">{{ $t->name }}</span>
-                        <span class="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide"
-                            style="color: {{ $color ?: '#6b7280' }};">
-                            <span class="h-2 w-2 rounded-full" style="background: {{ $color ?: '#9ca3af' }};"></span>
-                            {{ $t->tableStatus?->name ?? '—' }}
+                        <span class="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide {{ $textClass }}">
+                            <span class="h-2 w-2 rounded-full {{ $dotClass }}"></span>
+                            {{ $status?->label() ?? '—' }}
                         </span>
                         <span class="text-[10px] text-secondary mt-0.5"><i class="ri-group-line"></i> {{ $t->capacity }}</span>
                     </button>

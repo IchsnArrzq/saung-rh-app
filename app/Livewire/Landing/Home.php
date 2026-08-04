@@ -3,7 +3,7 @@
 namespace App\Livewire\Landing;
 
 use App\Models\Menu;
-use App\Services\Landing\PublicHomeServiceInterface;
+use App\Services\Landing\PublicHomeService;
 use App\Support\RestaurantCart;
 use Livewire\Component;
 
@@ -25,7 +25,7 @@ class Home extends Component
         return $this->redirectRoute('public.home', navigate: true);
     }
 
-    public function render(PublicHomeServiceInterface $publicHomeService)
+    public function render(PublicHomeService $publicHomeService)
     {
         return view('livewire.landing.home', [
             'menus' => $publicHomeService->featuredMenus(4),

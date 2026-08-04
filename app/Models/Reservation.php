@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domains\Table\Enums\TableStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -118,9 +119,7 @@ class Reservation extends Model
             return;
         }
 
-        if ($reserved = TableStatus::query()->where('key', self::RESERVED_STATUS_KEY)->first()) {
-            $table->update(['table_status_id' => $reserved->id]);
-        }
+        $table->update(['status' => TableStatus::Reserved->value]);
     }
 
     /**
@@ -145,8 +144,6 @@ class Reservation extends Model
             return;
         }
 
-        if ($default = TableStatus::query()->where('is_default', true)->first()) {
-            $table->update(['table_status_id' => $default->id]);
-        }
+        $table->update(['status' => TableStatus::default()->value]);
     }
 }

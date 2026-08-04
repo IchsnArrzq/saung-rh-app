@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Admin\Tables;
 
+use App\Domains\Table\Enums\TableStatus;
 use App\Models\Table as DiningTable;
 use App\Models\TableCategory;
-use App\Models\TableStatus;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -22,7 +22,7 @@ class Form extends Component
 
     public string $capacity = '4';
 
-    public string $table_status_id = '';
+    public string $status = '';
 
     public string $table_category_id = '';
 
@@ -37,7 +37,7 @@ class Form extends Component
             $this->code = (string) $this->table->code;
             $this->name = (string) ($this->table->name ?? '');
             $this->capacity = (string) ($this->table->capacity ?? 4);
-            $this->table_status_id = (string) ($this->table->table_status_id ?? '');
+            $this->status = (string) ($this->table->status ?? '');
             $this->table_category_id = (string) ($this->table->table_category_id ?? '');
             $this->notes = (string) ($this->table->notes ?? '');
 
@@ -45,30 +45,18 @@ class Form extends Component
         }
 
 
-        $defaultStatus = TableStatus::query()
-            ->where('is_default', true)
-            ->first()
-            ?? TableStatus::query()->orderBy('sort_order')->orderBy('name')->first();
-
-        $this->table_status_id = (string) ($defaultStatus?->id ?? '');
+        $this->status = TableStatus::default()->value;
     }
 
     public function save()
     {
         $validated = $this->validate($this->rules());
 
-        $status = TableStatus::query()->find($validated['table_status_id']);
-        if (! $status) {
-            throw ValidationException::withMessages([
-                'table_status_id' => 'Status meja tidak valid.',
-            ]);
-        }
-
         $payload = [
             'code' => $validated['code'],
             'name' => $validated['name'] ?: null,
             'capacity' => (int) $validated['capacity'],
-            'table_status_id' => $validated['table_status_id'],
+            'status' => $validated['status'],
             'table_category_id' => $validated['table_category_id'] ?: null,
             'notes' => $validated['notes'] ?: null,
         ];
@@ -99,28 +87,20 @@ class Form extends Component
             'code' => ['required', 'string', 'max:40', $codeRule],
             'name' => ['nullable', 'string', 'max:120'],
             'capacity' => ['required', 'integer', 'min:1'],
-            'table_status_id' => ['required', 'exists:table_statuses,id'],
+            'status' => ['required', Rule::in(TableStatus::values())],
             'table_category_id' => ['nullable', 'exists:table_categories,id'],
             'notes' => ['nullable', 'string'],
         ];
     }
 
     /**
-     * @return Collection<int, TableStatus>
+     * @return SupportCollection<int, TableStatus>
      */
-    public function statusOptions(): Collection
+    public function statusOptions(): SupportCollection
     {
-        return TableStatus::query()
-            ->where(function ($query): void {
-                $query->where('is_active', true);
-
-                if ($this->table?->table_status_id) {
-                    $query->orWhere('id', $this->table->table_status_id);
-                }
-            })
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->get();
+        return collect(TableStatus::cases())
+            ->sortBy(fn (TableStatus $status) => $status->sortOrder())
+            ->values();
     }
 
     /**

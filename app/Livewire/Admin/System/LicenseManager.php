@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin\System;
 
 use App\Models\Subscription;
-use App\Services\Settings\LicenseServiceInterface;
+use App\Services\Settings\LicenseService;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -24,7 +24,7 @@ class LicenseManager extends Component
 
     public string $notes = '';
 
-    public function mount(LicenseServiceInterface $license): void
+    public function mount(LicenseService $license): void
     {
         $sub = $license->current();
 
@@ -69,7 +69,7 @@ class LicenseManager extends Component
         session()->flash('success', 'Lisensi diperbarui.');
     }
 
-    public function render(LicenseServiceInterface $license): View
+    public function render(LicenseService $license): View
     {
         return view('livewire.admin.system.license-manager', [
             'summary' => $license->summary(),

@@ -4,7 +4,7 @@ namespace App\Livewire\Frontend;
 
 use App\Events\ChatMessagePosted;
 use App\Models\Table;
-use App\Services\Chat\ChatServiceInterface;
+use App\Services\Chat\ChatService;
 use App\Support\TableSessionContext;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -92,7 +92,7 @@ class TableChat extends Component
         // Only allow DMs to tables that are actually occupied right now.
         $reachable = Table::query()
             ->whereKey($otherTableId)
-            ->whereHas('tableStatus', fn ($q) => $q->whereIn('key', self::OCCUPIED_STATUS_KEYS))
+            ->whereIn('status', self::OCCUPIED_STATUS_KEYS)
             ->exists();
 
         if (! $reachable) {
@@ -111,7 +111,7 @@ class TableChat extends Component
         $this->activeConversation = null;
     }
 
-    public function send(ChatServiceInterface $chat): void
+    public function send(ChatService $chat): void
     {
         if (! $this->tableId || $this->activeConversation === null) {
             return;
@@ -162,7 +162,7 @@ class TableChat extends Component
         $this->reset('body');
     }
 
-    public function render(ChatServiceInterface $chat): View
+    public function render(ChatService $chat): View
     {
         $available = $chat->available();
 
@@ -214,9 +214,8 @@ class TableChat extends Component
     private function occupiedTables()
     {
         return Table::query()
-            ->with('tableStatus')
             ->whereKeyNot($this->tableId)
-            ->whereHas('tableStatus', fn ($q) => $q->whereIn('key', self::OCCUPIED_STATUS_KEYS))
+            ->whereIn('status', self::OCCUPIED_STATUS_KEYS)
             ->orderBy('code')
             ->get();
     }

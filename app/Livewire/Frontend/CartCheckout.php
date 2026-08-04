@@ -5,7 +5,7 @@ namespace App\Livewire\Frontend;
 use App\Events\OrderCreated;
 use App\Models\Order;
 use App\Models\Table;
-use App\Models\TableStatus;
+use App\Domains\Table\Enums\TableStatus;
 use App\Support\RestaurantCart;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -89,10 +89,9 @@ class CartCheckout extends Component
             'notes' => ['nullable', 'string'],
         ]);
 
-        $table = Table::query()->with('tableStatus')->findOrFail($this->tableId);
-        $orderInStatus = TableStatus::query()->where('key', 'order_in')->first();
+        $table = Table::query()->findOrFail($this->tableId);
 
-        $order = DB::transaction(function () use ($cart, $table, $orderInStatus): Order {
+        $order = DB::transaction(function () use ($cart, $table): Order {
             $subtotal = collect($cart)->sum(fn (array $item) => ((float) $item['price']) * ((int) $item['qty']));
 
             $order = Order::query()->create([
@@ -126,8 +125,8 @@ class CartCheckout extends Component
 
             // A QR check-in already flips the table to "occupied"; an incoming
             // order should advance either state to "order_in".
-            if ($orderInStatus && in_array($table->tableStatus?->key, ['available', 'occupied'], true)) {
-                $table->update(['table_status_id' => $orderInStatus->id]);
+            if (in_array($table->status, [TableStatus::Available->value, TableStatus::Occupied->value], true)) {
+                $table->update(['status' => TableStatus::OrderIn->value]);
             }
 
             return $order;
@@ -146,8 +145,11 @@ class CartCheckout extends Component
     public function render()
     {
         $tables = Table::query()
-            ->with('tableStatus')
-            ->whereHas('tableStatus', fn ($status) => $status->whereIn('key', ['available', 'occupied', 'order_in']))
+            ->whereIn('status', [
+                TableStatus::Available->value,
+                TableStatus::Occupied->value,
+                TableStatus::OrderIn->value,
+            ])
             ->orderBy('code')
             ->get();
 

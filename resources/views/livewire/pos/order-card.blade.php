@@ -101,8 +101,8 @@
                             @foreach ($tables as $table)
                                 <option value="{{ $table->id }}">
                                     {{ $table->code }} - {{ $table->name }}
-                                    @if ($table->tableStatus?->name)
-                                        ({{ $table->tableStatus->name }})
+                                    @if ($status = \App\Domains\Table\Enums\TableStatus::tryFrom((string) $table->status))
+                                        ({{ $status->label() }})
                                     @endif
                                 </option>
                             @endforeach

@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Admin\Reservations;
 
+use App\Domains\Table\Enums\TableStatus;
 use App\Events\OrderCreated;
 use App\Models\Order;
 use App\Models\Reservation;
-use App\Models\TableStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -77,7 +77,7 @@ class Table extends Component
     public function generateOrder(string $id): void
     {
         $reservation = Reservation::query()
-            ->with(['table.tableStatus', 'items'])
+            ->with(['table', 'items'])
             ->findOrFail($id);
 
         if ($reservation->items->isEmpty()) {
@@ -97,9 +97,7 @@ class Table extends Component
             return;
         }
 
-        $orderInStatus = TableStatus::query()->where('key', 'order_in')->first();
-
-        $order = DB::transaction(function () use ($reservation, $sourceMarker, $orderInStatus): Order {
+        $order = DB::transaction(function () use ($reservation, $sourceMarker): Order {
             $subtotal = (float) $reservation->items->sum('line_total');
 
             $order = Order::query()->create([
@@ -132,10 +130,8 @@ class Table extends Component
             $reservation->update(['status' => 'seated']);
 
             $table = $reservation->table;
-            if ($table && $table->tableStatus?->key === 'available' && $orderInStatus) {
-                $table->update([
-                    'table_status_id' => $orderInStatus->id,
-                ]);
+            if ($table && $table->status === TableStatus::Available->value) {
+                $table->update(['status' => TableStatus::OrderIn->value]);
             }
 
             return $order;

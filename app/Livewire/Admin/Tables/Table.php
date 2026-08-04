@@ -2,9 +2,10 @@
 
 namespace App\Livewire\Admin\Tables;
 
+use App\Domains\Table\Enums\TableStatus;
+use App\Domains\Table\QueryUseCases\GetTableListQueryUseCase;
+use App\Domains\Table\UseCases\ChangeTableStatusUseCase;
 use App\Models\Table as DiningTable;
-use App\Models\TableStatus;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
@@ -32,29 +33,19 @@ class Table extends Component
         $this->resetPage();
     }
 
-    public function updateStatus(string $tableId): void
+    public function updateStatus(string $tableId, ChangeTableStatusUseCase $changeStatus): void
     {
         $table = DiningTable::query()->findOrFail($tableId);
 
-        $statusId = $this->statusDrafts[$tableId] ?? null;
-
-        if (! $statusId) {
-            throw ValidationException::withMessages([
-                'table_status_id' => 'Status meja harus dipilih.',
-            ]);
-        }
-
-        $status = TableStatus::query()->find($statusId);
+        $status = TableStatus::tryFrom((string) ($this->statusDrafts[$tableId] ?? ''));
 
         if (! $status) {
             throw ValidationException::withMessages([
-                'table_status_id' => 'Status meja tidak valid.',
+                'status' => 'Status meja tidak valid.',
             ]);
         }
 
-        $table->update([
-            'table_status_id' => $status->id,
-        ]);
+        $changeStatus->handle($table, $status);
 
         session()->flash('success', 'Status meja berhasil diperbarui.');
     }
@@ -67,35 +58,19 @@ class Table extends Component
         session()->flash('success', 'Meja berhasil dihapus.');
     }
 
-    public function render(): View
+    public function render(GetTableListQueryUseCase $tableList): View
     {
         $search = trim($this->search);
 
-        $tables = DiningTable::query()
-            ->with(['tableStatus', 'tableCategory'])
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('code', 'like', '%'.$search.'%')
-                        ->orWhere('name', 'like', '%'.$search.'%')
-                        ->orWhere('capacity', 'like', '%'.$search.'%')
-                        ->orWhereHas('tableStatus', fn (Builder $status) => $status->where(function (Builder $statusQuery) use ($search): void {
-                            $statusQuery->where('name', 'like', '%'.$search.'%')
-                                ->orWhere('key', 'like', '%'.$search.'%');
-                        }))
-                        ->orWhereHas('tableCategory', fn (Builder $category) => $category->where('name', 'like', '%'.$search.'%'));
-                });
-            })
-            ->orderBy('code')
-            ->paginate(12);
+        $tables = $tableList->paginate($search);
 
-        $statusOptions = TableStatus::query()
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->get();
+        $statusOptions = collect(TableStatus::cases())
+            ->sortBy(fn (TableStatus $status) => $status->sortOrder())
+            ->values();
 
         foreach ($tables as $table) {
             if (! isset($this->statusDrafts[$table->id])) {
-                $this->statusDrafts[$table->id] = (string) ($table->table_status_id ?? '');
+                $this->statusDrafts[$table->id] = (string) $table->status;
             }
         }
 

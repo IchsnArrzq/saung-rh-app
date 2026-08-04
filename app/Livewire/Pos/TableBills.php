@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Pos;
 
-use App\Models\Order;
-use App\Services\Admin\PaymentServiceInterface;
-use App\Services\Pos\BillingServiceInterface;
+use App\Domains\Order\QueryUseCases\GetOpenBillsQueryUseCase;
+use App\Domains\Order\UseCases\SettleBillUseCase;
+use App\Services\Admin\PaymentService;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
@@ -30,31 +30,25 @@ class TableBills extends Component
         $this->dispatch('close-modal', 'settle-bill-modal');
     }
 
-    public function settle(BillingServiceInterface $billing): void
+    public function settle(SettleBillUseCase $settleBill): void
     {
-        $order = Order::query()->with('payments')->find($this->payOrderId);
-
-        if (! $order) {
-            $this->addError('settle', 'Order tidak ditemukan.');
-
-            return;
-        }
-
         try {
-            $payment = $billing->settle($order, $this->method);
+            $payment = $settleBill->handle((string) $this->payOrderId, $this->method);
         } catch (ValidationException $e) {
             $this->addError('settle', $e->validator->errors()->first());
 
             return;
         }
 
+        $orderNumber = $payment->order?->order_number ?? '';
+
         $this->closeSettle();
-        session()->flash('success', 'Tagihan '.$order->order_number.' lunas — Rp '.number_format((float) $payment->amount, 0, ',', '.').'.');
+        session()->flash('success', 'Tagihan '.$orderNumber.' lunas — Rp '.number_format((float) $payment->amount, 0, ',', '.').'.');
     }
 
-    public function render(BillingServiceInterface $billing)
+    public function render(GetOpenBillsQueryUseCase $openBills)
     {
-        $bills = $billing->openBills($this->search);
+        $bills = $openBills->handle($this->search);
 
         $payBill = $this->payOrderId
             ? $bills->firstWhere('id', $this->payOrderId)
@@ -63,7 +57,7 @@ class TableBills extends Component
         return view('livewire.pos.table-bills', [
             'bills' => $bills,
             'totalOutstanding' => $bills->sum('outstanding'),
-            'methods' => PaymentServiceInterface::METHOD_OPTIONS,
+            'methods' => PaymentService::METHOD_OPTIONS,
             'payBill' => $payBill,
         ]);
     }

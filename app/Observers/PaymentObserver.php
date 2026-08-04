@@ -3,11 +3,11 @@
 namespace App\Observers;
 
 use App\Models\Payment;
-use App\Services\Admin\InventoryServiceInterface;
+use App\Services\Admin\InventoryService;
 
 class PaymentObserver
 {
-    public function __construct(private readonly InventoryServiceInterface $inventoryService) {}
+    public function __construct(private readonly InventoryService $inventoryService) {}
 
     public function updated(Payment $payment): void
     {

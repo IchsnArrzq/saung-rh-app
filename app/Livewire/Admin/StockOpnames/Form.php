@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin\StockOpnames;
 
 use App\Models\StockOpname;
-use App\Services\Admin\StockOpnameServiceInterface;
+use App\Services\Admin\StockOpnameService;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -54,7 +54,7 @@ class Form extends Component
      * Create route: snapshot current stock into a new draft, then continue on
      * the edit screen to enter the physical counts.
      */
-    public function startDraft(StockOpnameServiceInterface $service)
+    public function startDraft(StockOpnameService $service)
     {
         $this->validate([
             'opname_date' => ['required', 'date'],
@@ -105,7 +105,7 @@ class Form extends Component
         return $this->redirectRoute('stock-opnames.edit', $this->opname, navigate: true);
     }
 
-    public function post(StockOpnameServiceInterface $service)
+    public function post(StockOpnameService $service)
     {
         if (! $this->opname || $this->opname->isPosted()) {
             return;

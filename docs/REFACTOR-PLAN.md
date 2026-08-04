@@ -147,12 +147,72 @@ Transition rule (mis. `order_in → cleaning` saat lunas) → **Policy**, dipang
 
 ## 6. Fase eksekusi (urut)
 
-### Fase A — Quick wins (risiko rendah, ~1–2 hari)
-- [ ] A1. G4 — hapus interface service 1-impl, rename `*Implement`→`*Service`, rapikan `ServiceBindingsProvider`.
-- [ ] A2. G6 — pecah routes ke subfolder; `web.php` jadi loader.
-- [ ] A3. Verifikasi: `route:list`, `view:cache`, `npm run build`, smoke test.
+### Fase A — Quick wins (risiko rendah, ~1–2 hari) — ✅ SELESAI (2026-08-03)
+- [x] A1. G4 — hapus interface service 1-impl, rename `*Implement`→`*Service`, rapikan `ServiceBindingsProvider`.
+      Hasil: 33 pasangan Interface/Implement dihapus/direname; `ServiceBindingsProvider.php` dihapus total (dropped dari `bootstrap/providers.php`); semua 30 consumer file (Livewire/Controller/Observer/Console/Test) diupdate ke concrete class. Bonus: ketemu & fix bug pre-existing tak terkait — class `AppSettingsManager.php` sebelumnya bernama `AppSettingsInterfaceManager` (typo lama), menyebabkan Livewire tag `<livewire:admin.system.app-settings-manager />` gagal resolve.
+      Verifikasi: `composer dump-autoload -o` bersih (8776 class), `php -l` 64 file clean, container resolve OK lintas 5 domain via tinker (Admin/Pos/Customer/Settings/Livewire).
+- [x] A2. G6 — pecah routes ke subfolder; `web.php` jadi loader.
+      Hasil: `routes/admin.php` (150 baris flat) → 11 file modul di `routes/admin/{dashboard,tables,menus,orders,payments,reservations,reports,users,system,inventory,customers}.php` + `admin.php` jadi loader (middleware group + require). `routes/customer.php` → 3 file di `routes/customer/{home,menu,reservations}.php` + loader. `web.php` sudah loader sejak awal (tak diubah). `pos.php`/`kds.php`/`staff.php`/`landing.php` DIBIARKAN flat (deviasi sengaja dari teks doc — sudah portal-scoped & kecil, tak perlu dipecah lagi).
+- [x] A3. Verifikasi: `route:list` (150 routes sebelum & sesudah split — tak ada yang hilang/duplikat), `view:cache` bersih, `npm run build` sukses (891kB chunk warning pre-existing, tak terkait).
 
-### Fase B — Pilot domain **Order** end-to-end (~3–5 hari)
+> ### ⚠️ REGRESI A1 — ditemukan & diperbaiki saat mulai Fase B (2026-08-03)
+> **Apa yang terjadi:** 4 interface yang dihapus ternyata mendeklarasikan `public const`, dan class
+> mewarisinya lewat `implements`. Begitu `implements` dihapus, konstanta itu lenyap → **fatal error saat runtime**.
+>
+> | Konstanta | Dulu di interface | Dipakai di |
+> |---|---|---|
+> | `STATUS_OPTIONS` | `OrderServiceInterface` | `OrderService::statusOptions()`, `validate()` |
+> | `METHOD_OPTIONS`, `STATUS_OPTIONS` | `PaymentServiceInterface` | `PaymentService` (4×), `BillingService:96`, `TableBills:66` |
+> | `STATUS_OPTIONS` | `ReservationServiceInterface` | `ReservationService` (2×) |
+> | `ORDERABLE_STATUSES` | `OrderCartServiceInterface` | `OrderCartService:128` |
+>
+> **Perbaikan:** konstanta dipindahkan ke class konkret sebagai `public const` (visibility sama seperti asalnya —
+> wajib `public` karena `BillingService`/`TableBills` mengaksesnya dari luar). Total 10 titik pemakaian pulih.
+>
+> **PELAJARAN PENTING UNTUK FASE C:** `php -l`, `route:list`, `view:cache`, dan `npm run build`
+> **SEMUANYA LOLOS** padahal ada fatal error — karena konstanta di-resolve saat *runtime*, bukan saat parse.
+> Verifikasi Fase C **wajib** menyertakan eksekusi kode nyata (tinker invoke method / render Livewire),
+> bukan hanya lint+build. Sebelum menghapus interface apa pun: `git show HEAD:<file> | grep const`.
+> (Catatan: `OrderStatus`/`PaymentStatus`/`ReservationStatus` Enum di Fase B–C akan menggantikan
+> konstanta-konstanta ini secara permanen — termasuk duplikatnya di `Livewire/Admin/{Orders,Payments,Reservations}/Form.php`.)
+
+### Fase B — Pilot domain **Order** end-to-end — ✅ INTI SELESAI (2026-08-03)
+
+> **Temuan besar saat mulai:** `app/Services/Admin/OrderService.php` ternyata **100% dead code**
+> (nol referensi di seluruh proyek). Logika order yang benar-benar hidup tersebar di Livewire
+> (`Admin/Orders/Form`, `Kds/Board`) + `OrderCartService` + `BillingService`. Jadi Fase B bukan
+> "migrasi OrderService" seperti asumsi plan, melainkan **mengangkat logika dari Livewire**.
+> `generateOrderNumber()` ditemukan **terduplikasi di 6 tempat** (satu di antaranya sudah drift
+> ke algoritma berbeda) → jadi `GenerateOrderNumberAction`.
+>
+> **Yang dibangun (19 file di `app/Domains/Order/`):** Enum `OrderStatus` (+label/color/transisi),
+> `OrderRepository`(+Interface, di-bind di `AppServiceProvider`), Actions
+> (`CalculateOrderTotalAction`, `GenerateOrderNumberAction`), DTO (`OrderTotals`, `CreateOrderData`,
+> `UpdateOrderData`), UseCases (`CreateOrder`, `UpdateOrder`, `SettleBill`, `ChangeOrderStatus`,
+> `AdvanceKitchenTicket`, `MarkOrderItemReady`, `VoidOrderItem`), QueryUseCases (`GetOrderList`,
+> `GetKitchenQueue`, `GetOpenBills`), Service (`OrderBillingService`).
+>
+> **Consumer yang sudah dialihkan:** `Pos/TableBills`, `Kds/Board`, `Admin/Orders/Table` (render),
+> `Admin/Orders/Form` (save). **Dihapus:** `Services/Admin/OrderService` (dead) & `Services/Pos/BillingService`
+> (digantikan domain) — plus duplikat `STATUS_OPTIONS`/`normalizeItems`/`generateOrderNumber` di Form.
+>
+> **Verifikasi RUNTIME (bukan cuma lint):** 17 class resolve dari container; transisi Enum benar
+> (`confirmed→ready` boleh, `paid→cancelled` & `ready→draft` ditolak); read flow nyata (21 order,
+> KDS 3 bucket, 10 tagihan outstanding Rp1.539.930); write flow di transaksi ter-rollback
+> (create 52.500 → update 102.500 → status guard menolak `preparing→draft` → kitchen cascade
+> order+item ke `ready`), DB kembali bersih di 21 order. `view:cache` + `route:list` (150) OK.
+>
+> **Sengaja BELUM dilakukan (catat untuk Fase C/D):**
+> - Model `Order` **tidak** di-cast ke Enum (`'status' => OrderStatus::class`) — supaya Blade yang
+>   membandingkan string tidak pecah. Domain memakai `OrderStatus::from($order->status)`. Cast menyusul
+>   saat Blade ikut dirapikan.
+> - `SettleBillUseCase` masih memanggil `TableTurnoverService` lintas domain & memakai
+>   `PaymentService::METHOD_OPTIONS` → keduanya sudah ditandai `@todo` (Fase D / C3).
+> - Consumer Order lain belum dialihkan: `Pos/OrderCard`, `Frontend/CartCheckout`, `Frontend/OrderStatus`,
+>   sisa 3 query di `Admin/Orders/Table`. Query Order di domain lain (Reporting/Dashboard/Reservation/
+>   Payment/Manager/Staff/Export) memang jatah Fase C.
+
+#### Checklist asli
 - [ ] B1. Buat skeleton `app/Domains/Order/{UseCases,QueryUseCases,Actions,Services,Repositories,DTO,Enums,Policies,Events}`.
 - [ ] B2. `OrderRepository` (+Interface) — pindahkan SEMUA query Order dari service & Livewire.
 - [ ] B3. Write UseCases: `CreateOrderUseCase`, `UpdateOrderUseCase`, `CancelOrderUseCase`, `SettleBillUseCase`.
@@ -164,8 +224,58 @@ Transition rule (mis. `order_in → cleaning` saat lunas) → **Policy**, dipang
 
 ### Fase C — Replikasi domain sisa (~3–5 minggu)
 Urutan by dependency (daun→akar) agar Events antar-domain rapi:
-- [ ] C1. **Table** (+TableStatus Enum, TablePolicy transitions)
-- [ ] C2. **Menu** (+MenuAvailability Enum)
+- [x] C1. **Table** (+TableStatus Enum) — ✅ SELESAI (2026-08-03)
+      **Pre-flight checklist berbuah lagi:** `TableService`, `TableStatusService`, `TableCategoryService`
+      ternyata **dead code** (0 consumer) — pola sama seperti `OrderService` di Fase B. Dihapus, tidak dimigrasi.
+      **Kunci yang membuat migrasi aman:** `Table::getStatusAttribute()` ternyata SUDAH mengekspos
+      `$table->status` sebagai string dari relasi, jadi semua *pembaca* sudah string-based; hanya ~20 *penulis*
+      (`table_status_id`) yang perlu diubah.
+      **Migrasi data (2 langkah, reversible):** (1) `add_status_to_tables` — tambah kolom string + backfill
+      via join dari `table_statuses.key`; FK lama sengaja dipertahankan dulu. Diverifikasi: 21/21 baris,
+      0 NULL, **0 mismatch** vs FK. (2) `drop_table_statuses_table` — buang FK, kolom, dan tabelnya;
+      `down()` merekonstruksi tabel + 5 baris seed + relink dari kolom `status`.
+      **Dihapus:** CRUD status meja (controller, 2 Livewire, blade, route, nav ×2, seeder, model,
+      policy) + `TableStatusService`/`TableService`/`TableCategoryService` (dead) + `CheckInService` &
+      `TableTurnoverService` (digantikan UseCase) + `admin/tables/_form.blade.php` (dead view).
+      **Dibangun:** `app/Domains/Table/` — Enum (label/color/sortOrder/default/isOrderable/isFree),
+      `TableRepository`(+Interface), `ChangeTableStatusUseCase`, `CheckInTableUseCase`,
+      `ReleaseTableUseCase`, `GetTableListQueryUseCase`. `SettleBillUseCase` kini memanggil
+      `ReleaseTableUseCase` (bukan service lintas domain).
+      **Bug pre-existing yang ikut ketemu & diperbaiki:** `table-map.blade.php` menyuntikkan token daisyUI
+      (`success`, `error`) langsung ke `style="border-color: …"` — **CSS tidak valid, warnanya tidak pernah
+      muncul**. Diganti class token penuh (`border-success bg-success/10`) sesuai DAISYUI-BLUEPRINT.
+      **Verifikasi RUNTIME:** skema benar (kolom baru ada, FK & tabel lama hilang); data utuh 21 meja dengan
+      distribusi identik; 14 class resolve; read flows (paginate/all/selectable/search/countByStatus/
+      dashboard/tableSelectionData) benar; write flows di transaksi ter-rollback (ChangeStatus by-model &
+      by-id, CheckIn available→occupied + sesi aktif, Release →cleaning + sesi tertutup, resolver
+      orderable vs free); **6 komponen Livewire benar-benar di-render** (HTML keluar, label Indonesia &
+      token daisyUI muncul). `view:cache` OK, `route:list` 150→**144** (6 rute CRUD status hilang, sesuai),
+      `npm run build` sukses.
+      ⚠️ **Deviasi disengaja:** tidak ada transition guard pada `TableStatus` — status meja memang bebas
+      berpindah (staf mengoreksi manual); menambah aturan justru akan mengubah perilaku, bukan mengamankan.
+      Toggle "Tampilkan status nonaktif" di status board hilang bersama kolom `is_active`.
+- [x] C2. **Menu** (+MenuAvailability Enum) — ✅ SELESAI (2026-08-03)
+      **Pre-flight (3× berturut-turut berbuah):** `MenuService`, `MenuCategoryService`, `MenuCatalogService`
+      = **dead code** (0 consumer). Dihapus.
+      **Beda penting dari C1:** `Menu::status()` adalah **relasi** (bukan accessor string seperti Table),
+      jadi `$menu->status` dulu mengembalikan *model*. Untungnya cakupannya kecil — hanya 2 titik nyata
+      (`Pos/OrderCard` status_name/color) + `getIsAvailableAttribute` + `scopeAvailable`/`scopeUnavailable`,
+      dan **nol pemakaian di Blade**.
+      **Migrasi 2 langkah reversible:** `add_status_to_menus` (backfill: 11 available + 1 unavailable,
+      0 NULL, **0 mismatch**) lalu `drop_menu_statuses_table` (`down()` rekonstruksi + relink).
+      **Dibangun:** `app/Domains/Menu/` — Enum `MenuAvailability` (label/color/sortOrder/default/
+      isSellable/**fromToggle**), `MenuRepository`(+Interface), `GetMenuCatalogQueryUseCase`.
+      `scopeAvailable`/`scopeUnavailable` kini query kolom langsung (bukan `whereHas`) — lebih cepat.
+      **Dihapus:** CRUD status menu (controller, 2 Livewire, 5 blade, 3 route, nav ×2, seeder, model, policy)
+      + 3 service dead.
+      **Catatan produk:** form admin hanya pernah menghasilkan `available`/`unavailable` (toggle boolean);
+      `sold_out` & `seasonal` ter-seed tapi **tak terjangkau UI dan tak dipakai baris mana pun**. Keduanya
+      dipertahankan di Enum (`fromToggle` memetakan toggle lama) — kini justru bisa dipakai bila dapur mau.
+      **Verifikasi RUNTIME:** skema benar; data utuh 12 menu; scope memartisi tepat (11+1=12); accessor
+      `is_available` benar dua arah; read flows (catalog/featured/adminPaginate/PublicHome/OrderCart) benar;
+      write ter-rollback (set `sold_out` → `is_available=false` & masuk `scopeUnavailable`, toggle balik);
+      **7 komponen Livewire di-render** (Menus Table/Form/MenuCard, OrderCard, MenuCatalog, Landing Home,
+      MenuIngredients Form). `route:list` 144→**141**, `view:cache` + `npm run build` sukses.
 - [ ] C3. **Payment** (+PaymentStatus Enum; audit interface poly di sini)
 - [ ] C4. **Reservation** (+ReservationStatus Enum)
 - [ ] C5. **Kitchen** (KDS — sebagian besar QueryUseCase + Events)

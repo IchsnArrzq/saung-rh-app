@@ -3,7 +3,7 @@
 namespace App\Livewire\Customer;
 
 use App\Models\Menu;
-use App\Services\Customer\BookingServiceInterface;
+use App\Services\Customer\BookingService;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -90,7 +90,7 @@ class BookingForm extends Component
         $this->activeCategory = $categoryId;
     }
 
-    public function submit(BookingServiceInterface $service)
+    public function submit(BookingService $service)
     {
         $validated = $this->validate([
             'table_id' => ['required', 'exists:tables,id'],
@@ -120,7 +120,7 @@ class BookingForm extends Component
         return $this->redirectRoute('customer.dashboard', navigate: true);
     }
 
-    public function render(BookingServiceInterface $service)
+    public function render(BookingService $service)
     {
         $data = $service->createFormData();
 

@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Domains\Table\Enums\TableStatus;
 use App\Models\Table;
 use App\Models\TableCategory;
-use App\Models\TableStatus;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -15,13 +15,12 @@ class TableSeeder extends Seeder
      */
     public function run(): void
     {
-        $statusOptions = ['available', 'occupied', 'order_in', 'cleaning'];
-        $statusMap = TableStatus::query()
-            ->whereIn('key', $statusOptions)
-            ->get()
-            ->keyBy('key');
-        $defaultStatus = TableStatus::query()->where('is_default', true)->first()
-            ?? TableStatus::query()->orderBy('sort_order')->orderBy('name')->first();
+        $statusOptions = [
+            TableStatus::Available,
+            TableStatus::Occupied,
+            TableStatus::OrderIn,
+            TableStatus::Cleaning,
+        ];
 
         $categoryIds = TableCategory::query()
             ->where('is_active', true)
@@ -33,8 +32,7 @@ class TableSeeder extends Seeder
         $columns = 5;
 
         for ($i = 1; $i <= 20; $i++) {
-            $statusKey = $statusOptions[array_rand($statusOptions)];
-            $status = $statusMap->get($statusKey) ?: $defaultStatus;
+            $status = $statusOptions[array_rand($statusOptions)];
 
             Table::query()->updateOrCreate(
                 ['code' => 'T-'.str_pad((string) $i, 2, '0', STR_PAD_LEFT)],
@@ -42,7 +40,7 @@ class TableSeeder extends Seeder
                     'name' => 'Meja '.str_pad((string) $i, 2, '0', STR_PAD_LEFT),
                     'capacity' => fake()->randomElement([2, 4, 4, 6, 8]),
                     'qr_token' => Str::random(24),
-                    'table_status_id' => $status?->id,
+                    'status' => $status->value,
                     'table_category_id' => $categoryIds !== []
                         ? $categoryIds[array_rand($categoryIds)]
                         : null,

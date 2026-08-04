@@ -9,7 +9,6 @@ use App\Models\Media;
 use App\Models\Menu;
 use App\Models\MenuCategory;
 use App\Models\MenuIngredient;
-use App\Models\MenuStatus;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderNote;
@@ -36,7 +35,6 @@ use App\Models\Supplier;
 use App\Models\Table;
 use App\Models\TableCategory;
 use App\Models\TableSession;
-use App\Models\TableStatus;
 use App\Models\Tip;
 use App\Models\User;
 use App\Models\VisitorLog;
@@ -58,7 +56,6 @@ class PolicyPermissions
         Menu::class,
         MenuCategory::class,
         MenuIngredient::class,
-        MenuStatus::class,
         Order::class,
         OrderItem::class,
         OrderNote::class,
@@ -85,7 +82,6 @@ class PolicyPermissions
         Table::class,
         TableCategory::class,
         TableSession::class,
-        TableStatus::class,
         Tip::class,
         User::class,
         VisitorLog::class,

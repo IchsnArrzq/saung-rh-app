@@ -47,26 +47,26 @@
     <section class="mt-5 grid gap-4 xl:grid-cols-4">
         @foreach ($statuses as $status)
             @php
-                $badge = $badgeMap[$status->color ?: 'neutral'] ?? 'badge-neutral';
-                $items = $tablesByStatus->get($status->id, collect());
+                $badge = $badgeMap[$status->color()] ?? 'badge-neutral';
+                $items = $tablesByStatus->get($status->value, collect());
             @endphp
 
             <article class="rounded-2xl border border-base-300 bg-base-100 p-3">
                 <header class="mb-3 flex items-center justify-between gap-2">
-                    <p class="text-sm font-semibold">{{ $status->name }}</p>
+                    <p class="text-sm font-semibold">{{ $status->label() }}</p>
                     <span class="badge {{ $badge }} badge-sm">{{ $items->count() }}</span>
                 </header>
 
                 <div class="space-y-3 rounded-xl border border-dashed border-base-300 p-2 min-h-[160px]">
                     @forelse ($items as $table)
-                        @php $statusKey = $table->tableStatus?->key ?? $table->status; @endphp
+                        @php $statusKey = (string) $table->status; @endphp
                         <article class="rounded-xl border border-base-300 bg-base-100 p-3 shadow-sm">
                             <div class="flex items-start justify-between gap-2">
                                 <div>
                                     <p class="font-semibold">{{ $table->code }}</p>
                                     <p class="text-xs text-base-content/60">{{ $table->name ?: 'Tanpa nama meja' }}</p>
                                 </div>
-                                <span class="badge badge-outline {{ $badge }} badge-sm">{{ $status->name }}</span>
+                                <span class="badge badge-outline {{ $badge }} badge-sm">{{ $status->label() }}</span>
                             </div>
 
                             <p class="mt-2 text-xs text-base-content/70">

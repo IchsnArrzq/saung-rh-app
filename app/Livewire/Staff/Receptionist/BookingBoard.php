@@ -3,7 +3,7 @@
 namespace App\Livewire\Staff\Receptionist;
 
 use App\Models\Reservation;
-use App\Services\Reservations\ReservationDepositServiceInterface;
+use App\Services\Reservations\ReservationDepositService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
@@ -83,7 +83,7 @@ class BookingBoard extends Component
         $this->reset(['depositFor', 'depositAmount', 'depositMethod']);
     }
 
-    public function saveDeposit(ReservationDepositServiceInterface $service): void
+    public function saveDeposit(ReservationDepositService $service): void
     {
         $this->validate([
             'depositAmount' => ['required', 'numeric', 'min:1'],
@@ -112,9 +112,9 @@ class BookingBoard extends Component
 
     private function onSeated(Reservation $reservation): void
     {
-        if ($occupied = \App\Models\TableStatus::query()->where('key', 'occupied')->first()) {
-            $reservation->table?->update(['table_status_id' => $occupied->id]);
-        }
+        $reservation->table?->update([
+            'status' => \App\Domains\Table\Enums\TableStatus::Occupied->value,
+        ]);
     }
 
     private function onCancelled(Reservation $reservation): void

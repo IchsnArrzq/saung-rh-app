@@ -2,13 +2,14 @@
 
 namespace App\Livewire\Pos;
 
+use App\Domains\Menu\Enums\MenuAvailability;
 use App\Events\OrderCreated;
 use App\Models\Menu;
 use App\Models\MenuCategory;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Table;
-use App\Models\TableStatus;
+use App\Domains\Table\Enums\TableStatus;
 use App\Support\RestaurantCart;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -100,8 +101,10 @@ class OrderCard extends Component
             'image_url' => (string) ($menu->image_url ?? ''),
             'is_available' => (bool) $menu->is_available,
             'category_name' => (string) ($menu->category?->name ?? 'Uncategorized'),
-            'status_name' => (string) ($menu->status?->name ?? ($menu->is_available ? 'Tersedia' : 'Tidak Tersedia')),
-            'status_color' => (string) ($menu->status?->color ?? ($menu->is_available ? 'success' : 'error')),
+            'status_name' => MenuAvailability::tryFrom((string) $menu->status)?->label()
+                ?? ($menu->is_available ? 'Tersedia' : 'Tidak Tersedia'),
+            'status_color' => MenuAvailability::tryFrom((string) $menu->status)?->color()
+                ?? ($menu->is_available ? 'success' : 'error'),
             'sku' => (string) ($menu->sku ?? '-'),
         ];
 
@@ -134,14 +137,12 @@ class OrderCard extends Component
             return;
         }
 
-        $orderInStatus = TableStatus::query()->where('key', 'order_in')->first();
-
-        $order = DB::transaction(function () use ($cart, $validated, $orderInStatus): Order {
+        $order = DB::transaction(function () use ($cart, $validated): Order {
             $table = null;
             $tableId = trim((string) ($validated['tableId'] ?? ''));
 
             if ($tableId !== '') {
-                $table = Table::query()->with('tableStatus')->find($tableId);
+                $table = Table::query()->find($tableId);
             }
 
             $subtotal = (float) collect($cart)
@@ -194,10 +195,8 @@ class OrderCard extends Component
                 ]);
             }
 
-            if ($table && $table->tableStatus?->key === 'available' && $orderInStatus) {
-                $table->update([
-                    'table_status_id' => $orderInStatus->id,
-                ]);
+            if ($table && $table->status === TableStatus::Available->value) {
+                $table->update(['status' => TableStatus::OrderIn->value]);
             }
 
             return $order;
@@ -265,7 +264,6 @@ class OrderCard extends Component
     public function getTablesProperty(): Collection
     {
         return Table::query()
-            ->with('tableStatus:id,key,name')
             ->orderBy('code')
             ->get();
     }

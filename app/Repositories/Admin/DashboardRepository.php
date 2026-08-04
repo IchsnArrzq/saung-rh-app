@@ -40,7 +40,7 @@ class DashboardRepository implements DashboardRepositoryInterface
     public function tablesByStatus(string $status): int
     {
         return Table::query()
-            ->whereHas('tableStatus', fn ($q) => $q->where('key', $status))
+            ->where('status', $status)
             ->count();
     }
 

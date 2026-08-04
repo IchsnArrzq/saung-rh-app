@@ -97,7 +97,7 @@
 - **Form control (daisyUI 5):** `<label class="form-control"><span class="label-text">..</span><input class="input input-bordered" /></label>` · select `select select-bordered` · textarea `textarea textarea-bordered`
 - **Tabs:** `<div role="tablist" class="tabs tabs-boxed"><a role="tab" class="tab tab-active">..</a></div>`
 - **Dropdown / Menu / Drawer / Stat:** ikuti pola daisyUI 5 (`dropdown dropdown-end`, `menu`, `drawer drawer-side`, `stats`→`stat`→`stat-title/value/desc`).
-- ⚠️ **Perubahan daisyUI 5 vs 4:** beberapa nama util berubah — verifikasi ke dokumen resmi versi 5 saat ragu, jangan pakai memori v4.
+- ⚠️ **Perubahan daisyUI 5 vs   :** beberapa nama util berubah — verifikasi ke dokumen resmi versi 5 saat ragu, jangan pakai memori v4.
 
 ---
 

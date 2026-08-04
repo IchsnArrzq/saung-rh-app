@@ -3,13 +3,13 @@
 namespace App\Livewire\Staff\Manager;
 
 use App\Models\SpecialRequest;
-use App\Services\SpecialRequests\SpecialRequestServiceInterface;
+use App\Services\SpecialRequests\SpecialRequestService;
 use Illuminate\View\View;
 use Livewire\Component;
 
 class SpecialRequestApprover extends Component
 {
-    public function approve(SpecialRequestServiceInterface $service, string $id): void
+    public function approve(SpecialRequestService $service, string $id): void
     {
         $request = SpecialRequest::query()->findOrFail($id);
         $waiter = $service->approve($request, auth()->user())->assignee;
@@ -19,7 +19,7 @@ class SpecialRequestApprover extends Component
             : 'Disetujui (belum ada waiter tersedia untuk ditugaskan).');
     }
 
-    public function reject(SpecialRequestServiceInterface $service, string $id): void
+    public function reject(SpecialRequestService $service, string $id): void
     {
         $service->reject(SpecialRequest::query()->findOrFail($id), auth()->user());
         session()->flash('special_status', 'Permintaan ditolak.');

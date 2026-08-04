@@ -2,9 +2,10 @@
 
 namespace App\Livewire\Staff\Waiter;
 
-use App\Models\Table;
-use App\Models\TableStatus;
-use Illuminate\Database\Eloquent\Builder;
+use App\Domains\Table\Enums\TableStatus;
+use App\Domains\Table\QueryUseCases\GetTableListQueryUseCase;
+use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\UseCases\ChangeTableStatusUseCase;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -14,44 +15,31 @@ class TableStatusUpdater extends Component
     #[Url(as: 'q', except: '')]
     public string $search = '';
 
-    public function updateStatus(string $tableId, string $statusId): void
+    /**
+     * The status now arrives as an Enum value ("available", "cleaning", …)
+     * instead of a table_statuses UUID — the Blade passes `$status->value`.
+     */
+    public function updateStatus(string $tableId, string $status, ChangeTableStatusUseCase $changeStatus, TableRepositoryInterface $tables): void
     {
-        $table = Table::query()->findOrFail($tableId);
-        $status = TableStatus::query()->findOrFail($statusId);
+        $target = TableStatus::tryFrom($status);
+        $table = $tables->find($tableId);
 
-        if ($table->table_status_id === $status->id) {
+        if (! $target || ! $table) {
             return;
         }
 
-        $table->update(['table_status_id' => $status->id]);
+        $changeStatus->handle($table, $target);
 
-        session()->flash('success', "Meja {$table->code} diubah ke status {$status->name}.");
+        session()->flash('success', "Meja {$table->code} diubah ke status {$target->label()}.");
     }
 
-    public function render(): View
+    public function render(GetTableListQueryUseCase $tableList): View
     {
-        $search = trim($this->search);
-
-        $statuses = TableStatus::query()
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->get();
-
-        $tables = Table::query()
-            ->with(['tableStatus', 'tableCategory'])
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('code', 'like', '%'.$search.'%')
-                        ->orWhere('name', 'like', '%'.$search.'%');
-                });
-            })
-            ->orderBy('code')
-            ->get();
-
         return view('livewire.staff.waiter.table-status-updater', [
-            'statuses' => $statuses,
-            'tables' => $tables,
+            'statuses' => collect(TableStatus::cases())
+                ->sortBy(fn (TableStatus $status) => $status->sortOrder())
+                ->values(),
+            'tables' => $tableList->search($this->search),
         ]);
     }
 }

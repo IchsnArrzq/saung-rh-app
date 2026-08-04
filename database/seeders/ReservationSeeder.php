@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Domains\Table\Enums\TableStatus;
 use App\Models\Reservation;
 use App\Models\Table;
-use App\Models\TableStatus;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -89,12 +89,11 @@ class ReservationSeeder extends Seeder
 
         // No-show: confirmed, reserved time passed beyond grace, never seated.
         // Lock its table so the auto-release visibly frees it.
-        $reservedStatus = TableStatus::query()->where('key', Reservation::RESERVED_STATUS_KEY)->first();
         $lockedTable = Table::query()->create([
             'code' => 'RSV-DEMO',
             'name' => 'Meja Reservasi Demo',
             'capacity' => 4,
-            'table_status_id' => $reservedStatus?->id,
+            'status' => TableStatus::Reserved->value,
         ]);
 
         Reservation::query()->create([

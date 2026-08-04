@@ -30,13 +30,13 @@
 
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Status</legend>
-                <select class="select select-bordered w-full" wire:model.defer="table_status_id" required>
+                <select class="select select-bordered w-full" wire:model.defer="status" required>
                     <option value="">Pilih status meja</option>
                     @foreach ($statusOptions as $status)
-                        <option value="{{ $status->id }}">{{ $status->name }}</option>
+                        <option value="{{ $status->value }}">{{ $status->label() }}</option>
                     @endforeach
                 </select>
-                @error('table_status_id')
+                @error('status')
                     <p class="label text-error">{{ $message }}</p>
                 @enderror
             </fieldset>

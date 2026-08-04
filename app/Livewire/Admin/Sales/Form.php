@@ -5,7 +5,7 @@ namespace App\Livewire\Admin\Sales;
 use App\Models\Customer;
 use App\Models\Ingredient;
 use App\Models\Sale;
-use App\Services\Admin\SaleServiceInterface;
+use App\Services\Admin\SaleService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -82,7 +82,7 @@ class Form extends Component
         return $this->redirectRoute('sales.index', navigate: true);
     }
 
-    public function post(SaleServiceInterface $service)
+    public function post(SaleService $service)
     {
         if ($this->sale && $this->sale->isPosted()) {
             return;

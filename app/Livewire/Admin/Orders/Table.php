@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Admin\Orders;
 
+use App\Domains\Order\QueryUseCases\GetOrderListQueryUseCase;
 use App\Models\Order;
 use App\Models\Payment;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
@@ -122,27 +122,10 @@ class Table extends Component
         session()->flash('success', 'Payment order '.$order->order_number.' berhasil dibuat.');
     }
 
-    public function render(): View
+    public function render(GetOrderListQueryUseCase $orderList): View
     {
-        $search = trim($this->search);
-
-        $orders = Order::query()
-            ->with('table')
-            ->withCount('items')
-            ->withSum(['payments as paid_total' => fn ($query) => $query->where('status', 'paid')], 'amount')
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('order_number', 'like', '%'.$search.'%')
-                        ->orWhere('customer_name', 'like', '%'.$search.'%')
-                        ->orWhere('status', 'like', '%'.$search.'%')
-                        ->orWhereHas('table', fn (Builder $table) => $table->where('code', 'like', '%'.$search.'%'));
-                });
-            })
-            ->latest()
-            ->paginate(12);
-
         return view('livewire.admin.orders.table', [
-            'orders' => $orders,
+            'orders' => $orderList->handle($this->search),
         ]);
     }
 }

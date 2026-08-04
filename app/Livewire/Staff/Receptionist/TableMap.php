@@ -18,7 +18,7 @@ class TableMap extends Component
     public function selectTable(string $tableId): void
     {
         $table = Table::query()
-            ->with(['tableStatus', 'tableCategory'])
+            ->with('tableCategory')
             ->find($tableId);
 
         if (! $table) {
@@ -37,8 +37,8 @@ class TableMap extends Component
             'name' => (string) $table->name,
             'capacity' => (int) $table->capacity,
             'category' => (string) ($table->tableCategory?->name ?? '-'),
-            'status' => (string) ($table->tableStatus?->name ?? '-'),
-            'status_key' => (string) ($table->tableStatus?->key ?? ''),
+            'status' => TableStatus::tryFrom((string) $table->status)?->label() ?? '-',
+            'status_key' => (string) $table->status,
             'session_pax' => $session?->pax,
             'session_started' => $session?->started_at?->format('H:i'),
             'order_number' => $activeOrder?->order_number,
@@ -49,7 +49,6 @@ class TableMap extends Component
     public function render(): View
     {
         $tables = Table::query()
-            ->with('tableStatus')
             ->orderBy('code')
             ->get();
 

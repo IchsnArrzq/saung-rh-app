@@ -3,13 +3,13 @@
 namespace App\Livewire\Staff\Waiter;
 
 use App\Models\SpecialRequest;
-use App\Services\SpecialRequests\SpecialRequestServiceInterface;
+use App\Services\SpecialRequests\SpecialRequestService;
 use Illuminate\View\View;
 use Livewire\Component;
 
 class SpecialRequestHandler extends Component
 {
-    public function complete(SpecialRequestServiceInterface $service, string $id): void
+    public function complete(SpecialRequestService $service, string $id): void
     {
         $request = SpecialRequest::query()
             ->where('assigned_to', auth()->id())

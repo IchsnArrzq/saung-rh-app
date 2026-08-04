@@ -1,7 +1,7 @@
 <div class="space-y-5">
     @include('admin.partials.flash')
 
-    @error('table_status_id')
+    @error('status')
         <div role="alert" class="alert alert-error">
             <span>{{ $message }}</span>
         </div>
@@ -52,7 +52,7 @@
                                     wire:model="statusDrafts.{{ $table->id }}">
                                     <option value="">Pilih status</option>
                                     @foreach ($statusOptions as $status)
-                                        <option value="{{ $status->id }}">{{ $status->name }}</option>
+                                        <option value="{{ $status->value }}">{{ $status->label() }}</option>
                                     @endforeach
                                 </select>
                                 <button type="button" class="btn btn-sm btn-outline"

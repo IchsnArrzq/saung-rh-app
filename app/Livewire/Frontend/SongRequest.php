@@ -4,7 +4,7 @@ namespace App\Livewire\Frontend;
 
 use App\Events\SongQueueUpdated;
 use App\Models\SongRequest as SongRequestModel;
-use App\Services\Songs\SongRequestServiceInterface;
+use App\Services\Songs\SongRequestService;
 use App\Support\TableSessionContext;
 use Illuminate\View\View;
 use Livewire\Attributes\Validate;
@@ -29,7 +29,7 @@ class SongRequest extends Component
         $this->sessionId = TableSessionContext::current()['session_id'] ?? null;
     }
 
-    public function submit(SongRequestServiceInterface $songs): void
+    public function submit(SongRequestService $songs): void
     {
         $session = TableSessionContext::activeSession();
 
@@ -55,7 +55,7 @@ class SongRequest extends Component
         session()->flash('song_status', 'Lagu masuk antrean.');
     }
 
-    public function render(SongRequestServiceInterface $songs): View
+    public function render(SongRequestService $songs): View
     {
         $mine = $this->sessionId
             ? SongRequestModel::query()

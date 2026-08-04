@@ -3,7 +3,7 @@
 namespace App\Livewire\Frontend;
 
 use App\Models\SpecialRequest;
-use App\Services\SpecialRequests\SpecialRequestServiceInterface;
+use App\Services\SpecialRequests\SpecialRequestService;
 use App\Support\TableSessionContext;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -22,7 +22,7 @@ class SpecialRequestForm extends Component
         $this->sessionId = TableSessionContext::current()['session_id'] ?? null;
     }
 
-    public function submit(SpecialRequestServiceInterface $service): void
+    public function submit(SpecialRequestService $service): void
     {
         $session = TableSessionContext::activeSession();
 

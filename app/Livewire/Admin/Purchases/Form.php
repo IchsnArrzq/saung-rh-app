@@ -5,7 +5,7 @@ namespace App\Livewire\Admin\Purchases;
 use App\Models\Ingredient;
 use App\Models\Purchase;
 use App\Models\Supplier;
-use App\Services\Admin\PurchaseServiceInterface;
+use App\Services\Admin\PurchaseService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -82,7 +82,7 @@ class Form extends Component
         return $this->redirectRoute('purchases.index', navigate: true);
     }
 
-    public function post(PurchaseServiceInterface $service)
+    public function post(PurchaseService $service)
     {
         if ($this->purchase && $this->purchase->isPosted()) {
             return;
