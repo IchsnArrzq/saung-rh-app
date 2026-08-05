@@ -2,11 +2,13 @@
 
 namespace App\Livewire\Admin\Reservations;
 
+use App\Domains\Order\Enums\OrderStatus;
+use App\Domains\Reservation\Enums\ReservationStatus;
+use App\Domains\Reservation\QueryUseCases\GetReservationListQueryUseCase;
 use App\Domains\Table\Enums\TableStatus;
 use App\Events\OrderCreated;
 use App\Models\Order;
 use App\Models\Reservation;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -105,7 +107,7 @@ class Table extends Component
                 'table_id' => $reservation->table_id,
                 'order_number' => $this->generateOrderNumber(),
                 'customer_name' => $reservation->customer_name,
-                'status' => 'confirmed',
+                'status' => OrderStatus::Confirmed->value,
                 'notes' => trim('Sumber: RESERVATION | '.$sourceMarker.' | '.($reservation->notes ?? '')),
                 'subtotal' => $subtotal,
                 'discount' => 0,
@@ -127,7 +129,7 @@ class Table extends Component
                 ->values()
                 ->all());
 
-            $reservation->update(['status' => 'seated']);
+            $reservation->update(['status' => ReservationStatus::Seated->value]);
 
             $table = $reservation->table;
             if ($table && $table->status === TableStatus::Available->value) {
@@ -142,26 +144,10 @@ class Table extends Component
         session()->flash('success', 'Order '.$order->order_number.' berhasil dibuat dari reservasi.');
     }
 
-    public function render(): View
+    public function render(GetReservationListQueryUseCase $reservationList): View
     {
-        $search = trim($this->search);
-
-        $reservations = Reservation::query()
-            ->with('table')
-            ->withCount('items')
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('customer_name', 'like', '%'.$search.'%')
-                        ->orWhere('phone', 'like', '%'.$search.'%')
-                        ->orWhere('status', 'like', '%'.$search.'%')
-                        ->orWhereHas('table', fn (Builder $table) => $table->where('code', 'like', '%'.$search.'%'));
-                });
-            })
-            ->latest()
-            ->paginate(12);
-
         return view('livewire.admin.reservations.table', [
-            'reservations' => $reservations,
+            'reservations' => $reservationList->forAdmin($this->search),
         ]);
     }
 

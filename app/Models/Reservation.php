@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domains\Reservation\Enums\ReservationStatus;
 use App\Domains\Table\Enums\TableStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -14,18 +15,6 @@ class Reservation extends Model
 {
     use HasFactory;
     use HasUuids;
-
-    /**
-     * Table status key used to lock a table while it is reserved.
-     */
-    public const RESERVED_STATUS_KEY = 'reserved';
-
-    /**
-     * Reservation statuses that actively hold a table.
-     *
-     * @var array<int, string>
-     */
-    public const HOLDING_STATUSES = ['confirmed', 'seated'];
 
     public $incrementing = false;
 
@@ -102,7 +91,7 @@ class Reservation extends Model
      */
     public function scopeNoShowCandidates(Builder $query, int $graceMinutes): Builder
     {
-        return $query->where('status', 'confirmed')
+        return $query->where('status', ReservationStatus::Confirmed->value)
             ->where('reservation_at', '<', now()->subMinutes($graceMinutes));
     }
 
@@ -130,14 +119,14 @@ class Reservation extends Model
     {
         $table = $this->getRelationValue('table');
 
-        if (! $table || $table->status !== self::RESERVED_STATUS_KEY) {
+        if (! $table || $table->status !== TableStatus::Reserved->value) {
             return;
         }
 
         $stillHeld = static::query()
             ->where('table_id', $table->id)
             ->where('id', '!=', $this->id)
-            ->whereIn('status', self::HOLDING_STATUSES)
+            ->whereIn('status', ReservationStatus::holdingValues())
             ->exists();
 
         if ($stillHeld) {

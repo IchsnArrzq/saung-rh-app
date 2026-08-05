@@ -2,9 +2,10 @@
 
 namespace App\Livewire\Staff\Receptionist;
 
+use App\Domains\Reservation\Enums\ReservationStatus;
+use App\Domains\Reservation\QueryUseCases\GetReservationListQueryUseCase;
 use App\Models\Reservation;
 use App\Services\Reservations\ReservationDepositService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -33,9 +34,9 @@ class BookingBoard extends Component
      * Allowed status transitions a receptionist can apply from the board.
      */
     public const ACTIONS = [
-        'confirmed' => 'Konfirmasi',
-        'seated' => 'Check-in',
-        'cancelled' => 'Batalkan',
+        ReservationStatus::Confirmed->value => 'Konfirmasi',
+        ReservationStatus::Seated->value => 'Check-in',
+        ReservationStatus::Cancelled->value => 'Batalkan',
     ];
 
     public function updatingSearch(): void
@@ -58,10 +59,10 @@ class BookingBoard extends Component
         $reservation->status = $status;
 
         // Keep the table lock in sync with the booking lifecycle.
-        match ($status) {
-            'confirmed' => $this->onConfirmed($reservation),
-            'seated' => $this->onSeated($reservation),
-            'cancelled' => $this->onCancelled($reservation),
+        match (ReservationStatus::tryFrom($status)) {
+            ReservationStatus::Confirmed => $this->onConfirmed($reservation),
+            ReservationStatus::Seated => $this->onSeated($reservation),
+            ReservationStatus::Cancelled => $this->onCancelled($reservation),
             default => null,
         };
 
@@ -124,34 +125,14 @@ class BookingBoard extends Component
         $reservation->releaseTable();
     }
 
-    public function render(): View
+    public function render(GetReservationListQueryUseCase $reservationList): View
     {
         $search = trim($this->search);
 
-        $reservations = Reservation::query()
-            ->with('table')
-            ->withCount('items')
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('customer_name', 'like', '%'.$search.'%')
-                        ->orWhere('phone', 'like', '%'.$search.'%')
-                        ->orWhereHas('table', fn (Builder $table) => $table->where('code', 'like', '%'.$search.'%'));
-                });
-            })
-            ->when($this->statusFilter !== 'all', fn (Builder $query) => $query->where('status', $this->statusFilter))
-            ->orderByRaw("CASE WHEN status = 'pending' THEN 0 WHEN status = 'confirmed' THEN 1 ELSE 2 END")
-            ->orderBy('reservation_at')
-            ->paginate(12);
-
-        $counts = Reservation::query()
-            ->selectRaw('status, count(*) as c')
-            ->groupBy('status')
-            ->pluck('c', 'status');
-
         return view('livewire.staff.receptionist.booking-board', [
-            'reservations' => $reservations,
-            'counts' => $counts,
-            'todayCount' => Reservation::query()->whereDate('reservation_at', today())->count(),
+            'reservations' => $reservationList->forBoard($search, $this->statusFilter),
+            'counts' => $reservationList->countsByStatus(),
+            'todayCount' => $reservationList->countToday(),
         ]);
     }
 }

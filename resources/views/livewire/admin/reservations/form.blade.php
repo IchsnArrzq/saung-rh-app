@@ -53,7 +53,7 @@
                 <legend class="fieldset-legend">Status</legend>
                 <select class="select select-bordered w-full" wire:model.defer="status" required>
                     @foreach ($statusOptions as $statusOption)
-                        <option value="{{ $statusOption }}">{{ str_replace('_', ' ', $statusOption) }}</option>
+                        <option value="{{ $statusOption->value }}">{{ $statusOption->label() }}</option>
                     @endforeach
                 </select>
                 @error('status')

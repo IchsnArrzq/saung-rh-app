@@ -2,6 +2,7 @@
 
 namespace App\Services\Customer;
 
+use App\Domains\Reservation\Enums\ReservationStatus;
 use App\Domains\Table\Enums\TableStatus;
 use App\Models\Menu;
 use App\Models\MenuCategory;
@@ -15,7 +16,6 @@ use Illuminate\Validation\ValidationException;
 
 class BookingService
 {
-    private const STATUS_PENDING = 'pending';
 
     /**
      * @return array{tables: Collection<int, Table>, menus: Collection<int, Menu>}
@@ -51,7 +51,10 @@ class BookingService
 
         $tableAlreadyBooked = Reservation::query()
             ->where('table_id', $validated['table_id'])
-            ->whereIn('status', ['pending', 'confirmed', 'seated'])
+            ->whereIn('status', [
+                ReservationStatus::Pending->value,
+                ...ReservationStatus::holdingValues(),
+            ])
             ->whereBetween('reservation_at', [
                 $reservationAt->copy()->subMinutes(90),
                 $reservationAt->copy()->addMinutes(90),
@@ -77,7 +80,7 @@ class BookingService
                 'phone' => null,
                 'pax' => $validated['pax'],
                 'reservation_at' => $validated['reservation_at'],
-                'status' => self::STATUS_PENDING,
+                'status' => ReservationStatus::Pending->value,
                 'notes' => $validated['notes'] ?? null,
             ]);
 

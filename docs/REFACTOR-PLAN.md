@@ -302,7 +302,30 @@ Urutan by dependency (daun→akar) agar Events antar-domain rapi:
       ref_type=Payment**; payment `pending` **tidak** memotong; `pending→paid` (hook `updated`) memotong.
       5 komponen Livewire di-render (label Indonesia muncul). `route:list` 141 tetap, `view:cache` +
       `npm run build` sukses.
-- [ ] C4. **Reservation** (+ReservationStatus Enum)
+- [x] C4. **Reservation** (+ReservationStatus Enum) — ✅ SELESAI (2026-08-04)
+      **Pre-flight (4× berturut-turut):** `ReservationService` **dead code** (0 consumer) → dihapus.
+      **Tidak ada migrasi data**, tapi ada catatan penting: kolom dibuat dengan `$table->enum('status', [...])`,
+      yang di Postgres jadi **CHECK constraint**. Jadi Enum PHP **wajib** sinkron dengan constraint DB —
+      menambah case tanpa migrasi akan gagal saat write. Sudah diverifikasi cocok persis (6 nilai).
+      **Dibangun:** `app/Domains/Reservation/` — `ReservationStatus` (label/color/`isHolding()`/
+      `holdingValues()`/`isFinal()`), `ReservationRepository`(+Interface), `GetReservationListQueryUseCase`
+      (mode `forAdmin` & `forBoard` — board diurut berdasarkan urgensi pending→confirmed→sisanya).
+      **Konstanta salah tempat dibereskan:** `Reservation::RESERVED_STATUS_KEY = 'reserved'` sebenarnya
+      **status MEJA**, bukan status reservasi — diganti `TableStatus::Reserved`. `HOLDING_STATUSES`
+      → `ReservationStatus::holdingValues()`. `BookingService::STATUS_PENDING` dan duplikat
+      `STATUS_OPTIONS` di `Livewire/Admin/Reservations/Form` juga dihapus.
+      `BookingBoard::ACTIONS` **dipertahankan** (label kata kerja tombol "Konfirmasi"/"Check-in" memang
+      beda konsep dari label status "Dikonfirmasi"/"Sudah Duduk") tapi kuncinya kini dari Enum.
+      Form admin dulu menampilkan `str_replace('_',' ')` → kini label Indonesia.
+      **Verifikasi RUNTIME:** Enum dibandingkan langsung dengan CHECK constraint di `pg_constraint`;
+      read (forAdmin 22, forBoard filter pending 7, urutan board benar, countsByStatus, countToday);
+      **siklus kunci-meja end-to-end ter-rollback**: `lockTable`→meja `reserved`; `releaseTable` saat
+      reservasi lain masih `seated` → meja **tetap** reserved; setelah yang lain `completed` → meja
+      `available`. `releaseExpired()` (job) jalan: 7 expired hold + 4 no-show.
+      4 komponen Livewire di-render. `route:list` 141 tetap, `view:cache` + `npm run build` sukses.
+      *Catatan proses:* percobaan pertama tampak gagal (meja tak jadi `available`) — ternyata meja uji
+      sudah dipegang reservasi seed berstatus `seated`, jadi penolakannya benar. Diulang dengan meja
+      tanpa reservasi dan hasilnya sesuai.
 - [ ] C5. **Kitchen** (KDS — sebagian besar QueryUseCase + Events)
 - [ ] C6. **Inventory** (Ingredient/Stock/Purchase/Supplier/Sale — domain terbesar)
 - [ ] C7. **Customer**

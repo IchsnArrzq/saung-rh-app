@@ -3,6 +3,7 @@
 namespace App\Services\Reservations;
 
 use App\Domains\Payment\Enums\PaymentStatus;
+use App\Domains\Reservation\Enums\ReservationStatus;
 use App\Models\Payment;
 use App\Models\Reservation;
 use App\Models\User;
@@ -36,7 +37,9 @@ class ReservationDepositService
                 'deposit_amount' => $amount,
                 'deposit_paid_at' => now(),
                 'hold_until' => null,
-                'status' => $reservation->status === 'pending' ? 'confirmed' : $reservation->status,
+                'status' => $reservation->status === ReservationStatus::Pending->value
+                    ? ReservationStatus::Confirmed->value
+                    : $reservation->status,
             ])->save();
 
             $reservation->refresh()->lockTable();

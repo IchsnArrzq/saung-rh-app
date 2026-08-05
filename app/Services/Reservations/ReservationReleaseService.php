@@ -2,6 +2,8 @@
 
 namespace App\Services\Reservations;
 
+use App\Domains\Reservation\Enums\ReservationStatus;
+use App\Domains\Table\Enums\TableStatus;
 use App\Models\Reservation;
 use Illuminate\Support\Facades\DB;
 
@@ -27,14 +29,14 @@ class ReservationReleaseService
 
         $expiredHolds = $this->process(
             Reservation::query()->expiredHolds()->with('table')->get(),
-            'cancelled',
+            ReservationStatus::Cancelled->value,
             'hold_expired',
             $tablesReleased,
         );
 
         $noShows = $this->process(
             Reservation::query()->noShowCandidates($graceMinutes)->with('table')->get(),
-            'no_show',
+            ReservationStatus::NoShow->value,
             'no_show',
             $tablesReleased,
         );
@@ -66,8 +68,8 @@ class ReservationReleaseService
 
                 $reservation->releaseTable();
 
-                if ($heldKey === Reservation::RESERVED_STATUS_KEY
-                    && optional($reservation->table?->fresh())->status !== Reservation::RESERVED_STATUS_KEY) {
+                if ($heldKey === TableStatus::Reserved->value
+                    && optional($reservation->table?->fresh())->status !== TableStatus::Reserved->value) {
                     $tablesReleased++;
                 }
             });

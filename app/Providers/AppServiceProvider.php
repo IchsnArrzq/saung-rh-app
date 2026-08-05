@@ -8,6 +8,8 @@ use App\Domains\Order\Repositories\OrderRepository;
 use App\Domains\Order\Repositories\OrderRepositoryInterface;
 use App\Domains\Payment\Repositories\PaymentRepository;
 use App\Domains\Payment\Repositories\PaymentRepositoryInterface;
+use App\Domains\Reservation\Repositories\ReservationRepository;
+use App\Domains\Reservation\Repositories\ReservationRepositoryInterface;
 use App\Domains\Table\Repositories\TableRepository;
 use App\Domains\Table\Repositories\TableRepositoryInterface;
 use App\Models\Payment;
@@ -29,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TableRepositoryInterface::class, TableRepository::class);
         $this->app->bind(MenuRepositoryInterface::class, MenuRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
+        $this->app->bind(ReservationRepositoryInterface::class, ReservationRepository::class);
     }
 
     /**
