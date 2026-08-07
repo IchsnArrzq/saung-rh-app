@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domains\Inventory\Enums\DocumentStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -56,6 +57,6 @@ class StockOpname extends Model
 
     public function isPosted(): bool
     {
-        return $this->status === 'posted';
+        return DocumentStatus::tryFrom((string) $this->status)?->isPosted() === true;
     }
 }

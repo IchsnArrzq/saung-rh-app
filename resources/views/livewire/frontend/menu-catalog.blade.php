@@ -1,33 +1,28 @@
 <div>
     @if (session('success'))
-        <div class="mb-4 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-medium text-success">
-            {{ session('success') }}
-        </div>
+        <x-alert type="success" class="mb-4">{{ session('success') }}</x-alert>
     @endif
 
     @error('cart')
-        <div class="mb-4 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">{{ $message }}</div>
+        <x-alert type="error" class="mb-4">{{ $message }}</x-alert>
     @enderror
 
     {{-- Header --}}
-    <section class="rounded-2xl border border-base-300 bg-base-100 p-4 md:p-5">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <div>
-                <h1 class="text-xl font-semibold">Menu Makanan & Minuman</h1>
-                <p class="mt-0.5 text-sm text-base-content/70">Pilih menu lalu kirim pesanan langsung ke dapur.</p>
-            </div>
+    <x-page-header title="Menu Makanan & Minuman"
+        description="Pilih menu lalu kirim pesanan langsung ke dapur.">
+        <x-slot:actions>
             @if ($selectedTable)
                 <div class="rounded-xl border border-success/30 bg-success/10 px-3 py-2 text-sm">
                     <p class="font-semibold"><i class="ri-checkbox-circle-line text-success"></i> Meja {{ $selectedTable->code }}</p>
                     <p class="text-xs text-base-content/60">Kapasitas {{ $selectedTable->capacity }} orang</p>
                 </div>
             @else
-                <a href="{{ route('login') }}" class="btn btn-sm btn-ghost">
-                    <i class="ri-calendar-check-line"></i> Mau reservasi? Masuk
-                </a>
+                <x-button variant="ghost" size="sm" icon="ri-calendar-check-line" :href="route('login')">
+                    Mau reservasi? Masuk
+                </x-button>
             @endif
-        </div>
-    </section>
+        </x-slot:actions>
+    </x-page-header>
 
     <div class="mt-4 grid gap-4 xl:grid-cols-12 xl:items-start">
 
@@ -40,27 +35,26 @@
 
             {{-- Filter Kategori --}}
             <div class="flex flex-wrap items-center gap-2">
-                <button type="button" wire:click="setCategory()"
-                    class="btn btn-sm rounded-full {{ is_null($activeCategoryId) ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
+                <x-button size="sm" wire:click="setCategory()"
+                    :variant="is_null($activeCategoryId) ? 'primary' : 'ghost'"
+                    class="rounded-full {{ is_null($activeCategoryId) ? '' : 'border border-base-300' }}">
                     Semua
                     <span class="badge badge-sm">{{ $totalAvailable }}</span>
-                </button>
+                </x-button>
+
                 @foreach ($categories as $category)
-                    <button type="button" wire:click="setCategory({{ $category->id }})"
-                        class="btn btn-sm rounded-full {{ $activeCategoryId === $category->id ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
+                    <x-button size="sm" wire:click="setCategory({{ $category->id }})"
+                        :variant="$activeCategoryId === $category->id ? 'primary' : 'ghost'"
+                        class="rounded-full {{ $activeCategoryId === $category->id ? '' : 'border border-base-300' }}">
                         {{ $category->name }}
                         <span class="badge badge-sm">{{ $category->menus_count }}</span>
-                    </button>
+                    </x-button>
                 @endforeach
             </div>
 
             {{-- Search --}}
-            <div class="relative">
-                <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40"></i>
-                <input type="text" class="input input-bordered w-full pl-10"
-                    wire:model.live.debounce.300ms="search"
-                    placeholder="Cari menu, deskripsi, atau SKU...">
-            </div>
+            <x-search-input wire:model.live.debounce.300ms="search"
+                placeholder="Cari menu, deskripsi, atau SKU..." label="Cari menu" />
 
             {{-- Grid Menu --}}
             <div @class([
@@ -71,10 +65,6 @@
                 @forelse ($menus as $menu)
                     <article class="overflow-hidden rounded-2xl border border-base-200 bg-base-100 shadow-sm">
                         <div class="relative aspect-[4/3]">
-                            <button type="button" wire:click="showMenuDetail('{{ $menu->id }}')"
-                                class="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/50 text-white opacity-0 transition-opacity hover:opacity-50">
-                                <i class="ri-expand-diagonal-2-line text-2xl"></i>
-                            </button>
                             @if ($menu->image_url)
                                 <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}"
                                     class="h-full w-full rounded-2xl object-cover p-1">
@@ -83,6 +73,10 @@
                                     <i class="ri-image-line text-4xl"></i>
                                 </div>
                             @endif
+
+                            <x-button variant="neutral" size="sm" shape="circle" icon="ri-information-line"
+                                label="Lihat detail {{ $menu->name }}" class="absolute right-2 top-2 z-10 opacity-90"
+                                wire:click="showMenuDetail('{{ $menu->id }}')" />
                         </div>
 
                         <div class="space-y-3 p-4">
@@ -94,108 +88,102 @@
                                 <p class="text-lg font-semibold">
                                     Rp {{ number_format((float) $menu->price, 0, ',', '.') }}
                                 </p>
-                                <button type="button" wire:click="quickAdd('{{ $menu->id }}')"
-                                    class="btn btn-sm btn-neutral btn-square" aria-label="Tambah ke cart">
-                                    <i class="ri-add-line text-lg"></i>
-                                </button>
+                                <x-button variant="neutral" size="sm" shape="square" icon="ri-add-line text-lg"
+                                    label="Tambah {{ $menu->name }} ke keranjang"
+                                    wire:click="quickAdd('{{ $menu->id }}')" loading="quickAdd('{{ $menu->id }}')" />
                             </div>
                         </div>
                     </article>
                 @empty
-                    <div class="col-span-full rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center">
-                        <p class="text-base-content/60">Belum ada menu tersedia pada kategori ini.</p>
-                    </div>
+                    <x-empty-state class="col-span-full" icon="ri-restaurant-line"
+                        title="Belum ada menu tersedia"
+                        description="Tidak ada menu pada kategori ini. Coba kategori lain atau ubah kata pencarian." />
                 @endforelse
             </div>
         </div>
 
         {{-- Kanan: Order Details --}}
         @if ($cartCount > 0)
-        <aside class="xl:col-span-5 xl:sticky xl:top-4">
-            <section class="rounded-2xl border border-base-300 bg-base-100 p-4">
-                <div class="mb-4 flex items-center justify-between gap-2">
-                    <h3 class="text-xl font-semibold">Order Details</h3>
-                    <button type="button" wire:click="clearCart"
-                        data-confirm="Reset semua item order ini?"
-                        class="btn btn-sm btn-outline">
-                        <i class="ri-delete-bin-line"></i> Reset Order
-                    </button>
-                </div>
-
-                @if ($selectedTable)
-                    <div class="mb-3 rounded-xl border border-success/30 bg-success/10 px-3 py-2 text-sm">
-                        <p class="font-semibold">Meja {{ $selectedTable->code }}</p>
-                        <p class="text-xs text-base-content/60">Kapasitas {{ $selectedTable->capacity }} orang</p>
+            <aside class="xl:col-span-5 xl:sticky xl:top-4">
+                <x-card>
+                    <div class="mb-4 flex items-center justify-between gap-2">
+                        <h3 class="text-xl font-semibold">Rincian Pesanan</h3>
+                        <x-button variant="outline" size="sm" icon="ri-delete-bin-line" wire:click="clearCart"
+                            data-confirm="Reset semua item order ini?">
+                            Reset Order
+                        </x-button>
                     </div>
-                @endif
 
-                {{-- Cart items --}}
-                <div class="space-y-3">
-                    @foreach ($cartItems as $item)
-                        <article class="rounded-xl border border-base-300 p-3">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="flex items-start gap-3">
-                                    <div class="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-base-200">
-                                        @if ($item['image_url'])
-                                            <img src="{{ $item['image_url'] }}" alt="{{ $item['name'] }}"
-                                                class="h-full w-full object-cover">
-                                        @else
-                                            <div class="flex h-full items-center justify-center text-base-content/40">
-                                                <i class="ri-image-line text-xl"></i>
-                                            </div>
-                                        @endif
+                    @if ($selectedTable)
+                        <div class="mb-3 rounded-xl border border-success/30 bg-success/10 px-3 py-2 text-sm">
+                            <p class="font-semibold">Meja {{ $selectedTable->code }}</p>
+                            <p class="text-xs text-base-content/60">Kapasitas {{ $selectedTable->capacity }} orang</p>
+                        </div>
+                    @endif
+
+                    {{-- Cart items --}}
+                    <div class="space-y-3">
+                        @foreach ($cartItems as $item)
+                            <article class="rounded-xl border border-base-300 p-3">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex items-start gap-3">
+                                        <div class="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-base-200">
+                                            @if ($item['image_url'])
+                                                <img src="{{ $item['image_url'] }}" alt="{{ $item['name'] }}"
+                                                    class="h-full w-full object-cover">
+                                            @else
+                                                <div class="flex h-full items-center justify-center text-base-content/40">
+                                                    <i class="ri-image-line text-xl"></i>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <p class="font-medium leading-tight">{{ $item['name'] }}</p>
+                                            <p class="mt-0.5 text-sm text-base-content/60">
+                                                Rp {{ number_format((float) $item['price'], 0, ',', '.') }}
+                                            </p>
+                                            @if (!empty($item['notes']))
+                                                <p class="mt-1 line-clamp-1 text-xs text-base-content/50">{{ $item['notes'] }}</p>
+                                            @endif
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="font-medium leading-tight">{{ $item['name'] }}</p>
-                                        <p class="mt-0.5 text-sm text-base-content/60">
-                                            Rp {{ number_format((float) $item['price'], 0, ',', '.') }}
-                                        </p>
-                                        @if (!empty($item['notes']))
-                                            <p class="mt-1 line-clamp-1 text-xs text-base-content/50">{{ $item['notes'] }}</p>
-                                        @endif
-                                    </div>
+                                    <x-button variant="error" size="sm" shape="square" icon="ri-delete-bin-line"
+                                        label="Hapus {{ $item['name'] }}" class="text-white"
+                                        wire:click="removeItem('{{ $item['menu_id'] }}')"
+                                        data-confirm="Hapus item ini dari cart?" />
                                 </div>
-                                <button type="button" wire:click="removeItem('{{ $item['menu_id'] }}')"
-                                    data-confirm="Hapus item ini dari cart?"
-                                    class="btn btn-sm btn-error btn-square text-white" aria-label="Hapus item">
-                                    <i class="ri-delete-bin-line"></i>
-                                </button>
-                            </div>
 
-                            <div class="mt-3 flex items-center justify-end gap-2">
-                                <button type="button" wire:click="decrementQty('{{ $item['menu_id'] }}')"
-                                    class="btn btn-sm btn-outline btn-square">
-                                    <i class="ri-subtract-line"></i>
-                                </button>
-                                <span class="min-w-8 text-center text-lg font-semibold">{{ $item['qty'] }}</span>
-                                <button type="button" wire:click="incrementQty('{{ $item['menu_id'] }}')"
-                                    class="btn btn-sm btn-outline btn-square">
-                                    <i class="ri-add-line"></i>
-                                </button>
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
-
-                {{-- Subtotal --}}
-                <div class="mt-4 border-t border-base-300 pt-4">
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-base-content/70">Total Item</span>
-                        <span class="font-medium">{{ $cartCount }}</span>
-                    </div>
-                    <div class="mt-1 flex items-center justify-between text-lg font-semibold">
-                        <span>Sub Total</span>
-                        <span>Rp {{ number_format((float) $cartSubtotal, 0, ',', '.') }}</span>
+                                <div class="mt-3 flex items-center justify-end gap-2">
+                                    <x-button variant="outline" size="sm" shape="square" icon="ri-subtract-line"
+                                        label="Kurangi jumlah {{ $item['name'] }}"
+                                        wire:click="decrementQty('{{ $item['menu_id'] }}')" />
+                                    <span class="min-w-8 text-center text-lg font-semibold">{{ $item['qty'] }}</span>
+                                    <x-button variant="outline" size="sm" shape="square" icon="ri-add-line"
+                                        label="Tambah jumlah {{ $item['name'] }}"
+                                        wire:click="incrementQty('{{ $item['menu_id'] }}')" />
+                                </div>
+                            </article>
+                        @endforeach
                     </div>
 
-                    <button type="button" wire:click="goToCart"
-                        class="btn btn-primary mt-4 w-full">
-                        <i class="ri-shopping-cart-line"></i>
-                        Lanjut ke Checkout
-                    </button>
-                </div>
-            </section>
-        </aside>
+                    {{-- Subtotal --}}
+                    <div class="mt-4 border-t border-base-300 pt-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-base-content/70">Total Item</span>
+                            <span class="font-medium">{{ $cartCount }}</span>
+                        </div>
+                        <div class="mt-1 flex items-center justify-between text-lg font-semibold">
+                            <span>Sub Total</span>
+                            <span>Rp {{ number_format((float) $cartSubtotal, 0, ',', '.') }}</span>
+                        </div>
+
+                        <x-button variant="primary" :block="true" class="mt-4" icon="ri-shopping-cart-line"
+                            wire:click="goToCart" loading="goToCart">
+                            Lanjut ke Checkout
+                        </x-button>
+                    </div>
+                </x-card>
+            </aside>
         @endif
     </div>
 
@@ -208,10 +196,8 @@
                         <h3 class="text-xl font-semibold">{{ $selectedMenu['name'] }}</h3>
                         <p class="text-sm text-base-content/60">{{ $selectedMenu['category_name'] }}</p>
                     </div>
-                    <button type="button" wire:click="closeMenuDetail"
-                        class="btn btn-sm btn-ghost btn-circle" aria-label="Tutup">
-                        <i class="ri-close-line text-lg"></i>
-                    </button>
+                    <x-button variant="ghost" size="sm" shape="circle" icon="ri-close-line text-lg"
+                        label="Tutup" wire:click="closeMenuDetail" />
                 </div>
 
                 <div class="aspect-[16/10] overflow-hidden rounded-xl bg-base-200">
@@ -234,12 +220,10 @@
                     </p>
                 </div>
 
-                <button type="button"
-                    wire:click="quickAdd('{{ $selectedMenu['id'] }}')"
-                    x-on:click="show = false"
-                    class="btn btn-primary w-full">
-                    <i class="ri-add-line"></i> Tambah ke Cart
-                </button>
+                <x-button variant="primary" :block="true" icon="ri-add-line"
+                    wire:click="quickAdd('{{ $selectedMenu['id'] }}')" x-on:click="show = false">
+                    Tambah ke Keranjang
+                </x-button>
             </div>
         @endif
     </x-modal>

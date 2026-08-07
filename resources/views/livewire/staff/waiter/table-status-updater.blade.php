@@ -41,12 +41,11 @@
 
                 <div class="mt-3 flex flex-wrap gap-1.5">
                     @foreach ($statuses as $status)
-                        <button
+                        <x-button size="xs" :variant="$status === $current ? 'primary' : 'outline'"
                             wire:click="updateStatus('{{ $table->id }}', '{{ $status->value }}')"
-                            @disabled($status === $current)
-                            class="btn btn-xs {{ $status === $current ? 'btn-primary' : 'btn-outline' }}">
+                            @disabled($status === $current)>
                             {{ $status->label() }}
-                        </button>
+                        </x-button>
                     @endforeach
                 </div>
             </div>

@@ -20,10 +20,9 @@
                 Drag kartu meja ke kolom status tujuan.
             </div>
 
-            <a href="{{ route('tables.create') }}" class="btn btn-sm btn-primary">
-                <i class="ri-add-line"></i>
+            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('tables.create')">
                 Tambah Meja
-            </a>
+            </x-button>
         </div>
     </section>
 
@@ -88,8 +87,8 @@
                                     {{ $table->tableCategory?->name ? 'Kategori: '.$table->tableCategory->name : 'Tanpa kategori' }}
                                 </p>
                                 <div class="mt-3 flex gap-2">
-                                    <a href="{{ route('tables.edit', $table) }}" class="btn btn-sm btn-warning">Edit</a>
-                                    <a href="{{ route('tables.qr', $table) }}" class="btn btn-sm btn-outline">QR</a>
+                                    <x-button variant="warning" size="sm" :href="route('tables.edit', $table)">Edit</x-button>
+                                    <x-button variant="outline" size="sm" :href="route('tables.qr', $table)">QR</x-button>
                                 </div>
                             </div>
                         @empty

@@ -20,9 +20,9 @@
                 placeholder="Mis. tolong siapkan kue ulang tahun, atau kecilkan AC..."
                 class="textarea textarea-bordered textarea-sm w-full"></textarea>
             @error('description') <span class="text-error text-xs">{{ $message }}</span> @enderror
-            <button type="submit" class="btn btn-accent btn-sm w-full">
-                <i class="ri-send-plane-2-line"></i> Kirim Permintaan
-            </button>
+            <x-button type="submit" variant="accent" size="sm" :block="true" icon="ri-send-plane-2-line" loading="submit">
+                Kirim Permintaan
+            </x-button>
         </form>
 
         @if ($mine->isNotEmpty())

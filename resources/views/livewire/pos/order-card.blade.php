@@ -12,26 +12,25 @@
             'xl:col-span-12' => $cartCount <= 0,
         ])>
         <div class="flex flex-wrap items-center gap-2">
-            <button type="button" wire:click="setCategory"
-                class="btn btn-sm rounded-full {{ is_null($activeCategoryId) ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
-                All
+            <x-button size="sm" wire:click="setCategory"
+                :variant="is_null($activeCategoryId) ? 'primary' : 'ghost'"
+                class="rounded-full {{ is_null($activeCategoryId) ? '' : 'border border-base-300' }}">
+                Semua
                 <span class="badge badge-sm">{{ $totalAvailableMenus }}</span>
-            </button>
+            </x-button>
 
             @foreach ($categories as $category)
-                <button type="button" wire:click="setCategory({{ $category->id }})"
-                    class="btn btn-sm rounded-full {{ $activeCategoryId === $category->id ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
+                <x-button size="sm" wire:click="setCategory({{ $category->id }})"
+                    :variant="$activeCategoryId === $category->id ? 'primary' : 'ghost'"
+                    class="rounded-full {{ $activeCategoryId === $category->id ? '' : 'border border-base-300' }}">
                     {{ $category->name }}
                     <span class="badge badge-sm">{{ $category->menus_count }}</span>
-                </button>
+                </x-button>
             @endforeach
         </div>
 
-        <div class="relative">
-            <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
-            <input type="text" class="input input-bordered w-full pl-10" wire:model.live.debounce.300ms="search"
-                placeholder="Cari menu, deskripsi, SKU, atau kategori..." />
-        </div>
+        <x-search-input wire:model.live.debounce.300ms="search"
+            placeholder="Cari menu, deskripsi, SKU, atau kategori..." label="Cari menu" />
 
         <div
             @class([
@@ -42,10 +41,6 @@
             @forelse ($menus as $menu)
                 <article class="overflow-hidden rounded-2xl border border-base-200 bg-base-100 shadow-sm">
                     <div class="relative aspect-[4/3]">
-                        <button type="button" wire:click="showMenuDetail('{{ $menu->id }}')"
-                            class="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/50 text-white opacity-0 transition-opacity hover:opacity-50">
-                            <i class="ri-expand-diagonal-2-line text-2xl"></i>
-                        </button>
                         @if ($menu->image_url)
                             <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}"
                                 class="h-full w-full rounded-2xl object-cover p-1">
@@ -54,6 +49,10 @@
                                 <i class="ri-image-line text-4xl"></i>
                             </div>
                         @endif
+
+                        <x-button variant="neutral" size="sm" shape="circle" icon="ri-information-line"
+                            label="Lihat detail {{ $menu->name }}" class="absolute right-2 top-2 z-10 opacity-90"
+                            wire:click="showMenuDetail('{{ $menu->id }}')" />
                     </div>
                     <div class="space-y-3 p-4">
                         <div>
@@ -63,105 +62,69 @@
                         <div class="flex items-center justify-between">
                             <p class="text-lg font-semibold">Rp {{ number_format((float) $menu->price, 0, ',', '.') }}
                             </p>
-                            <button type="button" wire:click="addToCart('{{ $menu->id }}')"
-                                class="btn btn-sm btn-neutral btn-square" aria-label="Tambah ke order">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
+                            <x-button variant="neutral" size="sm" shape="square" icon="ri-add-line text-lg"
+                                label="Tambah {{ $menu->name }} ke order"
+                                wire:click="addToCart('{{ $menu->id }}')" loading="addToCart('{{ $menu->id }}')" />
                         </div>
                     </div>
                 </article>
             @empty
-                <div class="col-span-full rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center">
-                    <p class="text-base-content/70">Belum ada menu tersedia pada kategori ini.</p>
-                </div>
+                <x-empty-state class="col-span-full" icon="ri-restaurant-line"
+                    title="Belum ada menu tersedia"
+                    description="Tidak ada menu pada kategori ini. Coba kategori lain atau ubah kata pencarian." />
             @endforelse
         </div>
     </div>
 
     @if ($cartCount > 0)
         <aside class="xl:col-span-5">
-            <section class="rounded-2xl border border-base-300 bg-base-100 p-4">
+            <x-card>
                 <div class="mb-4 flex items-center justify-between gap-2">
-                    <h3 class="text-xl font-semibold">Order Details</h3>
-                    <button type="button" wire:click="clearCart" data-confirm="Reset semua item order ini?"
-                        class="btn btn-sm btn-outline">
-                        <i class="ri-delete-bin-line"></i>
+                    <h3 class="text-xl font-semibold">Rincian Order</h3>
+                    <x-button variant="outline" size="sm" icon="ri-delete-bin-line" wire:click="clearCart"
+                        data-confirm="Reset semua item order ini?">
                         Reset Order
-                    </button>
+                    </x-button>
                 </div>
 
                 <div class="space-y-3 rounded-xl border border-base-300 bg-base-100 p-3">
-                    <label class="form-control w-full">
-                        <div class="label py-1">
-                            <span class="label-text text-xs font-semibold uppercase tracking-wide text-base-content/70">Meja
-                                (Opsional)</span>
-                        </div>
-                        <select class="select select-bordered w-full" wire:model.defer="tableId">
-                            <option value="">Tanpa meja (take away / online)</option>
-                            @foreach ($tables as $table)
-                                <option value="{{ $table->id }}">
-                                    {{ $table->code }} - {{ $table->name }}
-                                    @if ($status = \App\Domains\Table\Enums\TableStatus::tryFrom((string) $table->status))
-                                        ({{ $status->label() }})
-                                    @endif
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('tableId')
-                            <span class="mt-1 text-xs text-error">{{ $message }}</span>
-                        @enderror
-                    </label>
+                    <x-select label="Meja (Opsional)" name="tableId" wire:model.defer="tableId">
+                        <option value="">Tanpa meja (take away / online)</option>
+                        @foreach ($tables as $table)
+                            <option value="{{ $table->id }}">
+                                {{ $table->code }} - {{ $table->name }}
+                                @if ($status = \App\Domains\Table\Enums\TableStatus::tryFrom((string) $table->status))
+                                    ({{ $status->label() }})
+                                @endif
+                            </option>
+                        @endforeach
+                    </x-select>
 
-                    <label class="form-control w-full">
-                        <div class="label py-1">
-                            <span class="label-text text-xs font-semibold uppercase tracking-wide text-base-content/70">Nama
-                                Customer</span>
-                        </div>
-                        <input type="text" class="input input-bordered w-full" wire:model.defer="customerName"
-                            placeholder="Contoh: Budi / Walk-in customer">
-                        @error('customerName')
-                            <span class="mt-1 text-xs text-error">{{ $message }}</span>
-                        @enderror
-                    </label>
+                    <x-input label="Nama Customer" name="customerName" wire:model.defer="customerName"
+                        placeholder="Contoh: Budi / Walk-in customer" />
 
-                    <label class="form-control w-full">
-                        <div class="label py-1">
-                            <span class="label-text text-xs font-semibold uppercase tracking-wide text-base-content/70">Catatan
-                                Order</span>
-                        </div>
-                        <textarea class="textarea textarea-bordered w-full" rows="2" wire:model.defer="notes"
-                            placeholder="Catatan tambahan untuk dapur (opsional)"></textarea>
-                        @error('notes')
-                            <span class="mt-1 text-xs text-error">{{ $message }}</span>
-                        @enderror
-                    </label>
+                    <x-textarea label="Catatan Order" name="notes" :rows="2" wire:model.defer="notes"
+                        placeholder="Catatan tambahan untuk dapur (opsional)" />
 
                     <div class="rounded-xl border border-base-300 bg-base-200/60 p-3">
                         <label class="flex cursor-pointer items-center justify-between gap-3">
                             <span>
-                                <span class="block text-xs font-semibold uppercase tracking-wide text-base-content/70">Payment</span>
+                                <span class="block text-xs font-semibold uppercase tracking-wide text-base-content/70">Pembayaran</span>
                                 <span class="text-sm font-medium text-base-content">Langsung buat payment</span>
                             </span>
                             <input type="checkbox" class="toggle toggle-primary" wire:model.live="payNow">
                         </label>
 
                         @if ($payNow)
-                            <label class="form-control mt-3 w-full">
-                                <div class="label py-1">
-                                    <span class="label-text text-xs font-semibold uppercase tracking-wide text-base-content/70">Metode Payment</span>
-                                </div>
-                                <select class="select select-bordered w-full" wire:model.defer="paymentMethod">
-                                    <option value="cash">Cash</option>
-                                    <option value="qris">QRIS</option>
-                                    <option value="debit_card">Debit Card</option>
-                                    <option value="credit_card">Credit Card</option>
-                                    <option value="transfer">Transfer</option>
-                                    <option value="ewallet">E-Wallet</option>
-                                </select>
-                                @error('paymentMethod')
-                                    <span class="mt-1 text-xs text-error">{{ $message }}</span>
-                                @enderror
-                            </label>
+                            <x-select label="Metode Pembayaran" name="paymentMethod" class="mt-3"
+                                wire:model.defer="paymentMethod" :options="[
+                                    'cash' => 'Cash',
+                                    'qris' => 'QRIS',
+                                    'debit_card' => 'Debit Card',
+                                    'credit_card' => 'Credit Card',
+                                    'transfer' => 'Transfer',
+                                    'ewallet' => 'E-Wallet',
+                                ]" />
                         @endif
                     </div>
                 </div>
@@ -188,23 +151,20 @@
                                     </div>
                                 </div>
 
-                                <button type="button" wire:click="removeCartItem('{{ $item['menu_id'] }}')"
-                                    data-confirm="Hapus item ini dari order?"
-                                    class="btn btn-sm btn-error btn-square text-white" aria-label="Hapus item">
-                                    <i class="ri-delete-bin-line"></i>
-                                </button>
+                                <x-button variant="error" size="sm" shape="square" icon="ri-delete-bin-line"
+                                    label="Hapus {{ $item['name'] }}" class="text-white"
+                                    wire:click="removeCartItem('{{ $item['menu_id'] }}')"
+                                    data-confirm="Hapus item ini dari order?" />
                             </div>
 
                             <div class="mt-3 flex items-center justify-end gap-2">
-                                <button type="button" wire:click="decrementQty('{{ $item['menu_id'] }}')"
-                                    class="btn btn-sm btn-outline btn-square" aria-label="Kurangi qty">
-                                    <i class="ri-subtract-line"></i>
-                                </button>
+                                <x-button variant="outline" size="sm" shape="square" icon="ri-subtract-line"
+                                    label="Kurangi jumlah {{ $item['name'] }}"
+                                    wire:click="decrementQty('{{ $item['menu_id'] }}')" />
                                 <span class="min-w-8 text-center text-lg font-semibold">{{ $item['qty'] }}</span>
-                                <button type="button" wire:click="incrementQty('{{ $item['menu_id'] }}')"
-                                    class="btn btn-sm btn-outline btn-square" aria-label="Tambah qty">
-                                    <i class="ri-add-line"></i>
-                                </button>
+                                <x-button variant="outline" size="sm" shape="square" icon="ri-add-line"
+                                    label="Tambah jumlah {{ $item['name'] }}"
+                                    wire:click="incrementQty('{{ $item['menu_id'] }}')" />
                             </div>
                         </article>
                     @endforeach
@@ -224,44 +184,25 @@
                         <p class="mt-2 text-xs font-medium text-error">{{ $message }}</p>
                     @enderror
 
-                    <button type="button" wire:click="placeOrder" wire:loading.attr="disabled" wire:target="placeOrder"
-                        class="btn btn-primary mt-4 w-full">
-                        <span wire:loading.remove wire:target="placeOrder">
-                            <i class="ri-save-2-line"></i>
-                            Simpan Order
-                        </span>
-                        <span wire:loading wire:target="placeOrder" class="inline-flex items-center gap-2">
-                            <span class="loading loading-spinner loading-sm"></span>
-                            Menyimpan...
-                        </span>
-                    </button>
+                    <x-button variant="primary" :block="true" class="mt-4" icon="ri-save-2-line"
+                        wire:click="placeOrder" loading="placeOrder">
+                        Simpan Order
+                    </x-button>
                 </div>
-            </section>
+            </x-card>
         </aside>
     @endif
 
     <x-modal name="menu-detail-modal" maxWidth="lg">
         @if ($selectedMenu)
-            @php
-                $statusBadgeClass = match ($selectedMenu['status_color']) {
-                    'success' => 'badge-success',
-                    'error' => 'badge-error',
-                    'warning' => 'badge-warning',
-                    'info' => 'badge-info',
-                    default => 'badge-neutral',
-                };
-            @endphp
-
             <div class="space-y-4">
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <h3 class="text-xl font-semibold">{{ $selectedMenu['name'] }}</h3>
                         <p class="text-sm text-base-content/70">{{ $selectedMenu['category_name'] }}</p>
                     </div>
-                    <button type="button" wire:click="closeMenuDetail" class="btn btn-sm btn-ghost btn-circle"
-                        aria-label="Tutup">
-                        <i class="ri-close-line text-lg"></i>
-                    </button>
+                    <x-button variant="ghost" size="sm" shape="circle" icon="ri-close-line text-lg"
+                        label="Tutup" wire:click="closeMenuDetail" />
                 </div>
 
                 <div class="aspect-[16/10] overflow-hidden rounded-xl bg-base-200">
@@ -276,11 +217,11 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
-                    <span class="badge {{ $statusBadgeClass }}">{{ $selectedMenu['status_name'] }}</span>
-                    <span class="badge badge-outline">SKU: {{ $selectedMenu['sku'] }}</span>
-                    <span class="badge {{ $selectedMenu['is_available'] ? 'badge-success' : 'badge-error' }}">
+                    <x-badge :color="$selectedMenu['status_color']">{{ $selectedMenu['status_name'] }}</x-badge>
+                    <x-badge color="default" :outline="true">SKU: {{ $selectedMenu['sku'] }}</x-badge>
+                    <x-badge :color="$selectedMenu['is_available'] ? 'success' : 'error'">
                         {{ $selectedMenu['is_available'] ? 'Aktif Dijual' : 'Tidak Dijual' }}
-                    </span>
+                    </x-badge>
                 </div>
 
                 <div>

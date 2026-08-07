@@ -1,68 +1,63 @@
 <div class="space-y-5">
     @include('admin.partials.flash')
 
-    <section class="rounded-2xl border border-stone-200 bg-white p-4 md:p-5">
+    <x-card>
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-2">
-                <div class="relative w-full max-w-md">
-                    <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
-                    <input type="text" class="input input-bordered w-full pl-10" wire:model.live.debounce.300ms="search"
-                        placeholder="Cari metode, status, referensi, no order...">
-                </div>
+                <x-search-input class="max-w-md" wire:model.live.debounce.300ms="search"
+                    placeholder="Cari metode, status, referensi, no order..." label="Cari pembayaran" />
+
                 @if ($search !== '')
-                    <button type="button" class="btn btn-sm btn-ghost" wire:click="$set('search', '')">Reset</button>
+                    <x-button variant="ghost" size="sm" wire:click="$set('search', '')">Reset</x-button>
                 @endif
             </div>
 
-            <a href="{{ route('payments.create') }}" class="btn btn-sm bg-emerald-800 text-amber-50 hover:bg-emerald-700">
-                <i class="ri-add-line"></i>
+            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('payments.create')">
                 Tambah Pembayaran
-            </a>
+            </x-button>
         </div>
-    </section>
+    </x-card>
 
-    <div class="overflow-x-auto rounded-2xl border border-stone-200 bg-white">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Order</th>
-                    <th>Metode</th>
-                    <th>Status</th>
-                    <th>Jumlah</th>
-                    <th class="text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($payments as $payment)
-                    <tr wire:key="payment-{{ $payment->id }}">
-                        <td>{{ $payment->order->order_number ?? '-' }}</td>
-                        <td>{{ str_replace('_', ' ', $payment->method) }}</td>
-                        <td>
-                            <span class="badge badge-outline">{{ $payment->status }}</span>
-                        </td>
-                        <td>Rp {{ number_format((float) $payment->amount, 0, ',', '.') }}</td>
-                        <td class="text-right">
-                            <div class="inline-flex gap-2">
-                                <a href="{{ route('payments.edit', $payment) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <button type="button" class="btn btn-sm btn-error text-white"
-                                    data-confirm="Hapus pembayaran ini?"
-                                    wire:click="delete('{{ $payment->id }}')"
-                                    wire:loading.attr="disabled"
-                                    wire:target="delete('{{ $payment->id }}')">
-                                    <span wire:loading.remove wire:target="delete('{{ $payment->id }}')">Hapus</span>
-                                    <span wire:loading wire:target="delete('{{ $payment->id }}')" class="loading loading-spinner loading-xs"></span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="text-center text-stone-500">Belum ada data pembayaran.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table>
+        <x-slot:head>
+            <tr>
+                <th>Order</th>
+                <th>Metode</th>
+                <th>Status</th>
+                <th>Jumlah</th>
+                <th class="text-right">Aksi</th>
+            </tr>
+        </x-slot:head>
+
+        @forelse ($payments as $payment)
+            <tr wire:key="payment-{{ $payment->id }}">
+                <td>{{ $payment->order->order_number ?? '-' }}</td>
+                <td class="capitalize">{{ str_replace('_', ' ', $payment->method) }}</td>
+                <td>
+                    <x-status-badge :status="$payment->status"
+                        :enum="\App\Domains\Payment\Enums\PaymentStatus::class" />
+                </td>
+                <td>Rp {{ number_format((float) $payment->amount, 0, ',', '.') }}</td>
+                <td class="text-right">
+                    <div class="inline-flex gap-2">
+                        <x-button variant="warning" size="sm" :href="route('payments.edit', $payment)">
+                            Edit
+                        </x-button>
+                        <x-button variant="error" size="sm" class="text-white"
+                            data-confirm="Hapus pembayaran ini?"
+                            wire:click="delete('{{ $payment->id }}')"
+                            loading="delete('{{ $payment->id }}')">
+                            Hapus
+                        </x-button>
+                    </div>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="5" class="text-center text-base-content/50">Belum ada data pembayaran.</td>
+            </tr>
+        @endforelse
+    </x-data-table>
 
     <div>{{ $payments->links() }}</div>
 </div>

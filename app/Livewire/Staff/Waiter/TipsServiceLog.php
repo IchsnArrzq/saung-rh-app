@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Staff\Waiter;
 
+use App\Domains\Order\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\ServiceLog;
 use App\Models\Table;
@@ -80,7 +81,7 @@ class TipsServiceLog extends Component
         $tables = Table::query()->orderBy('code')->get(['id', 'code', 'name']);
 
         $activeOrders = Order::query()
-            ->whereIn('status', ['confirmed', 'preparing', 'ready', 'served'])
+            ->whereIn('status', OrderStatus::inServiceValues())
             ->orderByDesc('ordered_at')
             ->limit(50)
             ->get(['id', 'order_number', 'customer_name']);

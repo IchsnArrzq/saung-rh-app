@@ -17,9 +17,10 @@
                         <span class="text-xs text-secondary">Meja {{ $req->table_code ?? '-' }} · {{ $req->requested_by ?? 'Tamu' }}</span>
                     </div>
                     <p class="text-sm">{{ $req->description }}</p>
-                    <button wire:click="complete('{{ $req->id }}')" class="btn btn-success btn-sm w-full">
-                        <i class="ri-check-double-line"></i> Tandai Selesai
-                    </button>
+                    <x-button variant="success" size="sm" :block="true" icon="ri-check-double-line"
+                        wire:click="complete('{{ $req->id }}')" loading="complete('{{ $req->id }}')">
+                        Tandai Selesai
+                    </x-button>
                 </div>
             </div>
         @empty

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Domains\Inventory\Repositories\IngredientRepository;
+use App\Domains\Inventory\Repositories\IngredientRepositoryInterface;
 use App\Domains\Menu\Repositories\MenuRepository;
 use App\Domains\Menu\Repositories\MenuRepositoryInterface;
 use App\Domains\Order\Repositories\OrderRepository;
@@ -32,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MenuRepositoryInterface::class, MenuRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
         $this->app->bind(ReservationRepositoryInterface::class, ReservationRepository::class);
+        $this->app->bind(IngredientRepositoryInterface::class, IngredientRepository::class);
     }
 
     /**

@@ -93,7 +93,7 @@
 <div class="rounded-2xl border border-stone-200 p-4">
     <div class="mb-3 flex items-center justify-between">
         <h3 class="font-semibold">Item Pesanan</h3>
-        <button type="button" id="add-order-item" class="btn btn-sm btn-outline">Tambah Item</button>
+        <x-button variant="outline" size="sm" id="add-order-item">Tambah Item</x-button>
     </div>
 
     @error('items')
@@ -160,7 +160,7 @@
                 </fieldset>
 
                 <div class="md:col-span-1 flex items-end justify-end">
-                    <button type="button" class="btn btn-sm btn-error text-white remove-item">Hapus</button>
+                    <x-button variant="error" size="sm" class="text-white remove-item">Hapus</x-button>
                 </div>
             </div>
         @endforeach
@@ -200,7 +200,7 @@
         </fieldset>
 
         <div class="md:col-span-1 flex items-end justify-end">
-            <button type="button" class="btn btn-sm btn-error text-white remove-item">Hapus</button>
+            <x-button variant="error" size="sm" class="text-white remove-item">Hapus</x-button>
         </div>
     </div>
 </template>

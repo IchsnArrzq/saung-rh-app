@@ -181,10 +181,10 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="btn w-full bg-emerald-800 text-amber-50 hover:bg-emerald-700" @disabled(! $menu->is_available)>
-                        <i class="ri-shopping-cart-2-line"></i>
+                    <x-button type="submit" variant="primary" :block="true" icon="ri-shopping-cart-2-line"
+                        @disabled(! $menu->is_available)>
                         Tambah ke Cart
-                    </button>
+                    </x-button>
                 </form>
             </div>
         </aside>
@@ -215,7 +215,7 @@
                     <h2 class="text-lg font-bold text-base-content">Menu Terkait</h2>
                     <p class="mt-1 text-sm text-secondary">Pilihan lain dari kategori yang sama.</p>
                 </div>
-                <a href="{{ $backUrl }}" class="btn btn-sm btn-ghost">Kembali ke Menu</a>
+                <x-button variant="ghost" size="sm" :href="$backUrl">Kembali ke Menu</x-button>
             </div>
 
             <div class="mt-4 grid gap-3 sm:grid-cols-2">

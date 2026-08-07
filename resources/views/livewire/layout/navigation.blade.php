@@ -39,7 +39,7 @@ new class extends Component {
     <div class="flex items-center gap-3">
 
         @if ($navigationMenuPreference === 'sidebar')
-            <label for="admin-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
+            <x-button as="label" for="admin-drawer" variant="ghost" shape="square" label="Buka menu samping">
                 <!-- Sidebar toggle icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round" stroke-linecap="round"
                     stroke-width="2" fill="none" stroke="currentColor" class="my-1.5 inline-block size-4">
@@ -47,7 +47,7 @@ new class extends Component {
                     <path d="M9 4v16"></path>
                     <path d="M14 10l2 2l-2 2"></path>
                 </svg>
-            </label>
+            </x-button>
         @endif
 
         <div class="mr-auto flex items-center gap-3">
@@ -62,10 +62,9 @@ new class extends Component {
             <span>Public Site</span>
         </a>
 
-        <button type="button" data-theme-toggle aria-label="Toggle dark mode" aria-pressed="false"
-            class="btn btn-square btn-ghost">
+        <x-button variant="ghost" shape="square" data-theme-toggle aria-pressed="false" label="Ganti mode gelap">
             <i data-theme-toggle-icon class="ri-moon-line text-xl"></i>
-        </button>
+        </x-button>
 
         <details class="dropdown dropdown-end">
             <summary

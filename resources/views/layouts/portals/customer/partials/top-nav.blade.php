@@ -1,8 +1,7 @@
 <header class="sticky top-0 z-30 border-b border-base-300 bg-base-100/95 px-4 py-3 backdrop-blur md:px-6">
     <div class="flex items-center gap-3">
-        <label for="customer-drawer" class="btn btn-square btn-ghost btn-sm drawer-button" aria-label="Toggle sidebar">
-            <i class="ri-menu-line text-xl"></i>
-        </label>
+        <x-button as="label" for="customer-drawer" variant="ghost" size="sm" shape="square"
+            class="drawer-button" icon="ri-menu-line text-xl" label="Buka menu samping" />
 
         <a href="{{ route('public.home') }}" class="flex items-center gap-2 font-bold text-base-content md:hidden">
             <span class="inline-flex h-9 w-9 items-center justify-center rounded-box bg-primary text-sm text-primary-content">
@@ -16,15 +15,15 @@
             <p class="text-sm font-semibold text-base-content">Kelola booking dan pesanan restoran Anda.</p>
         </div>
 
-        <a href="{{ route('public.home') }}" class="btn btn-ghost btn-sm hidden md:inline-flex">
-            <i class="ri-external-link-line text-base"></i>
-            Public Site
-        </a>
+        <x-button variant="ghost" size="sm" class="hidden md:inline-flex" icon="ri-external-link-line text-base"
+            :href="route('public.home')">
+            Situs Publik
+        </x-button>
 
-        <button type="button" data-theme-toggle aria-label="Toggle dark mode" aria-pressed="false"
-            class="btn btn-square btn-ghost btn-sm">
+        <x-button variant="ghost" size="sm" shape="square" data-theme-toggle aria-pressed="false"
+            label="Ganti mode gelap">
             <i data-theme-toggle-icon class="ri-moon-line text-lg"></i>
-        </button>
+        </x-button>
 
         <details class="dropdown dropdown-end">
             <summary class="flex cursor-pointer list-none items-center gap-2 rounded-box px-1 py-1 hover:bg-base-200">

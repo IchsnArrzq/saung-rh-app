@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Admin;
 
+use App\Domains\Order\Enums\OrderStatus;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -33,7 +34,7 @@ class DashboardRepository implements DashboardRepositoryInterface
     public function activeOrders(): int
     {
         return Order::query()
-            ->whereIn('status', ['confirmed', 'preparing', 'ready', 'served'])
+            ->whereIn('status', OrderStatus::inServiceValues())
             ->count();
     }
 

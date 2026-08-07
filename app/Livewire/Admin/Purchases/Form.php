@@ -5,7 +5,8 @@ namespace App\Livewire\Admin\Purchases;
 use App\Models\Ingredient;
 use App\Models\Purchase;
 use App\Models\Supplier;
-use App\Services\Admin\PurchaseService;
+use App\Domains\Inventory\Enums\DocumentStatus;
+use App\Domains\Inventory\UseCases\PostPurchaseUseCase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -82,14 +83,14 @@ class Form extends Component
         return $this->redirectRoute('purchases.index', navigate: true);
     }
 
-    public function post(PurchaseService $service)
+    public function post(PostPurchaseUseCase $postPurchase)
     {
         if ($this->purchase && $this->purchase->isPosted()) {
             return;
         }
 
         $purchase = $this->persist();
-        $service->post($purchase);
+        $postPurchase->handle($purchase);
 
         session()->flash('success', 'Pembelian diposting. Stok bahan telah ditambahkan.');
 
@@ -116,7 +117,7 @@ class Form extends Component
                     'code' => $this->generateCode(Carbon::parse($validated['purchase_date'])),
                     'supplier_id' => $validated['supplier_id'] ?: null,
                     'purchase_date' => $validated['purchase_date'],
-                    'status' => 'draft',
+                    'status' => DocumentStatus::Draft->value,
                     'notes' => $validated['notes'] ?: null,
                     'user_id' => auth()->id(),
                 ]);

@@ -1,9 +1,9 @@
 <div class="space-y-5">
     <div class="flex items-center justify-between">
         <div class="join">
-            <button wire:click="setRange('today')" class="btn btn-sm join-item {{ $range === 'today' ? 'btn-primary' : 'btn-outline' }}">Hari Ini</button>
-            <button wire:click="setRange('week')" class="btn btn-sm join-item {{ $range === 'week' ? 'btn-primary' : 'btn-outline' }}">Minggu Ini</button>
-            <button wire:click="setRange('month')" class="btn btn-sm join-item {{ $range === 'month' ? 'btn-primary' : 'btn-outline' }}">Bulan Ini</button>
+            <x-button size="sm" class="join-item" :variant="$range === 'today' ? 'primary' : 'outline'" wire:click="setRange('today')">Hari Ini</x-button>
+            <x-button size="sm" class="join-item" :variant="$range === 'week' ? 'primary' : 'outline'" wire:click="setRange('week')">Minggu Ini</x-button>
+            <x-button size="sm" class="join-item" :variant="$range === 'month' ? 'primary' : 'outline'" wire:click="setRange('month')">Bulan Ini</x-button>
         </div>
     </div>
 

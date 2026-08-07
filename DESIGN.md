@@ -566,67 +566,101 @@ Inventory Alerts
 
 # Restaurant Specific UI
 
+## Status Display
+
+Labels and colors live in the domain Enums.
+
+The Enum is the single source of truth.
+
+Never hardcode a status label or a badge color in a Blade view.
+
+Never print a raw backing value — `no_show`, `order_in` — in the UI.
+
+Use:
+
+`$status->label()` for the text
+
+`$status->color()` for the semantic token
+
+Tailwind cannot scan a class built from a variable.
+
+Map to full class names in the view:
+
+```blade
+@php
+    $badgeMap = [
+        'success' => 'badge-success',   'error'   => 'badge-error',
+        'warning' => 'badge-warning',   'info'    => 'badge-info',
+        'accent'  => 'badge-accent',    'secondary' => 'badge-secondary',
+        'neutral' => 'badge-neutral',
+    ];
+@endphp
+<span class="badge {{ $badgeMap[$status->color()] ?? 'badge-neutral' }}">{{ $status->label() }}</span>
+```
+
+The tables below are a reference copy.
+
+If a table and its Enum disagree, the Enum wins and this document is the one to fix.
+
+---
+
 ## Order Status
 
-Pending
+`app/Domains/Order/Enums/OrderStatus.php`
 
-badge-warning
-
-Preparing
-
-badge-info
-
-Ready
-
-badge-success
-
-Completed
-
-badge-success
-
-Cancelled
-
-badge-error
+| Case | Label | Token |
+|---|---|---|
+| `draft` | Draft | `neutral` |
+| `confirmed` | Dikonfirmasi | `info` |
+| `preparing` | Disiapkan | `warning` |
+| `ready` | Siap | `accent` |
+| `served` | Disajikan | `secondary` |
+| `paid` | Lunas | `success` |
+| `cancelled` | Dibatalkan | `error` |
 
 ---
 
 ## Reservation Status
 
-Pending
+`app/Domains/Reservation/Enums/ReservationStatus.php`
 
-badge-warning
-
-Confirmed
-
-badge-success
-
-Checked In
-
-badge-info
-
-Cancelled
-
-badge-error
-
-No Show
-
-badge-error
+| Case | Label | Token |
+|---|---|---|
+| `pending` | Menunggu Konfirmasi | `warning` |
+| `confirmed` | Dikonfirmasi | `info` |
+| `seated` | Sudah Duduk | `success` |
+| `completed` | Selesai | `neutral` |
+| `cancelled` | Dibatalkan | `error` |
+| `no_show` | Tidak Hadir | `error` |
 
 ---
 
 ## Payment Status
 
-Unpaid
+`app/Domains/Payment/Enums/PaymentStatus.php`
 
-badge-warning
+| Case | Label | Token |
+|---|---|---|
+| `pending` | Menunggu | `warning` |
+| `paid` | Lunas | `success` |
+| `failed` | Gagal | `error` |
+| `refunded` | Dikembalikan | `info` |
 
-Paid
+---
 
-badge-success
+## Table Status
 
-Refunded
+`app/Domains/Table/Enums/TableStatus.php`
 
-badge-error
+| Case | Label | Token |
+|---|---|---|
+| `available` | Tersedia | `success` |
+| `occupied` | Terisi | `error` |
+| `order_in` | Pesanan Masuk | `warning` |
+| `reserved` | Direservasi | `secondary` |
+| `cleaning` | Perlu Dibersihkan | `info` |
+
+Board ordering comes from `sortOrder()`, not from this table.
 
 ---
 
@@ -704,11 +738,27 @@ Always.
 
 Use one icon set only.
 
-Recommended:
+Icon set:
 
-Heroicons
+Remix Icon
+
+Loaded in the layout files as `remixicon@4.2.0`.
+
+Usage:
+
+`<i class="ri-search-line"></i>`
+
+Style rules:
+
+* Prefer the `-line` variant. Use `-fill` only for active or selected state.
+* Size with text utilities — `text-lg`, `text-xl`. Never fixed pixel sizes.
+* Color with semantic tokens — `text-base-content/40`, `text-primary`.
 
 Never mix icon libraries.
+
+Do not introduce Heroicons, Font Awesome, Bootstrap Icons, or inline SVG icon sets.
+
+Every icon-only button needs `aria-label` — see Accessibility.
 
 ---
 
@@ -1128,7 +1178,7 @@ Reuse conventions from apps the user already knows — cart, receipt, order trac
 Do not invent new metaphors for solved problems.
 
 ---
-
+                                                                                                                                                                       
 # C. Interaction Laws
 
 ## 21. Fitts's Law

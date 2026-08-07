@@ -5,7 +5,8 @@ namespace App\Livewire\Admin\Sales;
 use App\Models\Customer;
 use App\Models\Ingredient;
 use App\Models\Sale;
-use App\Services\Admin\SaleService;
+use App\Domains\Inventory\Enums\DocumentStatus;
+use App\Domains\Inventory\UseCases\PostSaleUseCase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -82,14 +83,14 @@ class Form extends Component
         return $this->redirectRoute('sales.index', navigate: true);
     }
 
-    public function post(SaleService $service)
+    public function post(PostSaleUseCase $postSale)
     {
         if ($this->sale && $this->sale->isPosted()) {
             return;
         }
 
         $sale = $this->persist();
-        $service->post($sale);
+        $postSale->handle($sale);
 
         session()->flash('success', 'Penjualan diposting. Stok bahan telah dikurangi.');
 
@@ -116,7 +117,7 @@ class Form extends Component
                     'code' => $this->generateCode(Carbon::parse($validated['sale_date'])),
                     'customer_id' => $validated['customer_id'] ?: null,
                     'sale_date' => $validated['sale_date'],
-                    'status' => 'draft',
+                    'status' => DocumentStatus::Draft->value,
                     'notes' => $validated['notes'] ?: null,
                     'user_id' => auth()->id(),
                 ]);

@@ -20,9 +20,10 @@
                 <input type="text" wire:model="artist" placeholder="Artis (opsional)" class="input input-bordered input-sm grow">
                 <input type="text" wire:model="requestedBy" placeholder="Nama (opsional)" class="input input-bordered input-sm grow">
             </div>
-            <button type="submit" class="btn btn-secondary btn-sm w-full" @disabled($activeCount >= $queueMax)>
-                <i class="ri-add-line"></i> Tambah ke Antrean
-            </button>
+            <x-button type="submit" variant="secondary" size="sm" :block="true" icon="ri-add-line"
+                loading="submit" @disabled($activeCount >= $queueMax)>
+                Tambah ke Antrean
+            </x-button>
         </form>
 
         @if ($mine->isNotEmpty())

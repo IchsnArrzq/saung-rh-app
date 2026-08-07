@@ -23,7 +23,7 @@
                     </div>
                     @error('endsAt') <span class="text-error text-xs">{{ $message }}</span> @enderror
                     <input type="text" wire:model="position" placeholder="Posisi (opsional)" class="input input-bordered input-sm w-full">
-                    <button type="submit" class="btn btn-primary btn-sm w-full"><i class="ri-add-line"></i> Tambah Shift</button>
+                    <x-button type="submit" variant="primary" size="sm" :block="true" icon="ri-add-line">Tambah Shift</x-button>
                 </form>
             </div>
         </div>
@@ -34,8 +34,8 @@
                 <div class="flex items-center justify-between">
                     <h3 class="card-title text-sm">Jadwal Mingguan</h3>
                     <div class="join">
-                        <button wire:click="previousWeek" class="btn btn-xs join-item btn-ghost"><i class="ri-arrow-left-s-line"></i></button>
-                        <button wire:click="nextWeek" class="btn btn-xs join-item btn-ghost"><i class="ri-arrow-right-s-line"></i></button>
+                        <x-button variant="ghost" size="xs" shape="square" class="join-item" icon="ri-arrow-left-s-line" label="Minggu sebelumnya" wire:click="previousWeek" />
+                        <x-button variant="ghost" size="xs" shape="square" class="join-item" icon="ri-arrow-right-s-line" label="Minggu berikutnya" wire:click="nextWeek" />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">

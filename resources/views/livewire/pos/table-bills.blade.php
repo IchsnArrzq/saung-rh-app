@@ -1,42 +1,30 @@
 <div class="space-y-5">
     @if (session('success'))
-        <div class="rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-medium text-success">
-            {{ session('success') }}
-        </div>
+        <x-alert type="success">{{ session('success') }}</x-alert>
     @endif
 
     {{-- Header --}}
-    <div class="rounded-2xl border border-base-300 bg-base-100 p-4 md:p-5">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <div>
-                <h1 class="text-xl font-semibold">Tagihan Meja</h1>
-                <p class="text-sm text-base-content/70">Tutup tagihan pesanan dine-in (QR / pelanggan / waiter) yang belum lunas.</p>
-            </div>
+    <x-page-header title="Tagihan Meja"
+        description="Tutup tagihan pesanan dine-in (QR / pelanggan / waiter) yang belum lunas.">
+        <x-slot:actions>
             <div class="rounded-xl border border-warning/30 bg-warning/10 px-4 py-2 text-right">
                 <p class="text-xs text-base-content/60">Total Belum Lunas</p>
                 <p class="text-lg font-bold text-warning">Rp {{ number_format((float) $totalOutstanding, 0, ',', '.') }}</p>
             </div>
-        </div>
+        </x-slot:actions>
 
-        <div class="relative mt-4 w-full max-w-md">
-            <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40"></i>
-            <input type="text" class="input input-bordered w-full pl-10"
-                wire:model.live.debounce.300ms="search"
-                placeholder="Cari no. order, nama, atau kode meja...">
-        </div>
-    </div>
+        <x-search-input class="mt-4 max-w-md" wire:model.live.debounce.300ms="search"
+            placeholder="Cari no. order, nama, atau kode meja..." label="Cari tagihan" />
+    </x-page-header>
 
     {{-- Bills --}}
     @if ($bills->isEmpty())
-        <div class="rounded-2xl border border-dashed border-base-300 bg-base-100 p-10 text-center">
-            <i class="ri-checkbox-circle-line text-4xl text-success"></i>
-            <p class="mt-2 font-medium">Tidak ada tagihan terbuka.</p>
-            <p class="text-sm text-base-content/60">Semua pesanan sudah lunas.</p>
-        </div>
+        <x-empty-state icon="ri-checkbox-circle-line" title="Tidak ada tagihan terbuka"
+            description="Semua pesanan sudah lunas." :dashed="true" />
     @else
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             @foreach ($bills as $bill)
-                <article class="flex flex-col rounded-2xl border border-base-300 bg-base-100 p-4">
+                <article class="flex flex-col rounded-xl border border-base-300 bg-base-100 p-4">
                     <div class="flex items-start justify-between gap-2">
                         <div>
                             <p class="font-semibold">
@@ -49,8 +37,9 @@
                             <p class="text-xs text-base-content/60">{{ $bill['order_number'] }}</p>
                         </div>
                         <div class="flex flex-col items-end gap-1">
-                            <span class="badge badge-ghost badge-sm">{{ $bill['source'] }}</span>
-                            <span class="badge badge-outline badge-sm">{{ $bill['status'] }}</span>
+                            <x-badge color="ghost" size="sm">{{ $bill['source'] }}</x-badge>
+                            <x-status-badge :status="$bill['status']" size="sm"
+                                :enum="\App\Domains\Order\Enums\OrderStatus::class" />
                         </div>
                     </div>
 
@@ -83,10 +72,10 @@
                         </div>
                     </div>
 
-                    <button type="button" wire:click="openSettle('{{ $bill['id'] }}')"
-                        class="btn btn-primary btn-sm mt-4 w-full">
-                        <i class="ri-cash-line"></i> Tutup Tagihan
-                    </button>
+                    <x-button variant="primary" size="sm" :block="true" class="mt-4" icon="ri-cash-line"
+                        wire:click="openSettle('{{ $bill['id'] }}')">
+                        Tutup Tagihan
+                    </x-button>
                 </article>
             @endforeach
         </div>
@@ -104,9 +93,8 @@
                             &middot; {{ $payBill['order_number'] }}
                         </p>
                     </div>
-                    <button type="button" wire:click="closeSettle" class="btn btn-sm btn-ghost btn-circle" aria-label="Tutup">
-                        <i class="ri-close-line text-lg"></i>
-                    </button>
+                    <x-button variant="ghost" size="sm" shape="circle" icon="ri-close-line text-lg"
+                        label="Tutup" wire:click="closeSettle" />
                 </div>
 
                 <div class="rounded-xl border border-base-300 bg-base-200/50 p-4 text-center">
@@ -118,21 +106,23 @@
                     <p class="mb-2 text-sm font-medium">Metode Pembayaran</p>
                     <div class="grid grid-cols-3 gap-2">
                         @foreach ($methods as $m)
-                            <button type="button" wire:click="$set('method', '{{ $m->value }}')"
-                                class="btn btn-sm {{ $method === $m->value ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
+                            <x-button size="sm" wire:click="$set('method', '{{ $m->value }}')"
+                                :variant="$method === $m->value ? 'primary' : 'ghost'"
+                                class="{{ $method === $m->value ? '' : 'border border-base-300' }}">
                                 {{ $m->label() }}
-                            </button>
+                            </x-button>
                         @endforeach
                     </div>
                 </div>
 
                 @error('settle')<p class="text-sm text-error">{{ $message }}</p>@enderror
 
-                <button type="button" wire:click="settle" data-confirm="Konfirmasi pembayaran tagihan ini?"
-                    data-confirm-title="Konfirmasi Pembayaran" data-confirm-yes="Ya, Bayar"
-                    class="btn btn-primary w-full">
-                    <i class="ri-checkbox-circle-line"></i> Konfirmasi Pembayaran
-                </button>
+                <x-button variant="primary" :block="true" icon="ri-checkbox-circle-line"
+                    wire:click="settle" loading="settle"
+                    data-confirm="Konfirmasi pembayaran tagihan ini?"
+                    data-confirm-title="Konfirmasi Pembayaran" data-confirm-yes="Ya, Bayar">
+                    Konfirmasi Pembayaran
+                </x-button>
             </div>
         @endif
     </x-modal>

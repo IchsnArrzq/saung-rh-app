@@ -29,9 +29,10 @@
         </div>
         
         <div>
-            <button type="button" wire:click="exportExcel" class="btn btn-sm bg-emerald-800 text-amber-50 hover:bg-emerald-700 rounded-lg">
-                <i class="ri-file-excel-2-line"></i> Ekspor Excel
-            </button>
+            <x-button variant="primary" size="sm" class="rounded-lg" icon="ri-file-excel-2-line"
+                wire:click="exportExcel" loading="exportExcel">
+                Ekspor Excel
+            </x-button>
         </div>
     </div>
 

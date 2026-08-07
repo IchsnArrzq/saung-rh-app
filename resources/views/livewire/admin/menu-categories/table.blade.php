@@ -2,61 +2,53 @@
     @include('admin.partials.flash')
 
     <div class="flex items-center justify-between gap-3">
-        <div class="relative w-full max-w-md">
-            <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
-            <input type="text" class="input input-bordered w-full pl-10" wire:model.live.debounce.300ms="search"
-                placeholder="Cari nama, slug, deskripsi...">
-        </div>
+        <x-search-input class="max-w-md" wire:model.live.debounce.300ms="search"
+            placeholder="Cari nama, slug, deskripsi..." label="Cari kategori menu" />
 
-        <a href="{{ route('menu-categories.create') }}" class="btn btn-sm bg-emerald-800 text-amber-50 hover:bg-emerald-700">
-            <i class="ri-add-line"></i>
+        <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('menu-categories.create')">
             Tambah Kategori
-        </a>
+        </x-button>
     </div>
 
-    <div class="overflow-x-auto rounded-2xl border border-stone-200 bg-white">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Nama</th>
-                    <th>Slug</th>
-                    <th>Status</th>
-                    <th class="text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($categories as $category)
-                    <tr wire:key="menu-category-{{ $category->id }}">
-                        <td>{{ $category->name }}</td>
-                        <td>{{ $category->slug }}</td>
-                        <td>
-                            <span class="badge {{ $category->is_active ? 'badge-success' : 'badge-error' }}">
-                                {{ $category->is_active ? 'Aktif' : 'Nonaktif' }}
-                            </span>
-                        </td>
-                        <td class="text-right">
-                            <div class="inline-flex gap-2">
-                                <a href="{{ route('menu-categories.edit', $category) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <button type="button" class="btn btn-sm btn-error text-white"
-                                    data-confirm="Hapus kategori ini?"
-                                    wire:click="delete('{{ $category->id }}')"
-                                    wire:loading.attr="disabled"
-                                    wire:target="delete('{{ $category->id }}')">
-                                    <span wire:loading.remove wire:target="delete('{{ $category->id }}')">Hapus</span>
-                                    <span wire:loading wire:target="delete('{{ $category->id }}')" class="loading loading-spinner loading-xs"></span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="text-center text-stone-500">Belum ada data kategori.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table>
+        <x-slot:head>
+            <tr>
+                <th>Nama</th>
+                <th>Slug</th>
+                <th>Status</th>
+                <th class="text-right">Aksi</th>
+            </tr>
+        </x-slot:head>
+
+        @forelse ($categories as $category)
+            <tr wire:key="menu-category-{{ $category->id }}">
+                <td>{{ $category->name }}</td>
+                <td>{{ $category->slug }}</td>
+                <td>
+                    <x-badge :color="$category->is_active ? 'success' : 'error'">
+                        {{ $category->is_active ? 'Aktif' : 'Nonaktif' }}
+                    </x-badge>
+                </td>
+                <td class="text-right">
+                    <div class="inline-flex gap-2">
+                        <x-button variant="warning" size="sm" :href="route('menu-categories.edit', $category)">
+                            Edit
+                        </x-button>
+                        <x-button variant="error" size="sm" class="text-white"
+                            data-confirm="Hapus kategori ini?"
+                            wire:click="delete('{{ $category->id }}')"
+                            loading="delete('{{ $category->id }}')">
+                            Hapus
+                        </x-button>
+                    </div>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="4" class="text-center text-base-content/50">Belum ada data kategori.</td>
+            </tr>
+        @endforelse
+    </x-data-table>
 
     <div>{{ $categories->links() }}</div>
 </div>
-

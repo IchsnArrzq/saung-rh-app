@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Staff\Receptionist;
 
+use App\Domains\Order\Enums\OrderStatus;
+use App\Domains\Table\Enums\TableStatus;
 use App\Models\Table;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -27,7 +29,7 @@ class TableMap extends Component
 
         $session = $table->activeSession();
         $activeOrder = $table->orders()
-            ->whereIn('status', ['confirmed', 'preparing', 'ready', 'served'])
+            ->whereIn('status', OrderStatus::inServiceValues())
             ->latest('ordered_at')
             ->first();
 

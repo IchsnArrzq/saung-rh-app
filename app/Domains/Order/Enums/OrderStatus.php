@@ -78,6 +78,30 @@ enum OrderStatus: string
     }
 
     /**
+     * The order is live on the floor: submitted to the kitchen, not yet settled
+     * or cancelled. Excludes drafts, which nobody is working on yet.
+     */
+    public function isInService(): bool
+    {
+        return in_array($this, [self::Confirmed, self::Preparing, self::Ready, self::Served], true);
+    }
+
+    /**
+     * Backing values of the in-service states. Extracted because the same four
+     * literals were repeated in three places (dashboard counters, the
+     * receptionist table map and the waiter's tip log).
+     *
+     * @return array<int, string>
+     */
+    public static function inServiceValues(): array
+    {
+        return array_values(array_map(
+            fn (self $status) => $status->value,
+            array_filter(self::cases(), fn (self $status) => $status->isInService()),
+        ));
+    }
+
+    /**
      * Allowed transitions. The forward chain is strict, but an open order can
      * always be settled or cancelled — the cashier may take payment at any
      * point (POS pays upfront, dine-in pays at the end).

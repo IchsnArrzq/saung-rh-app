@@ -326,8 +326,62 @@ Urutan by dependency (daun→akar) agar Events antar-domain rapi:
       *Catatan proses:* percobaan pertama tampak gagal (meja tak jadi `available`) — ternyata meja uji
       sudah dipegang reservasi seed berstatus `seated`, jadi penolakannya benar. Diulang dengan meja
       tanpa reservasi dan hasilnya sesuai.
-- [ ] C5. **Kitchen** (KDS — sebagian besar QueryUseCase + Events)
-- [ ] C6. **Inventory** (Ingredient/Stock/Purchase/Supplier/Sale — domain terbesar)
+- [x] C5. **Kitchen** (KDS) — ✅ SELESAI (2026-08-04)
+      ⚠️ **Keputusan arsitektur: Kitchen TIDAK dijadikan domain terpisah.** Alasannya konkret —
+      tidak ada model/tabel `KitchenTicket`; KDS sepenuhnya membaca & menulis agregat **Order**
+      (order + item-nya). UseCase-nya (`AdvanceKitchenTicket`, `MarkOrderItemReady`, `VoidOrderItem`,
+      `GetKitchenQueue`) sudah dibuat di Fase B dan **benar** berada di domain Order — memindahkannya
+      keluar hanya akan menciptakan kopling lintas-domain tanpa manfaat. Membuat `app/Domains/Kitchen/`
+      kosong justru melanggar Core Principle #1 (abstraksi harus menyelesaikan masalah yang ADA sekarang).
+      Kitchen = *view* atas domain Order, bukan domain sendiri.
+      **Yang benar-benar dikerjakan (level view + konsumen):**
+      - `kds/board.blade.php`: literal status mentah (`=== 'confirmed'`, `in_array([...])`) → Enum
+        (`isKitchenBound()`, `label()`); status yang tadinya tampil mentah ("confirmed") kini
+        label Indonesia; class warna dipetakan penuh per cabang (aturan scanner Tailwind).
+      - `OrderStatus::isInService()` + `inServiceValues()` — set `['confirmed','preparing','ready','served']`
+        ternyata **diduplikasi 3×** identik (DashboardRepository, TableMap, TipsServiceLog) + 1 varian
+        di SidebarNavigation. Semua kini memakai satu sumber.
+      - `KdsController`: buang import `Request` yang tak terpakai, tambah return type.
+      ⚠️ **BUG YANG SAYA PERKENALKAN DI C1, ditemukan & diperbaiki di sini:**
+      `Livewire/Staff/Receptionist/TableMap.php` memakai `TableStatus::tryFrom(...)` **tanpa import** →
+      PHP mencari `App\Livewire\Staff\Receptionist\TableStatus` → fatal "Class not found". Lolos dari
+      `php -l` (nama class tak di-resolve saat parse) DAN dari uji render C1 (baris itu ada di
+      `selectTable()`, sebuah action yang tidak dipanggil saat mount). Diperbaiki, lalu diverifikasi
+      dengan **memanggil `selectTable()` sungguhan** → mengembalikan label "Terisi" dari key `occupied`.
+      **Alat baru:** skrip pemeriksa `scratchpad/check_enum_imports.php` — memindai seluruh `app/`
+      untuk enum yang dipakai tanpa import/FQCN. Kini **bersih**. Jalankan ini di tiap fase berikutnya;
+      grep bash tidak andal untuk pola berisi backslash.
+      **Verifikasi RUNTIME:** enum baru; KDS render + label Indonesia muncul & status mentah hilang;
+      `selectTable()` (jalur yang tadinya fatal); DashboardRepository activeOrders=11; TipsServiceLog
+      render. `route:list` 141, `view:cache` + `npm run build` sukses.
+- [x] C6. **Inventory** (Ingredient/Stock/Purchase/Sale/StockOpname/Supplier) — ✅ SELESAI (2026-08-07)
+      **Pre-flight — rangkaian dead code BERAKHIR:** untuk pertama kalinya keempat service (`InventoryService`,
+      `PurchaseService`, `SaleService`, `StockOpnameService`) semuanya **hidup dan dipakai**. Jadi ini
+      migrasi sungguhan, bukan penghapusan.
+      **Tidak ada migrasi data:** seluruh tabel inventory **kosong** (0 baris) — subsistem ini belum
+      pernah dipakai dengan data nyata. Status `draft/posted` sudah kolom string + CHECK constraint.
+      **Dibangun (`app/Domains/Inventory/`):**
+      - Enum `DocumentStatus` (draft/posted) — **satu enum dipakai bertiga** (Purchase/Sale/StockOpname);
+        ketiganya dibuat dengan `$table->enum('status',['draft','posted'])` yang identik dan berperilaku
+        sama, jadi tiga salinan dua nilai tak ada gunanya. Enum `StockMovementType` (in/out/adjustment).
+      - **Action reusable — inti fase ini:** `RecordStockMovementAction` (dipakai ketiganya; satu-satunya
+        tempat yang menulis ledger + menggeser saldo, sehingga keduanya tak mungkin melenceng),
+        `AddStockAction`, `ReduceStockAction`, `AdjustStockAction`.
+      - `IngredientRepository`(+Interface), UseCases `PostPurchase`, `PostSale`, `PostStockOpname`,
+        `CreateStockOpnameDraft`, `DeductStockForPayment`.
+      **Dialihkan:** `PaymentObserver` → `DeductStockForPaymentUseCase`; 3 Livewire Form → UseCase;
+      `isPosted()` di model Purchase/Sale/StockOpname → `DocumentStatus`. **4 service lama dihapus**
+      (total 11 service dihapus sejak Fase A).
+      **Verifikasi RUNTIME — keempat jalur stok dijalankan sungguhan (ter-rollback):**
+      bahan stok 100 → (a) PostPurchase +25 → **125**, status `posted`, `cost_per_unit` ikut ter-update,
+      dan **post ulang tidak menggandakan** (idempoten); (b) PostSale −10 → **115**; (c) PostStockOpname
+      hitung fisik 90 → **90**, selisih −25 tercatat di baris; (d) Payment `paid` dengan resep 3/porsi ×
+      2 porsi → **84**. Ledger: `in/out/adjustment/out` dengan `reference_type`
+      Purchase/Sale/StockOpname/Payment — sekaligus **membuktikan perbaikan `reference_id` UUID dari C3
+      bekerja untuk SEMUA tipe dokumen**, bukan cuma Payment. 11 komponen Livewire render bersih.
+      *Catatan proses:* render pertama menghasilkan byte-count kecil (form 1.5KB) karena view cache stale
+      setelah komponen Blade baru ditambahkan; setelah `view:clear` angkanya normal (9.8KB). Sinyal kotor
+      jangan diterima apa adanya — ulangi dengan cache bersih.
 - [ ] C7. **Customer**
 - [ ] C8. **Employee** (Shift/Tip/ServiceLog)
 - [ ] C9. **Reporting** (murni QueryUseCase lintas domain)

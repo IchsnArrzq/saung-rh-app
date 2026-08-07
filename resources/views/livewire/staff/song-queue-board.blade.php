@@ -21,11 +21,11 @@
                         </div>
                         <div class="flex gap-1 shrink-0">
                             @if ($song->status === 'queued')
-                                <button wire:click="advance('{{ $song->id }}')" class="btn btn-xs btn-success">Putar</button>
+                                <x-button variant="success" size="xs" wire:click="advance('{{ $song->id }}')">Putar</x-button>
                             @else
-                                <button wire:click="advance('{{ $song->id }}')" class="btn btn-xs btn-outline btn-success">Selesai</button>
+                                <x-button variant="success" :outline="true" size="xs" wire:click="advance('{{ $song->id }}')">Selesai</x-button>
                             @endif
-                            <button wire:click="reject('{{ $song->id }}')" class="btn btn-xs btn-outline btn-error">Tolak</button>
+                            <x-button variant="error" :outline="true" size="xs" wire:click="reject('{{ $song->id }}')">Tolak</x-button>
                         </div>
                     </div>
                 @empty

@@ -1,24 +1,27 @@
 <?php
 
-namespace App\Services\Admin;
+namespace App\Domains\Inventory\UseCases;
 
+use App\Domains\Inventory\Actions\ReduceStockAction;
+use App\Domains\Inventory\Enums\DocumentStatus;
 use App\Models\Sale;
 use Illuminate\Support\Facades\DB;
 
-class SaleService
+/**
+ * Takes a sale out of stock and freezes the document. Idempotent, like posting
+ * a purchase.
+ */
+class PostSaleUseCase
 {
-    public function __construct(
-        private readonly InventoryService $inventory,
-    ) {
-    }
+    public function __construct(private readonly ReduceStockAction $reduceStock) {}
 
-    public function post(Sale $sale): void
+    public function handle(Sale $sale): void
     {
-        if ($sale->isPosted()) {
+        if (DocumentStatus::from($sale->status)->isPosted()) {
             return;
         }
 
-        DB::transaction(function () use ($sale) {
+        DB::transaction(function () use ($sale): void {
             $sale->loadMissing('items.ingredient');
 
             foreach ($sale->items as $item) {
@@ -28,7 +31,7 @@ class SaleService
                     continue;
                 }
 
-                $this->inventory->reduceStock(
+                $this->reduceStock->handle(
                     $ingredient,
                     (float) $item->qty,
                     "Penjualan {$sale->code}",
@@ -37,7 +40,7 @@ class SaleService
             }
 
             $sale->update([
-                'status' => 'posted',
+                'status' => DocumentStatus::Posted->value,
                 'posted_at' => now(),
                 'posted_by' => auth()->id(),
             ]);

@@ -3,8 +3,8 @@
         <span class="text-sm font-semibold"><i class="ri-trophy-line text-warning"></i> KPI Pegawai Terbaik</span>
         <div class="join ml-auto">
             @foreach (['today' => 'Hari ini', 'week' => 'Minggu', 'month' => 'Bulan'] as $key => $label)
-                <button wire:click="setRange('{{ $key }}')"
-                    class="btn btn-xs join-item {{ $range === $key ? 'btn-primary' : 'btn-ghost' }}">{{ $label }}</button>
+                <x-button size="xs" class="join-item" wire:click="setRange('{{ $key }}')"
+                    :variant="$range === $key ? 'primary' : 'ghost'">{{ $label }}</x-button>
             @endforeach
         </div>
     </div>

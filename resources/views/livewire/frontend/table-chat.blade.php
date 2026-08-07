@@ -23,9 +23,7 @@
                 <input type="text" wire:model="senderName" maxlength="24" placeholder="Nama tampilan (opsional)"
                     class="grow bg-transparent">
             </label>
-            <button type="submit" class="btn btn-ghost btn-xs" title="Simpan nama">
-                <i class="ri-check-line"></i>
-            </button>
+            <x-button type="submit" variant="ghost" size="xs" shape="square" icon="ri-check-line" label="Simpan nama" />
         </form>
 
         <div class="flex-1 min-h-40 max-h-80 space-y-1 overflow-y-auto">
@@ -84,9 +82,8 @@
     @else
         {{-- ================= Tampilan percakapan ================= --}}
         <div class="mb-2 flex items-center gap-2">
-            <button type="button" wire:click="backToList" class="btn btn-ghost btn-xs btn-circle" aria-label="Kembali">
-                <i class="ri-arrow-left-line text-lg"></i>
-            </button>
+            <x-button variant="ghost" size="xs" shape="circle" icon="ri-arrow-left-line text-lg" label="Kembali"
+                wire:click="backToList" />
             <span class="flex h-9 w-9 items-center justify-center rounded-full {{ $activeType === 'room' ? 'bg-primary/15 text-primary' : 'bg-base-200 text-base-content/70' }}">
                 <i class="{{ $activeType === 'room' ? 'ri-group-line' : 'ri-chat-1-line' }}"></i>
             </span>
@@ -125,9 +122,7 @@
         <form wire:submit="send" class="mt-3 flex items-center gap-2">
             <input type="text" wire:model="body" maxlength="280"
                 placeholder="Tulis pesan..." class="input input-bordered input-sm grow">
-            <button type="submit" class="btn btn-primary btn-sm">
-                <i class="ri-send-plane-2-line"></i>
-            </button>
+            <x-button type="submit" variant="primary" size="sm" shape="square" icon="ri-send-plane-2-line" label="Kirim pesan" />
         </form>
         @error('body') <span class="text-error text-xs mt-1">{{ $message }}</span> @enderror
 

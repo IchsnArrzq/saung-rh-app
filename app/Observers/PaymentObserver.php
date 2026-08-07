@@ -2,9 +2,9 @@
 
 namespace App\Observers;
 
+use App\Domains\Inventory\UseCases\DeductStockForPaymentUseCase;
 use App\Domains\Payment\Enums\PaymentStatus;
 use App\Models\Payment;
-use App\Services\Admin\InventoryService;
 
 /**
  * Deducts ingredient stock the moment money is actually received. Lives at the
@@ -13,20 +13,20 @@ use App\Services\Admin\InventoryService;
  */
 class PaymentObserver
 {
-    public function __construct(private readonly InventoryService $inventoryService) {}
+    public function __construct(private readonly DeductStockForPaymentUseCase $deductStock) {}
 
     public function updated(Payment $payment): void
     {
         // Kurangi stok hanya ketika status berubah menjadi 'paid'
         if ($payment->wasChanged('status') && $this->isSettled($payment)) {
-            $this->inventoryService->deductFromPayment($payment);
+            $this->deductStock->handle($payment);
         }
     }
 
     public function created(Payment $payment): void
     {
         if ($this->isSettled($payment)) {
-            $this->inventoryService->deductFromPayment($payment);
+            $this->deductStock->handle($payment);
         }
     }
 

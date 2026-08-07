@@ -20,8 +20,8 @@
                                 <p class="text-sm mt-1">{{ $req->description }}</p>
                             </div>
                             <div class="flex gap-1 shrink-0">
-                                <button wire:click="approve('{{ $req->id }}')" class="btn btn-xs btn-success">Setujui</button>
-                                <button wire:click="reject('{{ $req->id }}')" class="btn btn-xs btn-outline btn-error">Tolak</button>
+                                <x-button variant="success" size="xs" wire:click="approve('{{ $req->id }}')">Setujui</x-button>
+                                <x-button variant="error" :outline="true" size="xs" wire:click="reject('{{ $req->id }}')">Tolak</x-button>
                             </div>
                         </div>
                     </div>

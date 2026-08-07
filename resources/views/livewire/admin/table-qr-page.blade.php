@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3">
             <h2 class="text-xl font-semibold">QR Meja {{ $table->code }}</h2>
-            <a href="{{ route('tables.index') }}" class="btn btn-sm btn-ghost">Kembali</a>
+            <x-button variant="ghost" size="sm" :href="route('tables.index')">Kembali</x-button>
         </div>
     </x-slot>
 

@@ -1,85 +1,77 @@
 <div class="space-y-5">
     @include('admin.partials.flash')
 
-    <section class="rounded-2xl border border-stone-200 bg-white p-4 md:p-5">
+    <x-card>
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-2">
-                <div class="relative w-full max-w-md">
-                    <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
-                    <input type="text" class="input input-bordered w-full pl-10" wire:model.live.debounce.300ms="search"
-                        placeholder="Cari nama, SKU, kategori...">
-                </div>
+                <x-search-input class="max-w-md" wire:model.live.debounce.300ms="search"
+                    placeholder="Cari nama, SKU, kategori..." label="Cari menu" />
+
                 @if ($search !== '')
-                    <button type="button" class="btn btn-sm btn-ghost" wire:click="$set('search', '')">Reset</button>
+                    <x-button variant="ghost" size="sm" wire:click="$set('search', '')">Reset</x-button>
                 @endif
             </div>
 
-            <a href="{{ route('menus.create') }}" class="btn btn-sm bg-emerald-800 text-amber-50 hover:bg-emerald-700">
-                <i class="ri-add-line"></i>
+            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('menus.create')">
                 Tambah Menu
-            </a>
+            </x-button>
         </div>
-    </section>
+    </x-card>
 
-    <div class="overflow-x-auto rounded-2xl border border-stone-200 bg-white">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Nama</th>
-                    <th>Kategori</th>
-                    <th>Harga</th>
-                    <th>Status</th>
-                    <th class="text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($menus as $menu)
-                    <tr wire:key="menu-row-{{ $menu->id }}">
-                        <td>
-                            <p class="font-semibold text-stone-800">{{ $menu->name }}</p>
-                            <p class="text-xs text-stone-500">{{ $menu->sku ?: '-' }}</p>
-                        </td>
-                        <td>{{ $menu->category->name ?? '-' }}</td>
-                        <td>Rp {{ number_format((float) $menu->price, 0, ',', '.') }}</td>
-                        <td>
-                            <span class="badge {{ $menu->is_available ? 'badge-success' : 'badge-error' }}">
-                                {{ $menu->is_available ? 'Tersedia' : 'Habis' }}
-                            </span>
-                        </td>
-                        <td class="text-right">
-                            <div class="inline-flex gap-2">
-                                <a href="{{ route('public.menu.show', $menu) }}" target="_blank" rel="noopener"
-                                    class="btn btn-sm btn-outline">
-                                    Detail
-                                </a>
-                                <a href="{{ route('menus.ingredients.edit', $menu) }}" class="btn btn-sm btn-info text-white"
-                                    title="Resep / Bahan">
-                                    <i class="ri-flask-line"></i> Resep
-                                </a>
-                                <a href="{{ route('menus.media.edit', $menu) }}" class="btn btn-sm btn-neutral text-white"
-                                    title="Gambar & Video">
-                                    <i class="ri-image-line"></i> Media
-                                </a>
-                                <a href="{{ route('menus.edit', $menu) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <button type="button" class="btn btn-sm btn-error text-white"
-                                    data-confirm="Hapus menu ini?"
-                                    wire:click="delete('{{ $menu->id }}')"
-                                    wire:loading.attr="disabled"
-                                    wire:target="delete('{{ $menu->id }}')">
-                                    <span wire:loading.remove wire:target="delete('{{ $menu->id }}')">Hapus</span>
-                                    <span wire:loading wire:target="delete('{{ $menu->id }}')" class="loading loading-spinner loading-xs"></span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="text-center text-stone-500">Belum ada data menu.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table>
+        <x-slot:head>
+            <tr>
+                <th>Nama</th>
+                <th>Kategori</th>
+                <th>Harga</th>
+                <th>Status</th>
+                <th class="text-right">Aksi</th>
+            </tr>
+        </x-slot:head>
+
+        @forelse ($menus as $menu)
+            <tr wire:key="menu-row-{{ $menu->id }}">
+                <td>
+                    <p class="font-semibold">{{ $menu->name }}</p>
+                    <p class="text-xs text-base-content/60">{{ $menu->sku ?: '-' }}</p>
+                </td>
+                <td>{{ $menu->category->name ?? '-' }}</td>
+                <td>Rp {{ number_format((float) $menu->price, 0, ',', '.') }}</td>
+                <td>
+                    <x-badge :color="$menu->is_available ? 'success' : 'error'">
+                        {{ $menu->is_available ? 'Tersedia' : 'Habis' }}
+                    </x-badge>
+                </td>
+                <td class="text-right">
+                    <div class="inline-flex gap-2">
+                        <x-button variant="outline" size="sm" :href="route('public.menu.show', $menu)"
+                            target="_blank" rel="noopener">
+                            Detail
+                        </x-button>
+                        <x-button variant="info" size="sm" icon="ri-flask-line" class="text-white"
+                            :href="route('menus.ingredients.edit', $menu)" title="Resep / Bahan">
+                            Resep
+                        </x-button>
+                        <x-button variant="neutral" size="sm" icon="ri-image-line" class="text-white"
+                            :href="route('menus.media.edit', $menu)" title="Gambar & Video">
+                            Media
+                        </x-button>
+                        <x-button variant="warning" size="sm" :href="route('menus.edit', $menu)">Edit</x-button>
+                        <x-button variant="error" size="sm" class="text-white"
+                            data-confirm="Hapus menu ini?"
+                            wire:click="delete('{{ $menu->id }}')"
+                            loading="delete('{{ $menu->id }}')">
+                            Hapus
+                        </x-button>
+                    </div>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="5" class="text-center text-base-content/50">Belum ada data menu.</td>
+            </tr>
+        @endforelse
+    </x-data-table>
 
     <div>{{ $menus->links() }}</div>
 </div>
