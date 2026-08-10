@@ -14,7 +14,9 @@ class AppLayout extends Component
      */
     public function render(): View
     {
-        $this->portal = auth()->user()->roles->first()->name;
+        // Pengguna tanpa peran (mis. akun baru yang perannya belum di-set) tidak boleh
+        // meruntuhkan seluruh kerangka halaman — layouts.app sudah punya fallback portal.
+        $this->portal = auth()->user()?->roles->first()?->name;
 
         return view('layouts.app');
     }

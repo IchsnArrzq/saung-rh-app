@@ -225,6 +225,8 @@ Transition rule (mis. `order_in → cleaning` saat lunas) → **Policy**, dipang
       Enum itu sendiri, jadi kelas terpisah cuma menambah indireksi.
 - [x] B7. Livewire Order/POS panggil UseCase. **Test runtime end-to-end**.
 - [ ] B8. **Review pola bersama pemilik** → jadikan template Fase C.
+      *(Praktis sudah terlampaui: C1–C10 semuanya dikerjakan di atas pola ini dan lolos verifikasi E3.
+      Centangnya sengaja dibiarkan kosong karena review-nya keputusan pemilik, bukan hasil kerja kode.)*
 
 #### ✅ Utang carry-over Fase B — LUNAS (2026-08-08)
 
@@ -726,7 +728,44 @@ basi, sehingga `update()` tidak melihat atribut kotor dan tak mengirim query sam
 ### Fase E — Konsolidasi
 - [ ] E1. Pindahkan Eloquent Models ke `app/Domains/{X}/Models` (opsional, terakhir — hati-hati namespace/migration).
 - [ ] E2. Update `AGENTS.md`/`ARCHITECTURE.md` bila ada deviasi final yang disepakati.
-- [ ] E3. Test suite penuh + `migrate:fresh --seed` + verifikasi browser end-to-end (customer + kasir loop).
+- [x] E3. **Test suite penuh + `migrate:fresh --seed` + verifikasi end-to-end — ✅ SELESAI (2026-08-10)**
+
+      **`php artisan test`: 48 lolos, 151 assert, 0 gagal.** Sebelum diperbaiki ada 4 gagal, semuanya
+      di scaffolding Breeze bawaan — bukan domain. Tiga di antaranya assertion basi yang menuntut rute
+      `/dashboard` yang memang sudah tidak ada (aplikasi mengarahkan per peran: `dashboard` →
+      `/admin/dashboard`, pendaftar publik → `/customer/dashboard`); testnya disesuaikan dan kini
+      memakai `route()`, bukan path harfiah, supaya tak basi lagi.
+      Satu sisanya **bug asli**: `AppLayout::render()` merangkai `auth()->user()->roles->first()->name`
+      tanpa pengaman, jadi pengguna tanpa peran meruntuhkan **seluruh** kerangka halaman dengan 500.
+      Diperbaiki jadi null-safe — `layouts.app` memang sudah punya fallback portal.
+
+      **`migrate:fresh --seed`: bersih** (65 langkah), menghasilkan 20 order / 20 payment / 21 meja /
+      12 menu / 19 user.
+
+      **Smoke-crawl 675 request — 9 peran × 75 route GET, hasil akhir 0 gagal.** Putaran pertama
+      menemukan **35 kegagalan pada 13 halaman staf** (semua portal manager/receptionist/waiter/ob +
+      `song-queue`). Penyebabnya `@livewire($component, ...)` di `resources/views/staff/page.blade.php`:
+      di dalam anonymous component, `$component` adalah nama yang **sudah dipakai Blade** untuk objek
+      komponennya sendiri, jadi Livewire menerima `Illuminate\View\AnonymousComponent` alih-alih nama
+      komponen. Kunci datanya diganti `livewireComponent` (view + 13 pemanggil di `PortalController`).
+      ⚠️ **Bug ini pre-existing** — identik di `master` sejak commit "fase 3", bukan akibat refactor;
+      artinya 13 halaman staf itu sudah mati sejak lama tanpa ketahuan. Ini justru alasan E3 ada.
+
+      **Loop bisnis end-to-end: 17 assert, 0 gagal** (`PlaceGuestOrderUseCase` → dapur → `SettleBillUseCase`,
+      dijalankan lewat container, bukan menulis model langsung): order tersimpan `confirmed` dengan total
+      sesuai `CalculateOrderTotalAction`, nama tamu ter-default dari kode meja, `OrderSource` terbaca
+      balik sebagai QR, **meja diklaim listener** (bukan ditulis domain Order), tiket maju
+      preparing→ready→served, pembayaran tercatat penuh, order jadi `paid`, meja dibebaskan ke `cleaning`.
+      Gerbang `TableBillsCleared` diuji ulang: dua tagihan di satu meja → melunasi yang pertama **tidak**
+      membebaskan meja, melunasi yang kedua baru membebaskan.
+
+      *Catatan data seed:* seeder menghasilkan meja berstatus `available` yang masih menggantung tagihan
+      belum lunas. Sempat terbaca sebagai kegagalan, ternyata perilaku yang benar — gerbang event memakai
+      **sisa tagihan**, bukan status order, jadi meja memang ditahan. Yang perlu dirapikan seedernya,
+      bukan aturannya.
+
+      `route:list` 141 tetap, `view:cache` bersih, `npm run build` sukses (peringatan chunk 891 kB
+      pre-existing).
 - [ ] E4. Update memory `refactor-audit-findings` & `proposal-alignment-roadmap`.
 
 ---
