@@ -179,7 +179,7 @@
                                             <p class="text-xs text-secondary">{{ $order->ordered_at?->format('d M Y H:i') ?? '-' }}</p>
                                         </td>
                                         <td>{{ $order->table?->code ?? '-' }}</td>
-                                        <td><span class="badge badge-ghost capitalize">{{ $order->status }}</span></td>
+                                        <td><x-status-badge :status="$order->status" size="sm" /></td>
                                         <td class="text-right font-semibold">Rp {{ number_format((float) $order->total, 0, ',', '.') }}</td>
                                     </tr>
                                 @empty

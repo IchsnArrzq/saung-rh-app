@@ -56,7 +56,7 @@
                                 wire:model.defer="items.{{ $index }}.qty" required />
 
                             <x-button variant="error" size="sm" class="text-white"
-                                wire:click="removeItem({{ $index }})" @disabled(count($items) <= 1)>
+                                wire:click="removeItem({{ $index }})" :disabled="count($items) <= 1">
                                 Hapus
                             </x-button>
                         </div>

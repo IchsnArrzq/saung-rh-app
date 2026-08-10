@@ -2,14 +2,11 @@
 
 namespace App\Livewire\Frontend;
 
-use App\Events\OrderCreated;
-use App\Models\Order;
-use App\Models\Table;
-use App\Domains\Table\Enums\TableStatus;
+use App\Domains\Order\DTO\PlaceGuestOrderData;
+use App\Domains\Order\UseCases\PlaceGuestOrderUseCase;
+use App\Domains\Table\Repositories\TableRepositoryInterface;
 use App\Support\RestaurantCart;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -73,100 +70,42 @@ class CartCheckout extends Component
         session()->flash('success', 'Item dihapus dari cart.');
     }
 
-    public function checkout()
+    public function checkout(PlaceGuestOrderUseCase $placeOrder)
     {
-        $cart = RestaurantCart::cart();
-
-        if (empty($cart)) {
+        if (RestaurantCart::cart() === []) {
             $this->addError('cart', 'Cart masih kosong.');
 
             return null;
         }
 
-        $this->validate([
+        $validated = $this->validate([
             'tableId' => ['required', 'exists:tables,id'],
             'customerName' => ['nullable', 'string', 'max:120'],
             'notes' => ['nullable', 'string'],
         ]);
 
-        $table = Table::query()->findOrFail($this->tableId);
-
-        $order = DB::transaction(function () use ($cart, $table): Order {
-            $subtotal = collect($cart)->sum(fn (array $item) => ((float) $item['price']) * ((int) $item['qty']));
-
-            $order = Order::query()->create([
-                'table_id' => $table->id,
-                'order_number' => $this->generateOrderNumber(),
-                'customer_name' => $this->customerName !== '' ? $this->customerName : 'Tamu Meja '.$table->code,
-                'status' => 'confirmed',
-                'notes' => trim('Sumber: DINE-IN QR | '.($this->notes ?: '')),
-                'subtotal' => $subtotal,
-                'discount' => 0,
-                'tax' => 0,
-                'total' => $subtotal,
-                'ordered_at' => now(),
-            ]);
-
-            $items = collect($cart)->map(function (array $item): array {
-                $price = (float) $item['price'];
-                $qty = (int) $item['qty'];
-
-                return [
-                    'menu_id' => $item['menu_id'],
-                    'menu_name_snapshot' => $item['name'],
-                    'qty' => $qty,
-                    'price' => $price,
-                    'line_total' => $qty * $price,
-                    'notes' => $item['notes'] ?? null,
-                ];
-            })->values()->all();
-
-            $order->items()->createMany($items);
-
-            // A QR check-in already flips the table to "occupied"; an incoming
-            // order should advance either state to "order_in".
-            if (in_array($table->status, [TableStatus::Available->value, TableStatus::Occupied->value], true)) {
-                $table->update(['status' => TableStatus::OrderIn->value]);
-            }
-
-            return $order;
-        });
+        $placeOrder->handle(new PlaceGuestOrderData(
+            items: RestaurantCart::toOrderItems(),
+            tableId: $validated['tableId'],
+            customerName: $validated['customerName'] ?? null,
+            notes: $validated['notes'] ?? null,
+        ));
 
         RestaurantCart::clearCart();
-        RestaurantCart::setTableId($table->id);
-
-        OrderCreated::dispatch($order);
+        RestaurantCart::setTableId($validated['tableId']);
 
         session()->flash('success', 'Pesanan berhasil dikirim ke dapur.');
 
-        return $this->redirectRoute('public.menu', ['table_id' => $table->id], navigate: true);
+        return $this->redirectRoute('public.menu', ['table_id' => $validated['tableId']], navigate: true);
     }
 
-    public function render()
+    public function render(TableRepositoryInterface $tables)
     {
-        $tables = Table::query()
-            ->whereIn('status', [
-                TableStatus::Available->value,
-                TableStatus::Occupied->value,
-                TableStatus::OrderIn->value,
-            ])
-            ->orderBy('code')
-            ->get();
-
         return view('livewire.frontend.cart-checkout', [
             'cartItems' => collect(RestaurantCart::cart())->values(),
             'subtotal' => RestaurantCart::subtotal(),
-            'tables' => $tables,
+            'tables' => $tables->orderable(),
             'tableId' => $this->tableId,
         ]);
-    }
-
-    private function generateOrderNumber(): string
-    {
-        do {
-            $number = 'ORD-'.now()->format('Ymd').'-'.Str::upper(Str::random(4));
-        } while (Order::query()->where('order_number', $number)->exists());
-
-        return $number;
     }
 }

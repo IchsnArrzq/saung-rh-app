@@ -44,7 +44,7 @@ class TableMap extends Component
             'session_pax' => $session?->pax,
             'session_started' => $session?->started_at?->format('H:i'),
             'order_number' => $activeOrder?->order_number,
-            'order_status' => $activeOrder?->status,
+            'order_status' => $activeOrder?->status->label(),
         ];
     }
 

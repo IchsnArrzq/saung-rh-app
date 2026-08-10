@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin\MenuMedia;
 
 use App\Models\Menu;
-use App\Services\Admin\MediaService;
+use App\Domains\Menu\Services\MediaService;
 use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithFileUploads;

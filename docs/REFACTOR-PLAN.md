@@ -202,7 +202,7 @@ Transition rule (mis. `order_in → cleaning` saat lunas) → **Policy**, dipang
 > (create 52.500 → update 102.500 → status guard menolak `preparing→draft` → kitchen cascade
 > order+item ke `ready`), DB kembali bersih di 21 order. `view:cache` + `route:list` (150) OK.
 >
-> **Sengaja BELUM dilakukan (catat untuk Fase C/D):**
+> **Sengaja BELUM dilakukan saat itu (catat untuk Fase C/D):**
 > - Model `Order` **tidak** di-cast ke Enum (`'status' => OrderStatus::class`) — supaya Blade yang
 >   membandingkan string tidak pecah. Domain memakai `OrderStatus::from($order->status)`. Cast menyusul
 >   saat Blade ikut dirapikan.
@@ -213,14 +213,75 @@ Transition rule (mis. `order_in → cleaning` saat lunas) → **Policy**, dipang
 >   Payment/Manager/Staff/Export) memang jatah Fase C.
 
 #### Checklist asli
-- [ ] B1. Buat skeleton `app/Domains/Order/{UseCases,QueryUseCases,Actions,Services,Repositories,DTO,Enums,Policies,Events}`.
-- [ ] B2. `OrderRepository` (+Interface) — pindahkan SEMUA query Order dari service & Livewire.
-- [ ] B3. Write UseCases: `CreateOrderUseCase`, `UpdateOrderUseCase`, `CancelOrderUseCase`, `SettleBillUseCase`.
-- [ ] B4. `CalculateOrderTotalAction` (contoh reuse eksplisit di AGENTS).
-- [ ] B5. QueryUseCases: `GetOrderListQueryUseCase`, `GetKitchenQueueQueryUseCase`.
-- [ ] B6. `OrderStatus` Enum + `OrderStatusPolicy` (transition rules).
-- [ ] B7. Livewire Order/POS panggil UseCase. **Test runtime end-to-end** (pola verifikasi di memory `refactor-audit-findings`).
+- [x] B1. Buat skeleton `app/Domains/Order/{UseCases,QueryUseCases,Actions,Services,Repositories,DTO,Enums,Policies,Events}`.
+- [x] B2. `OrderRepository` (+Interface) — pindahkan SEMUA query Order dari service & Livewire.
+- [x] B3. Write UseCases: `CreateOrderUseCase`, `UpdateOrderUseCase`, `CancelOrderUseCase`, `SettleBillUseCase`.
+      *Deviasi:* pembatalan tidak jadi `CancelOrderUseCase` sendiri — `cancelled` hanyalah satu transisi,
+      jadi ditangani `ChangeOrderStatusUseCase` (Merge Rule).
+- [x] B4. `CalculateOrderTotalAction` (contoh reuse eksplisit di AGENTS).
+- [x] B5. QueryUseCases: `GetOrderListQueryUseCase`, `GetKitchenQueueQueryUseCase`.
+- [x] B6. `OrderStatus` Enum + transition rules. *Deviasi:* aturan transisi tinggal di dalam Enum
+      (`canTransitionTo`), bukan kelas `OrderStatusPolicy` terpisah — satu-satunya konsumennya adalah
+      Enum itu sendiri, jadi kelas terpisah cuma menambah indireksi.
+- [x] B7. Livewire Order/POS panggil UseCase. **Test runtime end-to-end**.
 - [ ] B8. **Review pola bersama pemilik** → jadikan template Fase C.
+
+#### ✅ Utang carry-over Fase B — LUNAS (2026-08-08)
+
+Tiga consumer terakhir + cast Enum dibereskan; domain Order kini tidak punya sisa query Eloquent
+di Livewire.
+
+**Consumer yang dialihkan**
+- `Frontend/CartCheckout` → `PlaceGuestOrderUseCase` (+`PlaceGuestOrderData`). Daftar meja lewat
+  `TableRepository::orderable()`.
+- `Pos/OrderCard` → `PlacePosOrderUseCase` (+`PlacePosOrderData`); menu lewat
+  `GetMenuCatalogQueryUseCase::availableFiltered()`, meja lewat `TableRepository::allOrdered()`.
+- `Frontend/OrderStatus` → `GetTableOrderTrackingQueryUseCase` (posisi antrian dihitung dari
+  `OrderRepository::kitchenQueueIds()`, urutan identik dengan KDS).
+- `Admin/Orders/Table` — 3 query terakhir habis: `delete` → `DeleteOrderUseCase`,
+  `showDetail` → `GetOrderListQueryUseCase::detail()` + `OrderBillingService`,
+  `createPayment` → `SettleBillUseCase`.
+
+**Action baru (Merge Rule terpenuhi, 2 konsumen):** `Payment\Actions\RecordPaymentAction` — satu-satunya
+tempat yang menulis baris payment lunas, dipakai `SettleBillUseCase` dan `PlacePosOrderUseCase`.
+Kolom `paid_at`/`status` tak mungkin lagi melenceng antar-jalur, dan itu persis yang dibaca
+`PaymentObserver` untuk memotong stok.
+
+**Cast Enum:** `Order::$casts['status'] = OrderStatus::class`. Semua pembaca ikut dirapikan —
+4 `OrderStatus::from($order->status)` di UseCase jadi `$order->status`, KDS blade tak perlu
+`::from()` lagi, `dashboard.blade` & `orders/table.blade` pakai `<x-status-badge>`, dan
+`table-bills.blade` yang tadinya me-render badge `neutral` + string mentah kini dapat label/warna
+Enum **tanpa perubahan view** (karena `OrderBillingService::summarize()` sekarang mengoper enum).
+
+**Perbaikan sekalian (bug nyata, bukan kosmetik):**
+- ⚠️ `Pos/OrderCard::showMenuDetail()` masih eager-load relasi `status:id,name,key,color` yang
+  **dihapus di C2** → `RelationNotFoundException` setiap kali tombol detail menu diklik. Sudah
+  dikonfirmasi lewat runtime (bukan dugaan) lalu diperbaiki ke `MenuAvailability`.
+- `CreateOrderUseCase` kini `DB::afterCommit()` saat dispatch `OrderCreated` — tanpa itu, UseCase
+  pembungkus yang punya transaksi sendiri akan menyiarkan order ke KDS sebelum commit.
+- `Admin/Orders/Table::createPayment` kini memakai jalur yang sama dengan kasir, sehingga order yang
+  dilunasi dari daftar admin **ikut membebaskan mejanya** (dulu meja tetap terkunci).
+
+**Verifikasi RUNTIME:** 33 assert lewat tinker (ter-rollback) — cast enum; 7 kelas resolve; POS
+bayar-di-muka (order confirmed + payment `paid` qris + meja→`order_in`) dan **POS tidak menimpa meja
+`reserved`**; guest QR `occupied`→`order_in` dengan nama default "Tamu Meja T-02"; tracking
+(queueTotal 3, posisi 3); settle → `BILL-*`, order `paid`, meja `cleaning`, settle kedua ditolak;
+delete. **8 komponen Livewire di-render** + 3 jalur aksi yang tidak jalan saat mount dipanggil
+langsung (`TableMap::selectTable`, `Orders\Table::showDetail`, `OrderCard::showMenuDetail`).
+Pemeriksa enum-tanpa-import bersih. `route:list` 141 tetap, `view:cache` + `npm run build` sukses.
+
+**Keputusan pemilik (2026-08-08):** `DeleteOrderUseCase` **menolak** order yang membawa uang —
+punya baris payment, atau berstatus `Paid` tanpa baris payment (anomali yang masih bisa dibuat form
+admin). Alasannya: tiket lunas adalah catatan akuntansi yang direkonsiliasi laporan, daftar tagihan
+kasir, dan ledger stok; menghapusnya meninggalkan payment yang menunjuk ke ketiadaan. Jalur yang
+benar adalah membatalkan (`ChangeOrderStatusUseCase`). Diverifikasi runtime: order polos terhapus,
+order berpayment & order `Paid` ditolak dengan pesan Indonesia, order tak ditemukan ditolak.
+
+**Dead view dihapus (2026-08-08):** `resources/views/admin/{orders,payments,reservations}/_form.blade.php`
+— partial form POST pra-Livewire (punya `<script>` sendiri, class `border-stone-200`, input
+`name="items[..]"`), nol referensi, sudah digantikan komponen Livewire masing-masing. Setelah dihapus
+`view:cache` bersih dan byte-count render 8 komponen **identik** dengan sebelumnya, jadi memang tak
+ada yang memakainya.
 
 ### Fase C — Replikasi domain sisa (~3–5 minggu)
 Urutan by dependency (daun→akar) agar Events antar-domain rapi:
@@ -382,14 +443,285 @@ Urutan by dependency (daun→akar) agar Events antar-domain rapi:
       *Catatan proses:* render pertama menghasilkan byte-count kecil (form 1.5KB) karena view cache stale
       setelah komponen Blade baru ditambahkan; setelah `view:clear` angkanya normal (9.8KB). Sinyal kotor
       jangan diterima apa adanya — ulangi dengan cache bersih.
-- [ ] C7. **Customer**
-- [ ] C8. **Employee** (Shift/Tip/ServiceLog)
-- [ ] C9. **Reporting** (murni QueryUseCase lintas domain)
-- [ ] C10. **User/System** + domain Social (Song/Special/Chat/Visitor)
+- [x] C7. **Customer** — ✅ SELESAI (2026-08-08)
+      **Pre-flight:** untuk pertama kalinya *tak ada* dead code — ketiga service (`Customer\DashboardService`,
+      `OrderCartService`, `BookingService`) hidup dan dipakai. (Catatan proses: grep pertama sempat
+      melaporkan `DashboardService` mati karena pola `Customer\\DashboardService` yang salah escape;
+      ternyata dipakai `Livewire\Customer\Dashboard`. Verifikasi ulang sebelum menghapus apa pun.)
+      **Temuan pemetaan:** `Customer\DashboardService` sebenarnya **query Reservation murni** — nol model
+      domain Customer. Jadi `GetCustomerDashboardQueryUseCase` tinggal di domain Customer (portal pelanggan
+      = view atas domain lain) tetapi membaca lewat `ReservationRepository`, bukan query sendiri.
+      `OrderCartService` ternyata **satu kelas untuk tiga domain**: cart sesi (Customer), katalog menu
+      (Menu), resolusi meja (Table), dan pembuatan order (Order) — dipecah sesuai batasnya.
+      **Dibangun (`app/Domains/Customer/`):** `CustomerRepository`(+Interface), `CustomerData` DTO
+      (normalisasi string kosong→null jadi satu tempat, dulu 6 baris `?: null` di form),
+      `Create/Update/DeleteCustomerUseCase`, `GetCustomerListQueryUseCase`,
+      `GetCustomerDashboardQueryUseCase`, dan `Services/CustomerCart` — cart sesi **per meja**, tanpa
+      satu pun query DB (Service sejati per AGENTS §Service). Beda dari `Support\RestaurantCart` yang
+      melayani tamu QR anonim (satu cart per sesi, tanpa kunci meja).
+      **Dibangun di domain lain:** `Order\PlaceCustomerOrderUseCase`(+DTO) — sibling ketiga setelah
+      POS & guest; `Reservation\PlaceReservationUseCase`(+DTO) — potongan C4 yang tertinggal karena
+      file-nya duduk di `Services/Customer`; `Table\QueryUseCases\FindTableQueryUseCase`
+      (`byId`/`orderable`/`free`) dan `Table\Actions\ClaimTableForOrderAction`.
+      **Action baru menghapus duplikasi nyata:** aturan "order masuk → meja `available`|`occupied`
+      jadi `order_in`" tadinya ditulis ulang di 3 tempat. Kini satu Action, dipakai `PlaceGuestOrder`
+      dan `PlaceCustomerOrder`. POS **sengaja tidak** memakainya (kasir hanya mengklaim meja yang
+      benar-benar kosong) dan alasannya ditulis di docblock, bukan disembunyikan di balik flag.
+      **Repo yang ditambah:** Reservation (`upcomingForUser`, `historyForUser`, `hasOverlappingHold`,
+      `createWithItems`), Menu (`findWithCategory`, `findManyKeyedById`,
+      `activeCategoriesWithAvailableCounts`), Table (`search()` kini juga mencakup kapasitas/status/
+      kategori — sebelumnya `groupedByStatus` akan menyempitkan pencarian meja pelanggan).
+      **Dihapus:** 3 service (total **14** sejak Fase A). `Pos/OrderCard` kehilangan query
+      `MenuCategory` terakhirnya.
+      ⚠️ **BUG C2 KEDUA DITEMUKAN:** `Customer/MenuOrder::showMenuDetail()` juga masih eager-load relasi
+      `status:id,name,key,color` yang dihapus di C2 — fatal setiap kali detail menu diklik, kembaran
+      persis dari bug `Pos/OrderCard` yang ditambal di utang Fase B. Dua-duanya kini lewat
+      `GetMenuCatalogQueryUseCase::find()`.
+      ⚠️ **5 BLADE RUSAK TOTAL DITEMUKAN (pre-existing, bukan dari C7):** `@disabled(...)` **di dalam
+      tag `<x-...>`** membuat compiler Blade kehilangan pembuka `if ($component->shouldRender())`
+      tetapi tetap menulis `endif` penutupnya → `syntax error, unexpected token "endif"`. Halaman
+      langsung 500, bukan salah render: `customer/booking-form`, `admin/reservations/form`,
+      `frontend/song-request`, `staff/waiter/table-status-updater`, `menus/partials/show-content`.
+      Diperbaiki jadi `:disabled="..."`. `@disabled` pada tag HTML biasa (`<input>`, `<select>`)
+      tetap aman dan tidak diubah.
+      **Alat baru:** `scratchpad/compile_all_views.php` — meng-compile **seluruh 206 view** lalu
+      mem-parse hasilnya. Inilah yang menemukan kelima view di atas; `view:cache` **tidak** menangkapnya
+      karena hanya meng-compile, tidak mem-parse. Jalankan tiap fase berikutnya.
+      **Verifikasi RUNTIME:** 43 assert (ter-rollback) — 11 kelas resolve; read (list+search pelanggan,
+      `groupedByStatus` 21/21 meja & 5 status urut, kategori+`menus_count`, katalog); dashboard (stats
+      konsisten, riwayat hanya milik user itu); CRUD pelanggan (trim & kosong→null, update, delete,
+      404 ditolak); **cart terbukti terpisah per meja** (2 vs 1, `empty` satu meja tak menyentuh yang
+      lain); order pelanggan (customer_id, tag sumber, total 3 porsi, meja `occupied`→`order_in`,
+      **ronde kedua di meja `order_in` tetap boleh**, meja `cleaning` & cart kosong ditolak); reservasi
+      (snapshot harga & nama, **bentrok 90 menit ditolak, di luar jendela boleh**).
+      **11 komponen Livewire di-render** + 4 aksi yang tidak jalan saat mount dipanggil langsung.
+      206 view compile+parse bersih, pemeriksa enum-import bersih, `route:list` 141 tetap,
+      `view:cache` + `npm run build` sukses.
+- [x] C8. **Employee** (Shift/Tip/ServiceLog) — ✅ SELESAI (2026-08-08)
+      **Pre-flight:** `ShiftService` & `ManagerAnalyticsService` dua-duanya hidup — tak ada dead code.
+      **Dibangun (`app/Domains/Employee/`):** Enum `ShiftStatus` (menggantikan `Shift::STATUSES`) dan
+      `ServiceType` (menggantikan peta label `ServiceLog::TYPES` **di dalam model** — label UI tidak
+      lagi menempel di Eloquent). Keduanya diverifikasi **langsung terhadap CHECK constraint Postgres**
+      di `pg_constraint`, sesuai pelajaran C4.
+      `ShiftRepository`(+Interface) dan `StaffActivityRepository`(+Interface) — Tip + ServiceLog sengaja
+      **satu aggregate**: satu layar mencatat keduanya dan satu papan skor menilai keduanya, jadi dua
+      repository hanya akan selalu di-inject berbarengan. `ShiftData` DTO, UseCase `ScheduleShift`,
+      `SetShiftStatus`, `DeleteShift`, `LogTip`, `LogService`, QueryUseCase `GetWeekSchedule`,
+      `GetStaffKpi`, `GetWaiterActivity`, `GetTopCustomers`.
+      **`schedulableStaff()` ditaruh di `ShiftRepository`, bukan UserRepository** (deviasi dari blueprint):
+      "siapa yang boleh masuk roster" adalah aturan penjadwalan, bukan fakta tentang record user — dan
+      domain User baru lahir di C10.
+      **Duplikasi ketiga yang dihapus:** blok `match` penghitung awal rentang waktu ada **2 salinan
+      identik** (`ManagerAnalyticsService` dan `Staff/Receptionist/TopAnalytics`) — dua layar bertetangga
+      di portal yang sama, bebas melenceng. Jadi Enum `AnalyticsRange`
+      (today/week/month + `startsAt()`/`label()`/`fromRequest()`). Ditaruh di
+      **`app/Domains/Reporting/Enums/`** — domain C9 dimulai dari sini karena semua dashboard membacanya.
+      **Skor KPI diberi nama:** rumus `(tips/10000) + services + (requests*2)` yang dulu jadi komentar
+      satu baris kini punya konstanta `TIP_DIVISOR`/`REQUEST_WEIGHT` beserta alasannya (satu tip besar
+      tak boleh mengalahkan kerja satu shift; permintaan khusus dihargai dua kali layanan rutin).
+      **Cast Enum:** `Shift::status` dan `ServiceLog::type`. Blade log layanan kini `$log->type->label()`
+      (dulu lookup array `$serviceTypes[$log->type]` yang akan pecah begitu di-cast).
+      **Dialihkan:** `ShiftScheduler`, `StaffKpi`, `TopCustomers`, `TipsServiceLog`, `TopAnalytics`;
+      `TipsServiceLog` juga berhenti query Table/Order langsung (lewat repository, `inServiceRecent()`
+      baru). Literal `'scheduled'` di `SpecialRequestService` dan dua seeder diarahkan ke Enum.
+      **Dihapus:** 2 service (total **16** sejak Fase A; `app/Services/` tinggal 13 file dari 29).
+      ⚠️ **Deviasi disengaja:** `SetShiftStatusUseCase` **tanpa transition guard** — manajer mengoreksi
+      roster manual dan boleh mengembalikan shift dari `absent` ke `scheduled`; penjaga yang benar di
+      sini adalah parameter bertipe Enum (nilai tak sah jadi mustahil), sementara service lama justru
+      **diam-diam mengabaikan** status tak dikenal.
+      **Verifikasi RUNTIME:** 45 assert (ter-rollback) — Enum vs CHECK constraint untuk dua kolom;
+      11 kelas resolve; `AnalyticsRange` (3 batas waktu, fallback ngawur & null); cast dua model;
+      read (7 kolom Senin–Minggu, `shiftsByDay` 9/9 & kunci `Y-m-d`, `schedulableStaff` 9 staf tanpa
+      customer, KPI terurut, TopCustomers terurut Rp811.410); write (shift dibuat→completed→**boleh
+      dikoreksi balik**→dihapus, 404 ditolak dua kali; tip 25.000 & log layanan tercatat, trim &
+      kosong→null, **total tip hari ini 0→25.000 dan KPI ikut bergerak ke score 3.5**).
+      **7 komponen Livewire di-render.** 206 view compile+parse bersih, enum-import bersih,
+      `route:list` 141 tetap, `view:cache` + `npm run build` sukses.
+- [x] C9. **Reporting** (murni QueryUseCase lintas domain) — ✅ SELESAI (2026-08-08)
+      **Pre-flight:** `ReportService` & `Admin/DashboardService` dua-duanya hidup. (Jebakan grep C7
+      terulang: pola ber-escape `Admin\\DashboardService` lagi-lagi nihil padahal kelasnya dipakai
+      `DashboardController` — selalu grep nama pendeknya.)
+      **`app/Repositories/` HABIS.** `DashboardRepository`(+Interface) adalah repository legacy
+      terakhir; isinya dibongkar ke repository domain masing-masing sesuai blueprint, bukan dipindah
+      utuh. Direktori `app/Repositories` kini tidak ada — semua query hidup di `app/Domains/*/Repositories`.
+      **Query yang dipulangkan ke pemiliknya:** Payment (`sumSettledBetween`,
+      `countSettledOrdersBetween`, `methodBreakdownForDate`), Order (`countByStatus`, `countInService`,
+      `countStaleKitchenOrders`, `recent`, `topMenuItemsForDate`, `topMenuItemsBetween`,
+      `sumPaidTotalBetween`, `countBetweenWithStatuses`, `revenueByCashierBetween`,
+      `paidTotalsBetween`), Menu (`countAll`), Reservation (`listForDate`). Table/Menu/Reservation
+      sisanya sudah punya method yang dibutuhkan sejak C1–C4.
+      **Dibangun (`app/Domains/Reporting/`):** `Enums/AnalyticsRange` (sudah lahir di C8),
+      `Services/SalesTrendService`, `QueryUseCases/GetSalesReportQueryUseCase` dan
+      `GetAdminDashboardQueryUseCase`. Keduanya **murni komposisi** — nol query Eloquent.
+      **`SalesTrendService` diberi nama & alasan:** logika paling rumit di ReportService lama (bucket
+      per jam / hari / bulan tergantung panjang rentang) kini punya kelas sendiri dengan penjelasan
+      *kenapa* — grafik 400 kolom harian tak terbaca, grafik sehari dengan satu kolom tak bercerita,
+      dan bucket kosong sengaja ditulis 0 supaya sumbu-x tetap rata dan Selasa yang sepi terlihat.
+      **Literal status habis:** `['confirmed','preparing','ready','served','paid']` di ReportService,
+      `['served','paid']` di topMenus, `'paid'` di 5 tempat, dan enam label chip dashboard
+      (`'draft'`, `'confirmed'`, …) semuanya lewat `OrderStatus`/`TableStatus`/`PaymentStatus`.
+      `SalesReportExport` ikut memakai `OrderStatus::Paid` (query-nya tetap `FromQuery` karena
+      maatwebsite butuh Builder, bukan hasil).
+      **Dihapus:** 2 service + 2 file repository legacy (total **18 service** sejak Fase A;
+      `app/Services/` tinggal **11** dari 29).
+      ⚠️ **Perubahan tampilan yang disengaja:** chip status order & tile status meja di dashboard kini
+      memakai `label()` dari Enum, jadi berbahasa Indonesia (`Dikonfirmasi`/`Disiapkan`/`Siap` dan
+      `Tersedia`/`Terisi`/`Pesanan Masuk`/`Perlu Dibersihkan`) — dulu masih mentah berbahasa Inggris.
+      Ini menutup satu-satunya layar yang belum ikut penyeragaman C1–C5. Ikon dan token warna
+      **tidak** diubah: `TableStatus::color()` untuk `occupied` adalah `error` sedangkan dashboard
+      memakai tone `warning`, dan peta `$toneClasses` di blade tak punya kunci itu — menyeragamkannya
+      adalah pekerjaan desain, bukan refactor.
+      **Verifikasi RUNTIME:** 40 assert — `app/Repositories` benar-benar lenyap & interface lama tak
+      bisa di-resolve; 3 kelas resolve; **paritas 10 method repository baru vs query mentah**
+      (jumlah, urutan, dan konsistensi `countByStatus` meja = total meja, `countAll` menu =
+      tersedia+tidak); `SalesTrendService` diuji ketiga cabangnya dengan data sintetis (24 bucket jam
+      & jam 09:00 menjumlahkan dua order; 5 bucket harian dengan hari kosong = 0; 6 bucket bulanan,
+      Maret = 22.000); sales report (kunci lengkap, label==nilai, totalSales & totalCustomers cocok
+      query mentah, rentang 3 bulan jalan); dashboard (11 kunci, 4 metric, 6 chip **tanpa** paid,
+      4 tile, 7 titik grafik, shortcut ber-URL); **dan dashboard terbukti bereaksi pada data baru** —
+      satu Payment 123.456 di transaksi ter-rollback mengubah "Penjualan Hari Ini" Rp 0 → Rp 123.456
+      dan menaikkan titik terakhir grafik.
+      **ReportBoard + halaman `dashboard.blade` penuh (85 KB) ter-render.** 206 view compile+parse
+      bersih, enum-import bersih, `route:list` 141 tetap, `view:cache` + `npm run build` sukses.
+      *Catatan proses:* dua assert sempat merah — ternyata **uji sayanya** yang salah (`sort()` pada
+      koleksi objek Carbon tidak membandingkan seperti dugaan, plus query diulang tiga kali sehingga
+      urutan `ordered_at` kembar bisa bergeser). Repository-nya benar; diperiksa dengan membandingkan
+      timestamp integer dari satu query. Sinyal merah tetap harus dibuktikan sebelum dipercaya —
+      dan begitu juga sinyal hijau.
+- [x] C10. **User/System** + domain Social (Song/Special/Chat/Visitor) — ✅ SELESAI (2026-08-08)
+      **`app/Services/` HABIS — Fase C tuntas.** Dari 29 service di awal, nol tersisa; direktorinya
+      tidak ada lagi. Struktur `app/` kini: Console, Domains, Events, Exports, Http, Livewire, Models,
+      Observers, Policies, Providers, Support, View.
+      **Pre-flight:** `TableCategoryService` **dead code** (0 consumer) — yang keenam sejak Fase B.
+      Dihapus, tidak dimigrasi. Sepuluh sisanya hidup.
+      **Dibangun (`app/Domains/Social/`):** Enum `SongStatus` (+`next()` sebagai mesin transisi,
+      `activeValues`/`finishedValues`), `SpecialRequestStatus`, `SpecialRequestCategory`;
+      `SongRequestRepository` & `SpecialRequestRepository` (+Interface); UseCase `RequestSong`,
+      `AdvanceSong`, `RejectSong`, `SubmitSpecialRequest`, `ApproveSpecialRequest`,
+      `RejectSpecialRequest`, `CompleteSpecialRequest`; QueryUseCase `GetSongQueue`,
+      `GetSpecialRequestBoard`; `Services/WaiterMatchmaker` + `Services/ChatService` (dipindah apa
+      adanya — cache/Redis, bukan Eloquent, jadi memang tak butuh Repository).
+      **Dibangun (`app/Domains/System/`):** Enum `SubscriptionStatus`; `UserRepository`,
+      `AppSettingRepository`, `SubscriptionRepository` (+Interface); `Services/AppSettings`;
+      `QueryUseCases/GetLicenseStatusQueryUseCase` (menggantikan `LicenseService` seluruhnya — ketiga
+      methodnya read); `UseCases/SaveLicenseUseCase`.
+      **`WaiterMatchmaker` memisahkan aturan dari query:** `bestWaiter()` lama mencampur tiga query
+      dengan satu aturan penyortiran. Kini query pindah ke repository (`UserRepository::activeWithRole`,
+      `ShiftRepository::onShiftUserIdsForDate`, `SpecialRequestRepository::activeLoadByAssignee`) dan
+      aturannya — on-shift menang, seri dipecah oleh beban paling ringan — jadi Service murni yang bisa
+      diuji dengan array biasa. Terbukti: keempat cabangnya diuji tanpa menyentuh database.
+      **Sisa domain terdahulu ikut dituntaskan:** `MediaService` → `Menu/Services`;
+      `ReservationDepositService` → `RecordReservationDepositUseCase`; `ReservationReleaseService` →
+      `ReleaseExpiredReservationsUseCase` (+ repo `expiredHolds`/`noShowCandidates`);
+      `PublicHomeService` & `PublicCartService` **dihapus** — isinya duplikat
+      `MenuRepository::featured()` dan `RestaurantCart::count()`/`addItem()`.
+      **Cast Enum:** `SongRequest::status`, `SpecialRequest::status` + `category`,
+      `Subscription::status`. Empat konstanta label/status terakhir lenyap dari model
+      (`SongRequest::STATUSES`/`ACTIVE_STATUSES`, `SpecialRequest::CATEGORIES`,
+      `Subscription::STATUSES`) dan empat blade berhenti menulis peta warna sendiri — semuanya
+      `<x-status-badge>`.
+      ⚠️ **BUG LAMA DITEMUKAN & DIPERBAIKI:** `AppSettings::setMany($values, $group = 'general')`
+      menstempel `group` ke **setiap** baris pada tiap simpan massal, sedangkan satu-satunya pemanggil
+      (`AppSettingsManager::save`) tak pernah mengoper grup. Artinya sekali admin menekan Simpan,
+      ke-9 setting jatuh ke grup `general` dan **seksi-seksi form itu sendiri runtuh permanen**
+      (DB nyata punya 3 grup: social/finance/profile). Parameternya dibuang; bulk save kini hanya
+      menyentuh `value`. Diverifikasi: distribusi grup identik sebelum & sesudah `setMany`.
+      ⚠️ **Utang C6 ditemukan:** `tests/Feature/Admin/StockOpnameTest.php` masih meng-import
+      `App\Services\Admin\StockOpnameService` yang dihapus di C6 — file test itu fatal saat di-load.
+      Tak ketahuan karena suite memang tak bisa jalan di mesin ini (sqlite, lihat memory
+      `env-and-tooling`). Diarahkan ke `CreateStockOpnameDraftUseCase`/`PostStockOpnameUseCase`.
+      **Verifikasi RUNTIME:** 62 assert (ter-rollback) — `app/Services` benar-benar lenyap;
+      **4 Enum dibandingkan langsung dengan CHECK constraint**; 18 kelas resolve; cast 4 model;
+      `SongStatus::next()` keempat cabang termasuk **klik ganda aman** (done tetap done);
+      `WaiterMatchmaker` keempat cabang tanpa DB; alur lagu (trim, `requested_by` kosong→null,
+      **cap antrean 2 ditegakkan**, advance mengisi `played_at` lalu tidak menimpanya, slot bebas
+      lagi setelah selesai); alur permintaan khusus end-to-end (submit→approve **auto-assign ke
+      "Waiter Saung RH"**→complete, dan **waiter lain ditolak menutup tugas orang**);
+      AppSettings (grup utuh, `set()` menulis grup & tipe, `get()` lewat cache); lisensi
+      (`expiring`/`active`/`expired`/`none` + `isValid` saat ditangguhkan); deposit reservasi
+      (pending→confirmed, `hold_until` dilepas, nominal 0 ditolak); job pelepasan.
+      **11 komponen Livewire di-render**, perintah `reservations:release-expired` dijalankan sungguhan.
+      206 view compile+parse bersih, enum-import bersih, `route:list` 141 tetap,
+      `view:cache` + `npm run build` sukses.
+      *Catatan proses (dua sinyal merah, dua sebab berbeda):*
+      (1) `AdvanceSongUseCase` sempat fatal `SongStatus::from()` menerima enum — **bug asli saya**,
+      kembaran persis dari yang ditambal di utang Fase B; diperbaiki lalu disapu seluruh proyek untuk
+      pola sejenis (bersih).
+      (2) `Livewire::mount(TableChat)` gagal dengan "Unable to evaluate dynamic event name placeholder:
+      `{tableId}`" — **bukan bug**: komponen itu memakai `#[On('echo:chat.table.{tableId},…')]` dan
+      di aplikasi nyata hanya dirender di dalam `@if (TableSessionContext::current())`. Dibuktikan
+      dengan request HTTP sungguhan (`GET /menu` tanpa QR → **200**, panel sosial memang tidak
+      dirender) dan dengan me-mount ulang setelah sesi meja diisi (**14 KB, PASS**). Harness
+      `Livewire::mount()` tidak bisa dipakai apa adanya untuk komponen ber-placeholder dinamis.
 
-### Fase D — Boundary lintas domain (~2–3 hari)
-- [ ] D1. Ganti call antar-domain langsung → **Events + Listener** (ARCH §Domain Dependencies). Manfaatkan `OrderCreated`/`OrderUpdated` yang sudah ada; tambah listener di Kitchen & Table.
-- [ ] D2. Audit statis: tidak ada `use App\Domains\X\...` dari dalam domain Y kecuali `Events`.
+### Fase D — Boundary lintas domain — ✅ SELESAI (2026-08-08)
+
+> **Aturan batas diperjelas dulu (keputusan Fase D).** Teks D2 asli — "tidak ada
+> `use App\Domains\X` dari dalam domain Y kecuali Events" — bertabrakan dengan §10 dokumen ini
+> sendiri, yang menyatakan Reporting **boleh** membaca lintas domain lewat Repository. Melarang
+> semuanya berarti tiap domain menyalin ulang query domain lain. Aturan yang dipakai:
+>
+> | Yang diimpor lintas domain | Boleh? | Alasan |
+> |---|---|---|
+> | `Events`, `Listeners` | ✅ | Justru inilah batasnya |
+> | `Enums`, `DTO` | ✅ | Nilai, bukan perilaku |
+> | `Repositories`, `QueryUseCases` | ✅ | Kontrak baca/persistensi milik domain itu sendiri |
+> | `UseCases`, `Actions`, `Services` | ❌ | Menulis di domain lain harus jadi **reaksi atas Event** |
+>
+> Pengecualian dicatat eksplisit di alat audit beserta alasannya, supaya pengecualian adalah
+> keputusan yang diambil seseorang, bukan sesuatu yang menyelinap masuk.
+
+- [x] D1. **6 kopling tulis → 4 jadi Event, 2 tetap (beralasan).**
+      **Event baru (`app/Domains/Order/Events/`):** `OrderPlaced` (orderId, tableId, source) dan
+      `TableBillsCleared` (tableId, settledOrderId). Keduanya **bukan** broadcast — murni kabel
+      internal; `OrderCreated`/`OrderUpdated` yang lama tetap melayani KDS.
+      **Listener baru (`app/Domains/Table/Listeners/`):** `ClaimTableOnOrderPlaced`,
+      `ReleaseTableOnBillsCleared`. Didaftarkan eksplisit di `AppServiceProvider::registerDomainListeners()`
+      — Laravel hanya auto-discover `app/Listeners`, dan daftar eksplisit sekaligus jadi peta
+      "domain mana bereaksi ke domain mana".
+      **`TableBillsCleared` sengaja lebih sempit dari "satu tagihan dibayar":** satu rombongan bisa
+      pesan beberapa ronde, jadi domain Order — pemilik pertanyaan "masih ada yang belum lunas?" —
+      menjawabnya sendiri dan baru mengumumkan saat meja benar-benar tidak berhutang. Domain Table
+      cukup membebaskan meja tanpa tahu apa pun soal tagihan.
+      **Enum `OrderSource` menyatukan kosakata yang tadinya terbelah dua:** tiga UseCase menulis
+      literal `'Sumber: POS'`/`'Sumber: DINE-IN QR'`/`'Sumber: CUSTOMER ORDER'`, sementara layar kasir
+      **mengendus balik** dengan `str_contains($notes, 'QR')`. Dua sisi satu kosakata, bebas melenceng.
+      Kini `composeNotes()` dan `fromNotes()` ada di satu Enum, dan `OrderSource::claimsOccupiedTable()`
+      memindahkan perbedaan aturan POS-vs-dine-in ke tempat yang bisa dibaca — dulu tersembunyi
+      sebagai `in_array` berbeda di dua UseCase.
+      **Dua yang TETAP panggilan langsung, dengan alasan:** `Order → Payment\RecordPaymentAction`
+      (pembayaran **adalah** pelunasannya — satu transaksi, dan pemanggil butuh baris Payment-nya
+      kembali; listener tak bisa mengembalikan nilai) dan `Reservation → PaymentRepository` (deposit
+      adalah bagian dari konfirmasi booking). Yang pertama terdaftar sebagai pengecualian resmi.
+      ⚠️ **Konsekuensi yang disengaja:** klaim/pembebasan meja kini terjadi **setelah** transaksi order
+      commit (`DB::afterCommit`), bukan di dalamnya. Kalau reaksi meja gagal, order tetap tersimpan dan
+      status meja bisa dikoreksi staf — pertukaran normal dari decoupling, dan uangnya yang dilindungi.
+- [x] D2. **Alat audit `scratchpad/audit_domain_deps.php`** memindai seluruh `app/Domains`,
+      mengklasifikasi tiap `use App\Domains\...` lintas domain per layer, dan **keluar dengan exit
+      code 1** bila ada domain yang menulis langsung ke domain lain. Juga melaporkan pengecualian yang
+      terdaftar tapi tak lagi dipakai, supaya daftarnya tak jadi sampah.
+      **Hasil akhir: CLEAN** — 29 impor lintas domain tersisa, semuanya kategori boleh
+      (13 Enums, 13 Repositories, 2 Events, 1 QueryUseCase) + 1 pengecualian tercatat.
+      Sebelum D1: 6 pelanggaran tulis.
+
+**Verifikasi RUNTIME Fase D:** 32 assert — `OrderSource` (compose/from bolak-balik utuh untuk ketiga
+case, catatan lama tanpa tag jatuh ke App, aturan klaim per sumber); **kedua listener benar-benar
+terdaftar** di dispatcher; UseCase **mengumumkan, bukan menulis** (dengan `Event::fake`, meja terbukti
+tidak berubah); **gerbang `TableBillsCleared` terbukti**: melunasi satu dari dua tagihan meja **tidak**
+menerbitkan event, melunasi sisanya menerbitkan; listener diuji per cabang (`available`+POS→order_in,
+`occupied`+POS→**tetap occupied**, `occupied`+QR→order_in, `reserved`→tak disentuh siapa pun, order
+takeaway tanpa meja & meja hilang→aman, release→cleaning + sesi ditutup); dan **rantai penuh tanpa
+`Event::fake` sama sekali** — place → listener klaim meja → settle → listener bebaskan meja → kasir
+membaca sumber "QR". Jumlah baris DB identik sebelum & sesudah (20 order, 20 payment).
+206 view compile+parse bersih, enum-import bersih, `route:list` 141 tetap,
+`view:cache` + `npm run build` sukses.
+
+*Catatan proses:* sebuah skrip ad-hoc sempat melaporkan "meja tidak dibebaskan". Ditelusuri, itu
+**perilaku yang benar** — meja yang dipilih skrip kebetulan masih punya tagihan lain dari data seed,
+jadi gerbangnya memang menahan event. Dibuktikan dengan sengaja mengulang skenario di meja T-19
+(punya 1 tagihan lain): event tertahan, lalu setelah tagihan itu ikut dilunasi syaratnya terpenuhi.
+Skrip ad-hoc itu juga punya bug sendiri — memulihkan status meja lewat model Eloquent yang sudah
+basi, sehingga `update()` tidak melihat atribut kotor dan tak mengirim query sama sekali.
 
 ### Fase E — Konsolidasi
 - [ ] E1. Pindahkan Eloquent Models ke `app/Domains/{X}/Models` (opsional, terakhir — hati-hati namespace/migration).

@@ -3,11 +3,11 @@
 namespace App\Livewire\Admin\Orders;
 
 use App\Domains\Order\QueryUseCases\GetOrderListQueryUseCase;
+use App\Domains\Order\Services\OrderBillingService;
+use App\Domains\Order\UseCases\DeleteOrderUseCase;
+use App\Domains\Order\UseCases\SettleBillUseCase;
 use App\Domains\Payment\Enums\PaymentMethod;
 use App\Domains\Payment\Enums\PaymentStatus;
-use App\Models\Order;
-use App\Models\Payment;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -34,23 +34,22 @@ class Table extends Component
         $this->resetPage();
     }
 
-    public function delete(string $id): void
+    public function delete(string $id, DeleteOrderUseCase $deleteOrder): void
     {
-        $order = Order::query()->findOrFail($id);
-        $order->delete();
+        $deleteOrder->handle($id);
 
         session()->flash('success', 'Order berhasil dihapus.');
     }
 
-    public function showDetail(string $id): void
+    public function showDetail(string $id, GetOrderListQueryUseCase $orderList, OrderBillingService $billing): void
     {
-        $order = Order::query()
-            ->with(['table', 'cashier', 'items.menu', 'payments'])
-            ->findOrFail($id);
+        $order = $orderList->detail($id);
 
-        $paidTotal = (float) $order->payments
-            ->where('status', 'paid')
-            ->sum('amount');
+        if (! $order) {
+            return;
+        }
+
+        $paidTotal = $billing->paidAmount($order);
 
         $this->selectedOrder = [
             'id' => (string) $order->id,
@@ -59,14 +58,14 @@ class Table extends Component
             'table' => (string) ($order->table?->code ?? '-'),
             'cashier' => (string) ($order->cashier?->name ?? '-'),
             'ordered_at' => (string) ($order->ordered_at?->format('d M Y H:i') ?? '-'),
-            'status' => (string) str_replace('_', ' ', $order->status),
+            'status' => $order->status->label(),
             'notes' => (string) ($order->notes ?? ''),
             'subtotal' => (float) $order->subtotal,
             'discount' => (float) $order->discount,
             'tax' => (float) $order->tax,
             'total' => (float) $order->total,
             'paid_total' => $paidTotal,
-            'remaining_total' => max(0, (float) $order->total - $paidTotal),
+            'remaining_total' => $billing->outstanding($order),
             'items' => $order->items
                 ->map(fn ($item): array => [
                     'name' => (string) $item->menu_name_snapshot,
@@ -80,8 +79,8 @@ class Table extends Component
                 ->all(),
             'payments' => $order->payments
                 ->map(fn ($payment): array => [
-                    'method' => (string) str_replace('_', ' ', $payment->method),
-                    'status' => (string) $payment->status,
+                    'method' => PaymentMethod::tryFrom((string) $payment->method)?->label() ?? (string) $payment->method,
+                    'status' => PaymentStatus::tryFrom((string) $payment->status)?->label() ?? (string) $payment->status,
                     'amount' => (float) $payment->amount,
                     'paid_at' => (string) ($payment->paid_at?->format('d M Y H:i') ?? '-'),
                     'reference' => (string) ($payment->reference ?? '-'),
@@ -93,35 +92,18 @@ class Table extends Component
         $this->dispatch('open-modal', 'order-detail-modal');
     }
 
-    public function createPayment(string $id): void
+    /**
+     * Cash-settles the remaining balance. Shares SettleBillUseCase with the POS
+     * bill screen, so an order paid from here also frees its table — previously
+     * this button marked the order paid and left the table locked.
+     */
+    public function createPayment(string $id, SettleBillUseCase $settleBill): void
     {
-        $order = Order::query()->with('payments')->findOrFail($id);
+        // A rejected settle (already paid, wrong status) surfaces as a
+        // ValidationException, which Livewire renders through $errors.
+        $payment = $settleBill->handle($id, PaymentMethod::Cash->value);
 
-        $paidTotal = (float) $order->payments()
-            ->where('status', 'paid')
-            ->sum('amount');
-        $remainingTotal = max(0, (float) $order->total - $paidTotal);
-
-        if ($remainingTotal <= 0) {
-            session()->flash('success', 'Order '.$order->order_number.' sudah lunas.');
-
-            return;
-        }
-
-        Payment::query()->create([
-            'order_id' => $order->id,
-            'method' => PaymentMethod::Cash->value,
-            'type' => 'full',
-            'status' => PaymentStatus::Paid->value,
-            'amount' => $remainingTotal,
-            'reference' => 'PAY-'.now()->format('Ymd').'-'.Str::upper(Str::random(4)),
-            'notes' => 'Dibuat dari tombol payment order table.',
-            'paid_at' => now(),
-        ]);
-
-        $order->update(['status' => 'paid']);
-
-        session()->flash('success', 'Payment order '.$order->order_number.' berhasil dibuat.');
+        session()->flash('success', 'Payment order '.$payment->order->order_number.' berhasil dibuat.');
     }
 
     public function render(GetOrderListQueryUseCase $orderList): View

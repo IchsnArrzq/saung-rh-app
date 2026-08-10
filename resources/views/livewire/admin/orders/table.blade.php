@@ -38,8 +38,7 @@
                 </td>
                 <td>{{ $order->table->code ?? '-' }}</td>
                 <td>
-                    <x-status-badge :status="$order->status"
-                        :enum="\App\Domains\Order\Enums\OrderStatus::class" />
+                    <x-status-badge :status="$order->status" />
                 </td>
                 <td>{{ $order->items_count }}</td>
                 <td>

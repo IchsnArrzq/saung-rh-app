@@ -34,7 +34,7 @@ class MarkOrderItemReadyUseCase
                 return null;
             }
 
-            $current = OrderStatus::from($order->status);
+            $current = $order->status;
             $allReady = $order->items->every(
                 fn ($line) => $line->status === OrderStatus::Ready->value
             );

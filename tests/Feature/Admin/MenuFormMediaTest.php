@@ -5,7 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Livewire\Admin\Menus\Form;
 use App\Models\Media;
 use App\Models\Menu;
-use App\Services\Admin\MediaService;
+use App\Domains\Menu\Services\MediaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;

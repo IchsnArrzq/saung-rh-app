@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Domains\Employee\Enums\ServiceType;
 use App\Models\Order;
 use App\Models\ServiceLog;
 use App\Models\Table;
@@ -60,7 +61,7 @@ class Fase3DemoSeeder extends Seeder
         }
 
         // Service logs.
-        $types = array_keys(ServiceLog::TYPES);
+        $types = ServiceType::values();
 
         foreach (range(0, 11) as $n) {
             ServiceLog::query()->create([

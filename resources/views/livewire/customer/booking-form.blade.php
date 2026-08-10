@@ -173,7 +173,7 @@
 
                     <div class="mt-4 space-y-2">
                         <x-button type="submit" variant="primary" :block="true" icon="ri-calendar-check-line"
-                            loading="submit" @disabled(count($items) === 0)>
+                            loading="submit" :disabled="count($items) === 0">
                             Kirim Reservasi
                         </x-button>
                         <x-button variant="ghost" :block="true" :href="route('customer.dashboard')" wire:navigate>

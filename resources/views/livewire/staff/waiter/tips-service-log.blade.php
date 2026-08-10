@@ -120,7 +120,7 @@
                 @forelse ($recentServices as $log)
                     <div class="flex items-center justify-between text-sm border-b border-base-200 pb-2">
                         <div>
-                            <span class="badge badge-ghost badge-sm">{{ $serviceTypes[$log->type] ?? $log->type }}</span>
+                            <span class="badge badge-ghost badge-sm">{{ $log->type->label() }}</span>
                             <span class="text-secondary">· {{ $log->table?->code ?? 'Umum' }}</span>
                             @if ($log->description) <p class="text-xs text-secondary">{{ $log->description }}</p> @endif
                         </div>

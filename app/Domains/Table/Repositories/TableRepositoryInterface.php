@@ -18,11 +18,17 @@ interface TableRepositoryInterface
     /** Every table for the floor board / pickers, category eager-loaded. */
     public function allOrdered(): Collection;
 
-    /** Full (unpaginated) list filtered by code/name — floor tools show every table. */
+    /**
+     * Full (unpaginated) list filtered by code, name, capacity, status or
+     * category — floor tools show every table and never paginate.
+     */
     public function search(string $search): Collection;
 
     /** Free tables only — what a customer may pick or book. */
     public function selectable(): Collection;
+
+    /** Tables a guest may still send an order to — free, seated, or already mid-order. */
+    public function orderable(): Collection;
 
     public function paginateForAdmin(int $perPage = 12, string $search = ''): LengthAwarePaginator;
 

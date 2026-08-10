@@ -2,6 +2,7 @@
 
 namespace App\Domains\Order\Services;
 
+use App\Domains\Order\Enums\OrderSource;
 use App\Domains\Payment\Enums\PaymentStatus;
 use App\Models\Order;
 use Illuminate\Support\Collection;
@@ -67,14 +68,12 @@ class OrderBillingService
         ];
     }
 
+    /**
+     * Recovered from the note tag the placing UseCase wrote, so the cashier
+     * screen and the three order flows share one vocabulary (OrderSource).
+     */
     private function source(Order $order): string
     {
-        $notes = (string) $order->notes;
-
-        return match (true) {
-            str_contains($notes, 'QR') => 'QR',
-            str_contains($notes, 'POS') => 'POS',
-            default => 'App',
-        };
+        return OrderSource::fromNotes($order->notes)->label();
     }
 }

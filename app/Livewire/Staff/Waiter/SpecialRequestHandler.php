@@ -2,34 +2,24 @@
 
 namespace App\Livewire\Staff\Waiter;
 
-use App\Models\SpecialRequest;
-use App\Services\SpecialRequests\SpecialRequestService;
+use App\Domains\Social\QueryUseCases\GetSpecialRequestBoardQueryUseCase;
+use App\Domains\Social\UseCases\CompleteSpecialRequestUseCase;
 use Illuminate\View\View;
 use Livewire\Component;
 
 class SpecialRequestHandler extends Component
 {
-    public function complete(SpecialRequestService $service, string $id): void
+    public function complete(CompleteSpecialRequestUseCase $completeRequest, string $id): void
     {
-        $request = SpecialRequest::query()
-            ->where('assigned_to', auth()->id())
-            ->findOrFail($id);
+        // The UseCase scopes the lookup to the signed-in waiter, so one waiter
+        // cannot close another's job.
+        $completeRequest->handle($id, (string) auth()->id());
 
-        $service->complete($request);
         session()->flash('special_status', 'Permintaan ditandai selesai.');
     }
 
-    public function render(): View
+    public function render(GetSpecialRequestBoardQueryUseCase $board): View
     {
-        $waiterId = (string) auth()->id();
-
-        return view('livewire.staff.waiter.special-request-handler', [
-            'assigned' => SpecialRequest::query()->openFor($waiterId)->latest()->get(),
-            'doneToday' => SpecialRequest::query()
-                ->where('assigned_to', $waiterId)
-                ->where('status', 'done')
-                ->whereDate('handled_at', today())
-                ->count(),
-        ]);
+        return view('livewire.staff.waiter.special-request-handler', $board->forWaiter((string) auth()->id()));
     }
 }

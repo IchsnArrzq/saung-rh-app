@@ -13,7 +13,7 @@
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <span class="badge badge-ghost badge-sm">{{ \App\Models\SpecialRequest::CATEGORIES[$req->category] ?? $req->category }}</span>
+                                    <span class="badge badge-ghost badge-sm">{{ $req->category->label() }}</span>
                                     <span class="text-xs text-secondary">Meja {{ $req->table_code ?? '-' }} · {{ $req->requested_by ?? 'Tamu' }}</span>
                                     @if ($req->is_paid)<span class="badge badge-secondary badge-sm">Berbayar</span>@endif
                                 </div>
@@ -35,17 +35,10 @@
             <div class="card-body gap-2">
                 <h3 class="card-title text-sm"><i class="ri-history-line"></i> Terbaru</h3>
                 @forelse ($recent as $req)
-                    @php
-                        $badge = match ($req->status) {
-                            'done' => 'badge-success',
-                            'rejected' => 'badge-error',
-                            default => 'badge-info',
-                        };
-                    @endphp
                     <div class="text-sm">
                         <div class="flex items-center justify-between gap-2">
                             <span class="truncate">{{ $req->description }}</span>
-                            <span class="badge {{ $badge }} badge-sm shrink-0">{{ $req->status }}</span>
+                            <x-status-badge :status="$req->status" size="sm" class="shrink-0" />
                         </div>
                         @if ($req->assignee)
                             <span class="text-xs text-secondary">→ {{ $req->assignee->name }}</span>

@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Staff\Manager;
 
-use App\Models\Shift;
-use App\Services\Manager\ShiftService;
+use App\Domains\Employee\DTO\ShiftData;
+use App\Domains\Employee\QueryUseCases\GetWeekScheduleQueryUseCase;
+use App\Domains\Employee\UseCases\DeleteShiftUseCase;
+use App\Domains\Employee\UseCases\ScheduleShiftUseCase;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -39,9 +41,9 @@ class ShiftScheduler extends Component
         $this->weekAnchor = Carbon::parse($this->weekAnchor)->addWeek()->toDateString();
     }
 
-    public function save(ShiftService $shifts): void
+    public function save(ScheduleShiftUseCase $scheduleShift): void
     {
-        $this->validate([
+        $validated = $this->validate([
             'userId' => ['required', 'exists:users,id'],
             'shiftDate' => ['required', 'date'],
             'startsAt' => ['required', 'date_format:H:i'],
@@ -49,26 +51,26 @@ class ShiftScheduler extends Component
             'position' => ['nullable', 'string', 'max:60'],
         ]);
 
-        $shifts->schedule($this->userId, $this->shiftDate, $this->startsAt, $this->endsAt, $this->position);
+        $scheduleShift->handle(ShiftData::fromValidated($validated));
 
         $this->reset(['userId', 'position']);
         session()->flash('shift_status', 'Shift berhasil dijadwalkan.');
     }
 
-    public function deleteShift(ShiftService $shifts, string $id): void
+    public function deleteShift(DeleteShiftUseCase $deleteShift, string $id): void
     {
-        $shifts->delete(Shift::query()->findOrFail($id));
+        $deleteShift->handle($id);
         session()->flash('shift_status', 'Shift dihapus.');
     }
 
-    public function render(ShiftService $shifts): View
+    public function render(GetWeekScheduleQueryUseCase $schedule): View
     {
         $anchor = Carbon::parse($this->weekAnchor);
 
         return view('livewire.staff.manager.shift-scheduler', [
-            'staff' => $shifts->schedulableStaff(),
-            'days' => collect(range(0, 6))->map(fn (int $i): Carbon => $anchor->copy()->startOfWeek()->addDays($i)),
-            'shiftsByDay' => $shifts->week($anchor),
+            'staff' => $schedule->schedulableStaff(),
+            'days' => $schedule->days($anchor),
+            'shiftsByDay' => $schedule->shiftsByDay($anchor),
         ]);
     }
 }

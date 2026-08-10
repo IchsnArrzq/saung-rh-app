@@ -4,8 +4,10 @@ namespace App\Domains\Payment\Repositories;
 
 use App\Domains\Payment\Enums\PaymentStatus;
 use App\Models\Payment;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class PaymentRepository implements PaymentRepositoryInterface
 {
@@ -56,5 +58,33 @@ class PaymentRepository implements PaymentRepositoryInterface
             ->where('order_id', $orderId)
             ->where('status', PaymentStatus::Paid->value)
             ->sum('amount');
+    }
+
+    public function sumSettledBetween(CarbonInterface $start, CarbonInterface $end): float
+    {
+        return (float) Payment::query()
+            ->where('status', PaymentStatus::Paid->value)
+            ->whereBetween('paid_at', [$start, $end])
+            ->sum('amount');
+    }
+
+    public function countSettledOrdersBetween(CarbonInterface $start, CarbonInterface $end): int
+    {
+        return Payment::query()
+            ->where('status', PaymentStatus::Paid->value)
+            ->whereBetween('paid_at', [$start, $end])
+            ->distinct('order_id')
+            ->count('order_id');
+    }
+
+    public function methodBreakdownForDate(CarbonInterface $date): Collection
+    {
+        return Payment::query()
+            ->selectRaw('method, COUNT(*) as total_count, SUM(amount) as total_amount')
+            ->where('status', PaymentStatus::Paid->value)
+            ->whereDate('paid_at', $date)
+            ->groupBy('method')
+            ->orderByDesc('total_amount')
+            ->get();
     }
 }

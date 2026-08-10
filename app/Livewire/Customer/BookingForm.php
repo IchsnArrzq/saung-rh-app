@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Customer;
 
-use App\Models\Menu;
-use App\Services\Customer\BookingService;
+use App\Domains\Menu\QueryUseCases\GetMenuCatalogQueryUseCase;
+use App\Domains\Reservation\DTO\PlaceReservationData;
+use App\Domains\Reservation\UseCases\PlaceReservationUseCase;
+use App\Domains\Table\QueryUseCases\GetTableListQueryUseCase;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -26,7 +28,7 @@ class BookingForm extends Component
 
     public ?int $activeCategory = null;
 
-    public function addItem(string $menuId): void
+    public function addItem(string $menuId, GetMenuCatalogQueryUseCase $catalog): void
     {
         foreach ($this->items as $index => $item) {
             if ($item['menu_id'] === $menuId) {
@@ -36,9 +38,9 @@ class BookingForm extends Component
             }
         }
 
-        $menu = Menu::query()->available()->find($menuId);
+        $menu = $catalog->find($menuId);
 
-        if (! $menu) {
+        if (! $menu || ! $menu->is_available) {
             return;
         }
 
@@ -90,7 +92,7 @@ class BookingForm extends Component
         $this->activeCategory = $categoryId;
     }
 
-    public function submit(BookingService $service)
+    public function submit(PlaceReservationUseCase $placeReservation)
     {
         $validated = $this->validate([
             'table_id' => ['required', 'exists:tables,id'],
@@ -108,7 +110,13 @@ class BookingForm extends Component
         ]);
 
         try {
-            $service->place($validated);
+            $placeReservation->handle(new PlaceReservationData(
+                tableId: $validated['table_id'],
+                pax: (int) $validated['pax'],
+                reservationAt: $validated['reservation_at'],
+                items: $validated['items'],
+                notes: $validated['notes'] ?? null,
+            ));
         } catch (ValidationException $e) {
             $this->addError('table_id', $e->validator->errors()->first());
 
@@ -120,13 +128,15 @@ class BookingForm extends Component
         return $this->redirectRoute('customer.dashboard', navigate: true);
     }
 
-    public function render(BookingService $service)
+    public function render(GetMenuCatalogQueryUseCase $catalog, GetTableListQueryUseCase $tableList)
     {
-        $data = $service->createFormData();
-
+        // Filtered in memory on purpose: the booking form keeps the whole
+        // sellable list in one payload so the category chips and the search box
+        // stay instant, and it needs the unfiltered total for the empty state.
+        $allMenus = $catalog->available();
         $search = trim(mb_strtolower($this->search));
 
-        $menus = $data['menus']
+        $menus = $allMenus
             ->when($this->activeCategory, fn ($menus) => $menus->where('menu_category_id', $this->activeCategory))
             ->when($search !== '', fn ($menus) => $menus->filter(
                 fn ($menu) => str_contains(mb_strtolower((string) $menu->name), $search)
@@ -134,10 +144,10 @@ class BookingForm extends Component
             ->values();
 
         return view('livewire.customer.booking-form', [
-            'tables' => $data['tables'],
-            'categories' => $data['categories'],
+            'tables' => $tableList->selectable(),
+            'categories' => $catalog->categories(),
             'menus' => $menus,
-            'totalMenus' => $data['menus']->count(),
+            'totalMenus' => $allMenus->count(),
             'subtotal' => collect($this->items)->sum(fn ($item) => $item['price'] * $item['qty']),
             'totalQty' => collect($this->items)->sum('qty'),
         ]);

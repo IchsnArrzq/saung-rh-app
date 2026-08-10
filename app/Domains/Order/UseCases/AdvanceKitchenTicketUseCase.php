@@ -21,7 +21,7 @@ class AdvanceKitchenTicketUseCase
     {
         $order = $this->orders->find($orderId);
 
-        if (! $order || ! OrderStatus::from($order->status)->canTransitionTo($next)) {
+        if (! $order || ! $order->status->canTransitionTo($next)) {
             return null;
         }
 

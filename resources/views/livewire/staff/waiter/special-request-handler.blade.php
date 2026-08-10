@@ -13,7 +13,7 @@
             <div class="card border border-warning/40 bg-warning/5 rounded-xl">
                 <div class="card-body gap-2 p-4">
                     <div class="flex items-center gap-2">
-                        <span class="badge badge-ghost badge-sm">{{ \App\Models\SpecialRequest::CATEGORIES[$req->category] ?? $req->category }}</span>
+                        <span class="badge badge-ghost badge-sm">{{ $req->category->label() }}</span>
                         <span class="text-xs text-secondary">Meja {{ $req->table_code ?? '-' }} · {{ $req->requested_by ?? 'Tamu' }}</span>
                     </div>
                     <p class="text-sm">{{ $req->description }}</p>

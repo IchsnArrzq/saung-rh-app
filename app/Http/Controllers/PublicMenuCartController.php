@@ -3,15 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
-use App\Services\Landing\PublicCartService;
+use App\Support\RestaurantCart;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 class PublicMenuCartController extends Controller
 {
-    public function __construct(private readonly PublicCartService $publicCartService) {}
-
     public function store(Request $request, Menu $menu): RedirectResponse
     {
         $validated = $request->validate([
@@ -20,19 +17,19 @@ class PublicMenuCartController extends Controller
             'redirect_to' => ['nullable', 'string', 'max:2048'],
         ]);
 
-        try {
-            $this->publicCartService->quickAdd(
-                $menu,
-                (int) ($validated['qty'] ?? 1),
-                trim((string) ($validated['notes'] ?? '')) ?: null,
-            );
-        } catch (ValidationException $exception) {
-            return redirect($this->safeRedirectTo($validated['redirect_to'] ?? null))
-                ->withErrors($exception->errors());
+        $redirectTo = $this->safeRedirectTo($validated['redirect_to'] ?? null);
+
+        if (! $menu->is_available) {
+            return redirect($redirectTo)->withErrors(['menu' => 'Menu sedang tidak tersedia.']);
         }
 
-        return redirect($this->safeRedirectTo($validated['redirect_to'] ?? null))
-            ->with('success', $menu->name.' berhasil dimasukkan ke cart.');
+        RestaurantCart::addItem(
+            $menu,
+            (int) ($validated['qty'] ?? 1),
+            trim((string) ($validated['notes'] ?? '')) ?: null,
+        );
+
+        return redirect($redirectTo)->with('success', $menu->name.' berhasil dimasukkan ke cart.');
     }
 
     private function safeRedirectTo(?string $redirectTo): string

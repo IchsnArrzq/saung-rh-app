@@ -37,7 +37,7 @@
                     <span class="label-text mb-1">Status</span>
                     <select wire:model="status" class="select select-bordered select-sm">
                         @foreach ($statuses as $st)
-                            <option value="{{ $st }}">{{ ucfirst($st) }}</option>
+                            <option value="{{ $st->value }}">{{ $st->label() }}</option>
                         @endforeach
                     </select>
                 </label>

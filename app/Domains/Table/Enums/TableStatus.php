@@ -77,6 +77,19 @@ enum TableStatus: string
         return in_array($this, [self::Available, self::Occupied, self::OrderIn], true);
     }
 
+    /**
+     * Backing values of the orderable states, for `whereIn` filters.
+     *
+     * @return array<int, string>
+     */
+    public static function orderableValues(): array
+    {
+        return array_values(array_map(
+            fn (self $status) => $status->value,
+            array_filter(self::cases(), fn (self $status) => $status->isOrderable()),
+        ));
+    }
+
     /** Only a free table can be picked or booked. */
     public function isFree(): bool
     {

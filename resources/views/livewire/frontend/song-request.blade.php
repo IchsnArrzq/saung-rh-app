@@ -21,7 +21,7 @@
                 <input type="text" wire:model="requestedBy" placeholder="Nama (opsional)" class="input input-bordered input-sm grow">
             </div>
             <x-button type="submit" variant="secondary" size="sm" :block="true" icon="ri-add-line"
-                loading="submit" @disabled($activeCount >= $queueMax)>
+                loading="submit" :disabled="$activeCount >= $queueMax">
                 Tambah ke Antrean
             </x-button>
         </form>
@@ -29,20 +29,12 @@
         @if ($mine->isNotEmpty())
             <ul class="mt-3 space-y-1.5">
                 @foreach ($mine as $song)
-                    @php
-                        $badge = match ($song->status) {
-                            'playing' => 'badge-success',
-                            'queued' => 'badge-warning',
-                            'rejected' => 'badge-error',
-                            default => 'badge-ghost',
-                        };
-                    @endphp
                     <li class="flex items-center justify-between text-sm rounded-lg bg-base-200/60 px-3 py-1.5">
                         <span class="truncate">
                             <span class="font-medium">{{ $song->title }}</span>
                             @if ($song->artist)<span class="text-secondary text-xs"> — {{ $song->artist }}</span>@endif
                         </span>
-                        <span class="badge {{ $badge }} badge-sm shrink-0">{{ $song->status }}</span>
+                        <x-status-badge :status="$song->status" size="sm" class="shrink-0" />
                     </li>
                 @endforeach
             </ul>

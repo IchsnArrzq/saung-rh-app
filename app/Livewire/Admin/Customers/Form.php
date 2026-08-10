@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Admin\Customers;
 
+use App\Domains\Customer\DTO\CustomerData;
+use App\Domains\Customer\UseCases\CreateCustomerUseCase;
+use App\Domains\Customer\UseCases\UpdateCustomerUseCase;
 use App\Models\Customer;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -40,22 +43,15 @@ class Form extends Component
         }
     }
 
-    public function save()
+    public function save(CreateCustomerUseCase $createCustomer, UpdateCustomerUseCase $updateCustomer)
     {
-        $validated = $this->validate($this->rules());
-
-        $validated['code'] = $validated['code'] ?: null;
-        $validated['phone'] = $validated['phone'] ?: null;
-        $validated['email'] = $validated['email'] ?: null;
-        $validated['address'] = $validated['address'] ?: null;
-        $validated['notes'] = $validated['notes'] ?: null;
-        $validated['is_active'] = (bool) $this->is_active;
+        $data = CustomerData::fromValidated($this->validate($this->rules()));
 
         if ($this->customer) {
-            $this->customer->update($validated);
+            $updateCustomer->handle($this->customer, $data);
             session()->flash('success', 'Pelanggan berhasil diperbarui.');
         } else {
-            Customer::query()->create($validated);
+            $createCustomer->handle($data);
             session()->flash('success', 'Pelanggan berhasil ditambahkan.');
         }
 

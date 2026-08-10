@@ -4,7 +4,7 @@ namespace App\Livewire\Frontend;
 
 use App\Events\ChatMessagePosted;
 use App\Models\Table;
-use App\Services\Chat\ChatService;
+use App\Domains\Social\Services\ChatService;
 use App\Support\TableSessionContext;
 use Illuminate\Support\Str;
 use Illuminate\View\View;

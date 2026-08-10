@@ -5,7 +5,9 @@ namespace App\Livewire\Staff\Receptionist;
 use App\Domains\Reservation\Enums\ReservationStatus;
 use App\Domains\Reservation\QueryUseCases\GetReservationListQueryUseCase;
 use App\Models\Reservation;
-use App\Services\Reservations\ReservationDepositService;
+use App\Domains\Payment\Enums\PaymentMethod;
+use App\Domains\Reservation\Repositories\ReservationRepositoryInterface;
+use App\Domains\Reservation\UseCases\RecordReservationDepositUseCase;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -84,19 +86,25 @@ class BookingBoard extends Component
         $this->reset(['depositFor', 'depositAmount', 'depositMethod']);
     }
 
-    public function saveDeposit(ReservationDepositService $service): void
+    public function saveDeposit(RecordReservationDepositUseCase $recordDeposit, ReservationRepositoryInterface $reservations): void
     {
         $this->validate([
             'depositAmount' => ['required', 'numeric', 'min:1'],
-            'depositMethod' => ['required', 'in:cash,qris,debit_card,credit_card,transfer,ewallet'],
+            'depositMethod' => ['required', 'in:'.implode(',', PaymentMethod::values())],
         ]);
 
-        $reservation = Reservation::query()->with('table')->findOrFail($this->depositFor);
+        $reservation = $reservations->findWithTable((string) $this->depositFor);
 
-        $service->record(
+        if (! $reservation) {
+            $this->addError('depositFor', 'Reservasi tidak ditemukan.');
+
+            return;
+        }
+
+        $recordDeposit->handle(
             $reservation,
             (float) $this->depositAmount,
-            $this->depositMethod,
+            PaymentMethod::from($this->depositMethod),
             verifiedBy: auth()->user(),
         );
 

@@ -2,11 +2,12 @@
 
 namespace App\Livewire\Staff\Waiter;
 
-use App\Domains\Order\Enums\OrderStatus;
-use App\Models\Order;
-use App\Models\ServiceLog;
-use App\Models\Table;
-use App\Models\Tip;
+use App\Domains\Employee\Enums\ServiceType;
+use App\Domains\Employee\QueryUseCases\GetWaiterActivityQueryUseCase;
+use App\Domains\Employee\UseCases\LogServiceUseCase;
+use App\Domains\Employee\UseCases\LogTipUseCase;
+use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Table\Repositories\TableRepositoryInterface;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -29,7 +30,7 @@ class TipsServiceLog extends Component
 
     public ?string $svcDescription = null;
 
-    public function saveTip(): void
+    public function saveTip(LogTipUseCase $logTip): void
     {
         $validated = $this->validate([
             'tipAmount' => ['required', 'numeric', 'min:1'],
@@ -38,83 +39,48 @@ class TipsServiceLog extends Component
             'tipNote' => ['nullable', 'string', 'max:255'],
         ]);
 
-        Tip::query()->create([
-            'waiter_id' => auth()->id(),
-            'table_id' => $validated['tipTableId'] ?: null,
-            'order_id' => $validated['tipOrderId'] ?: null,
-            'amount' => $validated['tipAmount'],
-            'note' => $validated['tipNote'] ?: null,
-            'received_at' => now(),
-        ]);
+        $logTip->handle(
+            amount: (float) $validated['tipAmount'],
+            tableId: $validated['tipTableId'] ?? null,
+            orderId: $validated['tipOrderId'] ?? null,
+            note: $validated['tipNote'] ?? null,
+        );
 
         $this->reset(['tipTableId', 'tipOrderId', 'tipAmount', 'tipNote']);
 
         session()->flash('tip_success', 'Tip berhasil dicatat.');
     }
 
-    public function saveService(): void
+    public function saveService(LogServiceUseCase $logService): void
     {
         $validated = $this->validate([
-            'svcType' => ['required', Rule::in(array_keys(ServiceLog::TYPES))],
+            'svcType' => ['required', Rule::in(ServiceType::values())],
             'svcTableId' => ['nullable', 'exists:tables,id'],
             'svcDescription' => ['nullable', 'string', 'max:500'],
         ]);
 
-        ServiceLog::query()->create([
-            'waiter_id' => auth()->id(),
-            'table_id' => $validated['svcTableId'] ?: null,
-            'type' => $validated['svcType'],
-            'description' => $validated['svcDescription'] ?: null,
-            'served_at' => now(),
-        ]);
+        $logService->handle(
+            type: ServiceType::from($validated['svcType']),
+            tableId: $validated['svcTableId'] ?? null,
+            description: $validated['svcDescription'] ?? null,
+        );
 
         $this->reset(['svcTableId', 'svcDescription']);
-        $this->svcType = 'greeting';
+        $this->svcType = ServiceType::default()->value;
 
         session()->flash('svc_success', 'Log layanan berhasil dicatat.');
     }
 
-    public function render(): View
-    {
-        $waiterId = auth()->id();
-
-        $tables = Table::query()->orderBy('code')->get(['id', 'code', 'name']);
-
-        $activeOrders = Order::query()
-            ->whereIn('status', OrderStatus::inServiceValues())
-            ->orderByDesc('ordered_at')
-            ->limit(50)
-            ->get(['id', 'order_number', 'customer_name']);
-
-        $todayTips = Tip::query()
-            ->where('waiter_id', $waiterId)
-            ->whereDate('received_at', today());
-
-        $tipsTotal = (clone $todayTips)->sum('amount');
-        $tipsCount = (clone $todayTips)->count();
-
-        $recentTips = Tip::query()
-            ->where('waiter_id', $waiterId)
-            ->with('table')
-            ->latest('received_at')
-            ->limit(8)
-            ->get();
-
-        $recentServices = ServiceLog::query()
-            ->where('waiter_id', $waiterId)
-            ->with('table')
-            ->latest('served_at')
-            ->limit(8)
-            ->get();
-
+    public function render(
+        GetWaiterActivityQueryUseCase $activity,
+        TableRepositoryInterface $tables,
+        OrderRepositoryInterface $orders,
+    ): View {
         return view('livewire.staff.waiter.tips-service-log', [
-            'tables' => $tables,
-            'activeOrders' => $activeOrders,
-            'tipsTotal' => $tipsTotal,
-            'tipsCount' => $tipsCount,
-            'recentTips' => $recentTips,
-            'recentServices' => $recentServices,
-            'serviceTypes' => ServiceLog::TYPES,
+            ...$activity->handle(),
+            'tables' => $tables->allOrdered(),
+            'activeOrders' => $orders->inServiceRecent(),
+            'serviceTypes' => ServiceType::options(),
         ]);
     }
 }

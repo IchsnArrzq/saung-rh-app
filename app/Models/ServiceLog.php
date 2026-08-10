@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domains\Employee\Enums\ServiceType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,16 +30,9 @@ class ServiceLog extends Model
     {
         return [
             'served_at' => 'datetime',
+            'type' => ServiceType::class,
         ];
     }
-
-    public const TYPES = [
-        'greeting' => 'Sambutan',
-        'refill' => 'Isi Ulang',
-        'cleanup' => 'Bersih-bersih',
-        'special_request' => 'Permintaan Khusus',
-        'other' => 'Lainnya',
-    ];
 
     public function waiter(): BelongsTo
     {

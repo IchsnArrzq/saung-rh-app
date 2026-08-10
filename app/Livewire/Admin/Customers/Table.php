@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Admin\Customers;
 
-use App\Models\Customer;
-use Illuminate\Database\Eloquent\Builder;
+use App\Domains\Customer\QueryUseCases\GetCustomerListQueryUseCase;
+use App\Domains\Customer\UseCases\DeleteCustomerUseCase;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -21,32 +21,17 @@ class Table extends Component
         $this->resetPage();
     }
 
-    public function delete(string $id): void
+    public function delete(string $id, DeleteCustomerUseCase $deleteCustomer): void
     {
-        $customer = Customer::query()->findOrFail($id);
-        $customer->delete();
+        $deleteCustomer->handle($id);
 
         session()->flash('success', 'Pelanggan berhasil dihapus.');
     }
 
-    public function render(): View
+    public function render(GetCustomerListQueryUseCase $customerList): View
     {
-        $search = trim($this->search);
-
-        $customers = Customer::query()
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('code', 'like', '%'.$search.'%')
-                        ->orWhere('phone', 'like', '%'.$search.'%')
-                        ->orWhere('email', 'like', '%'.$search.'%');
-                });
-            })
-            ->latest()
-            ->paginate(15);
-
         return view('livewire.admin.customers.table', [
-            'customers' => $customers,
+            'customers' => $customerList->handle($this->search),
         ]);
     }
 }

@@ -26,7 +26,7 @@
             
             @forelse($mainData as $order)
                 @php
-                    $status = \App\Domains\Order\Enums\OrderStatus::from($order->status);
+                    $status = $order->status;
                     // Full class names per branch — Tailwind cannot scan interpolated ones.
                     $accentClass = match (true) {
                         $order->is_vip => 'bg-warning',
@@ -114,7 +114,7 @@
                 <div class="flex gap-4 h-full items-stretch w-max pb-2">
                     @foreach($mainData as $order)
                         @php
-                            $status = \App\Domains\Order\Enums\OrderStatus::from($order->status);
+                            $status = $order->status;
                             $isPlated = in_array($status, [
                                 \App\Domains\Order\Enums\OrderStatus::Ready,
                                 \App\Domains\Order\Enums\OrderStatus::Served,

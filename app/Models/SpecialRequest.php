@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Domains\Social\Enums\SpecialRequestCategory;
+use App\Domains\Social\Enums\SpecialRequestStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,17 +14,6 @@ class SpecialRequest extends Model
 {
     use HasFactory;
     use HasUuids;
-
-    /**
-     * @var array<string, string>
-     */
-    public const CATEGORIES = [
-        'service' => 'Pelayanan',
-        'kitchen' => 'Dapur',
-        'ambience' => 'Suasana',
-        'celebration' => 'Perayaan',
-        'other' => 'Lainnya',
-    ];
 
     public $incrementing = false;
 
@@ -49,6 +40,8 @@ class SpecialRequest extends Model
             'is_paid' => 'boolean',
             'price' => 'decimal:2',
             'handled_at' => 'datetime',
+            'status' => SpecialRequestStatus::class,
+            'category' => SpecialRequestCategory::class,
         ];
     }
 
@@ -77,7 +70,7 @@ class SpecialRequest extends Model
      */
     public function scopePending(Builder $query): Builder
     {
-        return $query->where('status', 'pending');
+        return $query->where('status', SpecialRequestStatus::Pending->value);
     }
 
     /**
@@ -87,6 +80,6 @@ class SpecialRequest extends Model
      */
     public function scopeOpenFor(Builder $query, string $waiterId): Builder
     {
-        return $query->where('assigned_to', $waiterId)->where('status', 'assigned');
+        return $query->where('assigned_to', $waiterId)->where('status', SpecialRequestStatus::Assigned->value);
     }
 }

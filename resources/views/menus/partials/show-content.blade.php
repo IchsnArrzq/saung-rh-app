@@ -182,7 +182,7 @@
                     </div>
 
                     <x-button type="submit" variant="primary" :block="true" icon="ri-shopping-cart-2-line"
-                        @disabled(! $menu->is_available)>
+                        :disabled="! $menu->is_available">
                         Tambah ke Cart
                     </x-button>
                 </form>

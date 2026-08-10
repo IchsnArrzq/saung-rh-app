@@ -45,9 +45,11 @@ class CreateOrderUseCase
         });
 
         // Broadcast only once the row is committed, and only for states the
-        // kitchen actually reacts to.
+        // kitchen actually reacts to. afterCommit (not a plain dispatch) because
+        // the flow UseCases wrap this one in an outer transaction — without it
+        // the KDS would be told about an order that can still roll back.
         if ($data->status->isKitchenBound()) {
-            OrderCreated::dispatch($order);
+            DB::afterCommit(fn () => OrderCreated::dispatch($order));
         }
 
         return $order;

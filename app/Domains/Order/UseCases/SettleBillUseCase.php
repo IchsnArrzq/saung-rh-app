@@ -3,16 +3,14 @@
 namespace App\Domains\Order\UseCases;
 
 use App\Domains\Order\Enums\OrderStatus;
+use App\Domains\Order\Events\TableBillsCleared;
 use App\Domains\Order\Repositories\OrderRepositoryInterface;
 use App\Domains\Order\Services\OrderBillingService;
+use App\Domains\Payment\Actions\RecordPaymentAction;
+use App\Domains\Payment\Enums\PaymentMethod;
 use App\Models\Order;
 use App\Models\Payment;
-use App\Domains\Payment\Enums\PaymentMethod;
-use App\Domains\Payment\Enums\PaymentStatus;
-use App\Domains\Table\UseCases\ReleaseTableUseCase;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -22,16 +20,19 @@ use Illuminate\Validation\ValidationException;
  * payment attached; this is the cashier's way to take the money regardless of
  * who created the order.
  *
- * @todo Fase D — release the table by dispatching an event the Table domain
- *       listens to, instead of calling TableTurnoverService across the boundary
- *       (ARCHITECTURE.md § Domain Dependencies).
+ * Two cross-domain touches, handled differently on purpose:
+ *  - the Payment row is written inline, because it *is* the settlement and the
+ *    caller is handed it back;
+ *  - freeing the table is a consequence, so it leaves as an event. Whether the
+ *    table still owes anything is answered here — a party can run several
+ *    rounds — and TableBillsCleared is only announced once it owes nothing.
  */
 class SettleBillUseCase
 {
     public function __construct(
         private readonly OrderRepositoryInterface $orders,
         private readonly OrderBillingService $billing,
-        private readonly ReleaseTableUseCase $releaseTable,
+        private readonly RecordPaymentAction $recordPayment,
     ) {}
 
     public function handle(string $orderId, string $method): Payment
@@ -59,35 +60,35 @@ class SettleBillUseCase
             ]);
         }
 
-        if (! OrderStatus::from($order->status)->canTransitionTo(OrderStatus::Paid)) {
+        if (! $order->status->canTransitionTo(OrderStatus::Paid)) {
             throw ValidationException::withMessages([
                 'settle' => 'Pesanan dengan status ini tidak bisa dilunasi.',
             ]);
         }
 
-        return DB::transaction(function () use ($order, $method, $outstanding): Payment {
-            $payment = $order->payments()->create([
-                'method' => $method,
-                'type' => 'full',
-                'status' => PaymentStatus::Paid->value,
-                'amount' => $outstanding,
-                'reference' => 'BILL-'.now()->format('Ymd').'-'.Str::upper(Str::random(4)),
-                'verified_by' => Auth::id(),
-                'notes' => 'Pelunasan tagihan meja via kasir.',
-                'paid_at' => now(),
-            ]);
+        [$payment, $tableCleared] = DB::transaction(function () use ($order, $method, $outstanding): array {
+            $payment = $this->recordPayment->handle(
+                $order,
+                PaymentMethod::from($method),
+                $outstanding,
+                'BILL',
+                'Pelunasan tagihan meja via kasir.',
+            );
 
             $this->orders->update($order, ['status' => OrderStatus::Paid->value]);
 
-            // Free the table only once every bill on it is settled — a party can
-            // run several order rounds. The just-paid order is already excluded
-            // by the repository's open-bill filter.
-            $table = $order->table;
-            if ($table && ! $this->billing->anyOutstanding($this->orders->openOrdersForTable($table->id))) {
-                $this->releaseTable->handle($table);
-            }
+            // The just-paid order is already excluded by the repository's
+            // open-bill filter, so this asks about everything *else* on the table.
+            $tableCleared = $order->table
+                && ! $this->billing->anyOutstanding($this->orders->openOrdersForTable($order->table->id));
 
-            return $payment;
+            return [$payment, $tableCleared];
         });
+
+        if ($tableCleared) {
+            DB::afterCommit(fn () => TableBillsCleared::dispatch($order->table->id, $order->id));
+        }
+
+        return $payment;
     }
 }

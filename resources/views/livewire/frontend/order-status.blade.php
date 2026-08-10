@@ -20,9 +20,11 @@
         <div class="space-y-3">
             @foreach ($orders as $order)
                 @php
+                    // Guest-facing wording, deliberately warmer than the Enum's
+                    // operational labels ("Disiapkan"/"Siap") shown to staff.
                     [$label, $badge, $icon] = match ($order->status) {
-                        'preparing' => ['Sedang dimasak', 'badge-info', 'ri-fire-line'],
-                        'ready' => ['Siap diantar', 'badge-success', 'ri-checkbox-circle-line'],
+                        \App\Domains\Order\Enums\OrderStatus::Preparing => ['Sedang dimasak', 'badge-info', 'ri-fire-line'],
+                        \App\Domains\Order\Enums\OrderStatus::Ready => ['Siap diantar', 'badge-success', 'ri-checkbox-circle-line'],
                         default => ['Menunggu dapur', 'badge-warning', 'ri-time-line'],
                     };
                     $itemCount = $order->items->sum('qty');
@@ -41,7 +43,7 @@
                     </div>
 
                     <div class="mt-3 flex items-center justify-between gap-2">
-                        @if ($order->status === 'ready')
+                        @if ($order->status === \App\Domains\Order\Enums\OrderStatus::Ready)
                             <span class="inline-flex items-center gap-1 text-xs font-medium text-success">
                                 <i class="ri-walk-line"></i> Pesanan sedang diantar ke meja
                             </span>

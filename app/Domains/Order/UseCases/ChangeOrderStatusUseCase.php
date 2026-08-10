@@ -31,7 +31,7 @@ class ChangeOrderStatusUseCase
             ]);
         }
 
-        $current = OrderStatus::from($order->status);
+        $current = $order->status;
 
         if (! $current->canTransitionTo($next)) {
             throw ValidationException::withMessages([

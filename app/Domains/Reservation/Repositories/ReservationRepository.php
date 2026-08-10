@@ -4,8 +4,10 @@ namespace App\Domains\Reservation\Repositories;
 
 use App\Domains\Reservation\Enums\ReservationStatus;
 use App\Models\Reservation;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
 class ReservationRepository implements ReservationRepositoryInterface
@@ -60,9 +62,74 @@ class ReservationRepository implements ReservationRepositoryInterface
         return Reservation::query()->whereDate('reservation_at', $date)->count();
     }
 
+    public function listForDate(CarbonInterface $date, int $limit = 6): EloquentCollection
+    {
+        return Reservation::query()
+            ->with('table:id,code,name')
+            ->whereDate('reservation_at', $date)
+            ->orderBy('reservation_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    public function upcomingForUser(string $userId, int $limit = 5): EloquentCollection
+    {
+        return Reservation::query()
+            ->with(['table', 'items'])
+            ->where('user_id', $userId)
+            ->whereIn('status', [ReservationStatus::Pending->value, ReservationStatus::Confirmed->value])
+            ->where('reservation_at', '>=', now())
+            ->orderBy('reservation_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    public function historyForUser(string $userId, int $limit = 10): EloquentCollection
+    {
+        return Reservation::query()
+            ->with(['table', 'items'])
+            ->where('user_id', $userId)
+            ->latest('reservation_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    public function hasOverlappingHold(string $tableId, CarbonInterface $at, int $windowMinutes = 90): bool
+    {
+        return Reservation::query()
+            ->where('table_id', $tableId)
+            ->whereIn('status', [
+                ReservationStatus::Pending->value,
+                ...ReservationStatus::holdingValues(),
+            ])
+            ->whereBetween('reservation_at', [
+                $at->copy()->subMinutes($windowMinutes),
+                $at->copy()->addMinutes($windowMinutes),
+            ])
+            ->exists();
+    }
+
+    public function expiredHolds(): EloquentCollection
+    {
+        return Reservation::query()->expiredHolds()->with('table')->get();
+    }
+
+    public function noShowCandidates(int $graceMinutes): EloquentCollection
+    {
+        return Reservation::query()->noShowCandidates($graceMinutes)->with('table')->get();
+    }
+
     public function create(array $attributes): Reservation
     {
         return Reservation::query()->create($attributes);
+    }
+
+    public function createWithItems(array $attributes, array $items): Reservation
+    {
+        $reservation = Reservation::query()->create($attributes);
+        $reservation->items()->createMany($items);
+
+        return $reservation;
     }
 
     public function update(Reservation $reservation, array $attributes): Reservation

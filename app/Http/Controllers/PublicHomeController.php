@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Landing\PublicHomeService;
+use App\Domains\Menu\QueryUseCases\GetMenuCatalogQueryUseCase;
+use App\Support\RestaurantCart;
 use Illuminate\View\View;
 
 class PublicHomeController extends Controller
 {
-    public function __construct(private readonly PublicHomeService $publicHomeService) {}
-
-    public function __invoke(): View
+    public function __invoke(GetMenuCatalogQueryUseCase $catalog): View
     {
         return view('public.home', [
-            'menus' => $this->publicHomeService->featuredMenus(),
-            'cartCount' => $this->publicHomeService->cartCount(),
+            'menus' => $catalog->featured(),
+            'cartCount' => RestaurantCart::count(),
         ]);
     }
 }

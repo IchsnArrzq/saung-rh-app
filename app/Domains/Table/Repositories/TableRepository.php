@@ -46,7 +46,10 @@ class TableRepository implements TableRepositoryInterface
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
                     $inner->where('code', 'like', '%'.$search.'%')
-                        ->orWhere('name', 'like', '%'.$search.'%');
+                        ->orWhere('name', 'like', '%'.$search.'%')
+                        ->orWhere('capacity', 'like', '%'.$search.'%')
+                        ->orWhere('status', 'like', '%'.$search.'%')
+                        ->orWhereHas('tableCategory', fn (Builder $category) => $category->where('name', 'like', '%'.$search.'%'));
                 });
             })
             ->orderBy('code')
@@ -56,6 +59,15 @@ class TableRepository implements TableRepositoryInterface
     public function selectable(): Collection
     {
         return $this->byStatus(TableStatus::Available->value);
+    }
+
+    public function orderable(): Collection
+    {
+        return Table::query()
+            ->with('tableCategory')
+            ->whereIn('status', TableStatus::orderableValues())
+            ->orderBy('code')
+            ->get();
     }
 
     public function paginateForAdmin(int $perPage = 12, string $search = ''): LengthAwarePaginator

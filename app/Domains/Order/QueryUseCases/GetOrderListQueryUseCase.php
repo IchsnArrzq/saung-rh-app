@@ -3,6 +3,7 @@
 namespace App\Domains\Order\QueryUseCases;
 
 use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Models\Order;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 /**
@@ -16,5 +17,11 @@ class GetOrderListQueryUseCase
     public function handle(string $search = '', int $perPage = 12): LengthAwarePaginator
     {
         return $this->orders->paginateForAdmin($perPage, $search);
+    }
+
+    /** One order with everything the receipt modal prints. */
+    public function detail(string $id): ?Order
+    {
+        return $this->orders->findForDetail($id);
     }
 }

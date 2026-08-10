@@ -5,7 +5,7 @@ namespace App\Livewire\Admin\Menus;
 use App\Models\Menu;
 use App\Models\MenuCategory;
 use App\Domains\Menu\Enums\MenuAvailability;
-use App\Services\Admin\MediaService;
+use App\Domains\Menu\Services\MediaService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;

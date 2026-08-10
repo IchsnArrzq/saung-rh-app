@@ -44,7 +44,7 @@ class Form extends Component
 
             $this->table_id = (string) ($this->order->table_id ?? '');
             $this->customer_name = (string) ($this->order->customer_name ?? '');
-            $this->status = (string) ($this->order->status ?: 'draft');
+            $this->status = ($this->order->status ?? OrderStatus::Draft)->value;
             $this->ordered_at = (string) ($this->order->ordered_at?->format('Y-m-d\TH:i') ?? '');
             $this->notes = (string) ($this->order->notes ?? '');
             $this->tax = (string) ($this->order->tax ?? 0);

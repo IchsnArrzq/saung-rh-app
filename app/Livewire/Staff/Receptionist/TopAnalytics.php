@@ -2,9 +2,10 @@
 
 namespace App\Livewire\Staff\Receptionist;
 
+use App\Domains\Order\Enums\OrderStatus;
+use App\Domains\Reporting\Enums\AnalyticsRange;
 use App\Models\Order;
 use App\Models\OrderItem;
-use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
@@ -17,24 +18,13 @@ class TopAnalytics extends Component
 
     public function setRange(string $range): void
     {
-        if (in_array($range, ['today', 'week', 'month'], true)) {
-            $this->range = $range;
-        }
-    }
-
-    private function rangeStart(): CarbonImmutable
-    {
-        return match ($this->range) {
-            'today' => CarbonImmutable::now()->startOfDay(),
-            'month' => CarbonImmutable::now()->startOfMonth(),
-            default => CarbonImmutable::now()->startOfWeek(),
-        };
+        $this->range = AnalyticsRange::tryFrom($range)?->value ?? $this->range;
     }
 
     public function render(): View
     {
-        $start = $this->rangeStart();
-        $countedStatuses = ['served', 'paid'];
+        $start = AnalyticsRange::fromRequest($this->range)->startsAt();
+        $countedStatuses = [OrderStatus::Served->value, OrderStatus::Paid->value];
 
         $topMenus = OrderItem::query()
             ->select(

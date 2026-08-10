@@ -3,19 +3,14 @@
 namespace App\Livewire\Pos;
 
 use App\Domains\Menu\Enums\MenuAvailability;
+use App\Domains\Menu\QueryUseCases\GetMenuCatalogQueryUseCase;
+use App\Domains\Menu\Repositories\MenuRepositoryInterface;
+use App\Domains\Order\DTO\PlacePosOrderData;
+use App\Domains\Order\UseCases\PlacePosOrderUseCase;
 use App\Domains\Payment\Enums\PaymentMethod;
-use App\Domains\Payment\Enums\PaymentStatus;
-use App\Events\OrderCreated;
-use App\Models\Menu;
-use App\Models\MenuCategory;
-use App\Models\Order;
-use App\Models\Payment;
-use App\Models\Table;
-use App\Domains\Table\Enums\TableStatus;
+use App\Domains\Table\Repositories\TableRepositoryInterface;
 use App\Support\RestaurantCart;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class OrderCard extends Component
@@ -43,11 +38,15 @@ class OrderCard extends Component
         $this->activeCategoryId = $categoryId;
     }
 
-    public function addToCart(string $menuId): void
+    public function addToCart(string $menuId, MenuRepositoryInterface $menus): void
     {
-        $menu = Menu::query()
-            ->available()
-            ->findOrFail($menuId);
+        $menu = $menus->find($menuId);
+
+        if (! $menu || ! $menu->is_available) {
+            $this->addError('cart', 'Menu tidak tersedia.');
+
+            return;
+        }
 
         RestaurantCart::addItem($menu, 1);
     }
@@ -89,11 +88,16 @@ class OrderCard extends Component
         RestaurantCart::clearCart();
     }
 
-    public function showMenuDetail(string $menuId): void
+    public function showMenuDetail(string $menuId, MenuRepositoryInterface $menus): void
     {
-        $menu = Menu::query()
-            ->with(['category:id,name', 'status:id,name,key,color'])
-            ->findOrFail($menuId);
+        $menu = $menus->find($menuId);
+
+        if (! $menu) {
+            return;
+        }
+
+        $menu->loadMissing('category:id,name');
+        $availability = MenuAvailability::tryFrom((string) $menu->status);
 
         $this->selectedMenu = [
             'id' => (string) $menu->id,
@@ -103,9 +107,9 @@ class OrderCard extends Component
             'image_url' => (string) ($menu->image_url ?? ''),
             'is_available' => (bool) $menu->is_available,
             'category_name' => (string) ($menu->category?->name ?? 'Uncategorized'),
-            'status_name' => MenuAvailability::tryFrom((string) $menu->status)?->label()
+            'status_name' => $availability?->label()
                 ?? ($menu->is_available ? 'Tersedia' : 'Tidak Tersedia'),
-            'status_color' => MenuAvailability::tryFrom((string) $menu->status)?->color()
+            'status_color' => $availability?->color()
                 ?? ($menu->is_available ? 'success' : 'error'),
             'sku' => (string) ($menu->sku ?? '-'),
         ];
@@ -119,7 +123,7 @@ class OrderCard extends Component
         $this->selectedMenu = null;
     }
 
-    public function placeOrder(): void
+    public function placeOrder(PlacePosOrderUseCase $placeOrder): void
     {
         $this->tableId = is_string($this->tableId) && trim($this->tableId) === '' ? null : $this->tableId;
 
@@ -128,124 +132,35 @@ class OrderCard extends Component
             'customerName' => ['nullable', 'string', 'max:120'],
             'notes' => ['nullable', 'string'],
             'payNow' => ['boolean'],
-            'paymentMethod' => ['required_if:payNow,true', 'in:cash,qris,debit_card,credit_card,transfer,ewallet'],
+            'paymentMethod' => ['required_if:payNow,true', 'in:'.implode(',', PaymentMethod::values())],
         ]);
 
-        $cart = RestaurantCart::cart();
-
-        if ($cart === []) {
+        if (RestaurantCart::cart() === []) {
             $this->addError('cart', 'Order masih kosong.');
 
             return;
         }
 
-        $order = DB::transaction(function () use ($cart, $validated): Order {
-            $table = null;
-            $tableId = trim((string) ($validated['tableId'] ?? ''));
+        $customerName = trim((string) ($validated['customerName'] ?? ''));
 
-            if ($tableId !== '') {
-                $table = Table::query()->find($tableId);
-            }
-
-            $subtotal = (float) collect($cart)
-                ->sum(fn (array $item) => ((float) $item['price']) * ((int) $item['qty']));
-            $cleanNotes = trim((string) ($validated['notes'] ?? ''));
-
-            $order = Order::query()->create([
-                'cashier_id' => auth()->id(),
-                'table_id' => $table?->id,
-                'order_number' => $this->generateOrderNumber(),
-                'customer_name' => trim((string) ($validated['customerName'] ?? '')) ?: null,
-                'status' => 'confirmed',
-                'notes' => $cleanNotes !== '' ? 'Sumber: POS | '.$cleanNotes : 'Sumber: POS',
-                'subtotal' => $subtotal,
-                'discount' => 0,
-                'tax' => 0,
-                'total' => $subtotal,
-                'ordered_at' => now(),
-            ]);
-
-            $items = collect($cart)
-                ->map(function (array $item): array {
-                    $qty = (int) $item['qty'];
-                    $price = (float) $item['price'];
-
-                    return [
-                        'menu_id' => $item['menu_id'],
-                        'menu_name_snapshot' => $item['name'],
-                        'qty' => $qty,
-                        'price' => $price,
-                        'line_total' => $qty * $price,
-                        'notes' => $item['notes'] ?? null,
-                    ];
-                })
-                ->values()
-                ->all();
-
-            $order->items()->createMany($items);
-
-            if ((bool) ($validated['payNow'] ?? false) && $subtotal > 0) {
-                Payment::query()->create([
-                    'order_id' => $order->id,
-                    'method' => $validated['paymentMethod'] ?? PaymentMethod::Cash->value,
-                    'type' => 'full',
-                    'status' => PaymentStatus::Paid->value,
-                    'amount' => $subtotal,
-                    'reference' => 'POS-'.now()->format('Ymd').'-'.Str::upper(Str::random(4)),
-                    'notes' => 'Payment otomatis dari POS.',
-                    'paid_at' => now(),
-                ]);
-            }
-
-            if ($table && $table->status === TableStatus::Available->value) {
-                $table->update(['status' => TableStatus::OrderIn->value]);
-            }
-
-            return $order;
-        });
+        $order = $placeOrder->handle(new PlacePosOrderData(
+            items: RestaurantCart::toOrderItems(),
+            tableId: trim((string) ($validated['tableId'] ?? '')) ?: null,
+            customerName: $customerName !== '' ? $customerName : null,
+            notes: $validated['notes'] ?? null,
+            payNow: (bool) ($validated['payNow'] ?? false),
+            paymentMethod: PaymentMethod::tryFrom((string) ($validated['paymentMethod'] ?? '')),
+        ));
 
         RestaurantCart::clearCart();
         $this->notes = '';
         $this->customerName = (string) (auth()->user()?->name ?? '');
         $this->tableId = null;
         $this->payNow = true;
-        $this->paymentMethod = 'cash';
+        $this->paymentMethod = PaymentMethod::Cash->value;
         $this->resetValidation();
 
-        OrderCreated::dispatch($order);
-
         session()->flash('success', 'Order '.$order->order_number.' berhasil disimpan.');
-    }
-
-    public function getCategoriesProperty(): Collection
-    {
-        return MenuCategory::query()
-            ->where('is_active', true)
-            ->withCount(['menus' => function ($query) {
-                $query->available();
-            }])
-            ->orderBy('name')
-            ->get();
-    }
-
-    public function getMenusProperty(): Collection
-    {
-        $search = trim($this->search);
-
-        return Menu::query()
-            ->with('category:id,name')
-            ->available()
-            ->when($this->activeCategoryId, fn ($query) => $query->where('menu_category_id', $this->activeCategoryId))
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($inner) use ($search) {
-                    $inner->where('name', 'ilike', '%'.$search.'%')
-                        ->orWhere('description', 'ilike', '%'.$search.'%')
-                        ->orWhere('sku', 'ilike', '%'.$search.'%')
-                        ->orWhereHas('category', fn ($category) => $category->where('name', 'ilike', '%'.$search.'%'));
-                });
-            })
-            ->orderBy('name')
-            ->get();
     }
 
     public function getCartItemsProperty(): Collection
@@ -263,32 +178,16 @@ class OrderCard extends Component
         return RestaurantCart::subtotal();
     }
 
-    public function getTablesProperty(): Collection
-    {
-        return Table::query()
-            ->orderBy('code')
-            ->get();
-    }
-
-    public function render()
+    public function render(GetMenuCatalogQueryUseCase $catalog, TableRepositoryInterface $tables)
     {
         return view('livewire.pos.order-card', [
-            'categories' => $this->categories,
-            'menus' => $this->menus,
-            'totalAvailableMenus' => Menu::query()->available()->count(),
+            'categories' => $catalog->categories(),
+            'menus' => $catalog->availableFiltered($this->search, $this->activeCategoryId),
+            'totalAvailableMenus' => $catalog->countAvailable(),
             'cartItems' => $this->cartItems,
             'cartCount' => $this->cartCount,
             'cartSubtotal' => $this->cartSubtotal,
-            'tables' => $this->tables,
+            'tables' => $tables->allOrdered(),
         ]);
-    }
-
-    private function generateOrderNumber(): string
-    {
-        do {
-            $number = 'ORD-'.now()->format('Ymd').'-'.Str::upper(Str::random(4));
-        } while (Order::query()->where('order_number', $number)->exists());
-
-        return $number;
     }
 }

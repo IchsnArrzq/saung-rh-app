@@ -3,6 +3,7 @@
 namespace App\Domains\Menu\QueryUseCases;
 
 use App\Domains\Menu\Repositories\MenuRepositoryInterface;
+use App\Models\Menu;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -23,6 +24,29 @@ class GetMenuCatalogQueryUseCase
     public function available(): Collection
     {
         return $this->menus->available();
+    }
+
+    /** The whole sellable list, narrowed — the POS pad filters without paging. */
+    public function availableFiltered(string $search = '', int|string|null $categoryId = null): Collection
+    {
+        return $this->menus->availableFiltered($search, $categoryId);
+    }
+
+    public function countAvailable(): int
+    {
+        return $this->menus->countAvailable();
+    }
+
+    /** Category chips with their sellable-item counts. */
+    public function categories(): Collection
+    {
+        return $this->menus->activeCategoriesWithAvailableCounts();
+    }
+
+    /** One item with its category — the detail modal on the order screens. */
+    public function find(string $id): ?Menu
+    {
+        return $this->menus->findWithCategory($id);
     }
 
     public function featured(int $limit = 8): Collection

@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Customer;
 
-use App\Services\Customer\OrderCartService;
+use App\Domains\Customer\Services\CustomerCart;
+use App\Domains\Table\QueryUseCases\FindTableQueryUseCase;
+use App\Domains\Table\QueryUseCases\GetTableListQueryUseCase;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -11,25 +13,27 @@ class TablePicker extends Component
 {
     public string $search = '';
 
-    public function selectTable(string $tableId, OrderCartService $service): void
+    public function selectTable(string $tableId, FindTableQueryUseCase $findTable, CustomerCart $cart): void
     {
-        if (! $service->findAvailableTable($tableId)) {
+        if (! $findTable->free($tableId)) {
             session()->flash('warning', 'Meja tersebut sudah tidak tersedia.');
 
             return;
         }
 
-        $service->setActiveTable($tableId);
+        $cart->setActiveTable($tableId);
         $this->redirectRoute('customer.menus.index', ['table_id' => $tableId], navigate: true);
     }
 
-    public function render(OrderCartService $service)
+    public function render(GetTableListQueryUseCase $tableList, FindTableQueryUseCase $findTable, CustomerCart $cart)
     {
-        $activeId = $service->activeTableId();
+        $activeId = $cart->activeTableId();
 
         return view('livewire.customer.table-picker', [
-            ...$service->tableSelectionData($this->search),
-            'activeTable' => $activeId ? $service->findOrderableTable($activeId) : null,
+            ...$tableList->groupedByStatus($this->search),
+            // Still orderable, not merely still existing — a party that has
+            // already ordered keeps its banner even though the table is busy.
+            'activeTable' => $activeId ? $findTable->orderable($activeId) : null,
         ]);
     }
 }

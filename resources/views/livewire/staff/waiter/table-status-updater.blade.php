@@ -43,7 +43,7 @@
                     @foreach ($statuses as $status)
                         <x-button size="xs" :variant="$status === $current ? 'primary' : 'outline'"
                             wire:click="updateStatus('{{ $table->id }}', '{{ $status->value }}')"
-                            @disabled($status === $current)>
+                            :disabled="$status === $current">
                             {{ $status->label() }}
                         </x-button>
                     @endforeach

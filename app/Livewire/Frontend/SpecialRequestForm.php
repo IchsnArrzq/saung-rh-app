@@ -2,8 +2,9 @@
 
 namespace App\Livewire\Frontend;
 
-use App\Models\SpecialRequest;
-use App\Services\SpecialRequests\SpecialRequestService;
+use App\Domains\Social\Enums\SpecialRequestCategory;
+use App\Domains\Social\QueryUseCases\GetSpecialRequestBoardQueryUseCase;
+use App\Domains\Social\UseCases\SubmitSpecialRequestUseCase;
 use App\Support\TableSessionContext;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -20,9 +21,10 @@ class SpecialRequestForm extends Component
     public function mount(): void
     {
         $this->sessionId = TableSessionContext::current()['session_id'] ?? null;
+        $this->category = SpecialRequestCategory::default()->value;
     }
 
-    public function submit(SpecialRequestService $service): void
+    public function submit(SubmitSpecialRequestUseCase $submitRequest): void
     {
         $session = TableSessionContext::activeSession();
 
@@ -32,30 +34,26 @@ class SpecialRequestForm extends Component
             return;
         }
 
-        $this->validate([
-            'category' => ['required', Rule::in(array_keys(SpecialRequest::CATEGORIES))],
+        $validated = $this->validate([
+            'category' => ['required', Rule::in(SpecialRequestCategory::values())],
             'description' => ['required', 'string', 'max:280'],
         ]);
 
-        $service->submit($session, $this->category, $this->description);
+        $submitRequest->handle(
+            $session,
+            SpecialRequestCategory::from($validated['category']),
+            $validated['description'],
+        );
 
         $this->reset('description');
         session()->flash('special_status', 'Permintaan dikirim. Menunggu persetujuan manajer.');
     }
 
-    public function render(): View
+    public function render(GetSpecialRequestBoardQueryUseCase $board): View
     {
-        $mine = $this->sessionId
-            ? SpecialRequest::query()
-                ->where('table_session_id', $this->sessionId)
-                ->latest()
-                ->limit(8)
-                ->get()
-            : collect();
-
         return view('livewire.frontend.special-request-form', [
-            'mine' => $mine,
-            'categories' => SpecialRequest::CATEGORIES,
+            'mine' => $board->forSession($this->sessionId),
+            'categories' => SpecialRequestCategory::options(),
         ]);
     }
 }
