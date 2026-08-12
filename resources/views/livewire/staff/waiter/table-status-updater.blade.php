@@ -16,27 +16,36 @@
 
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         @forelse ($tables as $table)
-            @php $key = $table->tableStatus?->key; @endphp
+            @php
+                $current = \App\Domains\Table\Enums\TableStatus::tryFrom((string) $table->status);
+                // Full class names per branch — Tailwind cannot scan interpolated ones.
+                $badgeClass = match ($current?->color()) {
+                    'success' => 'badge-success',
+                    'error' => 'badge-error',
+                    'warning' => 'badge-warning',
+                    'info' => 'badge-info',
+                    'secondary' => 'badge-secondary',
+                    default => 'badge-neutral',
+                };
+            @endphp
             <div class="card border border-base-300 bg-base-100 rounded-xl p-4">
                 <div class="flex items-start justify-between">
                     <div>
                         <h3 class="font-bold text-base-content">{{ $table->name }}</h3>
                         <p class="text-xs text-secondary">{{ $table->code }} · {{ $table->capacity }} kursi</p>
                     </div>
-                    <span class="badge badge-sm font-semibold whitespace-nowrap"
-                        style="{{ $table->tableStatus?->color ? 'background-color:'.$table->tableStatus->color.';border-color:'.$table->tableStatus->color.';color:#fff;' : '' }}">
-                        {{ $table->tableStatus?->name ?? '—' }}
+                    <span class="badge badge-sm font-semibold whitespace-nowrap {{ $badgeClass }}">
+                        {{ $current?->label() ?? '—' }}
                     </span>
                 </div>
 
                 <div class="mt-3 flex flex-wrap gap-1.5">
                     @foreach ($statuses as $status)
-                        <button
-                            wire:click="updateStatus('{{ $table->id }}', '{{ $status->id }}')"
-                            @disabled($status->id === $table->table_status_id)
-                            class="btn btn-xs {{ $status->id === $table->table_status_id ? 'btn-primary' : 'btn-outline' }}">
-                            {{ $status->name }}
-                        </button>
+                        <x-button size="xs" :variant="$status === $current ? 'primary' : 'outline'"
+                            wire:click="updateStatus('{{ $table->id }}', '{{ $status->value }}')"
+                            :disabled="$status === $current">
+                            {{ $status->label() }}
+                        </x-button>
                     @endforeach
                 </div>
             </div>

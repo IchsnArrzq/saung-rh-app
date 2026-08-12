@@ -3,62 +3,27 @@
 
     <form wire:submit="save" class="space-y-5">
         <div class="grid gap-4 md:grid-cols-2">
-            <fieldset class="fieldset md:col-span-2">
-                <legend class="fieldset-legend">Nama Bahan</legend>
-                <input type="text" class="input input-bordered w-full" wire:model.defer="name" required>
-                @error('name')
-                    <p class="label text-error">{{ $message }}</p>
-                @enderror
-            </fieldset>
+            <x-input field-class="md:col-span-2" label="Nama Bahan" name="name" :required="true"
+                wire:model.defer="name" required />
 
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Satuan</legend>
-                <input type="text" class="input input-bordered w-full" wire:model.defer="unit"
-                    placeholder="gram, ml, butir, buah, liter...">
-                @error('unit')
-                    <p class="label text-error">{{ $message }}</p>
-                @enderror
-            </fieldset>
+            <x-input label="Satuan" name="unit" wire:model.defer="unit"
+                placeholder="gram, ml, butir, buah, liter..." />
 
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Harga per Satuan (Rp)</legend>
-                <input type="number" step="0.01" min="0" class="input input-bordered w-full"
-                    wire:model.defer="cost_per_unit" placeholder="Opsional">
-                @error('cost_per_unit')
-                    <p class="label text-error">{{ $message }}</p>
-                @enderror
-            </fieldset>
+            <x-input label="Harga per Satuan (Rp)" name="cost_per_unit" type="number" step="0.01" min="0"
+                wire:model.defer="cost_per_unit" placeholder="Opsional" />
 
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Stok Awal</legend>
-                <input type="number" step="0.001" min="0" class="input input-bordered w-full" wire:model.defer="stock">
-                @error('stock')
-                    <p class="label text-error">{{ $message }}</p>
-                @enderror
-            </fieldset>
+            <x-input label="Stok Awal" name="stock" type="number" step="0.001" min="0"
+                wire:model.defer="stock" />
 
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Stok Minimum (alert)</legend>
-                <input type="number" step="0.001" min="0" class="input input-bordered w-full" wire:model.defer="min_stock">
-                @error('min_stock')
-                    <p class="label text-error">{{ $message }}</p>
-                @enderror
-            </fieldset>
+            <x-input label="Stok Minimum (alert)" name="min_stock" type="number" step="0.001" min="0"
+                wire:model.defer="min_stock" hint="Stok di bawah angka ini akan ditandai Rendah." />
 
-            <fieldset class="fieldset md:col-span-2">
-                <legend class="fieldset-legend">Status</legend>
-                <label class="label cursor-pointer justify-start gap-3 px-0">
-                    <input type="checkbox" class="checkbox checkbox-sm" wire:model="is_active">
-                    <span class="label-text">Bahan aktif digunakan</span>
-                </label>
-            </fieldset>
+            <div class="md:col-span-2">
+                <x-checkbox label="Bahan aktif digunakan" name="is_active" size="sm" wire:model="is_active" />
+            </div>
         </div>
 
-        <div class="flex gap-2">
-            <button type="submit" class="btn bg-emerald-800 text-amber-50 hover:bg-emerald-700">
-                {{ $ingredient ? 'Update' : 'Simpan' }}
-            </button>
-            <a href="{{ route('ingredients.index') }}" class="btn btn-ghost">Batal</a>
-        </div>
+        <x-form-actions :submit-label="$ingredient ? 'Update' : 'Simpan'" :cancel-href="route('ingredients.index')"
+            loading="save" />
     </form>
 </div>

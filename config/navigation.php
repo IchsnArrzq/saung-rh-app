@@ -38,7 +38,6 @@ return [
             'icon' => 'ri-layout-grid-line',
             'items' => [
                 ['label' => 'Table', 'icon' => 'ri-layout-grid-line', 'route' => 'tables.index', 'active' => ['tables.*']],
-                ['label' => 'Table Status', 'icon' => 'ri-flag-line', 'route' => 'table-statuses.index', 'active' => ['table-statuses.*']],
                 ['label' => 'Table Category', 'icon' => 'ri-layout-2-line', 'route' => 'table-categories.index', 'active' => ['table-categories.*']],
             ],
         ],
@@ -47,7 +46,6 @@ return [
             'icon' => 'ri-restaurant-2-line',
             'items' => [
                 ['label' => 'Menu', 'icon' => 'ri-bowl-line', 'route' => 'menus.index', 'active' => ['menus.*']],
-                ['label' => 'Menu Status', 'icon' => 'ri-checkbox-circle-line', 'route' => 'menu-statuses.index', 'active' => ['menu-statuses.*']],
                 ['label' => 'Menu Category', 'icon' => 'ri-price-tag-3-line', 'route' => 'menu-categories.index', 'active' => ['menu-categories.*']],
             ],
         ],
@@ -137,7 +135,6 @@ return [
             'icon' => 'ri-layout-grid-line',
             'items' => [
                 ['label' => 'Table', 'icon' => 'ri-layout-grid-line', 'route' => 'tables.index', 'active' => ['tables.*']],
-                ['label' => 'Table Status', 'icon' => 'ri-flag-line', 'route' => 'table-statuses.index', 'active' => ['table-statuses.*']],
                 ['label' => 'Table Category', 'icon' => 'ri-layout-2-line', 'route' => 'table-categories.index', 'active' => ['table-categories.*']],
             ],
         ],
@@ -146,7 +143,6 @@ return [
             'icon' => 'ri-restaurant-2-line',
             'items' => [
                 ['label' => 'Menu', 'icon' => 'ri-bowl-line', 'route' => 'menus.index', 'active' => ['menus.*']],
-                ['label' => 'Menu Status', 'icon' => 'ri-checkbox-circle-line', 'route' => 'menu-statuses.index', 'active' => ['menu-statuses.*']],
                 ['label' => 'Menu Category', 'icon' => 'ri-price-tag-3-line', 'route' => 'menu-categories.index', 'active' => ['menu-categories.*']],
             ],
         ],

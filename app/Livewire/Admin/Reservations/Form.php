@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Reservations;
 
+use App\Domains\Reservation\Enums\ReservationStatus;
 use App\Models\Menu;
 use App\Models\Reservation;
 use App\Models\Table;
@@ -17,7 +18,6 @@ class Form extends Component
     /**
      * @var array<int, string>
      */
-    private const STATUS_OPTIONS = ['pending', 'confirmed', 'seated', 'completed', 'cancelled', 'no_show'];
 
     public ?Reservation $reservation = null;
 
@@ -148,7 +148,7 @@ class Form extends Component
             'phone' => ['nullable', 'string', 'max:30'],
             'pax' => ['required', 'integer', 'min:1'],
             'reservation_at' => ['required', 'date'],
-            'status' => ['required', Rule::in(self::STATUS_OPTIONS)],
+            'status' => ['required', Rule::in(ReservationStatus::values())],
             'notes' => ['nullable', 'string'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.menu_id' => ['required', 'exists:menus,id'],
@@ -166,11 +166,11 @@ class Form extends Component
     }
 
     /**
-     * @return array<int, string>
+     * @return array<int, ReservationStatus>
      */
     public function statusOptions(): array
     {
-        return self::STATUS_OPTIONS;
+        return ReservationStatus::cases();
     }
 
     /**

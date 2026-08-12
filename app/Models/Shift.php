@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domains\Employee\Enums\ShiftStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,11 +13,6 @@ class Shift extends Model
 {
     use HasFactory;
     use HasUuids;
-
-    /**
-     * @var array<int, string>
-     */
-    public const STATUSES = ['scheduled', 'completed', 'absent'];
 
     public $incrementing = false;
 
@@ -36,6 +32,7 @@ class Shift extends Model
     {
         return [
             'shift_date' => 'date',
+            'status' => ShiftStatus::class,
         ];
     }
 

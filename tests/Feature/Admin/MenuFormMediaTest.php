@@ -5,7 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Livewire\Admin\Menus\Form;
 use App\Models\Media;
 use App\Models\Menu;
-use App\Services\Admin\MediaServiceInterface;
+use App\Domains\Menu\Services\MediaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -41,7 +41,7 @@ class MenuFormMediaTest extends TestCase
         Storage::fake('public');
         $menu = Menu::create(['name' => 'Soto', 'slug' => 'soto', 'price' => 15000]);
 
-        app(MediaServiceInterface::class)->addImage($menu, UploadedFile::fake()->image('a.jpg'));
+        app(MediaService::class)->addImage($menu, UploadedFile::fake()->image('a.jpg'));
         $media = $menu->media()->first();
 
         Livewire::test(Form::class, ['menu' => $menu])
@@ -56,7 +56,7 @@ class MenuFormMediaTest extends TestCase
         Storage::fake('public');
         $menu = Menu::create(['name' => 'Bakso', 'slug' => 'bakso', 'price' => 12000]);
 
-        $service = app(MediaServiceInterface::class);
+        $service = app(MediaService::class);
         $service->addImage($menu, UploadedFile::fake()->image('a.jpg'));
         $service->addImage($menu, UploadedFile::fake()->image('b.jpg'));
 

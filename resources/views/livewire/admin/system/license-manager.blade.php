@@ -37,7 +37,7 @@
                     <span class="label-text mb-1">Status</span>
                     <select wire:model="status" class="select select-bordered select-sm">
                         @foreach ($statuses as $st)
-                            <option value="{{ $st }}">{{ ucfirst($st) }}</option>
+                            <option value="{{ $st->value }}">{{ $st->label() }}</option>
                         @endforeach
                     </select>
                 </label>
@@ -55,7 +55,7 @@
                     <textarea wire:model="notes" rows="2" class="textarea textarea-bordered textarea-sm"></textarea>
                 </label>
                 <div class="sm:col-span-2 flex justify-end">
-                    <button type="submit" class="btn btn-primary btn-sm"><i class="ri-save-line"></i> Simpan Lisensi</button>
+                    <x-button type="submit" variant="primary" size="sm" icon="ri-save-line">Simpan Lisensi</x-button>
                 </div>
             </form>
         </div>

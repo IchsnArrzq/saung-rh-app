@@ -2,9 +2,10 @@
 
 namespace App\Livewire\Admin\Tables;
 
-use App\Models\Table as DiningTable;
-use App\Models\TableStatus;
-use Illuminate\Database\Eloquent\Builder;
+use App\Domains\Table\Enums\TableStatus;
+use App\Domains\Table\QueryUseCases\GetTableListQueryUseCase;
+use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\UseCases\ChangeTableStatusUseCase;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -14,50 +15,35 @@ class StatusBoard extends Component
     #[Url(as: 'boardSearch', except: '')]
     public string $search = '';
 
-    public bool $showInactiveStatuses = false;
-
-    public function moveTable(string $tableId, string $targetStatusId): void
+    /**
+     * The target now arrives as an Enum value instead of a table_statuses UUID.
+     * Every status is always shown — the old `showInactiveStatuses` toggle
+     * disappeared with the `is_active` column.
+     */
+    public function moveTable(string $tableId, string $targetStatus, ChangeTableStatusUseCase $changeStatus, TableRepositoryInterface $tables): void
     {
-        $table = DiningTable::query()->findOrFail($tableId);
-        $targetStatus = TableStatus::query()->findOrFail($targetStatusId);
+        $target = TableStatus::tryFrom($targetStatus);
+        $table = $tables->find($tableId);
 
-        if ($table->table_status_id === $targetStatus->id) {
+        if (! $target || ! $table) {
             return;
         }
 
-        $table->update([
-            'table_status_id' => $targetStatus->id,
-        ]);
+        $changeStatus->handle($table, $target);
 
-        session()->flash('success', "Meja {$table->code} dipindahkan ke status {$targetStatus->name}.");
+        session()->flash('success', "Meja {$table->code} dipindahkan ke status {$target->label()}.");
     }
 
-    public function render(): View
+    public function render(GetTableListQueryUseCase $tableList): View
     {
-        $search = trim($this->search);
-
-        $statuses = TableStatus::query()
-            ->when(! $this->showInactiveStatuses, fn (Builder $query) => $query->where('is_active', true))
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->with([
-                'tables' => function ($query) use ($search): void {
-                    $query->with(['tableCategory', 'tableStatus'])
-                        ->when($search !== '', function ($tableQuery) use ($search): void {
-                            $tableQuery->where(function (Builder $inner) use ($search): void {
-                                $inner->where('code', 'like', '%'.$search.'%')
-                                    ->orWhere('name', 'like', '%'.$search.'%')
-                                    ->orWhere('capacity', 'like', '%'.$search.'%')
-                                    ->orWhereHas('tableCategory', fn (Builder $category) => $category->where('name', 'like', '%'.$search.'%'));
-                            });
-                        })
-                        ->orderBy('code');
-                },
-            ])
-            ->get();
+        $tablesByStatus = $tableList->search($this->search)
+            ->groupBy(fn ($table) => (string) $table->status);
 
         return view('livewire.admin.tables.status-board', [
-            'statuses' => $statuses,
+            'statuses' => collect(TableStatus::cases())
+                ->sortBy(fn (TableStatus $status) => $status->sortOrder())
+                ->values(),
+            'tablesByStatus' => $tablesByStatus,
         ]);
     }
 }

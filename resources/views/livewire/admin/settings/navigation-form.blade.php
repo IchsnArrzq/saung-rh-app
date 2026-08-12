@@ -45,7 +45,7 @@
         </section>
 
         <div class="flex gap-2">
-            <button type="submit" class="btn bg-emerald-800 text-amber-50 hover:bg-emerald-700">Simpan</button>
+            <x-button type="submit" variant="primary">Simpan</x-button>
         </div>
     </form>
 </div>

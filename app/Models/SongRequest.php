@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domains\Social\Enums\SongStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,18 +13,6 @@ class SongRequest extends Model
 {
     use HasFactory;
     use HasUuids;
-
-    /**
-     * Statuses that still occupy a slot in a table's queue.
-     *
-     * @var array<int, string>
-     */
-    public const ACTIVE_STATUSES = ['queued', 'playing'];
-
-    /**
-     * @var array<int, string>
-     */
-    public const STATUSES = ['queued', 'playing', 'done', 'rejected'];
 
     public $incrementing = false;
 
@@ -44,6 +33,7 @@ class SongRequest extends Model
     {
         return [
             'played_at' => 'datetime',
+            'status' => SongStatus::class,
         ];
     }
 
@@ -62,6 +52,6 @@ class SongRequest extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->whereIn('status', self::ACTIVE_STATUSES);
+        return $query->whereIn('status', SongStatus::activeValues());
     }
 }

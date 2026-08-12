@@ -38,18 +38,25 @@ This applies to interfaces too — see Service section.
 
 app/
 ├── Domains/
+│ ├── Table/
 │ ├── Menu/
-│ ├── Order/
+│ ├── Order/        ← includes KDS; a kitchen ticket is an Order, not its own record
 │ ├── Reservation/
-│ ├── Kitchen/
+│ ├── Payment/
 │ ├── Inventory/
 │ ├── Customer/
-│ └── Employee/
+│ ├── Employee/
+│ ├── Reporting/    ← read-only, crosses domains by design
+│ ├── Social/       ← song request, special request, table chat
+│ └── System/       ← users, app settings, licensing
 
 
-Avoid large generic folders. Domains do NOT import each other's classes
-directly — cross-domain communication happens via Events (see
-ARCHITECTURE.md § Domain Dependencies).
+Avoid large generic folders. A domain never **writes** into another domain —
+that happens by dispatching an Event the other domain listens to. Reading is
+different: `Enums`, `DTO`, `Repositories`, and `QueryUseCases` may be imported
+across domains, because those are the other domain's own published contracts.
+The full table, the audit tool, and the one registered exception are in
+ARCHITECTURE.md § Domain Dependencies & Boundary Rule.
 
 ---
 
@@ -293,17 +300,35 @@ Never hardcode role checks (`if(auth()->user()->role === 'admin')`).
 
 # State Machine / Status Handling
 
-Order, Reservation, Table, and Kitchen statuses are **hardcoded Enums +
-Policy-based transition rules** — NOT database-driven Workflow.
+Order, Reservation, Table, and Menu statuses are **hardcoded Enums** — NOT
+database-driven Workflow, and no longer the `table_statuses` / `menu_statuses`
+lookup tables the app started with.
+
+**Transition rules live on the Enum itself**, not in a separate Policy class: a
+Policy answers *may this user do it*, while *which status may follow which* is a
+property of the status. The Enum also owns the UI metadata that used to be
+columns (`label()`, `color()`).
 
 ```php
 enum OrderStatus: string {
     case Draft = 'draft';
-    case Submitted = 'submitted';
-    case Completed = 'completed';
+    case Confirmed = 'confirmed';
+    case Preparing = 'preparing';
+    case Ready = 'ready';
+    case Served = 'served';
+    case Paid = 'paid';
     case Cancelled = 'cancelled';
+
+    public function canTransitionTo(self $next): bool { /* ... */ }
 }
 ```
+
+**Reading a status back:** `Order`, `Shift`, `SongRequest`, `SpecialRequest`, and
+`Subscription` cast the column to their Enum, so `$order->status` *is* an Enum.
+`Table`, `Menu`, `Reservation`, and `Payment` still hold a plain string and are
+compared as `$table->status === TableStatus::OrderIn->value`. Check the model
+before writing the comparison, and prefer moving a model onto the cast when you
+are already rewriting the screens that read it.
 
 This is a deliberate choice: this is a single-tenant system where business
 flow doesn't need to change per client without a deploy. If that ever

@@ -1,13 +1,12 @@
 <div>
     @if ($errors->any())
-        <div class="mb-4 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
-            <p class="font-semibold">Periksa input berikut:</p>
+        <x-alert type="error" title="Periksa input berikut:" class="mb-4">
             <ul class="mt-1 list-disc pl-5">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
-        </div>
+        </x-alert>
     @endif
 
     <form wire:submit="submit">
@@ -15,70 +14,55 @@
             {{-- Kiri: Detail Reservasi + Pilih Menu --}}
             <div class="space-y-4 xl:col-span-7">
                 {{-- Info Reservasi --}}
-                <section class="rounded-2xl border border-base-300 bg-base-100 p-4 md:p-5">
+                <x-card>
                     <h1 class="text-xl font-semibold">Booking Meja</h1>
                     <p class="mt-0.5 text-sm text-base-content/70">Isi detail reservasi dan pilih menu yang ingin dipesan.</p>
 
                     <div class="mt-4 grid gap-4 md:grid-cols-2">
-                        <label class="form-control w-full">
-                            <span class="label-text mb-1">Pilih Meja</span>
-                            <select wire:model="table_id" class="select select-bordered w-full">
-                                <option value="">-- Pilih Meja --</option>
-                                @foreach ($tables as $table)
-                                    <option value="{{ $table->id }}">
-                                        {{ $table->code }} — Kapasitas {{ $table->capacity }} orang
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('table_id')<span class="mt-1 text-xs text-error">{{ $message }}</span>@enderror
-                        </label>
+                        <x-select label="Pilih Meja" name="table_id" :required="true"
+                            placeholder="-- Pilih Meja --" wire:model="table_id">
+                            @foreach ($tables as $table)
+                                <option value="{{ $table->id }}">
+                                    {{ $table->code }} — Kapasitas {{ $table->capacity }} orang
+                                </option>
+                            @endforeach
+                        </x-select>
 
-                        <label class="form-control w-full">
-                            <span class="label-text mb-1">Jumlah Orang</span>
-                            <input type="number" wire:model="pax" min="1" max="30" class="input input-bordered w-full">
-                            @error('pax')<span class="mt-1 text-xs text-error">{{ $message }}</span>@enderror
-                        </label>
+                        <x-input label="Jumlah Orang" name="pax" type="number" :required="true"
+                            min="1" max="30" wire:model="pax" />
 
-                        <label class="form-control w-full">
-                            <span class="label-text mb-1">Waktu Reservasi</span>
-                            <input type="datetime-local" wire:model="reservation_at" class="input input-bordered w-full">
-                            @error('reservation_at')<span class="mt-1 text-xs text-error">{{ $message }}</span>@enderror
-                        </label>
+                        <x-input label="Waktu Reservasi" name="reservation_at" type="datetime-local" :required="true"
+                            wire:model="reservation_at" />
 
-                        <label class="form-control w-full">
-                            <span class="label-text mb-1">Catatan Reservasi</span>
-                            <textarea wire:model="notes" rows="2" class="textarea textarea-bordered w-full"
-                                placeholder="opsional"></textarea>
-                        </label>
+                        <x-textarea label="Catatan Reservasi" name="notes" :rows="2"
+                            wire:model="notes" placeholder="opsional" />
                     </div>
-                </section>
+                </x-card>
 
                 {{-- Pilih Menu --}}
-                <section class="space-y-4 rounded-2xl border border-base-300 bg-base-100 p-4 md:p-5">
-                    <h2 class="font-semibold">Pilih Menu</h2>
-
+                <x-card title="Pilih Menu" class="space-y-4">
                     {{-- Filter Kategori --}}
                     <div class="flex flex-wrap gap-2">
-                        <button type="button" wire:click="setCategory()"
-                            class="btn btn-sm rounded-full {{ is_null($activeCategory) ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
+                        <x-button size="sm" wire:click="setCategory()"
+                            :variant="is_null($activeCategory) ? 'primary' : 'ghost'"
+                            class="rounded-full {{ is_null($activeCategory) ? '' : 'border border-base-300' }}">
                             Semua
                             <span class="badge badge-sm">{{ $totalMenus }}</span>
-                        </button>
+                        </x-button>
+
                         @foreach ($categories as $category)
-                            <button type="button" wire:click="setCategory({{ $category->id }})"
-                                class="btn btn-sm rounded-full {{ $activeCategory === $category->id ? 'btn-primary' : 'btn-ghost border border-base-300' }}">
+                            <x-button size="sm" wire:click="setCategory({{ $category->id }})"
+                                :variant="$activeCategory === $category->id ? 'primary' : 'ghost'"
+                                class="rounded-full {{ $activeCategory === $category->id ? '' : 'border border-base-300' }}">
                                 {{ $category->name }}
                                 <span class="badge badge-sm">{{ $category->menus_count }}</span>
-                            </button>
+                            </x-button>
                         @endforeach
                     </div>
 
                     {{-- Search --}}
-                    <div class="relative">
-                        <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40"></i>
-                        <input type="text" wire:model.live.debounce.300ms="search" class="input input-bordered w-full pl-10"
-                            placeholder="Cari nama menu...">
-                    </div>
+                    <x-search-input wire:model.live.debounce.300ms="search"
+                        placeholder="Cari nama menu..." label="Cari menu" />
 
                     {{-- Grid Menu --}}
                     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -101,38 +85,36 @@
                                     </div>
                                     <div class="flex items-center justify-between gap-2">
                                         <p class="font-semibold">Rp {{ number_format((float) $menu->price, 0, ',', '.') }}</p>
-                                        <button type="button" wire:click="addItem('{{ $menu->id }}')"
-                                            class="btn btn-sm btn-neutral btn-square">
-                                            <i class="ri-add-line text-lg"></i>
-                                        </button>
+                                        <x-button variant="neutral" size="sm" shape="square" icon="ri-add-line text-lg"
+                                            label="Tambah {{ $menu->name }} ke pesanan"
+                                            wire:click="addItem('{{ $menu->id }}')" />
                                     </div>
                                 </div>
                             </article>
                         @empty
-                            <div class="col-span-full rounded-2xl border border-dashed border-base-300 p-8 text-center text-base-content/50">
-                                Menu tidak ditemukan.
-                            </div>
+                            <x-empty-state class="col-span-full" icon="ri-search-line"
+                                title="Menu tidak ditemukan"
+                                description="Coba kata kunci lain atau pilih kategori yang berbeda." />
                         @endforelse
                     </div>
-                </section>
+                </x-card>
             </div>
 
             {{-- Kanan: Order Details --}}
             <aside class="xl:col-span-5 xl:sticky xl:top-4">
-                <section class="rounded-2xl border border-base-300 bg-base-100 p-4">
+                <x-card>
                     <div class="mb-4 flex items-center justify-between gap-2">
-                        <h3 class="text-xl font-semibold">Order Details</h3>
+                        <h3 class="text-xl font-semibold">Rincian Pesanan</h3>
                         @if (count($items) > 0)
-                            <button type="button" wire:click="resetItems" class="btn btn-sm btn-outline">
-                                <i class="ri-delete-bin-line"></i> Reset
-                            </button>
+                            <x-button variant="outline" size="sm" icon="ri-delete-bin-line" wire:click="resetItems">
+                                Reset
+                            </x-button>
                         @endif
                     </div>
 
                     @if (count($items) === 0)
-                        <div class="rounded-xl border border-dashed border-base-300 p-6 text-center text-sm text-base-content/50">
-                            Belum ada menu dipilih.<br>Klik tombol <span class="font-semibold">+</span> pada menu di kiri.
-                        </div>
+                        <x-empty-state icon="ri-shopping-basket-line" title="Belum ada menu dipilih"
+                            description="Klik tombol + pada menu di sebelah kiri untuk menambahkannya." />
                     @else
                         <div class="space-y-3">
                             @foreach ($items as $index => $item)
@@ -156,27 +138,22 @@
                                                 </p>
                                             </div>
                                         </div>
-                                        <button type="button" wire:click="removeItem({{ $index }})"
-                                            class="btn btn-sm btn-error btn-square text-white">
-                                            <i class="ri-delete-bin-line"></i>
-                                        </button>
+                                        <x-button variant="error" size="sm" shape="square" icon="ri-delete-bin-line"
+                                            label="Hapus {{ $item['name'] }}" class="text-white"
+                                            wire:click="removeItem({{ $index }})" />
                                     </div>
 
                                     <div class="mt-2">
-                                        <input type="text" wire:model="items.{{ $index }}.notes"
-                                            class="input input-bordered input-sm w-full" placeholder="Catatan (opsional)">
+                                        <x-input name="items.{{ $index }}.notes" size="sm"
+                                            wire:model="items.{{ $index }}.notes" placeholder="Catatan (opsional)" />
                                     </div>
 
                                     <div class="mt-2 flex items-center justify-end gap-2">
-                                        <button type="button" wire:click="decrement({{ $index }})"
-                                            class="btn btn-sm btn-outline btn-square">
-                                            <i class="ri-subtract-line"></i>
-                                        </button>
+                                        <x-button variant="outline" size="sm" shape="square" icon="ri-subtract-line"
+                                            label="Kurangi jumlah {{ $item['name'] }}" wire:click="decrement({{ $index }})" />
                                         <span class="min-w-8 text-center text-lg font-semibold">{{ $item['qty'] }}</span>
-                                        <button type="button" wire:click="increment({{ $index }})"
-                                            class="btn btn-sm btn-outline btn-square">
-                                            <i class="ri-add-line"></i>
-                                        </button>
+                                        <x-button variant="outline" size="sm" shape="square" icon="ri-add-line"
+                                            label="Tambah jumlah {{ $item['name'] }}" wire:click="increment({{ $index }})" />
                                     </div>
                                 </article>
                             @endforeach
@@ -195,14 +172,15 @@
                     @endif
 
                     <div class="mt-4 space-y-2">
-                        <button type="submit" @disabled(count($items) === 0)
-                            class="btn btn-primary w-full">
-                            <i class="ri-calendar-check-line"></i>
+                        <x-button type="submit" variant="primary" :block="true" icon="ri-calendar-check-line"
+                            loading="submit" :disabled="count($items) === 0">
                             Kirim Reservasi
-                        </button>
-                        <a href="{{ route('customer.dashboard') }}" wire:navigate class="btn btn-ghost w-full">Batal</a>
+                        </x-button>
+                        <x-button variant="ghost" :block="true" :href="route('customer.dashboard')" wire:navigate>
+                            Batal
+                        </x-button>
                     </div>
-                </section>
+                </x-card>
             </aside>
         </div>
     </form>

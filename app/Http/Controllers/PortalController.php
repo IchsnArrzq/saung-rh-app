@@ -71,7 +71,7 @@ class PortalController extends Controller
             'title' => 'Update Status Meja',
             'subtitle' => 'Ubah status meja secara instan dari lantai resto.',
             'icon' => 'ri-refresh-line',
-            'component' => 'staff.waiter.table-status-updater',
+            'livewireComponent' => 'staff.waiter.table-status-updater',
         ]);
     }
 
@@ -81,7 +81,7 @@ class PortalController extends Controller
             'title' => 'Tips & Service Log',
             'subtitle' => 'Catat tip yang diterima dan aktivitas pelayanan.',
             'icon' => 'ri-hand-coin-line',
-            'component' => 'staff.waiter.tips-service-log',
+            'livewireComponent' => 'staff.waiter.tips-service-log',
         ]);
     }
 
@@ -91,7 +91,7 @@ class PortalController extends Controller
             'title' => 'Table Map',
             'subtitle' => 'Peta visual status meja secara real-time.',
             'icon' => 'ri-layout-grid-line',
-            'component' => 'staff.receptionist.table-map',
+            'livewireComponent' => 'staff.receptionist.table-map',
         ]);
     }
 
@@ -101,7 +101,7 @@ class PortalController extends Controller
             'title' => 'Visitor Counter',
             'subtitle' => 'Hitung pengunjung harian dari QR & walk-in.',
             'icon' => 'ri-group-line',
-            'component' => 'staff.receptionist.visitor-counter',
+            'livewireComponent' => 'staff.receptionist.visitor-counter',
         ]);
     }
 
@@ -111,7 +111,7 @@ class PortalController extends Controller
             'title' => 'Booking Management',
             'subtitle' => 'Kelola dan ubah status reservasi yang masuk.',
             'icon' => 'ri-calendar-check-line',
-            'component' => 'staff.receptionist.booking-board',
+            'livewireComponent' => 'staff.receptionist.booking-board',
         ]);
     }
 
@@ -121,7 +121,7 @@ class PortalController extends Controller
             'title' => 'F&B Top Analytics',
             'subtitle' => 'Menu & minuman terlaris beserta pendapatan.',
             'icon' => 'ri-bar-chart-box-line',
-            'component' => 'staff.receptionist.top-analytics',
+            'livewireComponent' => 'staff.receptionist.top-analytics',
         ]);
     }
 
@@ -131,7 +131,7 @@ class PortalController extends Controller
             'title' => 'Employee Shifting',
             'subtitle' => 'Atur jadwal kerja staf per minggu.',
             'icon' => 'ri-calendar-schedule-line',
-            'component' => 'staff.manager.shift-scheduler',
+            'livewireComponent' => 'staff.manager.shift-scheduler',
         ]);
     }
 
@@ -141,7 +141,7 @@ class PortalController extends Controller
             'title' => 'Employee KPI',
             'subtitle' => 'Peringkat pegawai terbaik berdasarkan tip, layanan & permintaan.',
             'icon' => 'ri-trophy-line',
-            'component' => 'staff.manager.staff-kpi',
+            'livewireComponent' => 'staff.manager.staff-kpi',
         ]);
     }
 
@@ -151,7 +151,7 @@ class PortalController extends Controller
             'title' => 'Top Customer',
             'subtitle' => 'Pelanggan paling loyal berdasarkan belanja.',
             'icon' => 'ri-vip-crown-line',
-            'component' => 'staff.manager.top-customers',
+            'livewireComponent' => 'staff.manager.top-customers',
         ]);
     }
 
@@ -161,7 +161,7 @@ class PortalController extends Controller
             'title' => 'Special Order Approver',
             'subtitle' => 'Setujui atau tolak permintaan khusus, lalu cocokkan ke waiter.',
             'icon' => 'ri-checkbox-circle-line',
-            'component' => 'staff.manager.special-request-approver',
+            'livewireComponent' => 'staff.manager.special-request-approver',
         ]);
     }
 
@@ -171,7 +171,7 @@ class PortalController extends Controller
             'title' => 'Special Request Handler',
             'subtitle' => 'Permintaan khusus yang ditugaskan kepada Anda.',
             'icon' => 'ri-customer-service-2-line',
-            'component' => 'staff.waiter.special-request-handler',
+            'livewireComponent' => 'staff.waiter.special-request-handler',
         ]);
     }
 
@@ -181,7 +181,7 @@ class PortalController extends Controller
             'title' => 'Antrean Lagu',
             'subtitle' => 'Kelola request lagu/karaoke dari meja pelanggan.',
             'icon' => 'ri-music-2-line',
-            'component' => 'staff.song-queue-board',
+            'livewireComponent' => 'staff.song-queue-board',
         ]);
     }
 
@@ -191,7 +191,7 @@ class PortalController extends Controller
             'title' => 'Pembersihan Meja',
             'subtitle' => 'Set status meja menjadi siap/kosong setelah dibersihkan.',
             'icon' => 'ri-brush-line',
-            'component' => 'staff.waiter.table-status-updater',
+            'livewireComponent' => 'staff.waiter.table-status-updater',
         ]);
     }
 }

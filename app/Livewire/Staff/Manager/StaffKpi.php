@@ -2,7 +2,8 @@
 
 namespace App\Livewire\Staff\Manager;
 
-use App\Services\Manager\ManagerAnalyticsServiceInterface;
+use App\Domains\Employee\QueryUseCases\GetStaffKpiQueryUseCase;
+use App\Domains\Reporting\Enums\AnalyticsRange;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -14,14 +15,14 @@ class StaffKpi extends Component
 
     public function setRange(string $range): void
     {
-        if (in_array($range, ['today', 'week', 'month'], true)) {
-            $this->range = $range;
-        }
+        // Ignore anything unknown rather than snapping back to the default —
+        // the panel keeps whatever window the manager was already looking at.
+        $this->range = AnalyticsRange::tryFrom($range)?->value ?? $this->range;
     }
 
-    public function render(ManagerAnalyticsServiceInterface $analytics): View
+    public function render(GetStaffKpiQueryUseCase $kpi): View
     {
-        $staff = $analytics->topStaff($this->range);
+        $staff = $kpi->handle(AnalyticsRange::fromRequest($this->range));
 
         return view('livewire.staff.manager.staff-kpi', [
             'staff' => $staff,

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Domains\Employee\Enums\ShiftStatus;
 use App\Models\Shift;
 use App\Models\SpecialRequest;
 use App\Models\TableSession;
@@ -43,7 +44,7 @@ class Fase6DemoSeeder extends Seeder
                     'starts_at' => $i % 2 === 0 ? '09:00' : '14:00',
                     'ends_at' => $i % 2 === 0 ? '17:00' : '22:00',
                     'position' => $person->getRoleNames()->first(),
-                    'status' => 'scheduled',
+                    'status' => ShiftStatus::Scheduled->value,
                 ]);
             }
 
@@ -56,7 +57,7 @@ class Fase6DemoSeeder extends Seeder
                     'starts_at' => '09:00',
                     'ends_at' => '17:00',
                     'position' => 'waiter',
-                    'status' => 'scheduled',
+                    'status' => ShiftStatus::Scheduled->value,
                 ]);
             }
         }

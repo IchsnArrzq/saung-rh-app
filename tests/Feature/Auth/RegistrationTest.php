@@ -29,7 +29,8 @@ class RegistrationTest extends TestCase
 
         $component->call('register');
 
-        $component->assertRedirect(route('dashboard', absolute: false));
+        // Pendaftaran publik selalu menghasilkan pelanggan, bukan staf.
+        $component->assertRedirect(route('customer.dashboard', absolute: false));
 
         $this->assertAuthenticated();
     }

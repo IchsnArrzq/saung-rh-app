@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Admin\System;
 
-use App\Models\AppSetting;
-use App\Services\Settings\AppSettingsInterface;
+use App\Domains\System\Repositories\AppSettingRepositoryInterface;
+use App\Domains\System\Services\AppSettings;
 use Illuminate\View\View;
 use Livewire\Component;
 
-class AppSettingsInterfaceManager extends Component
+class AppSettingsManager extends Component
 {
     /**
      * key => value map bound to the form inputs.
@@ -16,28 +16,24 @@ class AppSettingsInterfaceManager extends Component
      */
     public array $values = [];
 
-    public function mount(): void
+    public function mount(AppSettingRepositoryInterface $settings): void
     {
-        $this->values = AppSetting::query()->pluck('value', 'key')->map(fn ($v) => (string) $v)->all();
+        $this->values = collect($settings->allKeyValue())
+            ->map(fn ($value) => (string) $value)
+            ->all();
     }
 
-    public function save(AppSettingsInterface $settings): void
+    public function save(AppSettings $settings): void
     {
         $settings->setMany($this->values);
 
         session()->flash('success', 'Pengaturan aplikasi disimpan.');
     }
 
-    public function render(): View
+    public function render(AppSettingRepositoryInterface $settings): View
     {
-        $groups = AppSetting::query()
-            ->orderBy('group')
-            ->orderBy('key')
-            ->get()
-            ->groupBy('group');
-
         return view('livewire.admin.system.app-settings-manager', [
-            'groups' => $groups,
+            'groups' => $settings->groupedForAdmin(),
         ]);
     }
 }

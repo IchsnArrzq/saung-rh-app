@@ -63,10 +63,9 @@
                         @endforeach
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary w-full">
-                    <span wire:loading.remove wire:target="addWalkIn">Tambah Pengunjung</span>
-                    <span wire:loading wire:target="addWalkIn">Menyimpan...</span>
-                </button>
+                <x-button type="submit" variant="primary" :block="true" loading="addWalkIn">
+                    Tambah Pengunjung
+                </x-button>
             </form>
         </div>
     </div>

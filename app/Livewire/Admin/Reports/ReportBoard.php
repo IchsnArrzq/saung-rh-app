@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Admin\Reports;
 
+use App\Domains\Reporting\QueryUseCases\GetSalesReportQueryUseCase;
 use App\Exports\SalesReportExport;
-use App\Services\Admin\ReportServiceInterface;
 use Carbon\Carbon;
 use Livewire\Component;
 use Maatwebsite\Excel\Facades\Excel;
@@ -52,9 +52,9 @@ class ReportBoard extends Component
         return Excel::download(new SalesReportExport($this->startDate, $this->endDate), $fileName);
     }
 
-    public function render(ReportServiceInterface $reportService)
+    public function render(GetSalesReportQueryUseCase $salesReport)
     {
-        $data = $reportService->getReportData($this->startDate, $this->endDate);
+        $data = $salesReport->handle($this->startDate, $this->endDate);
 
         $this->dispatch('chart-updated', data: [
             'labels' => $data['chartLabels'],

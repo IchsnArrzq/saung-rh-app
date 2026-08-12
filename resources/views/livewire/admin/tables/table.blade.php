@@ -1,90 +1,80 @@
 <div class="space-y-5">
     @include('admin.partials.flash')
 
-    @error('table_status_id')
-        <div role="alert" class="alert alert-error">
-            <span>{{ $message }}</span>
-        </div>
+    @error('status')
+        <x-alert type="error">{{ $message }}</x-alert>
     @enderror
 
-    <section class="rounded-2xl border border-stone-200 bg-white p-4 md:p-5">
+    <x-card>
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-2">
-                <div class="relative w-full max-w-md">
-                    <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
-                    <input type="text" class="input input-bordered w-full pl-10" wire:model.live.debounce.300ms="search"
-                        placeholder="Cari kode, nama, status, kategori, kapasitas...">
-                </div>
+                <x-search-input class="max-w-md" wire:model.live.debounce.300ms="search"
+                    placeholder="Cari kode, nama, status, kategori, kapasitas..." label="Cari meja" />
+
                 @if ($search !== '')
-                    <button type="button" class="btn btn-sm btn-ghost" wire:click="$set('search', '')">Reset</button>
+                    <x-button variant="ghost" size="sm" wire:click="$set('search', '')">Reset</x-button>
                 @endif
             </div>
 
-            <a href="{{ route('tables.create') }}" class="btn btn-sm bg-emerald-800 text-amber-50 hover:bg-emerald-700">
-                <i class="ri-add-line"></i>
+            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('tables.create')">
                 Tambah Meja
-            </a>
+            </x-button>
         </div>
-    </section>
+    </x-card>
 
-    <div class="overflow-x-auto rounded-2xl border border-stone-200 bg-white">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Kode</th>
-                    <th>Nama</th>
-                    <th>Kapasitas</th>
-                    <th>Kategori</th>
-                    <th>Status</th>
-                    <th class="text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($tables as $table)
-                    <tr wire:key="table-{{ $table->id }}">
-                        <td>{{ $table->code }}</td>
-                        <td>{{ $table->name ?: '-' }}</td>
-                        <td>{{ $table->capacity }}</td>
-                        <td>{{ $table->tableCategory->name ?? '-' }}</td>
-                        <td>
-                            <div class="flex items-center gap-2">
-                                <select class="select select-bordered select-xs w-40"
-                                    wire:model="statusDrafts.{{ $table->id }}">
-                                    <option value="">Pilih status</option>
-                                    @foreach ($statusOptions as $status)
-                                        <option value="{{ $status->id }}">{{ $status->name }}</option>
-                                    @endforeach
-                                </select>
-                                <button type="button" class="btn btn-sm btn-outline"
-                                    wire:click="updateStatus('{{ $table->id }}')">
-                                    Update
-                                </button>
-                            </div>
-                        </td>
-                        <td class="text-right">
-                            <div class="inline-flex gap-2">
-                                <a href="{{ route('tables.qr', $table) }}" class="btn btn-sm btn-outline">QR</a>
-                                <a href="{{ route('tables.edit', $table) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <button type="button" class="btn btn-sm btn-error text-white"
-                                    data-confirm="Hapus meja ini?"
-                                    wire:click="delete('{{ $table->id }}')"
-                                    wire:loading.attr="disabled"
-                                    wire:target="delete('{{ $table->id }}')">
-                                    <span wire:loading.remove wire:target="delete('{{ $table->id }}')">Hapus</span>
-                                    <span wire:loading wire:target="delete('{{ $table->id }}')" class="loading loading-spinner loading-xs"></span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="text-center text-stone-500">Belum ada data meja.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table>
+        <x-slot:head>
+            <tr>
+                <th>Kode</th>
+                <th>Nama</th>
+                <th>Kapasitas</th>
+                <th>Kategori</th>
+                <th>Status</th>
+                <th class="text-right">Aksi</th>
+            </tr>
+        </x-slot:head>
+
+        @forelse ($tables as $table)
+            <tr wire:key="table-{{ $table->id }}">
+                <td>{{ $table->code }}</td>
+                <td>{{ $table->name ?: '-' }}</td>
+                <td>{{ $table->capacity }}</td>
+                <td>{{ $table->tableCategory->name ?? '-' }}</td>
+                <td>
+                    <div class="flex items-center gap-2">
+                        <x-select :bare="true" size="xs" class="w-40" placeholder="Pilih status"
+                            label="Status meja {{ $table->code }}"
+                            wire:model="statusDrafts.{{ $table->id }}">
+                            @foreach ($statusOptions as $status)
+                                <option value="{{ $status->value }}">{{ $status->label() }}</option>
+                            @endforeach
+                        </x-select>
+
+                        <x-button variant="outline" size="sm" wire:click="updateStatus('{{ $table->id }}')"
+                            loading="updateStatus('{{ $table->id }}')">
+                            Update
+                        </x-button>
+                    </div>
+                </td>
+                <td class="text-right">
+                    <div class="inline-flex gap-2">
+                        <x-button variant="outline" size="sm" :href="route('tables.qr', $table)">QR</x-button>
+                        <x-button variant="warning" size="sm" :href="route('tables.edit', $table)">Edit</x-button>
+                        <x-button variant="error" size="sm" class="text-white"
+                            data-confirm="Hapus meja ini?"
+                            wire:click="delete('{{ $table->id }}')"
+                            loading="delete('{{ $table->id }}')">
+                            Hapus
+                        </x-button>
+                    </div>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="6" class="text-center text-base-content/50">Belum ada data meja.</td>
+            </tr>
+        @endforelse
+    </x-data-table>
 
     <div>{{ $tables->links() }}</div>
 </div>
-

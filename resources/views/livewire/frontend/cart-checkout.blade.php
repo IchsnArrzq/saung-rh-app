@@ -1,34 +1,27 @@
 <div>
     @if (session('success'))
-        <div class="mb-4 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-medium text-success">
-            {{ session('success') }}
-        </div>
+        <x-alert type="success" class="mb-4">{{ session('success') }}</x-alert>
     @endif
 
     @if ($errors->any())
-        <div class="mb-4 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
-            <p class="font-semibold">Periksa input checkout:</p>
+        <x-alert type="error" title="Periksa input checkout:" class="mb-4">
             <ul class="mt-2 list-disc pl-5">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
-        </div>
+        </x-alert>
     @endif
 
-    <section class="rounded-3xl border border-base-300 bg-base-100 p-5 md:p-6">
-        <div class="flex flex-wrap items-center gap-3">
-            <div>
-                <h1 class="text-2xl font-semibold">Cart Pesanan</h1>
-                <p class="mt-1 text-sm text-base-content/70">Pesan langsung ke dapur untuk meja Anda (dine-in).</p>
-            </div>
+    <x-page-header title="Cart Pesanan" description="Pesan langsung ke dapur untuk meja Anda (dine-in).">
+        <x-slot:actions>
+            <x-button variant="ghost" size="sm" icon="ri-arrow-left-line"
+                :href="route('public.menu', ['table_id' => $tableId])">
+                Kembali ke Menu
+            </x-button>
+        </x-slot:actions>
 
-            <a href="{{ route('public.menu', ['table_id' => $tableId]) }}" class="btn btn-sm btn-ghost ml-auto">
-                <i class="ri-arrow-left-line"></i> Kembali ke Menu
-            </a>
-        </div>
-
-        <div class="mt-4 rounded-2xl border border-info/30 bg-info/10 p-4 text-sm text-base-content/80">
+        <div class="mt-4 rounded-xl border border-info/30 bg-info/10 p-4 text-sm text-base-content/80">
             <p class="font-semibold"><i class="ri-information-line"></i> Pesan Sekarang (Dine-in)</p>
             <p class="mt-1">Pilih menu, pastikan meja Anda terpilih, lalu kirim pesanan. Order langsung masuk ke dapur.</p>
             <p class="mt-2">
@@ -37,15 +30,13 @@
                 untuk membuat booking.
             </p>
         </div>
-    </section>
+    </x-page-header>
 
     <section class="mt-6 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <article class="rounded-3xl border border-base-300 bg-base-100 p-5">
-            <h2 class="text-lg font-semibold">List Menu di Cart</h2>
-
+        <x-card title="List Menu di Cart">
             <div class="mt-4 space-y-3">
                 @forelse ($cartItems as $item)
-                    <div class="rounded-2xl border border-base-300 p-3">
+                    <div class="rounded-xl border border-base-300 p-3">
                         <div class="flex items-start gap-3">
                             <div class="h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-base-200">
                                 @if ($item['image_url'])
@@ -69,28 +60,34 @@
                         </div>
 
                         <div class="mt-3 flex items-center gap-2">
-                            <button type="button" wire:click="decrementQty('{{ $item['menu_id'] }}')" class="btn btn-sm btn-outline btn-square">
-                                <i class="ri-subtract-line"></i>
-                            </button>
+                            <x-button variant="outline" size="sm" shape="square" icon="ri-subtract-line"
+                                label="Kurangi jumlah {{ $item['name'] }}"
+                                wire:click="decrementQty('{{ $item['menu_id'] }}')" />
                             <span class="w-8 text-center text-sm font-semibold">{{ $item['qty'] }}</span>
-                            <button type="button" wire:click="incrementQty('{{ $item['menu_id'] }}')" class="btn btn-sm btn-outline btn-square">
-                                <i class="ri-add-line"></i>
-                            </button>
-                            <button type="button" wire:click="removeItem('{{ $item['menu_id'] }}')" class="btn btn-sm btn-error btn-square text-white ml-auto">
-                                <i class="ri-delete-bin-line"></i>
-                            </button>
+                            <x-button variant="outline" size="sm" shape="square" icon="ri-add-line"
+                                label="Tambah jumlah {{ $item['name'] }}"
+                                wire:click="incrementQty('{{ $item['menu_id'] }}')" />
+                            <x-button variant="error" size="sm" shape="square" icon="ri-delete-bin-line"
+                                class="ml-auto text-white" label="Hapus {{ $item['name'] }}"
+                                wire:click="removeItem('{{ $item['menu_id'] }}')"
+                                data-confirm="Hapus item ini dari cart?" />
                         </div>
                     </div>
                 @empty
-                    <p class="rounded-xl border border-dashed border-base-300 p-4 text-sm text-base-content/60">
-                        Cart masih kosong. Silakan pilih menu dulu.
-                    </p>
+                    <x-empty-state icon="ri-shopping-cart-line" title="Cart masih kosong"
+                        description="Silakan pilih menu dulu.">
+                        <x-slot:actions>
+                            <x-button variant="primary" size="sm" icon="ri-restaurant-line"
+                                :href="route('public.menu', ['table_id' => $tableId])">
+                                Lihat Menu
+                            </x-button>
+                        </x-slot:actions>
+                    </x-empty-state>
                 @endforelse
             </div>
-        </article>
+        </x-card>
 
-        <article class="rounded-3xl border border-base-300 bg-base-100 p-5">
-            <h2 class="text-lg font-semibold">Checkout</h2>
+        <x-card title="Checkout">
             <p class="mt-1 text-sm text-base-content/70">
                 Total Estimasi: <span class="font-semibold text-base-content">Rp {{ number_format((float) $subtotal, 0, ',', '.') }}</span>
             </p>
@@ -101,6 +98,7 @@
                     <div class="mt-2 grid grid-cols-2 gap-2">
                         @foreach ($tables as $table)
                             <button type="button" wire:click="selectTable('{{ $table->id }}')"
+                                aria-pressed="{{ (string) $tableId === (string) $table->id ? 'true' : 'false' }}"
                                 class="rounded-xl border p-3 text-left text-sm transition {{ (string) $tableId === (string) $table->id ? 'border-primary bg-primary/10' : 'border-base-300 bg-base-100 hover:border-primary/50' }}">
                                 <p class="font-semibold">{{ $table->code }}</p>
                                 <p class="text-xs text-base-content/60">{{ $table->capacity }} orang</p>
@@ -109,21 +107,18 @@
                     </div>
                 </div>
 
-                <label class="form-control w-full">
-                    <span class="label-text mb-1">Nama Pemesan (opsional)</span>
-                    <input type="text" wire:model="customerName" class="input input-bordered w-full" placeholder="Nama Anda">
-                </label>
+                <x-input label="Nama Pemesan (opsional)" name="customerName" wire:model="customerName"
+                    placeholder="Nama Anda" />
 
-                <label class="form-control w-full">
-                    <span class="label-text mb-1">Catatan Pesanan</span>
-                    <textarea wire:model="notes" rows="3" class="textarea textarea-bordered w-full" placeholder="opsional"></textarea>
-                </label>
+                <x-textarea label="Catatan Pesanan" name="notes" :rows="3" wire:model="notes"
+                    placeholder="opsional" />
 
-                <button type="button" wire:click="checkout" data-confirm="Kirim pesanan ini ke dapur?"
-                    class="btn btn-primary w-full">
-                    <i class="ri-send-plane-2-line"></i> Kirim Pesanan ke Dapur
-                </button>
+                <x-button variant="primary" :block="true" icon="ri-send-plane-2-line"
+                    wire:click="checkout" loading="checkout"
+                    data-confirm="Kirim pesanan ini ke dapur?">
+                    Kirim Pesanan ke Dapur
+                </x-button>
             </div>
-        </article>
+        </x-card>
     </section>
 </div>

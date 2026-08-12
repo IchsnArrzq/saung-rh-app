@@ -14,21 +14,15 @@
                         placeholder="Cari kode, nama, kategori, kapasitas...">
                 </div>
 
-                <label class="label cursor-pointer justify-start gap-2 px-0">
-                    <input type="checkbox" class="checkbox checkbox-sm checkbox-primary"
-                        wire:model.live="showInactiveStatuses">
-                    <span class="label-text text-sm">Tampilkan status nonaktif</span>
-                </label>
             </div>
 
             <div class="text-xs text-secondary">
                 Drag kartu meja ke kolom status tujuan.
             </div>
 
-            <a href="{{ route('tables.create') }}" class="btn btn-sm btn-primary">
-                <i class="ri-add-line"></i>
+            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('tables.create')">
                 Tambah Meja
-            </a>
+            </x-button>
         </div>
     </section>
 
@@ -36,45 +30,48 @@
         <div class="flex min-w-max gap-4 pb-1">
             @forelse ($statuses as $status)
                 @php
-                    $headerBadgeClass = match ($status->color) {
+                    // Full class names per branch — Tailwind cannot scan interpolated ones.
+                    $headerBadgeClass = match ($status->color()) {
                         'success' => 'badge-success',
                         'error' => 'badge-error',
                         'warning' => 'badge-warning',
                         'info' => 'badge-info',
+                        'secondary' => 'badge-secondary',
                         default => 'badge-neutral',
                     };
+                    $statusTables = $tablesByStatus->get($status->value, collect());
                 @endphp
                 <article class="w-[300px] shrink-0 rounded-2xl border border-base-300 bg-base-100 p-3 shadow-sm">
                     <header class="mb-3 flex items-center justify-between gap-2 px-1">
                         <div>
-                            <h3 class="text-sm font-semibold text-base-content">{{ $status->name }}</h3>
-                            <p class="text-xs text-secondary">Key: {{ $status->key }}</p>
+                            <h3 class="text-sm font-semibold text-base-content">{{ $status->label() }}</h3>
+                            <p class="text-xs text-secondary">Key: {{ $status->value }}</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="badge {{ $headerBadgeClass }}">{{ $status->color ?: 'neutral' }}</span>
-                            <span class="badge badge-outline">{{ $status->tables->count() }}</span>
+                            <span class="badge {{ $headerBadgeClass }}">{{ $status->color() }}</span>
+                            <span class="badge badge-outline">{{ $statusTables->count() }}</span>
                         </div>
                     </header>
 
                     <div class="min-h-[280px] space-y-2 rounded-xl border border-dashed border-base-300 bg-base-200 p-2 transition"
-                        x-bind:class="overStatusId === '{{ $status->id }}' ? 'ring-2 ring-primary/40 ring-offset-2 ring-offset-base-100 border-primary/50' : ''"
-                        x-on:dragenter.prevent="overStatusId = '{{ $status->id }}'"
+                        x-bind:class="overStatusId === '{{ $status->value }}' ? 'ring-2 ring-primary/40 ring-offset-2 ring-offset-base-100 border-primary/50' : ''"
+                        x-on:dragenter.prevent="overStatusId = '{{ $status->value }}'"
                         x-on:dragover.prevent
-                        x-on:dragleave.prevent="if (overStatusId === '{{ $status->id }}') overStatusId = null"
+                        x-on:dragleave.prevent="if (overStatusId === '{{ $status->value }}') overStatusId = null"
                         x-on:drop.prevent="
                             if (!draggingTableId) return;
-                            $wire.moveTable(draggingTableId, '{{ $status->id }}');
+                            $wire.moveTable(draggingTableId, '{{ $status->value }}');
                             draggingTableId = null;
                             fromStatusId = null;
                             overStatusId = null;
                         ">
-                        @forelse ($status->tables as $table)
+                        @forelse ($statusTables as $table)
                             <div class="cursor-grab rounded-xl border border-base-300 bg-base-100 p-3 shadow-sm transition active:cursor-grabbing"
                                 draggable="true" wire:key="status-board-table-{{ $table->id }}"
                                 x-bind:class="draggingTableId === '{{ $table->id }}' ? 'scale-[0.98] opacity-40' : ''"
                                 x-on:dragstart="
                                     draggingTableId = '{{ $table->id }}';
-                                    fromStatusId = '{{ $status->id }}';
+                                    fromStatusId = '{{ $status->value }}';
                                 "
                                 x-on:dragend="
                                     draggingTableId = null;
@@ -90,8 +87,8 @@
                                     {{ $table->tableCategory?->name ? 'Kategori: '.$table->tableCategory->name : 'Tanpa kategori' }}
                                 </p>
                                 <div class="mt-3 flex gap-2">
-                                    <a href="{{ route('tables.edit', $table) }}" class="btn btn-sm btn-warning">Edit</a>
-                                    <a href="{{ route('tables.qr', $table) }}" class="btn btn-sm btn-outline">QR</a>
+                                    <x-button variant="warning" size="sm" :href="route('tables.edit', $table)">Edit</x-button>
+                                    <x-button variant="outline" size="sm" :href="route('tables.qr', $table)">QR</x-button>
                                 </div>
                             </div>
                         @empty

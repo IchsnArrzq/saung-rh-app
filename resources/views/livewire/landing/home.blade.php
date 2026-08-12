@@ -30,13 +30,15 @@
                     Nikmati hidangan khas kami dengan kemudahan memesan langsung dari meja menggunakan QR code, atau lakukan reservasi tempat sebelum kedatangan.
                 </p>
                 <div class="mt-10 flex flex-wrap justify-center lg:justify-start gap-4">
-                    <a href="{{ route('public.menu') }}" class="btn rounded-lg bg-primary border-none text-primary-content hover:brightness-90 px-8 py-3 shadow-lg shadow-primary/30 transition-all font-semibold">
+                    <x-button variant="primary" class="rounded-lg border-none px-8 py-3 font-semibold shadow-lg shadow-primary/30 transition-all"
+                        :href="route('public.menu')">
                         Lihat Menu
-                    </a>
+                    </x-button>
                     @if (Route::has('customer.bookings.create'))
-                        <a href="{{ route('customer.bookings.create') }}" class="btn rounded-lg bg-base-100 border border-base-300 text-base-content hover:bg-base-200 px-8 py-3 font-semibold transition-all shadow-sm">
+                        <x-button variant="outline" class="rounded-lg border-base-300 bg-base-100 px-8 py-3 font-semibold shadow-sm transition-all"
+                            :href="route('customer.bookings.create')">
                             Pesan Meja
-                        </a>
+                        </x-button>
                     @endif
                 </div>
             </div>
@@ -98,12 +100,15 @@
                             alt="{{ $menu->name }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110">
                         
                         <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
-                            <a href="{{ route('public.menu.show', $menu) }}" class="btn btn-sm rounded-lg bg-base-100 border-none text-base-content hover:bg-base-200 shadow-lg font-medium">
-                                <i class="ri-eye-line"></i> Detail
-                            </a>
-                            <button type="button" wire:click="quickAdd('{{ $menu->id }}')" class="btn btn-sm rounded-lg bg-success border-none text-success-content hover:brightness-90 shadow-lg font-medium">
-                                <i class="ri-shopping-cart-2-line"></i> Tambah
-                            </button>
+                            <x-button variant="neutral" :outline="true" size="sm" class="rounded-lg bg-base-100 font-medium shadow-lg"
+                                icon="ri-eye-line" :href="route('public.menu.show', $menu)">
+                                Detail
+                            </x-button>
+                            <x-button variant="success" size="sm" class="rounded-lg font-medium shadow-lg"
+                                icon="ri-shopping-cart-2-line" wire:click="quickAdd('{{ $menu->id }}')"
+                                loading="quickAdd('{{ $menu->id }}')">
+                                Tambah
+                            </x-button>
                         </div>
                     </div>
 
@@ -117,9 +122,7 @@
                         
                         <div class="mt-5 pt-4 border-t border-base-200 flex items-center justify-between gap-2">
                             <p class="text-lg font-extrabold text-success">Rp {{ number_format((float) $menu->price, 0, ',', '.') }}</p>
-                            <a href="{{ route('public.menu.show', $menu) }}" class="btn btn-xs btn-ghost">
-                                Detail
-                            </a>
+                            <x-button variant="ghost" size="xs" :href="route('public.menu.show', $menu)">Detail</x-button>
                             <button type="button" wire:click="quickAdd('{{ $menu->id }}')" class="flex h-8 w-8 items-center justify-center rounded-full bg-success/10 text-success hover:bg-success hover:text-success-content transition-colors lg:hidden">
                                 <i class="ri-add-line text-lg font-bold"></i>
                             </button>

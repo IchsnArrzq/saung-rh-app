@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Domains\Order\Enums\OrderStatus;
 use App\Models\Order;
 use Illuminate\Support\Facades\Route;
 
@@ -93,7 +94,7 @@ class SidebarNavigation
     private function activeOrdersBadge(): ?string
     {
         $count = Order::query()
-            ->whereIn('status', ['draft', 'confirmed', 'preparing', 'ready', 'served'])
+            ->whereIn('status', [OrderStatus::Draft->value, ...OrderStatus::inServiceValues()])
             ->count();
 
         return $count > 0 ? (string) $count : null;

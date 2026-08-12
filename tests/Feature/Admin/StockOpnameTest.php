@@ -6,7 +6,8 @@ use App\Livewire\Admin\StockOpnames\Form;
 use App\Models\Ingredient;
 use App\Models\StockMovement;
 use App\Models\StockOpname;
-use App\Services\Admin\StockOpnameServiceInterface;
+use App\Domains\Inventory\UseCases\CreateStockOpnameDraftUseCase;
+use App\Domains\Inventory\UseCases\PostStockOpnameUseCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
@@ -22,7 +23,7 @@ class StockOpnameTest extends TestCase
         Ingredient::create(['name' => 'Gula', 'unit' => 'gram', 'stock' => 500, 'min_stock' => 50, 'is_active' => true]);
         Ingredient::create(['name' => 'Nonaktif', 'unit' => 'gram', 'stock' => 5, 'min_stock' => 1, 'is_active' => false]);
 
-        $opname = app(StockOpnameServiceInterface::class)->createDraft(Carbon::parse('2026-07-05'));
+        $opname = app(CreateStockOpnameDraftUseCase::class)->handle(Carbon::parse('2026-07-05'));
 
         $this->assertSame('draft', $opname->status);
         $this->assertSame(2, $opname->items()->count()); // only active
@@ -33,7 +34,7 @@ class StockOpnameTest extends TestCase
     {
         $garam = Ingredient::create(['name' => 'Garam', 'unit' => 'gram', 'stock' => 1000, 'min_stock' => 100, 'is_active' => true]);
 
-        $opname = app(StockOpnameServiceInterface::class)->createDraft(Carbon::parse('2026-07-05'));
+        $opname = app(CreateStockOpnameDraftUseCase::class)->handle(Carbon::parse('2026-07-05'));
         $item = $opname->items()->first();
 
         // Physically counted 950 (shortage of 50).
@@ -59,7 +60,7 @@ class StockOpnameTest extends TestCase
     public function test_posted_opname_cannot_be_reposted(): void
     {
         Ingredient::create(['name' => 'Garam', 'unit' => 'gram', 'stock' => 1000, 'min_stock' => 100, 'is_active' => true]);
-        $opname = app(StockOpnameServiceInterface::class)->createDraft(Carbon::parse('2026-07-05'));
+        $opname = app(CreateStockOpnameDraftUseCase::class)->handle(Carbon::parse('2026-07-05'));
 
         Livewire::test(Form::class, ['opname' => $opname])
             ->set('rows.0.physical_qty', '900')
@@ -68,8 +69,8 @@ class StockOpnameTest extends TestCase
         $garam = Ingredient::first();
         $this->assertEqualsWithDelta(900, (float) $garam->fresh()->stock, 0.001);
 
-        // Re-posting is a no-op (service guards against it); stock unchanged.
-        app(StockOpnameServiceInterface::class)->post($opname->fresh());
+        // Re-posting is a no-op (the UseCase guards against it); stock unchanged.
+        app(PostStockOpnameUseCase::class)->handle($opname->fresh());
         $this->assertEqualsWithDelta(900, (float) $garam->fresh()->stock, 0.001);
         $this->assertSame(1, StockMovement::where('ingredient_id', $garam->id)->count());
     }

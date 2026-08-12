@@ -1,89 +1,83 @@
 <div class="space-y-5">
     @include('admin.partials.flash')
 
-    <section class="rounded-2xl border border-stone-200 bg-white p-4 md:p-5">
+    <x-card>
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-2">
-                <div class="relative w-full max-w-md">
-                    <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
-                    <input type="text" class="input input-bordered w-full pl-10" wire:model.live.debounce.300ms="search"
-                        placeholder="Cari nama, satuan...">
-                </div>
+                <x-search-input class="max-w-md" wire:model.live.debounce.300ms="search"
+                    placeholder="Cari nama, satuan..." label="Cari bahan" />
+
                 @if ($search !== '')
-                    <button type="button" class="btn btn-sm btn-ghost" wire:click="$set('search', '')">Reset</button>
+                    <x-button variant="ghost" size="sm" wire:click="$set('search', '')">Reset</x-button>
                 @endif
             </div>
 
-            <a href="{{ route('ingredients.create') }}" class="btn btn-sm bg-emerald-800 text-amber-50 hover:bg-emerald-700">
-                <i class="ri-add-line"></i>
+            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('ingredients.create')">
                 Tambah Bahan
-            </a>
+            </x-button>
         </div>
-    </section>
+    </x-card>
 
-    <div class="overflow-x-auto rounded-2xl border border-stone-200 bg-white">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Nama Bahan</th>
-                    <th>Satuan</th>
-                    <th>Stok Saat Ini</th>
-                    <th>Stok Minimum</th>
-                    <th>Harga/Satuan</th>
-                    <th>Status</th>
-                    <th class="text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($ingredients as $ingredient)
-                    <tr wire:key="ingredient-row-{{ $ingredient->id }}">
-                        <td>
-                            <p class="font-semibold text-stone-800">{{ $ingredient->name }}</p>
-                        </td>
-                        <td>{{ $ingredient->unit }}</td>
-                        <td>
-                            <span class="{{ $ingredient->isLowStock() ? 'text-error font-semibold' : 'text-stone-700' }}">
-                                {{ number_format((float) $ingredient->stock, 3, ',', '.') }}
-                            </span>
-                            @if ($ingredient->isLowStock())
-                                <span class="badge badge-error badge-sm ml-1">Rendah</span>
-                            @endif
-                        </td>
-                        <td>{{ number_format((float) $ingredient->min_stock, 3, ',', '.') }}</td>
-                        <td>
-                            @if ($ingredient->cost_per_unit)
-                                Rp {{ number_format((float) $ingredient->cost_per_unit, 0, ',', '.') }}
-                            @else
-                                -
-                            @endif
-                        </td>
-                        <td>
-                            <span class="badge {{ $ingredient->is_active ? 'badge-success' : 'badge-ghost' }}">
-                                {{ $ingredient->is_active ? 'Aktif' : 'Nonaktif' }}
-                            </span>
-                        </td>
-                        <td class="text-right">
-                            <div class="inline-flex gap-2">
-                                <a href="{{ route('ingredients.edit', $ingredient) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <button type="button" class="btn btn-sm btn-error text-white"
-                                    data-confirm="Hapus bahan ini?"
-                                    wire:click="delete('{{ $ingredient->id }}')"
-                                    wire:loading.attr="disabled"
-                                    wire:target="delete('{{ $ingredient->id }}')">
-                                    <span wire:loading.remove wire:target="delete('{{ $ingredient->id }}')">Hapus</span>
-                                    <span wire:loading wire:target="delete('{{ $ingredient->id }}')" class="loading loading-spinner loading-xs"></span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="text-center text-stone-500">Belum ada data bahan makanan.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table>
+        <x-slot:head>
+            <tr>
+                <th>Nama Bahan</th>
+                <th>Satuan</th>
+                <th>Stok Saat Ini</th>
+                <th>Stok Minimum</th>
+                <th>Harga/Satuan</th>
+                <th>Status</th>
+                <th class="text-right">Aksi</th>
+            </tr>
+        </x-slot:head>
+
+        @forelse ($ingredients as $ingredient)
+            <tr wire:key="ingredient-row-{{ $ingredient->id }}">
+                <td>
+                    <p class="font-semibold">{{ $ingredient->name }}</p>
+                </td>
+                <td>{{ $ingredient->unit }}</td>
+                <td>
+                    <span class="{{ $ingredient->isLowStock() ? 'font-semibold text-error' : 'text-base-content/80' }}">
+                        {{ number_format((float) $ingredient->stock, 3, ',', '.') }}
+                    </span>
+                    @if ($ingredient->isLowStock())
+                        <x-badge color="error" size="sm" class="ml-1">Rendah</x-badge>
+                    @endif
+                </td>
+                <td>{{ number_format((float) $ingredient->min_stock, 3, ',', '.') }}</td>
+                <td>
+                    @if ($ingredient->cost_per_unit)
+                        Rp {{ number_format((float) $ingredient->cost_per_unit, 0, ',', '.') }}
+                    @else
+                        -
+                    @endif
+                </td>
+                <td>
+                    <x-badge :color="$ingredient->is_active ? 'success' : 'ghost'">
+                        {{ $ingredient->is_active ? 'Aktif' : 'Nonaktif' }}
+                    </x-badge>
+                </td>
+                <td class="text-right">
+                    <div class="inline-flex gap-2">
+                        <x-button variant="warning" size="sm" :href="route('ingredients.edit', $ingredient)">
+                            Edit
+                        </x-button>
+                        <x-button variant="error" size="sm" class="text-white"
+                            data-confirm="Hapus bahan ini?"
+                            wire:click="delete('{{ $ingredient->id }}')"
+                            loading="delete('{{ $ingredient->id }}')">
+                            Hapus
+                        </x-button>
+                    </div>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="7" class="text-center text-base-content/50">Belum ada data bahan makanan.</td>
+            </tr>
+        @endforelse
+    </x-data-table>
 
     <div>{{ $ingredients->links() }}</div>
 </div>

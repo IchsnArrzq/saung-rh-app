@@ -2,24 +2,21 @@
 
 namespace App\Livewire\Admin\Orders;
 
+use App\Domains\Order\DTO\CreateOrderData;
+use App\Domains\Order\DTO\UpdateOrderData;
+use App\Domains\Order\Enums\OrderStatus;
+use App\Domains\Order\UseCases\CreateOrderUseCase;
+use App\Domains\Order\UseCases\UpdateOrderUseCase;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\Table;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
 
 class Form extends Component
 {
-
-    /**
-     * @var array<int, string>
-     */
-    private const STATUS_OPTIONS = ['draft', 'confirmed', 'preparing', 'ready', 'served', 'paid', 'cancelled'];
-
     public ?Order $order = null;
 
     public string $table_id = '';
@@ -47,7 +44,7 @@ class Form extends Component
 
             $this->table_id = (string) ($this->order->table_id ?? '');
             $this->customer_name = (string) ($this->order->customer_name ?? '');
-            $this->status = (string) ($this->order->status ?: 'draft');
+            $this->status = ($this->order->status ?? OrderStatus::Draft)->value;
             $this->ordered_at = (string) ($this->order->ordered_at?->format('Y-m-d\TH:i') ?? '');
             $this->notes = (string) ($this->order->notes ?? '');
             $this->tax = (string) ($this->order->tax ?? 0);
@@ -105,49 +102,38 @@ class Form extends Component
         $this->items[$index]['price'] = (float) $menu->price;
     }
 
-    public function save()
+    public function save(CreateOrderUseCase $createOrder, UpdateOrderUseCase $updateOrder)
     {
         $validated = $this->validate($this->rules());
-        $normalizedItems = $this->normalizeItems($validated['items']);
-        $subtotal = collect($normalizedItems)->sum('line_total');
+
+        $status = OrderStatus::from($validated['status']);
+        $tableId = $validated['table_id'] ?: null;
+        $customerName = $validated['customer_name'] ?: null;
+        $notes = $validated['notes'] ?: null;
         $tax = (float) ($validated['tax'] ?? 0);
-        $total = max($subtotal + $tax, 0);
+        $orderedAt = $validated['ordered_at'] ?: null;
 
-        DB::transaction(function () use ($validated, $normalizedItems, $subtotal, $tax, $total): void {
-            if ($this->order) {
-                $this->order->update([
-                    'table_id' => $validated['table_id'] ?: null,
-                    'customer_name' => $validated['customer_name'] ?: null,
-                    'status' => $validated['status'],
-                    'notes' => $validated['notes'] ?: null,
-                    'subtotal' => $subtotal,
-                    'discount' => 0,
-                    'tax' => $tax,
-                    'total' => $total,
-                    'ordered_at' => $validated['ordered_at'] ?: $this->order->ordered_at,
-                ]);
-
-                $this->order->items()->delete();
-                $this->order->items()->createMany($normalizedItems);
-
-                return;
-            }
-
-            $order = Order::query()->create([
-                'table_id' => $validated['table_id'] ?: null,
-                'order_number' => $this->generateOrderNumber(),
-                'customer_name' => $validated['customer_name'] ?: null,
-                'status' => $validated['status'],
-                'notes' => $validated['notes'] ?: null,
-                'subtotal' => $subtotal,
-                'discount' => 0,
-                'tax' => $tax,
-                'total' => $total,
-                'ordered_at' => $validated['ordered_at'] ?: now(),
-            ]);
-
-            $order->items()->createMany($normalizedItems);
-        });
+        if ($this->order) {
+            $updateOrder->handle($this->order, new UpdateOrderData(
+                items: $validated['items'],
+                status: $status,
+                tableId: $tableId,
+                customerName: $customerName,
+                notes: $notes,
+                tax: $tax,
+                orderedAt: $orderedAt,
+            ));
+        } else {
+            $createOrder->handle(new CreateOrderData(
+                items: $validated['items'],
+                status: $status,
+                tableId: $tableId,
+                customerName: $customerName,
+                notes: $notes,
+                tax: $tax,
+                orderedAt: $orderedAt,
+            ));
+        }
 
         session()->flash('success', $this->order ? 'Order berhasil diperbarui.' : 'Order berhasil dibuat.');
 
@@ -162,7 +148,7 @@ class Form extends Component
         return [
             'table_id' => ['nullable', 'exists:tables,id'],
             'customer_name' => ['nullable', 'string', 'max:120'],
-            'status' => ['required', Rule::in(self::STATUS_OPTIONS)],
+            'status' => ['required', Rule::in(OrderStatus::values())],
             'ordered_at' => ['nullable', 'date'],
             'notes' => ['nullable', 'string'],
             'tax' => ['nullable', 'numeric', 'min:0'],
@@ -173,27 +159,6 @@ class Form extends Component
             'items.*.price' => ['required', 'numeric', 'min:0'],
             'items.*.notes' => ['nullable', 'string'],
         ];
-    }
-
-    /**
-     * @param  array<int, array<string, mixed>>  $items
-     * @return array<int, array<string, mixed>>
-     */
-    private function normalizeItems(array $items): array
-    {
-        return collect($items)->map(function (array $item): array {
-            $qty = (int) $item['qty'];
-            $price = (float) $item['price'];
-
-            return [
-                'menu_id' => ($item['menu_id'] ?? '') !== '' ? $item['menu_id'] : null,
-                'menu_name_snapshot' => $item['menu_name_snapshot'],
-                'qty' => $qty,
-                'price' => $price,
-                'line_total' => $qty * $price,
-                'notes' => ($item['notes'] ?? '') !== '' ? $item['notes'] : null,
-            ];
-        })->values()->all();
     }
 
     /**
@@ -208,15 +173,6 @@ class Form extends Component
             'price' => 0,
             'notes' => '',
         ];
-    }
-
-    private function generateOrderNumber(): string
-    {
-        do {
-            $number = 'ORD-'.now()->format('Ymd').'-'.Str::upper(Str::random(4));
-        } while (Order::query()->where('order_number', $number)->exists());
-
-        return $number;
     }
 
     /**
@@ -240,7 +196,7 @@ class Form extends Component
      */
     public function statusOptions(): array
     {
-        return self::STATUS_OPTIONS;
+        return OrderStatus::values();
     }
 
     public function render(): View

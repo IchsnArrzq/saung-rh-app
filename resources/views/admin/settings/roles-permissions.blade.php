@@ -51,8 +51,8 @@
                                             <div class="flex items-center gap-2">
                                                 <span>{{ $group['label'] }}</span>
                                                 @unless ($isSuperadmin)
-                                                    <button type="button" data-select-all="{{ $group['slug'] }}"
-                                                        class="btn btn-2xs btn-ghost text-stone-500">Semua</button>
+                                                    <x-button variant="ghost" size="xs" class="text-base-content/60"
+                                                        data-select-all="{{ $group['slug'] }}">Semua</x-button>
                                                 @endunless
                                             </div>
                                         </td>
@@ -74,9 +74,7 @@
 
                     @unless ($isSuperadmin)
                         <div class="pt-4">
-                            <button type="submit" class="btn bg-emerald-800 text-amber-50 hover:bg-emerald-700">
-                                Simpan Permission
-                            </button>
+                            <x-button type="submit" variant="primary">Simpan Permission</x-button>
                         </div>
                     @endunless
                 </form>

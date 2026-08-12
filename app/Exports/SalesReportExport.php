@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Domains\Order\Enums\OrderStatus;
 use App\Models\Order;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromQuery;
@@ -28,7 +29,7 @@ class SalesReportExport implements FromQuery, WithHeadings, WithMapping, ShouldA
         return Order::query()
             ->with(['table', 'cashier'])
             ->whereBetween('ordered_at', [$this->startDate, $this->endDate])
-            ->where('status', 'paid')
+            ->where('status', OrderStatus::Paid->value)
             ->orderBy('ordered_at', 'desc');
     }
 

@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Menu;
 use App\Models\MenuCategory;
-use App\Models\MenuStatus;
+use App\Domains\Menu\Enums\MenuAvailability;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -15,14 +15,6 @@ class MenuSeeder extends Seeder
      */
     public function run(): void
     {
-        $availableStatusId = MenuStatus::query()
-            ->where('key', 'available')
-            ->value('id');
-
-        $unavailableStatusId = MenuStatus::query()
-            ->where('key', 'unavailable')
-            ->value('id') ?? $availableStatusId;
-
         $menus = [
             ['Nasi Goreng Special', 'Makanan Utama', 35000],
             ['Mie Goreng Jawa', 'Makanan Utama', 32000],
@@ -50,7 +42,7 @@ class MenuSeeder extends Seeder
                 ['slug' => $slug],
                 [
                     'menu_category_id' => $category?->id,
-                    'menu_status_id' => fake()->boolean(90) ? $availableStatusId : $unavailableStatusId,
+                    'status' => (fake()->boolean(90) ? MenuAvailability::Available : MenuAvailability::Unavailable)->value,
                     'name' => $menuName,
                     'sku' => strtoupper(Str::slug($menuName, '')),
                     'description' => fake()->sentence(12),

@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin\MenuMedia;
 
 use App\Models\Menu;
-use App\Services\Admin\MediaServiceInterface;
+use App\Domains\Menu\Services\MediaService;
 use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -33,7 +33,7 @@ class Manager extends Component
         );
     }
 
-    public function uploadImages(MediaServiceInterface $mediaService): void
+    public function uploadImages(MediaService $mediaService): void
     {
         $this->validate(
             [
@@ -52,7 +52,7 @@ class Manager extends Component
         session()->flash('success', 'Gambar berhasil diunggah.');
     }
 
-    public function uploadVideo(MediaServiceInterface $mediaService): void
+    public function uploadVideo(MediaService $mediaService): void
     {
         $this->validate(
             ['newVideo' => ['required', 'file', 'mimetypes:video/mp4,video/webm,video/ogg', 'max:51200']], // 50 MB
@@ -66,13 +66,13 @@ class Manager extends Component
         session()->flash('success', 'Video berhasil diunggah.');
     }
 
-    public function setPrimary(string $mediaId, MediaServiceInterface $mediaService): void
+    public function setPrimary(string $mediaId, MediaService $mediaService): void
     {
         $mediaService->setPrimaryImage($this->menu, $mediaId);
         session()->flash('success', 'Gambar utama diperbarui.');
     }
 
-    public function remove(string $mediaId, MediaServiceInterface $mediaService): void
+    public function remove(string $mediaId, MediaService $mediaService): void
     {
         $media = $this->menu->media()->findOrFail($mediaId);
         $mediaService->delete($media);

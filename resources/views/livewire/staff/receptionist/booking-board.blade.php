@@ -1,91 +1,98 @@
 <div class="space-y-4">
     @if (session('success'))
-        <div class="alert alert-success py-2 text-sm"><i class="ri-checkbox-circle-line"></i><span>{{ session('success') }}</span></div>
+        <x-alert type="success" class="py-2 text-sm">{{ session('success') }}</x-alert>
     @endif
 
     <div class="flex flex-wrap items-center gap-3">
-        <label class="input input-bordered flex items-center gap-2 w-full sm:max-w-xs">
-            <i class="ri-search-line text-secondary"></i>
-            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari nama / telp / meja..." class="grow">
-        </label>
-        <select wire:model.live="statusFilter" class="select select-bordered">
-            <option value="all">Semua status</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="seated">Seated</option>
-            <option value="cancelled">Cancelled</option>
-        </select>
-        <span class="badge badge-ghost ml-auto">Hari ini: {{ $todayCount }}</span>
+        <x-search-input class="w-full sm:max-w-xs" wire:model.live.debounce.300ms="search"
+            placeholder="Cari nama / telp / meja..." label="Cari reservasi" />
+
+        <x-select :bare="true" label="Filter status" wire:model.live="statusFilter" :options="[
+            'all' => 'Semua status',
+            'pending' => 'Menunggu Konfirmasi',
+            'confirmed' => 'Dikonfirmasi',
+            'seated' => 'Sudah Duduk',
+            'cancelled' => 'Dibatalkan',
+        ]" />
+
+        <x-badge color="ghost" class="ml-auto">Hari ini: {{ $todayCount }}</x-badge>
     </div>
 
-    <div class="overflow-x-auto card border border-base-300 bg-base-100 rounded-xl">
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th>Pelanggan</th>
-                    <th>Meja</th>
-                    <th>Waktu</th>
-                    <th>Pax</th>
-                    <th>Item</th>
-                    <th>DP</th>
-                    <th>Status</th>
-                    <th class="text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($reservations as $r)
-                    <tr>
-                        <td>
-                            <div class="font-semibold">{{ $r->customer_name }}</div>
-                            <div class="text-xs text-secondary">{{ $r->phone ?? '-' }}</div>
-                        </td>
-                        <td>{{ $r->table?->code ?? '-' }}</td>
-                        <td class="text-sm">{{ $r->reservation_at?->format('d M Y H:i') ?? '-' }}</td>
-                        <td>{{ $r->pax }}</td>
-                        <td>{{ $r->items_count }}</td>
-                        <td>
-                            @if ($r->has_deposit)
-                                <span class="badge badge-success badge-sm gap-1"><i class="ri-check-line"></i>Rp {{ number_format((float) $r->deposit_amount, 0, ',', '.') }}</span>
-                            @elseif ($r->hold_until)
-                                <span class="badge badge-warning badge-sm" title="Batas DP {{ $r->hold_until->format('d M H:i') }}">Hold {{ $r->hold_until->diffForHumans(['short' => true]) }}</span>
-                            @else
-                                <span class="text-xs text-secondary">-</span>
-                            @endif
-                        </td>
-                        <td>
-                            @php
-                                $badge = match ($r->status) {
-                                    'confirmed' => 'badge-info',
-                                    'seated' => 'badge-success',
-                                    'cancelled' => 'badge-error',
-                                    default => 'badge-ghost',
-                                };
-                            @endphp
-                            <span class="badge {{ $badge }} badge-sm">{{ str_replace('_', ' ', $r->status) }}</span>
-                        </td>
-                        <td>
-                            <div class="flex justify-end gap-1">
-                                @if (! $r->has_deposit && ! in_array($r->status, ['cancelled', 'no_show', 'completed']))
-                                    <button wire:click="openDeposit('{{ $r->id }}')" class="btn btn-xs btn-outline btn-warning">Catat DP</button>
-                                @endif
-                                @if ($r->status !== 'confirmed' && $r->status !== 'cancelled')
-                                    <button wire:click="setStatus('{{ $r->id }}', 'confirmed')" class="btn btn-xs btn-outline btn-info">Konfirmasi</button>
-                                @endif
-                                @if ($r->status !== 'seated' && $r->status !== 'cancelled')
-                                    <button wire:click="setStatus('{{ $r->id }}', 'seated')" class="btn btn-xs btn-outline btn-success">Check-in</button>
-                                @endif
-                                @if ($r->status !== 'cancelled')
-                                    <button wire:click="setStatus('{{ $r->id }}', 'cancelled')" data-confirm="Batalkan reservasi ini?" class="btn btn-xs btn-outline btn-error">Batal</button>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="8" class="text-center py-8 text-secondary text-sm">Tidak ada reservasi.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table :zebra="false" size="sm">
+        <x-slot:head>
+            <tr>
+                <th>Pelanggan</th>
+                <th>Meja</th>
+                <th>Waktu</th>
+                <th>Pax</th>
+                <th>Item</th>
+                <th>DP</th>
+                <th>Status</th>
+                <th class="text-right">Aksi</th>
+            </tr>
+        </x-slot:head>
+
+        @forelse ($reservations as $r)
+            <tr>
+                <td>
+                    <div class="font-semibold">{{ $r->customer_name }}</div>
+                    <div class="text-xs text-base-content/60">{{ $r->phone ?? '-' }}</div>
+                </td>
+                <td>{{ $r->table?->code ?? '-' }}</td>
+                <td class="text-sm">{{ $r->reservation_at?->format('d M Y H:i') ?? '-' }}</td>
+                <td>{{ $r->pax }}</td>
+                <td>{{ $r->items_count }}</td>
+                <td>
+                    @if ($r->has_deposit)
+                        <x-badge color="success" size="sm" icon="ri-check-line" class="gap-1">
+                            Rp {{ number_format((float) $r->deposit_amount, 0, ',', '.') }}
+                        </x-badge>
+                    @elseif ($r->hold_until)
+                        <x-badge color="warning" size="sm" title="Batas DP {{ $r->hold_until->format('d M H:i') }}">
+                            Hold {{ $r->hold_until->diffForHumans(['short' => true]) }}
+                        </x-badge>
+                    @else
+                        <span class="text-xs text-base-content/60">-</span>
+                    @endif
+                </td>
+                <td>
+                    <x-status-badge :status="$r->status" size="sm"
+                        :enum="\App\Domains\Reservation\Enums\ReservationStatus::class" />
+                </td>
+                <td>
+                    <div class="flex justify-end gap-1">
+                        @if (! $r->has_deposit && ! in_array($r->status, ['cancelled', 'no_show', 'completed']))
+                            <x-button variant="warning" :outline="true" size="xs"
+                                wire:click="openDeposit('{{ $r->id }}')">
+                                Catat DP
+                            </x-button>
+                        @endif
+                        @if ($r->status !== 'confirmed' && $r->status !== 'cancelled')
+                            <x-button variant="info" :outline="true" size="xs"
+                                wire:click="setStatus('{{ $r->id }}', 'confirmed')">
+                                Konfirmasi
+                            </x-button>
+                        @endif
+                        @if ($r->status !== 'seated' && $r->status !== 'cancelled')
+                            <x-button variant="success" :outline="true" size="xs"
+                                wire:click="setStatus('{{ $r->id }}', 'seated')">
+                                Check-in
+                            </x-button>
+                        @endif
+                        @if ($r->status !== 'cancelled')
+                            <x-button variant="error" :outline="true" size="xs"
+                                wire:click="setStatus('{{ $r->id }}', 'cancelled')"
+                                data-confirm="Batalkan reservasi ini?">
+                                Batal
+                            </x-button>
+                        @endif
+                    </div>
+                </td>
+            </tr>
+        @empty
+            <tr><td colspan="8" class="py-8 text-center text-sm text-base-content/50">Tidak ada reservasi.</td></tr>
+        @endforelse
+    </x-data-table>
 
     <div>{{ $reservations->links() }}</div>
 
@@ -95,25 +102,24 @@
             <div class="card w-full max-w-sm bg-base-100 shadow-xl">
                 <div class="card-body gap-4">
                     <h3 class="card-title text-base"><i class="ri-hand-coin-line text-warning"></i> Catat Uang Muka (DP)</h3>
-                    <label class="form-control">
-                        <span class="label-text mb-1">Nominal DP</span>
-                        <input type="number" min="1" step="1000" wire:model="depositAmount" class="input input-bordered" placeholder="50000">
-                        @error('depositAmount') <span class="text-error text-xs mt-1">{{ $message }}</span> @enderror
-                    </label>
-                    <label class="form-control">
-                        <span class="label-text mb-1">Metode</span>
-                        <select wire:model="depositMethod" class="select select-bordered">
-                            <option value="transfer">Transfer</option>
-                            <option value="qris">QRIS</option>
-                            <option value="cash">Tunai</option>
-                            <option value="ewallet">E-Wallet</option>
-                            <option value="debit_card">Kartu Debit</option>
-                            <option value="credit_card">Kartu Kredit</option>
-                        </select>
-                    </label>
+
+                    <x-input label="Nominal DP" name="depositAmount" type="number" min="1" step="1000"
+                        wire:model="depositAmount" placeholder="50000" />
+
+                    <x-select label="Metode" name="depositMethod" wire:model="depositMethod" :options="[
+                        'transfer' => 'Transfer',
+                        'qris' => 'QRIS',
+                        'cash' => 'Tunai',
+                        'ewallet' => 'E-Wallet',
+                        'debit_card' => 'Kartu Debit',
+                        'credit_card' => 'Kartu Kredit',
+                    ]" />
+
                     <div class="flex justify-end gap-2">
-                        <button wire:click="closeDeposit" class="btn btn-ghost btn-sm">Batal</button>
-                        <button wire:click="saveDeposit" class="btn btn-warning btn-sm">Simpan DP &amp; Kunci Meja</button>
+                        <x-button variant="ghost" size="sm" wire:click="closeDeposit">Batal</x-button>
+                        <x-button variant="warning" size="sm" wire:click="saveDeposit" loading="saveDeposit">
+                            Simpan DP &amp; Kunci Meja
+                        </x-button>
                     </div>
                 </div>
             </div>

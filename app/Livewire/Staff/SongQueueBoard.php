@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Staff;
 
-use App\Events\SongQueueUpdated;
-use App\Models\SongRequest;
-use App\Services\Songs\SongRequestServiceInterface;
+use App\Domains\Social\QueryUseCases\GetSongQueueQueryUseCase;
+use App\Domains\Social\UseCases\AdvanceSongUseCase;
+use App\Domains\Social\UseCases\RejectSongUseCase;
 use Illuminate\View\View;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -17,27 +17,22 @@ class SongQueueBoard extends Component
         // Re-render to reflect the latest queue (wire:poll is the fallback).
     }
 
-    public function advance(SongRequestServiceInterface $songs, string $id): void
+    public function advance(AdvanceSongUseCase $advanceSong, string $id): void
     {
-        $songs->advance(SongRequest::query()->findOrFail($id));
-        SongQueueUpdated::dispatch();
+        // The UseCase broadcasts SongQueueUpdated once its write commits.
+        $advanceSong->handle($id);
     }
 
-    public function reject(SongRequestServiceInterface $songs, string $id): void
+    public function reject(RejectSongUseCase $rejectSong, string $id): void
     {
-        $songs->reject(SongRequest::query()->findOrFail($id));
-        SongQueueUpdated::dispatch();
+        $rejectSong->handle($id);
     }
 
-    public function render(SongRequestServiceInterface $songs): View
+    public function render(GetSongQueueQueryUseCase $songs): View
     {
         return view('livewire.staff.song-queue-board', [
             'queue' => $songs->queue(),
-            'recentDone' => SongRequest::query()
-                ->whereIn('status', ['done', 'rejected'])
-                ->latest('updated_at')
-                ->limit(8)
-                ->get(),
+            'recentDone' => $songs->recentlyFinished(),
         ]);
     }
 }

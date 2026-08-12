@@ -32,7 +32,7 @@
         @endforeach
 
         <div class="flex justify-end">
-            <button type="submit" class="btn btn-primary btn-sm"><i class="ri-save-line"></i> Simpan Pengaturan</button>
+            <x-button type="submit" variant="primary" size="sm" icon="ri-save-line">Simpan Pengaturan</x-button>
         </div>
     </form>
 </div>

@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Customer;
 
-use App\Models\Menu;
-use App\Models\Table;
-use App\Services\Customer\OrderCartServiceInterface;
+use App\Domains\Customer\Services\CustomerCart;
+use App\Domains\Menu\QueryUseCases\GetMenuCatalogQueryUseCase;
+use App\Domains\Order\DTO\PlaceCustomerOrderData;
+use App\Domains\Order\UseCases\PlaceCustomerOrderUseCase;
+use App\Domains\Table\QueryUseCases\FindTableQueryUseCase;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -30,17 +32,17 @@ class MenuOrder extends Component
 
     public string $orderNotes = '';
 
-    public function mount(OrderCartServiceInterface $service): void
+    public function mount(FindTableQueryUseCase $findTable, CustomerCart $cart): void
     {
         $tableId = (string) request()->query('table_id', '');
 
         // Fall back to the seated table so "Pesan Menu" keeps working after the
         // first order moves the table to "order_in".
         if ($tableId === '') {
-            $tableId = (string) $service->activeTableId();
+            $tableId = (string) $cart->activeTableId();
         }
 
-        if ($tableId === '' || ! $service->findOrderableTable($tableId)) {
+        if ($tableId === '' || ! $findTable->orderable($tableId)) {
             session()->flash('warning', 'Pilih meja terlebih dahulu untuk mulai memesan.');
             $this->redirectRoute('customer.menus.tables', navigate: true);
 
@@ -48,7 +50,7 @@ class MenuOrder extends Component
         }
 
         $this->tableId = $tableId;
-        $service->setActiveTable($tableId);
+        $cart->setActiveTable($tableId);
     }
 
     public function updatedSearch(): void
@@ -62,11 +64,13 @@ class MenuOrder extends Component
         $this->resetPage();
     }
 
-    public function showMenuDetail(string $menuId): void
+    public function showMenuDetail(string $menuId, GetMenuCatalogQueryUseCase $catalog): void
     {
-        $menu = Menu::query()
-            ->with(['category:id,name', 'status:id,name,key,color'])
-            ->findOrFail($menuId);
+        $menu = $catalog->find($menuId);
+
+        if (! $menu) {
+            return;
+        }
 
         $this->selectedMenu = [
             'id' => (string) $menu->id,
@@ -88,72 +92,68 @@ class MenuOrder extends Component
         $this->selectedMenu = null;
     }
 
-    public function addFromDetail(OrderCartServiceInterface $service): void
+    public function addFromDetail(GetMenuCatalogQueryUseCase $catalog, CustomerCart $cart): void
     {
         if (! $this->selectedMenu) {
             return;
         }
 
-        $service->addItem($this->tableId, $this->selectedMenu['id'], max(1, $this->detailQty), $this->detailNotes);
+        $this->putInCart($catalog, $cart, $this->selectedMenu['id'], max(1, $this->detailQty), $this->detailNotes);
 
         $this->closeMenuDetail();
         session()->flash('success', 'Menu ditambahkan ke cart.');
     }
 
-    public function quickAdd(string $menuId, OrderCartServiceInterface $service): void
+    public function quickAdd(string $menuId, GetMenuCatalogQueryUseCase $catalog, CustomerCart $cart): void
     {
-        $service->addItem($this->tableId, $menuId, 1);
+        $this->putInCart($catalog, $cart, $menuId);
     }
 
-    public function incrementQty(string $menuId, OrderCartServiceInterface $service): void
+    public function incrementQty(string $menuId, CustomerCart $cart): void
     {
-        $current = $this->currentQty($service, $menuId);
+        $current = $cart->qtyOf($this->tableId, $menuId);
 
         if ($current > 0) {
-            $service->setQty($this->tableId, $menuId, $current + 1);
+            $cart->setQty($this->tableId, $menuId, $current + 1);
         }
     }
 
-    public function decrementQty(string $menuId, OrderCartServiceInterface $service): void
+    public function decrementQty(string $menuId, CustomerCart $cart): void
     {
-        $current = $this->currentQty($service, $menuId);
-
-        if ($current <= 1) {
-            $service->removeItem($this->tableId, $menuId);
+        if ($cart->qtyOf($this->tableId, $menuId) <= 1) {
+            $cart->removeItem($this->tableId, $menuId);
 
             return;
         }
 
-        $service->setQty($this->tableId, $menuId, $current - 1);
+        $cart->setQty($this->tableId, $menuId, $cart->qtyOf($this->tableId, $menuId) - 1);
     }
 
-    public function removeItem(string $menuId, OrderCartServiceInterface $service): void
+    public function removeItem(string $menuId, CustomerCart $cart): void
     {
-        $service->removeItem($this->tableId, $menuId);
+        $cart->removeItem($this->tableId, $menuId);
     }
 
-    public function clearCart(OrderCartServiceInterface $service): void
+    public function clearCart(CustomerCart $cart): void
     {
-        $service->emptyCart($this->tableId);
+        $cart->empty($this->tableId);
     }
 
-    private function currentQty(OrderCartServiceInterface $service, string $menuId): int
-    {
-        $item = $service->cartItems($this->tableId)->firstWhere('menu_id', $menuId);
-
-        return (int) ($item['qty'] ?? 0);
-    }
-
-    public function checkout(OrderCartServiceInterface $service)
+    public function checkout(PlaceCustomerOrderUseCase $placeOrder, CustomerCart $cart)
     {
         try {
-            $service->placeOrder($this->tableId, $this->orderNotes);
+            $placeOrder->handle(new PlaceCustomerOrderData(
+                items: $cart->toOrderItems($this->tableId),
+                tableId: $this->tableId,
+                notes: $this->orderNotes,
+            ));
         } catch (ValidationException $e) {
             $this->addError('cart', $e->validator->errors()->first());
 
             return null;
         }
 
+        $cart->empty($this->tableId);
         $this->orderNotes = '';
         session()->flash('success', 'Pesanan terkirim ke dapur. Anda bisa memesan lagi bila perlu.');
 
@@ -161,18 +161,43 @@ class MenuOrder extends Component
         return $this->redirectRoute('customer.menus.index', ['table_id' => $this->tableId], navigate: true);
     }
 
-    public function render(OrderCartServiceInterface $service)
+    public function render(GetMenuCatalogQueryUseCase $catalog, FindTableQueryUseCase $findTable, CustomerCart $cart)
     {
-        $catalog = $service->catalog($this->search, $this->activeCategoryId);
-
         return view('livewire.customer.menu-order', [
-            'menus' => $catalog['menus'],
-            'categories' => $catalog['categories'],
-            'totalAvailable' => $catalog['totalAvailable'],
-            'table' => Table::query()->find($this->tableId),
-            'cartItems' => $service->cartItems($this->tableId),
-            'cartCount' => $service->cartCount($this->tableId),
-            'cartSubtotal' => $service->cartSubtotal($this->tableId),
+            'menus' => $catalog->paginate($this->search, $this->activeCategoryId, 24),
+            'categories' => $catalog->categories(),
+            'totalAvailable' => $catalog->countAvailable(),
+            'table' => $findTable->byId($this->tableId),
+            'cartItems' => $cart->items($this->tableId),
+            'cartCount' => $cart->count($this->tableId),
+            'cartSubtotal' => $cart->subtotal($this->tableId),
         ]);
+    }
+
+    /**
+     * The cart stores a price snapshot, so every add has to go through the
+     * catalog first — and that is also where an unavailable menu is caught.
+     */
+    private function putInCart(
+        GetMenuCatalogQueryUseCase $catalog,
+        CustomerCart $cart,
+        string $menuId,
+        int $qty = 1,
+        ?string $notes = null,
+    ): void {
+        $menu = $catalog->find($menuId);
+
+        if (! $menu || ! $menu->is_available) {
+            $this->addError('cart', 'Menu tidak ditemukan atau sedang tidak tersedia.');
+
+            return;
+        }
+
+        $cart->addItem($this->tableId, [
+            'id' => (string) $menu->id,
+            'name' => (string) $menu->name,
+            'price' => (float) $menu->price,
+            'image_url' => $menu->image_url,
+        ], $qty, $notes);
     }
 }

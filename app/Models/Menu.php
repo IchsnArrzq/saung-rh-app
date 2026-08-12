@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domains\Menu\Enums\MenuAvailability;
 use App\Models\Concerns\HasMedia;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +22,9 @@ class Menu extends Model
 
     protected $fillable = [
         'menu_category_id',
-        'menu_status_id',
+        // Backed by App\Domains\Menu\Enums\MenuAvailability. Plain string, not
+        // an enum cast, so Blade comparisons keep working (same call as Order/Table).
+        'status',
         'name',
         'slug',
         'sku',
@@ -48,11 +51,12 @@ class Menu extends Model
     }
 
     /**
-     * Availability is derived from the menu status (single source of truth).
+     * Availability is derived from the status column, backed by
+     * App\Domains\Menu\Enums\MenuAvailability.
      */
     public function getIsAvailableAttribute(): bool
     {
-        return optional($this->status)->key === 'available';
+        return $this->status === MenuAvailability::Available->value;
     }
 
     /**
@@ -60,7 +64,7 @@ class Menu extends Model
      */
     public function scopeAvailable($query)
     {
-        return $query->whereHas('status', fn ($q) => $q->where('key', 'available'));
+        return $query->where('status', MenuAvailability::Available->value);
     }
 
     /**
@@ -68,7 +72,9 @@ class Menu extends Model
      */
     public function scopeUnavailable($query)
     {
-        return $query->whereDoesntHave('status', fn ($q) => $q->where('key', 'available'));
+        return $query->where(fn ($inner) => $inner
+            ->where('status', '!=', MenuAvailability::Available->value)
+            ->orWhereNull('status'));
     }
 
     /**
@@ -82,11 +88,6 @@ class Menu extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(MenuCategory::class, 'menu_category_id');
-    }
-
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(MenuStatus::class, 'menu_status_id');
     }
 
     public function menuIngredients(): HasMany

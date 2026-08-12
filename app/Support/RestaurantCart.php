@@ -147,6 +147,25 @@ class RestaurantCart
         session()->forget(self::SESSION_CART_KEY);
     }
 
+    /**
+     * Cart lines translated into the shape the Order domain expects (see
+     * App\Domains\Order\Actions\CalculateOrderTotalAction). Lives here so the
+     * two checkouts reading this session — the QR guest and the POS — cannot
+     * map it differently.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function toOrderItems(): array
+    {
+        return array_values(array_map(fn (array $item): array => [
+            'menu_id' => $item['menu_id'],
+            'menu_name_snapshot' => $item['name'],
+            'qty' => (int) $item['qty'],
+            'price' => (float) $item['price'],
+            'notes' => $item['notes'] ?? null,
+        ], self::cart()));
+    }
+
     public static function count(): int
     {
         return collect(self::cart())->sum('qty');

@@ -2,33 +2,33 @@
 
 namespace App\Livewire\Landing;
 
-use App\Models\Menu;
-use App\Services\Landing\PublicHomeServiceInterface;
+use App\Domains\Menu\QueryUseCases\GetMenuCatalogQueryUseCase;
 use App\Support\RestaurantCart;
 use Livewire\Component;
 
 class Home extends Component
 {
-    public function quickAdd(string $menuId)
+    public function quickAdd(string $menuId, GetMenuCatalogQueryUseCase $catalog)
     {
-        $menu = Menu::query()->available()->find($menuId);
+        $menu = $catalog->find($menuId);
 
-        if (! $menu) {
+        if (! $menu || ! $menu->is_available) {
             $this->addError('cart', 'Menu sedang tidak tersedia.');
-            return;
+
+            return null;
         }
 
         RestaurantCart::addItem($menu, 1);
 
-        session()->flash('success', $menu->name . ' berhasil ditambahkan ke cart.');
+        session()->flash('success', $menu->name.' berhasil ditambahkan ke cart.');
 
         return $this->redirectRoute('public.home', navigate: true);
     }
 
-    public function render(PublicHomeServiceInterface $publicHomeService)
+    public function render(GetMenuCatalogQueryUseCase $catalog)
     {
         return view('livewire.landing.home', [
-            'menus' => $publicHomeService->featuredMenus(4),
+            'menus' => $catalog->featured(4),
         ]);
     }
 }

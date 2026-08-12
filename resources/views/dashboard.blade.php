@@ -16,10 +16,9 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 @foreach ($summary['shortcuts'] as $shortcut)
-                    <a href="{{ $shortcut['url'] }}" class="btn btn-sm btn-primary">
-                        <i class="{{ $shortcut['icon'] }}"></i>
+                    <x-button variant="primary" size="sm" :icon="$shortcut['icon']" :href="$shortcut['url']">
                         {{ $shortcut['label'] }}
-                    </a>
+                    </x-button>
                 @endforeach
             </div>
         </div>
@@ -66,10 +65,9 @@
                             <h3 class="text-lg font-semibold text-base-content">Pendapatan 7 Hari</h3>
                             <p class="text-sm text-secondary">Berdasarkan pembayaran berstatus paid.</p>
                         </div>
-                        <a href="{{ route('reports.index') }}" class="btn btn-sm btn-ghost">
-                            <i class="ri-arrow-right-line"></i>
+                        <x-button variant="ghost" size="sm" icon="ri-arrow-right-line" :href="route('reports.index')">
                             Detail
-                        </a>
+                        </x-button>
                     </div>
 
                     <div wire:ignore class="mt-2 min-h-[300px]">
@@ -161,7 +159,7 @@
                 <div class="card-body p-5">
                     <div class="flex items-center justify-between gap-3">
                         <h3 class="text-lg font-semibold text-base-content">Order Terbaru</h3>
-                        <a href="{{ route('orders.index') }}" class="btn btn-sm btn-ghost">Lihat Semua</a>
+                        <x-button variant="ghost" size="sm" :href="route('orders.index')">Lihat Semua</x-button>
                     </div>
                     <div class="mt-2 overflow-x-auto">
                         <table class="table">
@@ -181,7 +179,7 @@
                                             <p class="text-xs text-secondary">{{ $order->ordered_at?->format('d M Y H:i') ?? '-' }}</p>
                                         </td>
                                         <td>{{ $order->table?->code ?? '-' }}</td>
-                                        <td><span class="badge badge-ghost capitalize">{{ $order->status }}</span></td>
+                                        <td><x-status-badge :status="$order->status" size="sm" /></td>
                                         <td class="text-right font-semibold">Rp {{ number_format((float) $order->total, 0, ',', '.') }}</td>
                                     </tr>
                                 @empty
@@ -199,7 +197,7 @@
                 <div class="card-body p-5">
                     <div class="flex items-center justify-between gap-3">
                         <h3 class="text-lg font-semibold text-base-content">Reservasi Hari Ini</h3>
-                        <a href="{{ route('reservations.index') }}" class="btn btn-sm btn-ghost">Lihat Semua</a>
+                        <x-button variant="ghost" size="sm" :href="route('reservations.index')">Lihat Semua</x-button>
                     </div>
                     <div class="mt-2 space-y-3">
                         @forelse ($summary['today_reservations'] as $reservation)

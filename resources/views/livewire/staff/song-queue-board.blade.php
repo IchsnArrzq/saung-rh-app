@@ -6,10 +6,10 @@
 
                 @forelse ($queue as $song)
                     <div class="flex items-center gap-3 rounded-lg border border-base-300 p-3
-                        {{ $song->status === 'playing' ? 'bg-success/10 border-success/40' : 'bg-base-100' }}">
+                        {{ $song->status === \App\Domains\Social\Enums\SongStatus::Playing ? 'bg-success/10 border-success/40' : 'bg-base-100' }}">
                         <div class="grow min-w-0">
                             <div class="font-semibold truncate">
-                                @if ($song->status === 'playing')<i class="ri-volume-up-line text-success"></i>@endif
+                                @if ($song->status === \App\Domains\Social\Enums\SongStatus::Playing)<i class="ri-volume-up-line text-success"></i>@endif
                                 {{ $song->title }}
                                 @if ($song->artist)<span class="text-secondary text-sm font-normal">— {{ $song->artist }}</span>@endif
                             </div>
@@ -20,12 +20,12 @@
                             </div>
                         </div>
                         <div class="flex gap-1 shrink-0">
-                            @if ($song->status === 'queued')
-                                <button wire:click="advance('{{ $song->id }}')" class="btn btn-xs btn-success">Putar</button>
+                            @if ($song->status === \App\Domains\Social\Enums\SongStatus::Queued)
+                                <x-button variant="success" size="xs" wire:click="advance('{{ $song->id }}')">Putar</x-button>
                             @else
-                                <button wire:click="advance('{{ $song->id }}')" class="btn btn-xs btn-outline btn-success">Selesai</button>
+                                <x-button variant="success" :outline="true" size="xs" wire:click="advance('{{ $song->id }}')">Selesai</x-button>
                             @endif
-                            <button wire:click="reject('{{ $song->id }}')" class="btn btn-xs btn-outline btn-error">Tolak</button>
+                            <x-button variant="error" :outline="true" size="xs" wire:click="reject('{{ $song->id }}')">Tolak</x-button>
                         </div>
                     </div>
                 @empty
@@ -40,7 +40,7 @@
                 @forelse ($recentDone as $song)
                     <div class="flex items-center justify-between text-sm">
                         <span class="truncate">{{ $song->title }}</span>
-                        <span class="badge badge-sm {{ $song->status === 'done' ? 'badge-ghost' : 'badge-error' }}">{{ $song->status }}</span>
+                        <x-status-badge :status="$song->status" size="sm" />
                     </div>
                 @empty
                     <p class="text-xs text-secondary">Belum ada riwayat.</p>

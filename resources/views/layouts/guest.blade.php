@@ -64,21 +64,14 @@
                                     ? route('pos.order.index')
                                     : route('customer.dashboard'));
                         @endphp
-                        <a href="{{ $dashboardRoute }}" class="btn btn-sm btn-primary">
-                            Dashboard
-                        </a>
+                        <x-button variant="primary" size="sm" :href="$dashboardRoute">Dashboard</x-button>
                     @else
                         @if (Route::has('login'))
-                            <a href="{{ route('login') }}"
-                                class="btn btn-sm btn-outline border-base-300 bg-base-100 text-base-content hover:border-secondary hover:bg-base-200">
-                                Login
-                            </a>
+                            <x-button variant="outline" size="sm" :href="route('login')">Masuk</x-button>
                         @endif
 
                         @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="btn btn-sm btn-primary">
-                                Register
-                            </a>
+                            <x-button variant="primary" size="sm" :href="route('register')">Daftar</x-button>
                         @endif
                     @endauth
                 </div>

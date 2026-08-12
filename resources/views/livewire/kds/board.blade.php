@@ -25,16 +25,19 @@
             @endphp
             
             @forelse($mainData as $order)
+                @php
+                    $status = $order->status;
+                    // Full class names per branch — Tailwind cannot scan interpolated ones.
+                    $accentClass = match (true) {
+                        $order->is_vip => 'bg-warning',
+                        $status === \App\Domains\Order\Enums\OrderStatus::Confirmed => 'bg-warning',
+                        $status === \App\Domains\Order\Enums\OrderStatus::Preparing => 'bg-info',
+                        default => 'bg-success',
+                    };
+                    $badgeClass = $status->isKitchenBound() ? 'badge-info' : 'badge-success';
+                @endphp
                 <div class="bg-base-100 rounded-xl p-3 shadow-sm relative overflow-hidden {{ $order->is_vip ? 'border-2 border-warning ring-1 ring-warning/40' : 'border border-base-300' }}">
-                    @if($order->is_vip)
-                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-warning"></div>
-                    @elseif($order->status === 'confirmed')
-                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-warning"></div>
-                    @elseif($order->status === 'preparing')
-                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-info"></div>
-                    @else
-                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-success"></div>
-                    @endif
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5 {{ $accentClass }}"></div>
 
                     <div class="flex justify-between items-start pl-3">
                         <div>
@@ -46,14 +49,14 @@
                             </h4>
                             <p class="text-xs font-medium text-secondary mt-0.5">#{{ $order->order_number }}</p>
                         </div>
-                        <span class="badge {{ in_array($order->status, ['confirmed', 'preparing']) ? 'badge-info' : 'badge-success' }} badge-sm font-bold uppercase tracking-wider">
-                            {{ $order->status }}
+                        <span class="badge {{ $badgeClass }} badge-sm font-bold uppercase tracking-wider">
+                            {{ $status->label() }}
                         </span>
                     </div>
 
                     <div class="pl-3 mt-3 flex justify-between items-center text-sm">
                         <span class="text-secondary">{{ $order->ordered_at->format('H:i') }}</span>
-                        @if(in_array($order->status, ['confirmed', 'preparing']))
+                        @if($status->isKitchenBound())
                             <div x-data="{ start: '{{ $order->ordered_at->toIso8601String() }}', timeString: '0m 0s' }"
                                  x-init="setInterval(() => { let diff = Math.floor((new Date() - new Date(start)) / 1000); if (diff < 0) diff = 0; let d = Math.floor(diff / 86400); let h = Math.floor((diff % 86400) / 3600); let m = Math.floor((diff % 3600) / 60); let s = diff % 60; timeString = d > 0 ? d + 'd ' + h + 'h ' + m + 'm ' + s + 's' : (h > 0 ? h + 'h ' + m + 'm ' + s + 's' : m + 'm ' + s + 's'); }, 1000)"
                                  class="font-medium text-base-content bg-base-300 px-2 py-1 rounded" x-text="timeString">
@@ -110,7 +113,15 @@
             @else
                 <div class="flex gap-4 h-full items-stretch w-max pb-2">
                     @foreach($mainData as $order)
-                        <div class="w-[380px] flex-shrink-0 bg-base-100 rounded-2xl shadow-sm flex flex-col overflow-hidden h-full {{ $order->is_vip ? 'border-2 border-warning ring-2 ring-warning/30' : (in_array($order->status, ['ready', 'served']) ? 'border border-success' : 'border border-base-300') }}">
+                        @php
+                            $status = $order->status;
+                            $isPlated = in_array($status, [
+                                \App\Domains\Order\Enums\OrderStatus::Ready,
+                                \App\Domains\Order\Enums\OrderStatus::Served,
+                            ], true);
+                            $badgeClass = $status->isKitchenBound() ? 'badge-info' : 'badge-success';
+                        @endphp
+                        <div class="w-[380px] flex-shrink-0 bg-base-100 rounded-2xl shadow-sm flex flex-col overflow-hidden h-full {{ $order->is_vip ? 'border-2 border-warning ring-2 ring-warning/30' : ($isPlated ? 'border border-success' : 'border border-base-300') }}">
 
                             @if($order->is_vip)
                                 <div class="flex items-center gap-1.5 bg-warning text-warning-content px-4 py-1.5 text-xs font-bold uppercase tracking-wider">
@@ -125,15 +136,15 @@
                                         <p class="text-xs font-semibold text-secondary mt-1">#{{ $order->order_number }}</p>
                                     </div>
                                     <div class="text-right">
-                                        <span class="badge {{ in_array($order->status, ['confirmed', 'preparing']) ? 'badge-info' : 'badge-success' }} font-bold uppercase tracking-wider">
-                                            {{ $order->status }}
+                                        <span class="badge {{ $badgeClass }} font-bold uppercase tracking-wider">
+                                            {{ $status->label() }}
                                         </span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="flex items-center justify-between mt-2 pt-3 border-t border-base-300">
                                     <span class="text-xs font-medium text-secondary">Waktu Order: {{ $order->ordered_at->format('H:i') }}</span>
-                                    @if(in_array($order->status, ['confirmed', 'preparing']))
+                                    @if($status->isKitchenBound())
                                         <div x-data="{ start: '{{ $order->ordered_at->toIso8601String() }}', timeString: '0m 0s' }"
                                              x-init="setInterval(() => { let diff = Math.floor((new Date() - new Date(start)) / 1000); if (diff < 0) diff = 0; let d = Math.floor(diff / 86400); let h = Math.floor((diff % 86400) / 3600); let m = Math.floor((diff % 3600) / 60); let s = diff % 60; timeString = d > 0 ? d + 'd ' + h + 'h ' + m + 'm ' + s + 's' : (h > 0 ? h + 'h ' + m + 'm ' + s + 's' : m + 'm ' + s + 's'); }, 1000)">
                                             <span class="text-sm font-bold text-base-content bg-base-100 px-2 py-1 rounded shadow-sm border border-base-300" x-text="timeString"></span>
@@ -144,49 +155,71 @@
 
                             @if($activeTab === 'ongoing')
                                 <div class="p-3 bg-base-100 border-b border-base-300 flex gap-2">
-                                    <button wire:click="markAsReady('{{ $order->id }}')" class="btn btn-neutral btn-sm h-auto py-2.5 flex-1 font-semibold text-sm">
+                                    <x-button variant="neutral" size="sm" class="h-auto flex-1 py-2.5 text-sm font-semibold"
+                                        wire:click="markAsReady('{{ $order->id }}')"
+                                        loading="markAsReady('{{ $order->id }}')">
                                         Semua Selesai Dimasak
-                                    </button>
-                                    <button wire:click="cancelOrder('{{ $order->id }}')" data-confirm="Batalkan pesanan ini?" class="btn btn-outline btn-error btn-sm h-auto py-2.5 font-semibold text-sm">
+                                    </x-button>
+                                    <x-button variant="error" :outline="true" size="sm" class="h-auto py-2.5 text-sm font-semibold"
+                                        wire:click="cancelOrder('{{ $order->id }}')"
+                                        data-confirm="Batalkan pesanan ini?">
                                         Batal
-                                    </button>
+                                    </x-button>
                                 </div>
                             @elseif($activeTab === 'ready')
                                 <div class="p-3 bg-base-200 border-b border-base-300 flex gap-2">
-                                    <button wire:click="markOrderAsServed('{{ $order->id }}')" class="btn btn-success btn-sm h-auto py-2.5 flex-1 font-semibold text-sm">
+                                    <x-button variant="success" size="sm" class="h-auto flex-1 py-2.5 text-sm font-semibold"
+                                        wire:click="markOrderAsServed('{{ $order->id }}')"
+                                        loading="markOrderAsServed('{{ $order->id }}')">
                                         Sudah Diantar
-                                    </button>
+                                    </x-button>
                                 </div>
                             @endif
 
                             <div class="flex-1 overflow-y-auto p-3 space-y-3 bg-base-100 min-h-0">
                                 @foreach($order->items as $item)
-                                    <div class="flex flex-col gap-2.5 p-3 rounded-xl border {{ in_array($item->status, ['ready', 'served']) ? 'border-success bg-base-100' : 'border-base-300 bg-base-200' }}">
-                                        
+                                    @php
+                                        // An item is "done" once it is plated or already served.
+                                        $itemDone = in_array(
+                                            \App\Domains\Order\Enums\OrderStatus::tryFrom((string) $item->status),
+                                            [
+                                                \App\Domains\Order\Enums\OrderStatus::Ready,
+                                                \App\Domains\Order\Enums\OrderStatus::Served,
+                                            ],
+                                            true,
+                                        );
+                                    @endphp
+                                    <div class="flex flex-col gap-2.5 p-3 rounded-xl border {{ $itemDone ? 'border-success bg-base-100' : 'border-base-300 bg-base-200' }}">
+
                                         <div class="flex items-center gap-3 w-full">
                                             <div class="flex-shrink-0 text-center">
-                                                <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-base-100 border text-base-content font-bold text-sm shadow-sm {{ in_array($item->status, ['ready', 'served']) ? 'border-success text-success' : 'border-base-300' }}">
+                                                <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-base-100 border text-base-content font-bold text-sm shadow-sm {{ $itemDone ? 'border-success text-success' : 'border-base-300' }}">
                                                     {{ $item->qty }}
                                                 </span>
                                             </div>
-                                            
+
                                             <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-bold leading-snug {{ in_array($item->status, ['ready', 'served']) ? 'text-success line-through opacity-70' : 'text-base-content' }}">
+                                                <p class="text-sm font-bold leading-snug {{ $itemDone ? 'text-success line-through opacity-70' : 'text-base-content' }}">
                                                     {{ $item->menu_name_snapshot }}
                                                 </p>
                                             </div>
 
                                             @if($activeTab === 'ongoing')
                                                 <div class="flex-shrink-0 flex items-center gap-1.5">
-                                                    @if(!in_array($item->status, ['ready', 'served']))
-                                                        <button wire:click="markItemAsReady('{{ $order->id }}', '{{ $item->id }}')" class="btn btn-xs btn-outline btn-info">
+                                                    @if(! $itemDone)
+                                                        <x-button variant="info" :outline="true" size="xs"
+                                                            wire:click="markItemAsReady('{{ $order->id }}', '{{ $item->id }}')">
                                                             Selesai
-                                                        </button>
-                                                        <button wire:click="voidItem('{{ $order->id }}', '{{ $item->id }}')" data-confirm="Hapus item ini dari pesanan?" class="btn btn-xs btn-outline btn-error">
+                                                        </x-button>
+                                                        <x-button variant="error" :outline="true" size="xs"
+                                                            wire:click="voidItem('{{ $order->id }}', '{{ $item->id }}')"
+                                                            data-confirm="Hapus item ini dari pesanan?">
                                                             Void
-                                                        </button>
+                                                        </x-button>
                                                     @else
-                                                        <span class="badge badge-success badge-outline badge-sm font-bold">Selesai</span>
+                                                        <x-badge color="success" size="sm" :outline="true" class="font-bold">
+                                                            Selesai
+                                                        </x-badge>
                                                     @endif
                                                 </div>
                                             @endif

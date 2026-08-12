@@ -2,9 +2,13 @@
 
 namespace App\Livewire\Kds;
 
-use App\Models\Order;
-use App\Models\OrderItem;
-use Carbon\Carbon;
+use App\Domains\Order\Enums\OrderStatus;
+use App\Domains\Order\QueryUseCases\GetKitchenQueueQueryUseCase;
+use App\Domains\Order\UseCases\AdvanceKitchenTicketUseCase;
+use App\Domains\Order\UseCases\ChangeOrderStatusUseCase;
+use App\Domains\Order\UseCases\MarkOrderItemReadyUseCase;
+use App\Domains\Order\UseCases\VoidOrderItemUseCase;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -26,126 +30,60 @@ class Board extends Component
         }
     }
 
-    public function markAsReady(string $orderId): void
+    public function markAsReady(string $orderId, AdvanceKitchenTicketUseCase $advance): void
     {
-        $order = Order::find($orderId);
-        
-        if ($order && in_array($order->status, ['confirmed', 'preparing'])) {
-            $order->update(['status' => 'ready']);
-            $order->items()->update(['status' => 'ready']);
+        $advance->handle($orderId, OrderStatus::Ready);
+    }
+
+    public function markItemAsReady(string $orderId, string $itemId, MarkOrderItemReadyUseCase $markItem): void
+    {
+        $markItem->handle($orderId, $itemId);
+    }
+
+    public function markOrderAsServed(string $orderId, AdvanceKitchenTicketUseCase $advance): void
+    {
+        $advance->handle($orderId, OrderStatus::Served);
+    }
+
+    public function cancelOrder(string $orderId, ChangeOrderStatusUseCase $changeStatus): void
+    {
+        try {
+            $changeStatus->handle($orderId, OrderStatus::Cancelled);
+        } catch (ValidationException) {
+            // Already settled, cancelled or gone — nothing to do.
         }
     }
 
-    public function markItemAsReady(string $orderId, string $itemId): void
+    public function voidItem(string $orderId, string $itemId, VoidOrderItemUseCase $voidItem): void
     {
-        $item = OrderItem::where('order_id', $orderId)->find($itemId);
-        
-        if ($item) {
-            $item->update(['status' => 'ready']);
-            
-            $order = Order::with('items')->find($orderId);
-            $allItemsReady = $order->items->every(fn($i) => $i->status === 'ready');
-            
-            if ($allItemsReady && in_array($order->status, ['confirmed', 'preparing'])) {
-                $order->update(['status' => 'ready']);
-            } elseif ($order->status === 'confirmed') {
-                $order->update(['status' => 'preparing']);
-            }
-        }
-    }
-
-    public function markOrderAsServed(string $orderId): void
-    {
-        $order = Order::find($orderId);
-        if ($order && $order->status === 'ready') {
-            $order->update(['status' => 'served']);
-            $order->items()->update(['status' => 'served']);
-        }
-    }
-
-    public function cancelOrder(string $orderId): void
-    {
-        $order = Order::find($orderId);
-        if ($order) {
-            $order->update(['status' => 'cancelled']);
-        }
-    }
-
-    public function voidItem(string $orderId, string $itemId): void
-    {
-        $order = Order::with('items')->find($orderId);
-        
-        if ($order) {
-            $item = $order->items->find($itemId);
-            
-            if ($item) {
-                $item->delete();
-                
-                $remainingItems = $order->items()->get();
-                
-                if ($remainingItems->isEmpty()) {
-                    $order->update([
-                        'status' => 'cancelled',
-                        'subtotal' => 0,
-                        'total' => 0
-                    ]);
-                } else {
-                    $subtotal = $remainingItems->sum('line_total');
-                    $total = max($subtotal + $order->tax - $order->discount, 0);
-                    
-                    $order->update([
-                        'subtotal' => $subtotal,
-                        'total' => $total
-                    ]);
-                }
-            }
-        }
+        $voidItem->handle($orderId, $itemId);
     }
 
     #[Computed]
     public function ongoingOrders()
     {
-        return Order::with(['items.menu', 'table'])
-            ->withCount($this->vipItemsCount())
-            ->whereIn('status', ['confirmed', 'preparing'])
-            ->orderByDesc('vip_items_count') // VIP track jumps the queue
-            ->orderBy('ordered_at', 'asc')
-            ->get();
+        return $this->queue()->ongoing();
     }
 
     #[Computed]
     public function readyOrders()
     {
-        return Order::with(['items.menu', 'table'])
-            ->withCount($this->vipItemsCount())
-            ->whereIn('status', ['ready'])
-            ->orderBy('updated_at', 'asc')
-            ->get();
+        return $this->queue()->ready();
     }
 
     #[Computed]
     public function completedOrders()
     {
-        return Order::with(['items.menu', 'table'])
-            ->withCount($this->vipItemsCount())
-            ->whereIn('status', ['served', 'paid'])
-            ->whereDate('updated_at', Carbon::today())
-            ->orderBy('updated_at', 'desc')
-            ->limit(50)
-            ->get();
+        return $this->queue()->completedToday();
     }
 
     /**
-     * Reusable withCount definition that aggregates the number of VIP-track
-     * items per order so the board can flag/prioritise VIP orders.
-     *
-     * @return array<string, callable>
+     * Computed properties do not receive method injection, so the read flow is
+     * resolved from the container here — the component still never queries.
      */
-    private function vipItemsCount(): array
+    private function queue(): GetKitchenQueueQueryUseCase
     {
-        return [
-            'items as vip_items_count' => fn ($query) => $query->whereHas('menu', fn ($menu) => $menu->where('track', 'vip')),
-        ];
+        return app(GetKitchenQueueQueryUseCase::class);
     }
 
     public function render()

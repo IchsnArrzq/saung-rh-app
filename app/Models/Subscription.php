@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domains\System\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,11 +11,6 @@ class Subscription extends Model
 {
     use HasFactory;
     use HasUuids;
-
-    /**
-     * @var array<int, string>
-     */
-    public const STATUSES = ['trial', 'active', 'expired', 'suspended'];
 
     public $incrementing = false;
 
@@ -33,6 +29,7 @@ class Subscription extends Model
     protected function casts(): array
     {
         return [
+            'status' => SubscriptionStatus::class,
             'seats' => 'integer',
             'started_at' => 'datetime',
             'expires_at' => 'datetime',
@@ -44,7 +41,7 @@ class Subscription extends Model
      */
     public function isValid(): bool
     {
-        if (! in_array($this->status, ['active', 'trial'], true)) {
+        if (! $this->status->entitlesAccess()) {
             return false;
         }
 

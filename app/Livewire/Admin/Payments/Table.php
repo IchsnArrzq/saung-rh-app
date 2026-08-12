@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Admin\Payments;
 
+use App\Domains\Payment\QueryUseCases\GetPaymentListQueryUseCase;
 use App\Models\Payment;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -33,25 +33,10 @@ class Table extends Component
         session()->flash('success', 'Pembayaran berhasil dihapus.');
     }
 
-    public function render(): View
+    public function render(GetPaymentListQueryUseCase $paymentList): View
     {
-        $search = trim($this->search);
-
-        $payments = Payment::query()
-            ->with('order')
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('method', 'like', '%'.$search.'%')
-                        ->orWhere('status', 'like', '%'.$search.'%')
-                        ->orWhere('reference', 'like', '%'.$search.'%')
-                        ->orWhereHas('order', fn (Builder $order) => $order->where('order_number', 'like', '%'.$search.'%'));
-                });
-            })
-            ->latest()
-            ->paginate(12);
-
         return view('livewire.admin.payments.table', [
-            'payments' => $payments,
+            'payments' => $paymentList->handle($this->search),
         ]);
     }
 }

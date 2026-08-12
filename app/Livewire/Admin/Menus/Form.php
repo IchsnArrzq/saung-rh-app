@@ -4,8 +4,8 @@ namespace App\Livewire\Admin\Menus;
 
 use App\Models\Menu;
 use App\Models\MenuCategory;
-use App\Models\MenuStatus;
-use App\Services\Admin\MediaServiceInterface;
+use App\Domains\Menu\Enums\MenuAvailability;
+use App\Domains\Menu\Services\MediaService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
@@ -98,7 +98,7 @@ class Form extends Component
     /**
      * Delete an already-saved media item immediately (edit route only).
      */
-    public function deleteMedia(string $mediaId, MediaServiceInterface $mediaService): void
+    public function deleteMedia(string $mediaId, MediaService $mediaService): void
     {
         if (! $this->menu) {
             return;
@@ -112,7 +112,7 @@ class Form extends Component
         }
     }
 
-    public function setPrimary(string $mediaId, MediaServiceInterface $mediaService): void
+    public function setPrimary(string $mediaId, MediaService $mediaService): void
     {
         if (! $this->menu) {
             return;
@@ -122,7 +122,7 @@ class Form extends Component
         session()->flash('success', 'Gambar utama diperbarui.');
     }
 
-    public function save(MediaServiceInterface $mediaService)
+    public function save(MediaService $mediaService)
     {
         $validated = $this->validate($this->rules());
         $validated['slug'] = Str::slug($validated['slug'] ?: $validated['name']);
@@ -131,7 +131,7 @@ class Form extends Component
         $validated['description'] = $validated['description'] ?: null;
         $validated['price'] = (float) $validated['price'];
         $validated['image_url'] = $validated['image_url'] ?: null;
-        $validated['menu_status_id'] = $this->resolveMenuStatusId($this->is_available);
+        $validated['status'] = MenuAvailability::fromToggle($this->is_available)->value;
 
         // Media fields are handled separately, not stored on the menu row.
         unset($validated['newImages'], $validated['newVideo']);
@@ -186,14 +186,6 @@ class Form extends Component
             'newImages.*' => ['image', 'max:4096'],
             'newVideo' => ['nullable', 'file', 'mimetypes:video/mp4,video/webm,video/ogg', 'max:51200'],
         ];
-    }
-
-    private function resolveMenuStatusId(bool $available): ?string
-    {
-        $key = $available ? 'available' : 'unavailable';
-
-        return MenuStatus::query()->where('key', $key)->value('id')
-            ?? MenuStatus::query()->where('key', 'available')->value('id');
     }
 
     /**

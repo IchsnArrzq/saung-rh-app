@@ -13,5 +13,7 @@
         </div>
     </x-slot>
 
-    @livewire($component, $params ?? [])
+    {{-- Bukan `$component`: di dalam anonymous component, Blade sudah memakai nama itu
+         untuk objek komponennya sendiri, sehingga @livewire menerima objek, bukan nama. --}}
+    @livewire($livewireComponent, $params ?? [])
 </x-admin-layout>

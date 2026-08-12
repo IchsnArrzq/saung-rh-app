@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domains\Order\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +36,7 @@ class Order extends Model
     protected function casts(): array
     {
         return [
+            'status' => OrderStatus::class,
             'ordered_at' => 'datetime',
             'subtotal' => 'decimal:2',
             'discount' => 'decimal:2',

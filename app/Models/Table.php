@@ -31,7 +31,11 @@ class Table extends Model
         'code',
         'name',
         'capacity',
-        'table_status_id',
+        // Backed by App\Domains\Table\Enums\TableStatus, but deliberately NOT
+        // enum-cast: the Blade screens compare it as a string. Note this differs
+        // from Order::$status, which IS cast — compare with `TableStatus::X->value`
+        // here. See ARCHITECTURE.md § Architectural Decisions.
+        'status',
         'table_category_id',
         'qr_token',
         'position_x',
@@ -46,19 +50,6 @@ class Table extends Model
             'position_x' => 'integer',
             'position_y' => 'integer',
         ];
-    }
-
-    /**
-     * Status is derived from the related table status (single source of truth).
-     */
-    public function getStatusAttribute(): ?string
-    {
-        return optional($this->tableStatus)->key;
-    }
-
-    public function tableStatus(): BelongsTo
-    {
-        return $this->belongsTo(TableStatus::class, 'table_status_id');
     }
 
     public function tableCategory(): BelongsTo

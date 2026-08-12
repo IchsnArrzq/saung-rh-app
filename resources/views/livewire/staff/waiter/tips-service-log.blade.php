@@ -53,10 +53,7 @@
                     <label class="text-xs text-secondary">Catatan (opsional)</label>
                     <input type="text" wire:model="tipNote" maxlength="255" class="input input-bordered w-full" placeholder="cth: pelanggan ramah">
                 </div>
-                <button type="submit" class="btn btn-primary w-full">
-                    <span wire:loading.remove wire:target="saveTip">Simpan Tip</span>
-                    <span wire:loading wire:target="saveTip">Menyimpan...</span>
-                </button>
+                <x-button type="submit" variant="primary" :block="true" loading="saveTip">Simpan Tip</x-button>
             </form>
         </div>
 
@@ -93,10 +90,7 @@
                     <label class="text-xs text-secondary">Deskripsi (opsional)</label>
                     <textarea wire:model="svcDescription" maxlength="500" rows="2" class="textarea textarea-bordered w-full" placeholder="Detail layanan..."></textarea>
                 </div>
-                <button type="submit" class="btn btn-neutral w-full">
-                    <span wire:loading.remove wire:target="saveService">Simpan Log</span>
-                    <span wire:loading wire:target="saveService">Menyimpan...</span>
-                </button>
+                <x-button type="submit" variant="neutral" :block="true" loading="saveService">Simpan Log</x-button>
             </form>
         </div>
     </div>
@@ -126,7 +120,7 @@
                 @forelse ($recentServices as $log)
                     <div class="flex items-center justify-between text-sm border-b border-base-200 pb-2">
                         <div>
-                            <span class="badge badge-ghost badge-sm">{{ $serviceTypes[$log->type] ?? $log->type }}</span>
+                            <span class="badge badge-ghost badge-sm">{{ $log->type->label() }}</span>
                             <span class="text-secondary">· {{ $log->table?->code ?? 'Umum' }}</span>
                             @if ($log->description) <p class="text-xs text-secondary">{{ $log->description }}</p> @endif
                         </div>

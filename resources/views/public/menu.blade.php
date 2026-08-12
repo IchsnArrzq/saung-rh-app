@@ -10,12 +10,11 @@
 
         <div x-data="{ open: false, tab: 'status' }" x-cloak>
             {{-- Tombol mengambang (FAB) untuk membuka panel meja --}}
-            <button type="button" @click="open = true"
-                class="btn btn-primary fixed bottom-5 right-5 z-40 h-14 gap-2 rounded-full pl-4 pr-5 shadow-lg shadow-primary/30"
-                aria-label="Buka panel meja">
-                <i class="ri-apps-2-line text-2xl"></i>
+            <x-button variant="primary" x-on:click="open = true" label="Buka panel meja"
+                icon="ri-apps-2-line text-2xl"
+                class="fixed bottom-5 right-5 z-40 h-14 gap-2 rounded-full pl-4 pr-5 shadow-lg shadow-primary/30">
                 <span class="hidden font-semibold sm:inline">Panel Meja</span>
-            </button>
+            </x-button>
 
             {{-- Overlay --}}
             <div x-show="open" x-transition.opacity @click="open = false"
@@ -40,10 +39,8 @@
                                     <span class="badge badge-primary badge-sm align-middle">Meja {{ $tableCode }}</span>
                                 @endif
                             </h2>
-                            <button type="button" @click="open = false" class="btn btn-ghost btn-sm btn-circle"
-                                aria-label="Tutup panel">
-                                <i class="ri-close-line text-lg"></i>
-                            </button>
+                            <x-button variant="ghost" size="sm" shape="circle" icon="ri-close-line text-lg"
+                                label="Tutup panel" x-on:click="open = false" />
                         </div>
                     </div>
 

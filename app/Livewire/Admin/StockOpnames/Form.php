@@ -3,7 +3,8 @@
 namespace App\Livewire\Admin\StockOpnames;
 
 use App\Models\StockOpname;
-use App\Services\Admin\StockOpnameServiceInterface;
+use App\Domains\Inventory\UseCases\CreateStockOpnameDraftUseCase;
+use App\Domains\Inventory\UseCases\PostStockOpnameUseCase;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -54,14 +55,14 @@ class Form extends Component
      * Create route: snapshot current stock into a new draft, then continue on
      * the edit screen to enter the physical counts.
      */
-    public function startDraft(StockOpnameServiceInterface $service)
+    public function startDraft(CreateStockOpnameDraftUseCase $createDraft)
     {
         $this->validate([
             'opname_date' => ['required', 'date'],
             'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $opname = $service->createDraft(Carbon::parse($this->opname_date), $this->notes);
+        $opname = $createDraft->handle(Carbon::parse($this->opname_date), $this->notes);
 
         session()->flash('success', 'Draft opname dibuat. Silakan isi stok fisik.');
 
@@ -105,14 +106,14 @@ class Form extends Component
         return $this->redirectRoute('stock-opnames.edit', $this->opname, navigate: true);
     }
 
-    public function post(StockOpnameServiceInterface $service)
+    public function post(PostStockOpnameUseCase $postOpname)
     {
         if (! $this->opname || $this->opname->isPosted()) {
             return;
         }
 
         $this->persistCounts();
-        $service->post($this->opname);
+        $postOpname->handle($this->opname);
 
         session()->flash('success', 'Opname diposting. Stok bahan telah disesuaikan.');
 
