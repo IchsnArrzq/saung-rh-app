@@ -727,7 +727,27 @@ basi, sehingga `update()` tidak melihat atribut kotor dan tak mengirim query sam
 
 ### Fase E — Konsolidasi
 - [ ] E1. Pindahkan Eloquent Models ke `app/Domains/{X}/Models` (opsional, terakhir — hati-hati namespace/migration).
-- [ ] E2. Update `AGENTS.md`/`ARCHITECTURE.md` bila ada deviasi final yang disepakati.
+- [x] E2. **`AGENTS.md`/`ARCHITECTURE.md` diselaraskan dengan kode — ✅ SELESAI (2026-08-10)**
+
+      Enam deviasi yang dicatat, bukan didiamkan:
+      1. **Aturan batas** — larangan menyeluruh "domain tidak mengimpor kelas domain lain" diganti
+         tabel Fase D (Events/Enums/DTO/Repository/QueryUseCase boleh; UseCase/Action/Service tidak),
+         plus alat audit dan satu pengecualian terdaftar.
+      2. **Tidak ada domain `Kitchen`** — tiket dapur adalah Order berstatus `preparing`/`ready`,
+         jadi KDS tinggal di domain Order. Memisahnya berarti dua domain memiliki satu baris yang sama.
+      3. **Tidak ada domain `User`** — jadi `System`; ditambah domain `Social` yang tak ada di doc lama.
+         Daftar 11 domain aktual menggantikan daftar lama.
+      4. **Aturan transisi ada di dalam Enum**, bukan kelas Policy. Policy menjawab *boleh tidak
+         pengguna ini*, sedangkan status apa boleh menyusul status apa adalah sifat statusnya sendiri.
+      5. **Enum ≠ selalu cast Eloquent** — `Order`/`Shift`/`SongRequest`/`SpecialRequest`/`Subscription`
+         di-cast; `Table`/`Menu`/`Reservation`/`Payment` masih string dan dibandingkan lewat `->value`.
+         Dicatat apa adanya sebagai urutan migrasi, bukan prinsip, plus arah rapinya ke mana.
+         Komentar menyesatkan di `app/Models/Table.php` (mengaku sama dengan `Order::$status`,
+         padahal Order justru di-cast) ikut dibetulkan.
+      6. **Peta routes** di ARCHITECTURE.md diganti dengan struktur `routes/` yang sebenarnya.
+
+      Contoh `OrderStatus` di AGENTS.md juga diganti dari karangan (`Submitted`/`Completed`) ke
+      tujuh case yang benar-benar ada.
 - [x] E3. **Test suite penuh + `migrate:fresh --seed` + verifikasi end-to-end — ✅ SELESAI (2026-08-10)**
 
       **`php artisan test`: 48 lolos, 151 assert, 0 gagal.** Sebelum diperbaiki ada 4 gagal, semuanya
@@ -766,7 +786,13 @@ basi, sehingga `update()` tidak melihat atribut kotor dan tak mengirim query sam
 
       `route:list` 141 tetap, `view:cache` bersih, `npm run build` sukses (peringatan chunk 891 kB
       pre-existing).
-- [ ] E4. Update memory `refactor-audit-findings` & `proposal-alignment-roadmap`.
+- [x] E4. **Memory diperbarui — ✅ SELESAI (2026-08-10)**
+      `refactor-to-docs-plan` ditulis ulang (dulu masih bilang "eksekusi belum dimulai"); status
+      per-fase menunjuk ke dokumen ini, bukan disalin. `refactor-audit-findings` dan
+      `proposal-alignment-roadmap` diberi peringatan jalur basi di paling atas + tabel pemetaan
+      nama kelas lama→baru (`OrderCartService`→`CustomerCart`, `Pos\BillingService`→
+      `OrderBillingService`+`SettleBillUseCase`, `TableTurnoverService::release`→listener
+      `ReleaseTableOnBillsCleared`), supaya sesi berikutnya tidak mengejar kelas yang sudah tak ada.
 
 ---
 

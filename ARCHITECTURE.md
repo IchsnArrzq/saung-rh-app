@@ -98,21 +98,49 @@ Payment → Order
 Kitchen ← Order
 
 
-Per AGENTS.md § Feature First Structure: domains do NOT import each
-other's classes directly. Cross-domain effects (e.g. Reservation
-check-in creating an Order) happen via Events, listened to by the
-target domain — not a direct `OrderService` call from inside the
-Reservation domain.
+**The rule is about who may WRITE, not about imports in general** (settled in
+Fase D, after the original blanket ban collided with Reporting — which by design
+reads across domains):
+
+| Imported across domains | Allowed? | Why |
+|---|---|---|
+| `Events`, `Listeners` | ✅ | This *is* the boundary |
+| `Enums`, `DTO` | ✅ | Values, not behaviour |
+| `Repositories`, `QueryUseCases` | ✅ | A domain's own read/persistence contract |
+| `UseCases`, `Actions`, `Services` | ❌ | Writing into another domain must be a **reaction to an Event** |
+
+Cross-domain effects (e.g. an order claiming its table) happen via Events
+listened to by the target domain — not a direct `TableService` call from inside
+the Order domain. Listeners are registered explicitly in
+`AppServiceProvider::registerDomainListeners()`; Laravel only auto-discovers
+`app/Listeners`, and the explicit list doubles as the map of which domain reacts
+to which.
+
+Exceptions are **recorded, not tolerated silently**: `scratchpad/audit_domain_deps.php`
+classifies every cross-domain `use App\Domains\...` by layer, exits non-zero when a
+domain writes into another, and also reports registered exceptions that are no
+longer used so the list can't rot. One exception stands today —
+`Order → Payment\RecordPaymentAction`, because settling a bill *is* the payment
+(one transaction, and the caller needs the Payment row back; a listener can't
+return a value).
 
 ## Folder Structure
 
-app/Domains/{Table,Menu,Reservation,Order,Payment,Kitchen,Reporting,User}/
+app/Domains/{Table,Menu,Reservation,Order,Payment,Inventory,Customer,Employee,Reporting,Social,System}/
 
+**There is no `Kitchen` domain.** A kitchen ticket is not a separate record — it is
+an Order in `preparing`/`ready`, so KDS lives in the Order domain
+(`AdvanceKitchenTicketUseCase`, `GetKitchenQueueQueryUseCase`). Splitting it out
+would have meant two domains owning one row. Likewise there is no `User` domain:
+users, settings, and licensing sit in `System`, and the guest-facing song/chat/
+special-request features sit in `Social`.
 
 ## Route Strategy
 
 routes/
-├── admin/{dashboard,tables,menus,reservations,orders,payments,reports,users}.php
+├── web.php ....... loader only
+├── admin.php, customer.php, staff.php, pos.php, kds.php, landing.php, auth.php
+├── admin/{dashboard,tables,menus,orders,payments,reservations,reports,customers,users,inventory,system}.php
 └── customer/{home,menu,reservations}.php
 
 `web.php` only loads route files. Full layer/flow detail: see AGENTS.md.
@@ -127,13 +155,17 @@ routes/
 
 **Why Action Pattern** — single responsibility, reusable business operations. Only extracted once genuinely reused (see AGENTS.md merge rule) — an Action used exactly once is not worth a separate file.
 
-**Why NOT a DB-driven Workflow (unlike some other projects)** — this is single-tenant; Order/Reservation/Kitchen/Table state transitions don't need to change per client without a deploy. Hardcoded Enum + Policy is simpler and sufficient. Revisit only if multi-branch custom flow becomes a real requirement.
+**Why NOT a DB-driven Workflow (unlike some other projects)** — this is single-tenant; Order/Reservation/Kitchen/Table state transitions don't need to change per client without a deploy. Hardcoded Enum is simpler and sufficient. Revisit only if multi-branch custom flow becomes a real requirement.
+
+**Why transition rules live inside the Enum, not a Policy class** — the plan said "Enum + Policy"; in practice `canTransitionTo()` sits on the Enum itself. A Policy answers *may this user do it*; which status may follow which is a property of the status, and a separate class for it would have been a file whose only job is a `match` on the very Enum it takes as an argument.
+
+**Why the Enum is the vocabulary but not always an Eloquent cast** — `Order`, `Shift`, `SongRequest`, `SpecialRequest`, and `Subscription` cast `status` to their Enum; `Table`, `Menu`, `Reservation`, and `Payment` keep a plain string column and use the Enum as the source of the allowed values (`TableStatus::Reserved->value`). The split is not principled, it is migration order: casting a column changes every Blade comparison that touches it, so it was done where the screens were already being rewritten. **When touching those screens, prefer moving them onto the cast** — the Enum is the authority either way, and mixed access styles are the thing to retire, not preserve.
 
 ## Non-Functional Requirements
 
 **Performance:** pagination required, eager loading required, prevent N+1.
 **Security:** policy-based authorization, permission-based access (`module.action` convention).
-**Maintainability:** Feature-first structure, domain-driven modules, no cross-domain class imports.
+**Maintainability:** Feature-first structure, domain-driven modules, no cross-domain *writes* (see § Domain Dependencies & Boundary Rule for what may still be imported).
 **Scalability:** realtime events decoupled from business logic, queue for heavy jobs.
 **Observability:** audit logs (via Observer, see AGENTS.md), activity logs, error monitoring.
 

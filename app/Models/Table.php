@@ -31,9 +31,10 @@ class Table extends Model
         'code',
         'name',
         'capacity',
-        // Backed by App\Domains\Table\Enums\TableStatus. Left as a plain string
-        // rather than an enum cast so Blade comparisons keep working — same
-        // call as Order::$status.
+        // Backed by App\Domains\Table\Enums\TableStatus, but deliberately NOT
+        // enum-cast: the Blade screens compare it as a string. Note this differs
+        // from Order::$status, which IS cast — compare with `TableStatus::X->value`
+        // here. See ARCHITECTURE.md § Architectural Decisions.
         'status',
         'table_category_id',
         'qr_token',
