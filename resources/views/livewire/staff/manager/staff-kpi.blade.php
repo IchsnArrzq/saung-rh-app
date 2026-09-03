@@ -14,7 +14,12 @@
             @forelse ($staff as $i => $s)
                 <div class="flex items-center gap-3">
                     <span class="text-lg font-bold w-6 text-center {{ $i === 0 ? 'text-warning' : 'text-secondary' }}">
-                        {{ $i === 0 ? '🏆' : $i + 1 }}
+                        @if ($i === 0)
+                            <i class="ri-trophy-fill" aria-hidden="true"></i>
+                            <span class="sr-only">1</span>
+                        @else
+                            {{ $i + 1 }}
+                        @endif
                     </span>
                     <div class="grow min-w-0">
                         <div class="flex items-center justify-between">

@@ -14,7 +14,12 @@
             @forelse ($customers as $i => $c)
                 <div class="flex items-center gap-3">
                     <span class="text-lg font-bold w-6 text-center {{ $i === 0 ? 'text-secondary' : 'text-secondary/60' }}">
-                        {{ $i === 0 ? '👑' : $i + 1 }}
+                        @if ($i === 0)
+                            <i class="ri-vip-crown-fill" aria-hidden="true"></i>
+                            <span class="sr-only">1</span>
+                        @else
+                            {{ $i + 1 }}
+                        @endif
                     </span>
                     <div class="grow min-w-0">
                         <div class="flex items-center justify-between">

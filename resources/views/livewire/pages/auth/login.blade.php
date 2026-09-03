@@ -51,7 +51,10 @@ new #[Layout('layouts.auth')] class extends Component {
 <div>
     <!-- Heading -->
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-stone-900">Selamat datang kembali 👋</h1>
+        <h1 class="text-2xl font-bold text-stone-900">
+            Selamat datang kembali
+            <i class="ri-emotion-happy-line text-primary" aria-hidden="true"></i>
+        </h1>
         <p class="mt-1 text-sm text-stone-500">Masuk untuk melanjutkan ke akun Anda.</p>
     </div>
 
