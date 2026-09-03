@@ -19,9 +19,7 @@ use RuntimeException;
  */
 class ChatService
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     private function redis()
     {
@@ -153,17 +151,11 @@ class ChatService
         ], $extra);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function messages(string $tableId): array
     {
         return $this->read($this->roomKey($tableId));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function post(string $tableId, string $tableCode, string $body, string $senderId, ?string $senderName = null): array
     {
         $message = $this->makeMessage($tableId, $tableCode, $body, $senderId, $senderName);
@@ -173,25 +165,16 @@ class ChatService
         return $message;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function roomLastMessage(string $tableId): ?array
     {
         return $this->lastOf($this->roomKey($tableId));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function dmMessages(string $tableIdA, string $tableIdB): array
     {
         return $this->read($this->dmKey($tableIdA, $tableIdB));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function postDm(string $fromTableId, string $fromTableCode, string $toTableId, string $toTableCode, string $body, string $senderId, ?string $senderName = null): array
     {
         $message = $this->makeMessage($fromTableId, $fromTableCode, $body, $senderId, $senderName, [
@@ -204,17 +187,11 @@ class ChatService
         return $message;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function dmLastMessage(string $tableIdA, string $tableIdB): ?array
     {
         return $this->lastOf($this->dmKey($tableIdA, $tableIdB));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function flush(string $tableId): void
     {
         $this->redis()->del($this->roomKey($tableId));

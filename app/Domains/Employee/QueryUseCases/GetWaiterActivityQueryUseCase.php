@@ -2,7 +2,8 @@
 
 namespace App\Domains\Employee\QueryUseCases;
 
-use App\Domains\Employee\Repositories\StaffActivityRepositoryInterface;
+use App\Domains\Employee\Repositories\StaffActivityRepository;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -10,14 +11,14 @@ use Illuminate\Support\Facades\Auth;
  */
 class GetWaiterActivityQueryUseCase
 {
-    public function __construct(private readonly StaffActivityRepositoryInterface $activity) {}
+    public function __construct(private readonly StaffActivityRepository $activity) {}
 
     /**
      * @return array{
      *     tipsTotal: float,
      *     tipsCount: int,
-     *     recentTips: \Illuminate\Database\Eloquent\Collection,
-     *     recentServices: \Illuminate\Database\Eloquent\Collection
+     *     recentTips: Collection,
+     *     recentServices: Collection
      * }
      */
     public function handle(?string $waiterId = null, int $limit = 8): array

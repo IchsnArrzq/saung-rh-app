@@ -9,18 +9,31 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 
-class StaffActivityRepository implements StaffActivityRepositoryInterface
+/**
+ * Tips and service logs, treated as one aggregate: a waiter records both from
+ * the same screen and is scored on both from the same leaderboard, so splitting
+ * them into two repositories would only mean two objects always injected
+ * together.
+ */
+class StaffActivityRepository
 {
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function createTip(array $attributes): Tip
     {
         return Tip::query()->create($attributes);
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function createServiceLog(array $attributes): ServiceLog
     {
         return ServiceLog::query()->create($attributes);
     }
 
+    /** Sum of one waiter's tips for a calendar day. */
     public function tipsTotalForDay(string $waiterId, CarbonInterface $day): float
     {
         return (float) Tip::query()
@@ -29,6 +42,7 @@ class StaffActivityRepository implements StaffActivityRepositoryInterface
             ->sum('amount');
     }
 
+    /** How many tips one waiter received on a calendar day. */
     public function tipsCountForDay(string $waiterId, CarbonInterface $day): int
     {
         return Tip::query()
@@ -37,6 +51,9 @@ class StaffActivityRepository implements StaffActivityRepositoryInterface
             ->count();
     }
 
+    /**
+     * @return Collection<int, Tip>
+     */
     public function recentTips(string $waiterId, int $limit = 8): Collection
     {
         return Tip::query()
@@ -47,6 +64,9 @@ class StaffActivityRepository implements StaffActivityRepositoryInterface
             ->get();
     }
 
+    /**
+     * @return Collection<int, ServiceLog>
+     */
     public function recentServiceLogs(string $waiterId, int $limit = 8): Collection
     {
         return ServiceLog::query()
@@ -57,6 +77,11 @@ class StaffActivityRepository implements StaffActivityRepositoryInterface
             ->get();
     }
 
+    /**
+     * Tip totals per waiter since `$since`: waiter_id => ['total' => float, 'count' => int].
+     *
+     * @return SupportCollection<string, array{total: float, count: int}>
+     */
     public function tipTotalsByWaiterSince(CarbonInterface $since): SupportCollection
     {
         return Tip::query()
@@ -69,6 +94,11 @@ class StaffActivityRepository implements StaffActivityRepositoryInterface
             ]);
     }
 
+    /**
+     * Service-log counts per waiter since `$since`: waiter_id => int.
+     *
+     * @return SupportCollection<string, int>
+     */
     public function serviceCountsByWaiterSince(CarbonInterface $since): SupportCollection
     {
         return ServiceLog::query()
@@ -79,6 +109,15 @@ class StaffActivityRepository implements StaffActivityRepositoryInterface
             ->map(fn ($count) => (int) $count);
     }
 
+    /**
+     * Completed special requests per assignee since `$since`: user_id => int.
+     *
+     * Cross-domain read — special requests belong to the Social domain, which
+     * Fase C10 has yet to build. It is here because the staff leaderboard scores
+     * them, and the alternative was a raw query inside the QueryUseCase.
+     *
+     * @return SupportCollection<string, int>
+     */
     public function completedRequestCountsByStaffSince(CarbonInterface $since): SupportCollection
     {
         return SpecialRequest::query()

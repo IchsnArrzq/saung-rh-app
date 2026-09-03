@@ -3,7 +3,7 @@
 namespace App\Domains\Order\UseCases;
 
 use App\Domains\Order\Enums\OrderStatus;
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -18,7 +18,7 @@ use Illuminate\Validation\ValidationException;
  */
 class DeleteOrderUseCase
 {
-    public function __construct(private readonly OrderRepositoryInterface $orders) {}
+    public function __construct(private readonly OrderRepository $orders) {}
 
     public function handle(string $orderId): void
     {

@@ -2,7 +2,7 @@
 
 namespace App\Domains\Order\QueryUseCases;
 
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
 use App\Domains\Order\Services\OrderBillingService;
 use App\Models\Order;
 use Illuminate\Support\Collection;
@@ -17,7 +17,7 @@ use Illuminate\Support\Collection;
 class GetOpenBillsQueryUseCase
 {
     public function __construct(
-        private readonly OrderRepositoryInterface $orders,
+        private readonly OrderRepository $orders,
         private readonly OrderBillingService $billing,
     ) {}
 

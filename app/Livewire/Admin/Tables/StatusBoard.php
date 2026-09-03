@@ -4,7 +4,7 @@ namespace App\Livewire\Admin\Tables;
 
 use App\Domains\Table\Enums\TableStatus;
 use App\Domains\Table\QueryUseCases\GetTableListQueryUseCase;
-use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\Repositories\TableRepository;
 use App\Domains\Table\UseCases\ChangeTableStatusUseCase;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
@@ -20,7 +20,7 @@ class StatusBoard extends Component
      * Every status is always shown — the old `showInactiveStatuses` toggle
      * disappeared with the `is_active` column.
      */
-    public function moveTable(string $tableId, string $targetStatus, ChangeTableStatusUseCase $changeStatus, TableRepositoryInterface $tables): void
+    public function moveTable(string $tableId, string $targetStatus, ChangeTableStatusUseCase $changeStatus, TableRepository $tables): void
     {
         $target = TableStatus::tryFrom($targetStatus);
         $table = $tables->find($tableId);

@@ -4,7 +4,7 @@ namespace App\Livewire\Frontend;
 
 use App\Domains\Order\DTO\PlaceGuestOrderData;
 use App\Domains\Order\UseCases\PlaceGuestOrderUseCase;
-use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\Repositories\TableRepository;
 use App\Support\RestaurantCart;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -99,7 +99,7 @@ class CartCheckout extends Component
         return $this->redirectRoute('public.menu', ['table_id' => $validated['tableId']], navigate: true);
     }
 
-    public function render(TableRepositoryInterface $tables)
+    public function render(TableRepository $tables)
     {
         return view('livewire.frontend.cart-checkout', [
             'cartItems' => collect(RestaurantCart::cart())->values(),

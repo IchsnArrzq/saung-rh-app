@@ -7,7 +7,7 @@ use App\Domains\Order\DTO\PlaceGuestOrderData;
 use App\Domains\Order\Enums\OrderSource;
 use App\Domains\Order\Enums\OrderStatus;
 use App\Domains\Order\Events\OrderPlaced;
-use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\Repositories\TableRepository;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -25,7 +25,7 @@ class PlaceGuestOrderUseCase
 
     public function __construct(
         private readonly CreateOrderUseCase $createOrder,
-        private readonly TableRepositoryInterface $tables,
+        private readonly TableRepository $tables,
     ) {}
 
     public function handle(PlaceGuestOrderData $data): Order

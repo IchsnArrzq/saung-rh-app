@@ -6,13 +6,17 @@ use App\Models\Customer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 
-class CustomerRepository implements CustomerRepositoryInterface
+/**
+ * All Customer persistence and querying.
+ */
+class CustomerRepository
 {
     public function find(string $id): ?Customer
     {
         return Customer::query()->find($id);
     }
 
+    /** Admin listing, newest first, searchable by name/code/phone/email. */
     public function paginateForAdmin(int $perPage = 15, string $search = ''): LengthAwarePaginator
     {
         $search = trim($search);
@@ -31,11 +35,17 @@ class CustomerRepository implements CustomerRepositoryInterface
             ->withQueryString();
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function create(array $attributes): Customer
     {
         return Customer::query()->create($attributes);
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function update(Customer $customer, array $attributes): Customer
     {
         $customer->update($attributes);

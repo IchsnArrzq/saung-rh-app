@@ -2,7 +2,7 @@
 
 namespace App\Domains\Social\QueryUseCases;
 
-use App\Domains\Social\Repositories\SpecialRequestRepositoryInterface;
+use App\Domains\Social\Repositories\SpecialRequestRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class GetSpecialRequestBoardQueryUseCase
 {
-    public function __construct(private readonly SpecialRequestRepositoryInterface $requests) {}
+    public function __construct(private readonly SpecialRequestRepository $requests) {}
 
     /**
      * @return array{pending: Collection, recent: Collection}

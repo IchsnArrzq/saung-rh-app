@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin\System;
 
-use App\Domains\System\Repositories\AppSettingRepositoryInterface;
+use App\Domains\System\Repositories\AppSettingRepository;
 use App\Domains\System\Services\AppSettings;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -16,7 +16,7 @@ class AppSettingsManager extends Component
      */
     public array $values = [];
 
-    public function mount(AppSettingRepositoryInterface $settings): void
+    public function mount(AppSettingRepository $settings): void
     {
         $this->values = collect($settings->allKeyValue())
             ->map(fn ($value) => (string) $value)
@@ -30,7 +30,7 @@ class AppSettingsManager extends Component
         session()->flash('success', 'Pengaturan aplikasi disimpan.');
     }
 
-    public function render(AppSettingRepositoryInterface $settings): View
+    public function render(AppSettingRepository $settings): View
     {
         return view('livewire.admin.system.app-settings-manager', [
             'groups' => $settings->groupedForAdmin(),

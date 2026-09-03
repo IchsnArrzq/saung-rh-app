@@ -4,7 +4,7 @@ namespace App\Domains\Inventory\UseCases;
 
 use App\Domains\Inventory\Actions\AddStockAction;
 use App\Domains\Inventory\Enums\DocumentStatus;
-use App\Domains\Inventory\Repositories\IngredientRepositoryInterface;
+use App\Domains\Inventory\Repositories\IngredientRepository;
 use App\Models\Purchase;
 use Illuminate\Support\Facades\DB;
 
@@ -18,7 +18,7 @@ class PostPurchaseUseCase
 {
     public function __construct(
         private readonly AddStockAction $addStock,
-        private readonly IngredientRepositoryInterface $ingredients,
+        private readonly IngredientRepository $ingredients,
     ) {}
 
     public function handle(Purchase $purchase): void

@@ -5,13 +5,23 @@ namespace App\Domains\System\Repositories;
 use App\Models\AppSetting;
 use Illuminate\Support\Collection;
 
-class AppSettingRepository implements AppSettingRepositoryInterface
+class AppSettingRepository
 {
+    /**
+     * Every setting as a flat key => value map.
+     *
+     * @return array<string, string|null>
+     */
     public function allKeyValue(): array
     {
         return AppSetting::query()->pluck('value', 'key')->all();
     }
 
+    /**
+     * Settings grouped by their `group` column, for the admin form's sections.
+     *
+     * @return Collection<string, Collection<int, AppSetting>>
+     */
     public function groupedForAdmin(): Collection
     {
         return AppSetting::query()

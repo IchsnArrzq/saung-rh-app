@@ -2,7 +2,7 @@
 
 namespace App\Domains\Order\QueryUseCases;
 
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
 use App\Models\Order;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -12,7 +12,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
  */
 class GetOrderListQueryUseCase
 {
-    public function __construct(private readonly OrderRepositoryInterface $orders) {}
+    public function __construct(private readonly OrderRepository $orders) {}
 
     public function handle(string $search = '', int $perPage = 12): LengthAwarePaginator
     {

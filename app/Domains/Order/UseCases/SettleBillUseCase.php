@@ -4,7 +4,7 @@ namespace App\Domains\Order\UseCases;
 
 use App\Domains\Order\Enums\OrderStatus;
 use App\Domains\Order\Events\TableBillsCleared;
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
 use App\Domains\Order\Services\OrderBillingService;
 use App\Domains\Payment\Actions\RecordPaymentAction;
 use App\Domains\Payment\Enums\PaymentMethod;
@@ -30,7 +30,7 @@ use Illuminate\Validation\ValidationException;
 class SettleBillUseCase
 {
     public function __construct(
-        private readonly OrderRepositoryInterface $orders,
+        private readonly OrderRepository $orders,
         private readonly OrderBillingService $billing,
         private readonly RecordPaymentAction $recordPayment,
     ) {}

@@ -3,7 +3,7 @@
 namespace App\Domains\Social\UseCases;
 
 use App\Domains\Social\Enums\SpecialRequestStatus;
-use App\Domains\Social\Repositories\SpecialRequestRepositoryInterface;
+use App\Domains\Social\Repositories\SpecialRequestRepository;
 use App\Models\SpecialRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 class RejectSpecialRequestUseCase
 {
-    public function __construct(private readonly SpecialRequestRepositoryInterface $requests) {}
+    public function __construct(private readonly SpecialRequestRepository $requests) {}
 
     public function handle(string $requestId, User $manager): SpecialRequest
     {

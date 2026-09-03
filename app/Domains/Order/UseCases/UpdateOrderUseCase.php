@@ -4,7 +4,7 @@ namespace App\Domains\Order\UseCases;
 
 use App\Domains\Order\Actions\CalculateOrderTotalAction;
 use App\Domains\Order\DTO\UpdateOrderData;
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
 use App\Events\OrderUpdated;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 class UpdateOrderUseCase
 {
     public function __construct(
-        private readonly OrderRepositoryInterface $orders,
+        private readonly OrderRepository $orders,
         private readonly CalculateOrderTotalAction $calculateTotal,
     ) {}
 

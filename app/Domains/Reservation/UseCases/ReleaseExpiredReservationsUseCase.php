@@ -3,7 +3,7 @@
 namespace App\Domains\Reservation\UseCases;
 
 use App\Domains\Reservation\Enums\ReservationStatus;
-use App\Domains\Reservation\Repositories\ReservationRepositoryInterface;
+use App\Domains\Reservation\Repositories\ReservationRepository;
 use App\Domains\Table\Enums\TableStatus;
 use App\Models\Reservation;
 use Illuminate\Support\Collection;
@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\DB;
  */
 class ReleaseExpiredReservationsUseCase
 {
-    public function __construct(private readonly ReservationRepositoryInterface $reservations) {}
+    public function __construct(private readonly ReservationRepository $reservations) {}
 
     /**
      * @return array{expired_holds:int, no_shows:int, tables_released:int}

@@ -2,10 +2,10 @@
 
 namespace App\Domains\Reservation\UseCases;
 
-use App\Domains\Menu\Repositories\MenuRepositoryInterface;
+use App\Domains\Menu\Repositories\MenuRepository;
 use App\Domains\Reservation\DTO\PlaceReservationData;
 use App\Domains\Reservation\Enums\ReservationStatus;
-use App\Domains\Reservation\Repositories\ReservationRepositoryInterface;
+use App\Domains\Reservation\Repositories\ReservationRepository;
 use App\Models\Reservation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -28,8 +28,8 @@ class PlaceReservationUseCase
     private const HOLD_WINDOW_MINUTES = 90;
 
     public function __construct(
-        private readonly ReservationRepositoryInterface $reservations,
-        private readonly MenuRepositoryInterface $menus,
+        private readonly ReservationRepository $reservations,
+        private readonly MenuRepository $menus,
     ) {}
 
     public function handle(PlaceReservationData $data): Reservation

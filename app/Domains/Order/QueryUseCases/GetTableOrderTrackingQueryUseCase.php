@@ -2,7 +2,7 @@
 
 namespace App\Domains\Order\QueryUseCases;
 
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class GetTableOrderTrackingQueryUseCase
 {
-    public function __construct(private readonly OrderRepositoryInterface $orders) {}
+    public function __construct(private readonly OrderRepository $orders) {}
 
     /**
      * @return array{orders: Collection<int, Order>, queueTotal: int}

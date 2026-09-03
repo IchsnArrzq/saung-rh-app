@@ -7,13 +7,14 @@ use App\Models\SpecialRequest;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 
-class SpecialRequestRepository implements SpecialRequestRepositoryInterface
+class SpecialRequestRepository
 {
     public function find(string $id): ?SpecialRequest
     {
         return SpecialRequest::query()->find($id);
     }
 
+    /** One request, but only if it belongs to this waiter. */
     public function findAssignedTo(string $id, string $waiterId): ?SpecialRequest
     {
         return SpecialRequest::query()
@@ -21,6 +22,9 @@ class SpecialRequestRepository implements SpecialRequestRepositoryInterface
             ->find($id);
     }
 
+    /**
+     * @return Collection<int, SpecialRequest>
+     */
     public function pending(): Collection
     {
         return SpecialRequest::query()
@@ -29,6 +33,11 @@ class SpecialRequestRepository implements SpecialRequestRepositoryInterface
             ->get();
     }
 
+    /**
+     * Everything past the manager's desk, newest activity first.
+     *
+     * @return Collection<int, SpecialRequest>
+     */
     public function recentlyHandled(int $limit = 10): Collection
     {
         return SpecialRequest::query()
@@ -39,6 +48,11 @@ class SpecialRequestRepository implements SpecialRequestRepositoryInterface
             ->get();
     }
 
+    /**
+     * Still on one waiter's plate.
+     *
+     * @return Collection<int, SpecialRequest>
+     */
     public function openFor(string $waiterId): Collection
     {
         return SpecialRequest::query()
@@ -57,6 +71,11 @@ class SpecialRequestRepository implements SpecialRequestRepositoryInterface
             ->count();
     }
 
+    /**
+     * One table's own requests, newest first.
+     *
+     * @return Collection<int, SpecialRequest>
+     */
     public function forSession(string $sessionId, int $limit = 8): Collection
     {
         return SpecialRequest::query()
@@ -66,6 +85,13 @@ class SpecialRequestRepository implements SpecialRequestRepositoryInterface
             ->get();
     }
 
+    /**
+     * How many open requests each of the given waiters is already carrying:
+     * user_id => count. Missing keys mean zero.
+     *
+     * @param  array<int, string>  $waiterIds
+     * @return SupportCollection<string, int>
+     */
     public function activeLoadByAssignee(array $waiterIds): SupportCollection
     {
         return SpecialRequest::query()
@@ -77,11 +103,17 @@ class SpecialRequestRepository implements SpecialRequestRepositoryInterface
             ->map(fn ($count) => (int) $count);
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function create(array $attributes): SpecialRequest
     {
         return SpecialRequest::query()->create($attributes);
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function update(SpecialRequest $request, array $attributes): SpecialRequest
     {
         $request->update($attributes);

@@ -3,7 +3,7 @@
 namespace App\Domains\Employee\UseCases;
 
 use App\Domains\Employee\Enums\ShiftStatus;
-use App\Domains\Employee\Repositories\ShiftRepositoryInterface;
+use App\Domains\Employee\Repositories\ShiftRepository;
 use App\Models\Shift;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -18,7 +18,7 @@ use Illuminate\Validation\ValidationException;
  */
 class SetShiftStatusUseCase
 {
-    public function __construct(private readonly ShiftRepositoryInterface $shifts) {}
+    public function __construct(private readonly ShiftRepository $shifts) {}
 
     public function handle(string $shiftId, ShiftStatus $status): Shift
     {

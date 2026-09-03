@@ -2,7 +2,9 @@
 
 namespace App\Domains\Employee\QueryUseCases;
 
-use App\Domains\Employee\Repositories\ShiftRepositoryInterface;
+use App\Domains\Employee\Repositories\ShiftRepository;
+use App\Models\Shift;
+use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
@@ -13,10 +15,10 @@ use Illuminate\Support\Collection as SupportCollection;
  */
 class GetWeekScheduleQueryUseCase
 {
-    public function __construct(private readonly ShiftRepositoryInterface $shifts) {}
+    public function __construct(private readonly ShiftRepository $shifts) {}
 
     /**
-     * @return SupportCollection<string, Collection<int, \App\Models\Shift>>
+     * @return SupportCollection<string, Collection<int, Shift>>
      */
     public function shiftsByDay(CarbonInterface $anchor): SupportCollection
     {
@@ -36,7 +38,7 @@ class GetWeekScheduleQueryUseCase
     }
 
     /**
-     * @return Collection<int, \App\Models\User>
+     * @return Collection<int, User>
      */
     public function schedulableStaff(): Collection
     {

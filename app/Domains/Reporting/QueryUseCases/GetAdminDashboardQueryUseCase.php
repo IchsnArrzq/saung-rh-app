@@ -2,13 +2,13 @@
 
 namespace App\Domains\Reporting\QueryUseCases;
 
-use App\Domains\Menu\Repositories\MenuRepositoryInterface;
+use App\Domains\Menu\Repositories\MenuRepository;
 use App\Domains\Order\Enums\OrderStatus;
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
-use App\Domains\Payment\Repositories\PaymentRepositoryInterface;
-use App\Domains\Reservation\Repositories\ReservationRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
+use App\Domains\Payment\Repositories\PaymentRepository;
+use App\Domains\Reservation\Repositories\ReservationRepository;
 use App\Domains\Table\Enums\TableStatus;
-use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\Repositories\TableRepository;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 
@@ -32,11 +32,11 @@ class GetAdminDashboardQueryUseCase
     private const SALES_CHART_DAYS = 7;
 
     public function __construct(
-        private readonly OrderRepositoryInterface $orders,
-        private readonly PaymentRepositoryInterface $payments,
-        private readonly TableRepositoryInterface $tables,
-        private readonly MenuRepositoryInterface $menus,
-        private readonly ReservationRepositoryInterface $reservations,
+        private readonly OrderRepository $orders,
+        private readonly PaymentRepository $payments,
+        private readonly TableRepository $tables,
+        private readonly MenuRepository $menus,
+        private readonly ReservationRepository $reservations,
     ) {}
 
     /**

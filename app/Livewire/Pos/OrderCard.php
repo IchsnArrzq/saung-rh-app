@@ -4,11 +4,11 @@ namespace App\Livewire\Pos;
 
 use App\Domains\Menu\Enums\MenuAvailability;
 use App\Domains\Menu\QueryUseCases\GetMenuCatalogQueryUseCase;
-use App\Domains\Menu\Repositories\MenuRepositoryInterface;
+use App\Domains\Menu\Repositories\MenuRepository;
 use App\Domains\Order\DTO\PlacePosOrderData;
 use App\Domains\Order\UseCases\PlacePosOrderUseCase;
 use App\Domains\Payment\Enums\PaymentMethod;
-use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\Repositories\TableRepository;
 use App\Support\RestaurantCart;
 use Illuminate\Support\Collection;
 use Livewire\Component;
@@ -38,7 +38,7 @@ class OrderCard extends Component
         $this->activeCategoryId = $categoryId;
     }
 
-    public function addToCart(string $menuId, MenuRepositoryInterface $menus): void
+    public function addToCart(string $menuId, MenuRepository $menus): void
     {
         $menu = $menus->find($menuId);
 
@@ -88,7 +88,7 @@ class OrderCard extends Component
         RestaurantCart::clearCart();
     }
 
-    public function showMenuDetail(string $menuId, MenuRepositoryInterface $menus): void
+    public function showMenuDetail(string $menuId, MenuRepository $menus): void
     {
         $menu = $menus->find($menuId);
 
@@ -178,7 +178,7 @@ class OrderCard extends Component
         return RestaurantCart::subtotal();
     }
 
-    public function render(GetMenuCatalogQueryUseCase $catalog, TableRepositoryInterface $tables)
+    public function render(GetMenuCatalogQueryUseCase $catalog, TableRepository $tables)
     {
         return view('livewire.pos.order-card', [
             'categories' => $catalog->categories(),

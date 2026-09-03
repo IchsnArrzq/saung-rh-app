@@ -3,7 +3,7 @@
 namespace App\Domains\Social\UseCases;
 
 use App\Domains\Social\Enums\SongStatus;
-use App\Domains\Social\Repositories\SongRequestRepositoryInterface;
+use App\Domains\Social\Repositories\SongRequestRepository;
 use App\Events\SongQueueUpdated;
 use App\Models\SongRequest;
 use App\Models\TableSession;
@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
  */
 class RequestSongUseCase
 {
-    public function __construct(private readonly SongRequestRepositoryInterface $songs) {}
+    public function __construct(private readonly SongRequestRepository $songs) {}
 
     public function handle(TableSession $session, string $title, ?string $artist = null, ?string $requestedBy = null): SongRequest
     {

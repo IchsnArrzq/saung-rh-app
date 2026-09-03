@@ -2,7 +2,7 @@
 
 namespace App\Domains\Order\Actions;
 
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
 use Illuminate\Support\Str;
 
 /**
@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
  */
 class GenerateOrderNumberAction
 {
-    public function __construct(private readonly OrderRepositoryInterface $orders) {}
+    public function __construct(private readonly OrderRepository $orders) {}
 
     public function handle(): string
     {

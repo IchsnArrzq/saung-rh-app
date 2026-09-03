@@ -2,7 +2,7 @@
 
 namespace App\Domains\Menu\QueryUseCases;
 
-use App\Domains\Menu\Repositories\MenuRepositoryInterface;
+use App\Domains\Menu\Repositories\MenuRepository;
 use App\Models\Menu;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class GetMenuCatalogQueryUseCase
 {
-    public function __construct(private readonly MenuRepositoryInterface $menus) {}
+    public function __construct(private readonly MenuRepository $menus) {}
 
     public function paginate(string $search = '', ?string $categoryId = null, int $perPage = 12): LengthAwarePaginator
     {

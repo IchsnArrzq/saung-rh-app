@@ -8,7 +8,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
-class IngredientRepository implements IngredientRepositoryInterface
+class IngredientRepository
 {
     public function find(string $id): ?Ingredient
     {
@@ -36,6 +36,7 @@ class IngredientRepository implements IngredientRepositoryInterface
             ->withQueryString();
     }
 
+    /** Ingredients at or below their minimum level. */
     public function lowStock(): Collection
     {
         return Ingredient::query()
@@ -51,6 +52,9 @@ class IngredientRepository implements IngredientRepositoryInterface
         return $ingredient;
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function update(Ingredient $ingredient, array $attributes): Ingredient
     {
         $ingredient->update($attributes);
@@ -58,6 +62,7 @@ class IngredientRepository implements IngredientRepositoryInterface
         return $ingredient;
     }
 
+    /** Append a row to the stock ledger. */
     public function recordMovement(array $attributes): StockMovement
     {
         return StockMovement::query()->create($attributes);

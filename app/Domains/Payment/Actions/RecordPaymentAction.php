@@ -4,7 +4,7 @@ namespace App\Domains\Payment\Actions;
 
 use App\Domains\Payment\Enums\PaymentMethod;
 use App\Domains\Payment\Enums\PaymentStatus;
-use App\Domains\Payment\Repositories\PaymentRepositoryInterface;
+use App\Domains\Payment\Repositories\PaymentRepository;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
  */
 class RecordPaymentAction
 {
-    public function __construct(private readonly PaymentRepositoryInterface $payments) {}
+    public function __construct(private readonly PaymentRepository $payments) {}
 
     /**
      * @param  string  $referencePrefix  Short tag identifying the flow, e.g. POS or BILL.

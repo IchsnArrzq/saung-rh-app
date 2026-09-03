@@ -2,7 +2,7 @@
 
 namespace App\Domains\Customer\QueryUseCases;
 
-use App\Domains\Customer\Repositories\CustomerRepositoryInterface;
+use App\Domains\Customer\Repositories\CustomerRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 /**
@@ -10,7 +10,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
  */
 class GetCustomerListQueryUseCase
 {
-    public function __construct(private readonly CustomerRepositoryInterface $customers) {}
+    public function __construct(private readonly CustomerRepository $customers) {}
 
     public function handle(string $search = '', int $perPage = 15): LengthAwarePaginator
     {

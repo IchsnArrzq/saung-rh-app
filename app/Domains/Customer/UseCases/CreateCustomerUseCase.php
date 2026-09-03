@@ -3,7 +3,7 @@
 namespace App\Domains\Customer\UseCases;
 
 use App\Domains\Customer\DTO\CustomerData;
-use App\Domains\Customer\Repositories\CustomerRepositoryInterface;
+use App\Domains\Customer\Repositories\CustomerRepository;
 use App\Models\Customer;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
  */
 class CreateCustomerUseCase
 {
-    public function __construct(private readonly CustomerRepositoryInterface $customers) {}
+    public function __construct(private readonly CustomerRepository $customers) {}
 
     public function handle(CustomerData $data): Customer
     {

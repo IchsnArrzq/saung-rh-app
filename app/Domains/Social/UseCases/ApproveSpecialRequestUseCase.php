@@ -2,11 +2,11 @@
 
 namespace App\Domains\Social\UseCases;
 
-use App\Domains\Employee\Repositories\ShiftRepositoryInterface;
+use App\Domains\Employee\Repositories\ShiftRepository;
 use App\Domains\Social\Enums\SpecialRequestStatus;
-use App\Domains\Social\Repositories\SpecialRequestRepositoryInterface;
+use App\Domains\Social\Repositories\SpecialRequestRepository;
 use App\Domains\Social\Services\WaiterMatchmaker;
-use App\Domains\System\Repositories\UserRepositoryInterface;
+use App\Domains\System\Repositories\UserRepository;
 use App\Models\SpecialRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -26,9 +26,9 @@ use Illuminate\Validation\ValidationException;
 class ApproveSpecialRequestUseCase
 {
     public function __construct(
-        private readonly SpecialRequestRepositoryInterface $requests,
-        private readonly UserRepositoryInterface $users,
-        private readonly ShiftRepositoryInterface $shifts,
+        private readonly SpecialRequestRepository $requests,
+        private readonly UserRepository $users,
+        private readonly ShiftRepository $shifts,
         private readonly WaiterMatchmaker $matchmaker,
     ) {}
 

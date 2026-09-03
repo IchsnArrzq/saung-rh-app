@@ -2,13 +2,13 @@
 
 namespace App\Domains\System\UseCases;
 
-use App\Domains\System\Repositories\SubscriptionRepositoryInterface;
+use App\Domains\System\Repositories\SubscriptionRepository;
 use App\Models\Subscription;
 use Illuminate\Support\Facades\DB;
 
 class SaveLicenseUseCase
 {
-    public function __construct(private readonly SubscriptionRepositoryInterface $subscriptions) {}
+    public function __construct(private readonly SubscriptionRepository $subscriptions) {}
 
     /**
      * @param  array<string, mixed>  $attributes

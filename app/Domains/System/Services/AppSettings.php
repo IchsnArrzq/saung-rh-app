@@ -2,7 +2,7 @@
 
 namespace App\Domains\System\Services;
 
-use App\Domains\System\Repositories\AppSettingRepositoryInterface;
+use App\Domains\System\Repositories\AppSettingRepository;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -17,7 +17,7 @@ class AppSettings
 {
     private const CACHE_KEY = 'app_settings.all';
 
-    public function __construct(private readonly AppSettingRepositoryInterface $settings) {}
+    public function __construct(private readonly AppSettingRepository $settings) {}
 
     /**
      * All settings as a flat key => value map (cached).

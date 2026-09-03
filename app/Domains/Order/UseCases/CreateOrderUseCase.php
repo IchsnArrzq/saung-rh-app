@@ -5,7 +5,7 @@ namespace App\Domains\Order\UseCases;
 use App\Domains\Order\Actions\CalculateOrderTotalAction;
 use App\Domains\Order\Actions\GenerateOrderNumberAction;
 use App\Domains\Order\DTO\CreateOrderData;
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
 use App\Events\OrderCreated;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 class CreateOrderUseCase
 {
     public function __construct(
-        private readonly OrderRepositoryInterface $orders,
+        private readonly OrderRepository $orders,
         private readonly CalculateOrderTotalAction $calculateTotal,
         private readonly GenerateOrderNumberAction $generateOrderNumber,
     ) {}

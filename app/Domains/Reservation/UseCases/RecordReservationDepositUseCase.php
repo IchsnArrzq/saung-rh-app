@@ -4,9 +4,9 @@ namespace App\Domains\Reservation\UseCases;
 
 use App\Domains\Payment\Enums\PaymentMethod;
 use App\Domains\Payment\Enums\PaymentStatus;
-use App\Domains\Payment\Repositories\PaymentRepositoryInterface;
+use App\Domains\Payment\Repositories\PaymentRepository;
 use App\Domains\Reservation\Enums\ReservationStatus;
-use App\Domains\Reservation\Repositories\ReservationRepositoryInterface;
+use App\Domains\Reservation\Repositories\ReservationRepository;
 use App\Models\Payment;
 use App\Models\Reservation;
 use App\Models\User;
@@ -25,8 +25,8 @@ use Illuminate\Validation\ValidationException;
 class RecordReservationDepositUseCase
 {
     public function __construct(
-        private readonly ReservationRepositoryInterface $reservations,
-        private readonly PaymentRepositoryInterface $payments,
+        private readonly ReservationRepository $reservations,
+        private readonly PaymentRepository $payments,
     ) {}
 
     public function handle(

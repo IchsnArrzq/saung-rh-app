@@ -2,13 +2,13 @@
 
 namespace App\Domains\Employee\UseCases;
 
-use App\Domains\Employee\Repositories\ShiftRepositoryInterface;
+use App\Domains\Employee\Repositories\ShiftRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class DeleteShiftUseCase
 {
-    public function __construct(private readonly ShiftRepositoryInterface $shifts) {}
+    public function __construct(private readonly ShiftRepository $shifts) {}
 
     public function handle(string $shiftId): void
     {

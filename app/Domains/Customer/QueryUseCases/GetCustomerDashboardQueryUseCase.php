@@ -2,7 +2,8 @@
 
 namespace App\Domains\Customer\QueryUseCases;
 
-use App\Domains\Reservation\Repositories\ReservationRepositoryInterface;
+use App\Domains\Reservation\Repositories\ReservationRepository;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -18,12 +19,12 @@ use Illuminate\Support\Facades\Auth;
  */
 class GetCustomerDashboardQueryUseCase
 {
-    public function __construct(private readonly ReservationRepositoryInterface $reservations) {}
+    public function __construct(private readonly ReservationRepository $reservations) {}
 
     /**
      * @return array{
-     *     upcomingReservations: \Illuminate\Database\Eloquent\Collection,
-     *     reservationHistory: \Illuminate\Database\Eloquent\Collection,
+     *     upcomingReservations: Collection,
+     *     reservationHistory: Collection,
      *     stats: array{active_booking:int,total_booking:int,total_item_upcoming:int}
      * }
      */

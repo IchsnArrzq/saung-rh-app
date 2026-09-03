@@ -12,8 +12,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
-class OrderRepository implements OrderRepositoryInterface
+/**
+ * All Order persistence and querying. No business rules live here.
+ */
+class OrderRepository
 {
+    /** Admin order listing with search, item counts and paid totals. */
     public function paginateForAdmin(int $perPage = 12, string $search = ''): LengthAwarePaginator
     {
         return Order::query()
@@ -26,6 +30,7 @@ class OrderRepository implements OrderRepositoryInterface
             ->withQueryString();
     }
 
+    /** Kitchen queue: confirmed + preparing, VIP-track orders first. */
     public function kitchenOngoing(): Collection
     {
         return Order::query()
@@ -37,6 +42,12 @@ class OrderRepository implements OrderRepositoryInterface
             ->get();
     }
 
+    /**
+     * Ids of the kitchen queue in the order the cooks work through it — enough
+     * to tell a guest their position without loading whole orders.
+     *
+     * @return array<int, string>
+     */
     public function kitchenQueueIds(): array
     {
         return Order::query()
@@ -48,6 +59,7 @@ class OrderRepository implements OrderRepositoryInterface
             ->all();
     }
 
+    /** Kitchen queue: plated and waiting to be served. */
     public function kitchenReady(): Collection
     {
         return Order::query()
@@ -58,6 +70,7 @@ class OrderRepository implements OrderRepositoryInterface
             ->get();
     }
 
+    /** Kitchen queue: finished today, newest first. */
     public function kitchenCompletedToday(int $limit = 50): Collection
     {
         return Order::query()
@@ -70,6 +83,7 @@ class OrderRepository implements OrderRepositoryInterface
             ->get();
     }
 
+    /** Orders that are neither paid nor cancelled and still carry a balance. */
     public function openBills(string $search = ''): Collection
     {
         return Order::query()
@@ -80,6 +94,7 @@ class OrderRepository implements OrderRepositoryInterface
             ->get();
     }
 
+    /** Open (unsettled) orders sitting on one table — a party may run several rounds. */
     public function openOrdersForTable(string $tableId): Collection
     {
         return Order::query()
@@ -89,6 +104,7 @@ class OrderRepository implements OrderRepositoryInterface
             ->get();
     }
 
+    /** Today's in-progress orders for one table, with their lines — the guest's tracker. */
     public function activeForTable(string $tableId): Collection
     {
         return Order::query()
@@ -104,6 +120,7 @@ class OrderRepository implements OrderRepositoryInterface
             ->get();
     }
 
+    /** Orders live on the floor right now, newest first — the waiter's picker. */
     public function inServiceRecent(int $limit = 50): Collection
     {
         return Order::query()
@@ -113,6 +130,12 @@ class OrderRepository implements OrderRepositoryInterface
             ->get(['id', 'order_number', 'customer_name']);
     }
 
+    /**
+     * Customers ranked by spend on finished orders since `$since`. Rows carry
+     * `customer_id`, `orders_count` and `total_spend`.
+     *
+     * @return Collection<int, Order>
+     */
     public function topSpendersSince(CarbonInterface $since, int $limit = 8): Collection
     {
         return Order::query()
@@ -131,11 +154,13 @@ class OrderRepository implements OrderRepositoryInterface
         return Order::query()->where('status', $status)->count();
     }
 
+    /** Orders live on the floor right now: confirmed through served. */
     public function countInService(): int
     {
         return Order::query()->whereIn('status', OrderStatus::inServiceValues())->count();
     }
 
+    /** Kitchen-bound orders that have been waiting longer than `$minutes`. */
     public function countStaleKitchenOrders(int $minutes): int
     {
         return Order::query()
@@ -144,6 +169,7 @@ class OrderRepository implements OrderRepositoryInterface
             ->count();
     }
 
+    /** Latest orders for the dashboard feed, table and cashier eager-loaded. */
     public function recent(int $limit = 6): Collection
     {
         return Order::query()
@@ -153,6 +179,12 @@ class OrderRepository implements OrderRepositoryInterface
             ->get();
     }
 
+    /**
+     * Best-selling lines on one day. Rows carry `menu_name_snapshot`,
+     * `total_qty` and `total_revenue`.
+     *
+     * @return Collection<int, OrderItem>
+     */
     public function topMenuItemsForDate(CarbonInterface $date, int $limit = 5): Collection
     {
         return OrderItem::query()
@@ -166,6 +198,12 @@ class OrderRepository implements OrderRepositoryInterface
             ->get();
     }
 
+    /**
+     * Best-selling lines across a window, counting the given order statuses.
+     *
+     * @param  array<int, string>  $statuses
+     * @return Collection<int, OrderItem>
+     */
     public function topMenuItemsBetween(CarbonInterface $start, CarbonInterface $end, array $statuses, int $limit = 5): Collection
     {
         return OrderItem::query()
@@ -179,6 +217,7 @@ class OrderRepository implements OrderRepositoryInterface
             ->get();
     }
 
+    /** Sum of settled order totals in a window. */
     public function sumPaidTotalBetween(CarbonInterface $start, CarbonInterface $end): float
     {
         return (float) Order::query()
@@ -187,6 +226,11 @@ class OrderRepository implements OrderRepositoryInterface
             ->sum('total');
     }
 
+    /**
+     * How many orders in a window carry any of the given statuses.
+     *
+     * @param  array<int, string>  $statuses
+     */
     public function countBetweenWithStatuses(CarbonInterface $start, CarbonInterface $end, array $statuses): int
     {
         return Order::query()
@@ -195,6 +239,12 @@ class OrderRepository implements OrderRepositoryInterface
             ->count();
     }
 
+    /**
+     * Settled revenue per cashier in a window. Rows carry `name`,
+     * `total_revenue` and `total_orders`.
+     *
+     * @return Collection<int, Order>
+     */
     public function revenueByCashierBetween(CarbonInterface $start, CarbonInterface $end): Collection
     {
         return Order::query()
@@ -207,6 +257,12 @@ class OrderRepository implements OrderRepositoryInterface
             ->get();
     }
 
+    /**
+     * Bare `ordered_at` + `total` of settled orders in a window — the raw
+     * material the sales trend is bucketed from.
+     *
+     * @return Collection<int, Order>
+     */
     public function paidTotalsBetween(CarbonInterface $start, CarbonInterface $end): Collection
     {
         return Order::query()
@@ -225,6 +281,7 @@ class OrderRepository implements OrderRepositoryInterface
         return Order::query()->with('items')->find($id);
     }
 
+    /** Everything the admin receipt modal prints: table, cashier, lines and payments. */
     public function findForDetail(string $id): ?Order
     {
         return Order::query()
@@ -237,6 +294,10 @@ class OrderRepository implements OrderRepositoryInterface
         return Order::query()->where('order_number', $orderNumber)->exists();
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     * @param  array<int, array<string, mixed>>  $items
+     */
     public function createWithItems(array $attributes, array $items): Order
     {
         $order = Order::query()->create($attributes);
@@ -245,6 +306,10 @@ class OrderRepository implements OrderRepositoryInterface
         return $order;
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     * @param  array<int, array<string, mixed>>  $items
+     */
     public function updateWithItems(Order $order, array $attributes, array $items): Order
     {
         $order->update($attributes);
@@ -254,6 +319,9 @@ class OrderRepository implements OrderRepositoryInterface
         return $order;
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function update(Order $order, array $attributes): Order
     {
         $order->update($attributes);
@@ -261,6 +329,7 @@ class OrderRepository implements OrderRepositoryInterface
         return $order;
     }
 
+    /** Cascade a status onto every line of an order (kitchen ticket moves as a whole). */
     public function updateItemsStatus(Order $order, string $status): void
     {
         $order->items()->update(['status' => $status]);

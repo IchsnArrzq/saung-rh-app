@@ -4,14 +4,14 @@ namespace App\Domains\Social\UseCases;
 
 use App\Domains\Social\Enums\SpecialRequestCategory;
 use App\Domains\Social\Enums\SpecialRequestStatus;
-use App\Domains\Social\Repositories\SpecialRequestRepositoryInterface;
+use App\Domains\Social\Repositories\SpecialRequestRepository;
 use App\Models\SpecialRequest;
 use App\Models\TableSession;
 use Illuminate\Support\Facades\DB;
 
 class SubmitSpecialRequestUseCase
 {
-    public function __construct(private readonly SpecialRequestRepositoryInterface $requests) {}
+    public function __construct(private readonly SpecialRequestRepository $requests) {}
 
     public function handle(
         TableSession $session,

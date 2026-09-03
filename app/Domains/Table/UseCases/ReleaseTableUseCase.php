@@ -3,7 +3,7 @@
 namespace App\Domains\Table\UseCases;
 
 use App\Domains\Table\Enums\TableStatus;
-use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\Repositories\TableRepository;
 use App\Models\Table;
 use Illuminate\Support\Facades\DB;
 
@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
  */
 class ReleaseTableUseCase
 {
-    public function __construct(private readonly TableRepositoryInterface $tables) {}
+    public function __construct(private readonly TableRepository $tables) {}
 
     public function handle(Table $table): void
     {

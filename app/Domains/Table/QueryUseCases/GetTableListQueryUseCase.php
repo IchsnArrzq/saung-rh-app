@@ -3,7 +3,8 @@
 namespace App\Domains\Table\QueryUseCases;
 
 use App\Domains\Table\Enums\TableStatus;
-use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\Repositories\TableRepository;
+use App\Models\Table;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -12,7 +13,7 @@ class GetTableListQueryUseCase
     /** Bucket for rows whose status column is somehow blank. */
     private const UNASSIGNED = '__unassigned__';
 
-    public function __construct(private readonly TableRepositoryInterface $tables) {}
+    public function __construct(private readonly TableRepository $tables) {}
 
     public function paginate(string $search = '', int $perPage = 12): LengthAwarePaginator
     {
@@ -43,8 +44,8 @@ class GetTableListQueryUseCase
      *
      * @return array{
      *     statuses: \Illuminate\Support\Collection<int, TableStatus>,
-     *     tablesByStatus: \Illuminate\Support\Collection<string, Collection<int, \App\Models\Table>>,
-     *     unassignedTables: \Illuminate\Support\Collection<int, \App\Models\Table>
+     *     tablesByStatus: \Illuminate\Support\Collection<string, Collection<int, Table>>,
+     *     unassignedTables: \Illuminate\Support\Collection<int, Table>
      * }
      */
     public function groupedByStatus(string $search = ''): array

@@ -2,13 +2,13 @@
 
 namespace App\Domains\Reservation\QueryUseCases;
 
-use App\Domains\Reservation\Repositories\ReservationRepositoryInterface;
+use App\Domains\Reservation\Repositories\ReservationRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class GetReservationListQueryUseCase
 {
-    public function __construct(private readonly ReservationRepositoryInterface $reservations) {}
+    public function __construct(private readonly ReservationRepository $reservations) {}
 
     /** Admin table. */
     public function forAdmin(string $search = '', int $perPage = 12): LengthAwarePaginator

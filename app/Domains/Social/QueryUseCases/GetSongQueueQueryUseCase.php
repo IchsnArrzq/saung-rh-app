@@ -2,7 +2,7 @@
 
 namespace App\Domains\Social\QueryUseCases;
 
-use App\Domains\Social\Repositories\SongRequestRepositoryInterface;
+use App\Domains\Social\Repositories\SongRequestRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class GetSongQueueQueryUseCase
 {
-    public function __construct(private readonly SongRequestRepositoryInterface $songs) {}
+    public function __construct(private readonly SongRequestRepository $songs) {}
 
     /** Playing first, then oldest queued. */
     public function queue(): Collection

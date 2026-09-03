@@ -6,8 +6,8 @@ use App\Domains\Employee\Enums\ServiceType;
 use App\Domains\Employee\QueryUseCases\GetWaiterActivityQueryUseCase;
 use App\Domains\Employee\UseCases\LogServiceUseCase;
 use App\Domains\Employee\UseCases\LogTipUseCase;
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
-use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
+use App\Domains\Table\Repositories\TableRepository;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -73,8 +73,8 @@ class TipsServiceLog extends Component
 
     public function render(
         GetWaiterActivityQueryUseCase $activity,
-        TableRepositoryInterface $tables,
-        OrderRepositoryInterface $orders,
+        TableRepository $tables,
+        OrderRepository $orders,
     ): View {
         return view('livewire.staff.waiter.tips-service-log', [
             ...$activity->handle(),

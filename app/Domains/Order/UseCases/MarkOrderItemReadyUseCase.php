@@ -3,7 +3,7 @@
 namespace App\Domains\Order\UseCases;
 
 use App\Domains\Order\Enums\OrderStatus;
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
 use App\Events\OrderUpdated;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
  */
 class MarkOrderItemReadyUseCase
 {
-    public function __construct(private readonly OrderRepositoryInterface $orders) {}
+    public function __construct(private readonly OrderRepository $orders) {}
 
     public function handle(string $orderId, string $itemId): ?Order
     {

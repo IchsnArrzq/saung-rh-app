@@ -6,7 +6,7 @@ use App\Domains\Reservation\Enums\ReservationStatus;
 use App\Domains\Reservation\QueryUseCases\GetReservationListQueryUseCase;
 use App\Models\Reservation;
 use App\Domains\Payment\Enums\PaymentMethod;
-use App\Domains\Reservation\Repositories\ReservationRepositoryInterface;
+use App\Domains\Reservation\Repositories\ReservationRepository;
 use App\Domains\Reservation\UseCases\RecordReservationDepositUseCase;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
@@ -86,7 +86,7 @@ class BookingBoard extends Component
         $this->reset(['depositFor', 'depositAmount', 'depositMethod']);
     }
 
-    public function saveDeposit(RecordReservationDepositUseCase $recordDeposit, ReservationRepositoryInterface $reservations): void
+    public function saveDeposit(RecordReservationDepositUseCase $recordDeposit, ReservationRepository $reservations): void
     {
         $this->validate([
             'depositAmount' => ['required', 'numeric', 'min:1'],

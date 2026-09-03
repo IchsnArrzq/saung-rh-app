@@ -4,7 +4,7 @@ namespace App\Livewire\Staff\Waiter;
 
 use App\Domains\Table\Enums\TableStatus;
 use App\Domains\Table\QueryUseCases\GetTableListQueryUseCase;
-use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\Repositories\TableRepository;
 use App\Domains\Table\UseCases\ChangeTableStatusUseCase;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
@@ -19,7 +19,7 @@ class TableStatusUpdater extends Component
      * The status now arrives as an Enum value ("available", "cleaning", …)
      * instead of a table_statuses UUID — the Blade passes `$status->value`.
      */
-    public function updateStatus(string $tableId, string $status, ChangeTableStatusUseCase $changeStatus, TableRepositoryInterface $tables): void
+    public function updateStatus(string $tableId, string $status, ChangeTableStatusUseCase $changeStatus, TableRepository $tables): void
     {
         $target = TableStatus::tryFrom($status);
         $table = $tables->find($tableId);

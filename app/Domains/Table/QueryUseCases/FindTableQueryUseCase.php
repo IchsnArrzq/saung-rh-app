@@ -3,7 +3,7 @@
 namespace App\Domains\Table\QueryUseCases;
 
 use App\Domains\Table\Enums\TableStatus;
-use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\Repositories\TableRepository;
 use App\Models\Table;
 
 /**
@@ -14,7 +14,7 @@ use App\Models\Table;
  */
 class FindTableQueryUseCase
 {
-    public function __construct(private readonly TableRepositoryInterface $tables) {}
+    public function __construct(private readonly TableRepository $tables) {}
 
     public function byId(string $tableId): ?Table
     {

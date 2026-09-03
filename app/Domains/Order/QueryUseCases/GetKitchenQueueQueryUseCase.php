@@ -2,7 +2,7 @@
 
 namespace App\Domains\Order\QueryUseCases;
 
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class GetKitchenQueueQueryUseCase
 {
-    public function __construct(private readonly OrderRepositoryInterface $orders) {}
+    public function __construct(private readonly OrderRepository $orders) {}
 
     /** Confirmed + preparing, VIP-track first. */
     public function ongoing(): Collection

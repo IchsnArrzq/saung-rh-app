@@ -2,7 +2,7 @@
 
 namespace App\Domains\Employee\QueryUseCases;
 
-use App\Domains\Employee\Repositories\StaffActivityRepositoryInterface;
+use App\Domains\Employee\Repositories\StaffActivityRepository;
 use App\Domains\Reporting\Enums\AnalyticsRange;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -22,7 +22,7 @@ class GetStaffKpiQueryUseCase
 
     private const REQUEST_WEIGHT = 2;
 
-    public function __construct(private readonly StaffActivityRepositoryInterface $activity) {}
+    public function __construct(private readonly StaffActivityRepository $activity) {}
 
     /**
      * @return Collection<int, array<string, mixed>>

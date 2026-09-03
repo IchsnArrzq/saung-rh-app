@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
-class ReservationRepository implements ReservationRepositoryInterface
+class ReservationRepository
 {
     public function find(string $id): ?Reservation
     {
@@ -22,6 +22,7 @@ class ReservationRepository implements ReservationRepositoryInterface
         return Reservation::query()->with('table')->find($id);
     }
 
+    /** Admin listing, newest first. */
     public function paginateForAdmin(int $perPage = 12, string $search = ''): LengthAwarePaginator
     {
         return Reservation::query()
@@ -33,6 +34,10 @@ class ReservationRepository implements ReservationRepositoryInterface
             ->withQueryString();
     }
 
+    /**
+     * Receptionist board: same search, but ordered by urgency
+     * (pending, then confirmed, then the rest) and filterable by status.
+     */
     public function paginateForBoard(int $perPage = 12, string $search = '', string $statusFilter = 'all'): LengthAwarePaginator
     {
         return Reservation::query()
@@ -49,6 +54,7 @@ class ReservationRepository implements ReservationRepositoryInterface
             ->withQueryString();
     }
 
+    /** status => count, for the board's summary chips. */
     public function countsByStatus(): Collection
     {
         return Reservation::query()
@@ -62,6 +68,11 @@ class ReservationRepository implements ReservationRepositoryInterface
         return Reservation::query()->whereDate('reservation_at', $date)->count();
     }
 
+    /**
+     * A day's bookings in arrival order — the dashboard's "today" panel.
+     *
+     * @return EloquentCollection<int, Reservation>
+     */
     public function listForDate(CarbonInterface $date, int $limit = 6): EloquentCollection
     {
         return Reservation::query()
@@ -72,6 +83,11 @@ class ReservationRepository implements ReservationRepositoryInterface
             ->get();
     }
 
+    /**
+     * A customer's still-open bookings, soonest first.
+     *
+     * @return EloquentCollection<int, Reservation>
+     */
     public function upcomingForUser(string $userId, int $limit = 5): EloquentCollection
     {
         return Reservation::query()
@@ -84,6 +100,11 @@ class ReservationRepository implements ReservationRepositoryInterface
             ->get();
     }
 
+    /**
+     * A customer's booking history, newest first.
+     *
+     * @return EloquentCollection<int, Reservation>
+     */
     public function historyForUser(string $userId, int $limit = 10): EloquentCollection
     {
         return Reservation::query()
@@ -94,6 +115,10 @@ class ReservationRepository implements ReservationRepositoryInterface
             ->get();
     }
 
+    /**
+     * Whether the table is already held by another booking within `$windowMinutes`
+     * either side of the requested time — the double-booking check.
+     */
     public function hasOverlappingHold(string $tableId, CarbonInterface $at, int $windowMinutes = 90): bool
     {
         return Reservation::query()
@@ -109,21 +134,38 @@ class ReservationRepository implements ReservationRepositoryInterface
             ->exists();
     }
 
+    /**
+     * Pending bookings whose deposit window lapsed unpaid, table eager-loaded.
+     *
+     * @return EloquentCollection<int, Reservation>
+     */
     public function expiredHolds(): EloquentCollection
     {
         return Reservation::query()->expiredHolds()->with('table')->get();
     }
 
+    /**
+     * Confirmed bookings past their grace window with nobody checked in.
+     *
+     * @return EloquentCollection<int, Reservation>
+     */
     public function noShowCandidates(int $graceMinutes): EloquentCollection
     {
         return Reservation::query()->noShowCandidates($graceMinutes)->with('table')->get();
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function create(array $attributes): Reservation
     {
         return Reservation::query()->create($attributes);
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     * @param  array<int, array<string, mixed>>  $items
+     */
     public function createWithItems(array $attributes, array $items): Reservation
     {
         $reservation = Reservation::query()->create($attributes);
@@ -132,6 +174,9 @@ class ReservationRepository implements ReservationRepositoryInterface
         return $reservation;
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function update(Reservation $reservation, array $attributes): Reservation
     {
         $reservation->update($attributes);

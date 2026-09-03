@@ -2,7 +2,7 @@
 
 namespace App\Domains\System\QueryUseCases;
 
-use App\Domains\System\Repositories\SubscriptionRepositoryInterface;
+use App\Domains\System\Repositories\SubscriptionRepository;
 use App\Models\Subscription;
 
 /**
@@ -17,7 +17,7 @@ class GetLicenseStatusQueryUseCase
     /** How close to expiry the banner starts warning. */
     private const EXPIRY_WARNING_DAYS = 7;
 
-    public function __construct(private readonly SubscriptionRepositoryInterface $subscriptions) {}
+    public function __construct(private readonly SubscriptionRepository $subscriptions) {}
 
     public function current(): ?Subscription
     {

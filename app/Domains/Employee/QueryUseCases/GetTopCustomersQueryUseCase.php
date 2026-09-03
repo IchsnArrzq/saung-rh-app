@@ -2,7 +2,7 @@
 
 namespace App\Domains\Employee\QueryUseCases;
 
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
 use App\Domains\Reporting\Enums\AnalyticsRange;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -18,7 +18,7 @@ use Illuminate\Support\Collection;
  */
 class GetTopCustomersQueryUseCase
 {
-    public function __construct(private readonly OrderRepositoryInterface $orders) {}
+    public function __construct(private readonly OrderRepository $orders) {}
 
     /**
      * @return Collection<int, array<string, mixed>>

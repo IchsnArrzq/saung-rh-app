@@ -3,7 +3,7 @@
 namespace App\Domains\Reporting\QueryUseCases;
 
 use App\Domains\Order\Enums\OrderStatus;
-use App\Domains\Order\Repositories\OrderRepositoryInterface;
+use App\Domains\Order\Repositories\OrderRepository;
 use App\Domains\Reporting\Services\SalesTrendService;
 use Carbon\Carbon;
 
@@ -17,7 +17,7 @@ use Carbon\Carbon;
 class GetSalesReportQueryUseCase
 {
     public function __construct(
-        private readonly OrderRepositoryInterface $orders,
+        private readonly OrderRepository $orders,
         private readonly SalesTrendService $trend,
     ) {}
 

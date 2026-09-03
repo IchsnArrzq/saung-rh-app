@@ -154,11 +154,19 @@ warns against.
 
 Query, persist, return models. No business logic.
 
-OrderRepositoryInterface → OrderRepository
+OrderRepository
 
 
-(Repository interfaces ARE worth keeping broadly, since swapping data
-source or mocking in tests is a real, common need — unlike most Services.)
+**No interface.** A Repository has exactly one implementation, so the same
+rule that governs Services governs it: an interface is earned by a second
+real implementation, not by the possibility of one. Type-hint the concrete
+class and let the container resolve it.
+
+(Earlier versions of this file exempted Repositories, on the grounds that
+swapping the data source or mocking in tests was a common need. Neither
+happened: one data source, and not a single test ever mocked a repository.
+The exemption produced 14 interfaces with one implementation each — the
+same "interface just in case" that Core Principle #1 forbids. Removed.)
 
 ## DTO
 
@@ -175,9 +183,11 @@ Don't create DTO for simple single-field CRUD.
 
 # Dependency Injection
 
-Bind interfaces only for Repository (always) and Service (only when
-multiple implementations are real — see above). Never inject concrete
-implementation when a genuine interface exists.
+One rule, no exceptions by layer: bind an interface only where ≥2 real
+implementations exist (payment gateway, notification channel). Everything
+else — Repository, Service, UseCase, Action — is type-hinted as the concrete
+class and resolved by the container without a binding. Where a genuine
+interface does exist, never inject the implementation behind it.
 
 ---
 
@@ -413,7 +423,7 @@ Promotion, Report, Settings — same architecture applies to all.
 | Is this one complete business flow that changes state? | UseCase |
 | Is this a small operation reused in ≥2 places? | Action |
 | Is this a core business rule (stock check, table availability, approval limit)? | Domain (Policy/Enum) |
-| Is this database access? | Repository |
+| Is this database access? | Repository (concrete class, no interface) |
 | Is this a technical integration (payment gateway, WA, WebSocket)? | Service (interface only if ≥2 real implementations) |
 | Does the status/flow need to change without a deploy, per client? | Not needed here — hardcoded Enum + Policy (see State Machine section) |
 | Can admin toggle behavior without code (feature flag, tax %)? | Configuration |

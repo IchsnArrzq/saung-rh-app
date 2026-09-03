@@ -3,7 +3,7 @@
 namespace App\Domains\Inventory\Actions;
 
 use App\Domains\Inventory\Enums\StockMovementType;
-use App\Domains\Inventory\Repositories\IngredientRepositoryInterface;
+use App\Domains\Inventory\Repositories\IngredientRepository;
 use App\Models\Ingredient;
 use App\Models\StockMovement;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class RecordStockMovementAction
 {
-    public function __construct(private readonly IngredientRepositoryInterface $ingredients) {}
+    public function __construct(private readonly IngredientRepository $ingredients) {}
 
     public function handle(
         Ingredient $ingredient,

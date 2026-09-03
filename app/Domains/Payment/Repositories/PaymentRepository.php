@@ -9,7 +9,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
-class PaymentRepository implements PaymentRepositoryInterface
+class PaymentRepository
 {
     public function find(string $id): ?Payment
     {
@@ -35,11 +35,17 @@ class PaymentRepository implements PaymentRepositoryInterface
             ->withQueryString();
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function create(array $attributes): Payment
     {
         return Payment::query()->create($attributes);
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function update(Payment $payment, array $attributes): Payment
     {
         $payment->update($attributes);
@@ -60,6 +66,7 @@ class PaymentRepository implements PaymentRepositoryInterface
             ->sum('amount');
     }
 
+    /** Money actually banked in a window — the dashboard's revenue figure. */
     public function sumSettledBetween(CarbonInterface $start, CarbonInterface $end): float
     {
         return (float) Payment::query()
@@ -68,6 +75,7 @@ class PaymentRepository implements PaymentRepositoryInterface
             ->sum('amount');
     }
 
+    /** How many distinct orders were settled in a window. */
     public function countSettledOrdersBetween(CarbonInterface $start, CarbonInterface $end): int
     {
         return Payment::query()
@@ -77,6 +85,12 @@ class PaymentRepository implements PaymentRepositoryInterface
             ->count('order_id');
     }
 
+    /**
+     * Settled payments for one day grouped by method, biggest first. Rows carry
+     * `method`, `total_count` and `total_amount`.
+     *
+     * @return Collection<int, Payment>
+     */
     public function methodBreakdownForDate(CarbonInterface $date): Collection
     {
         return Payment::query()

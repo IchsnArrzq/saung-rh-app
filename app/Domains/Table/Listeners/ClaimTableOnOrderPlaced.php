@@ -4,7 +4,7 @@ namespace App\Domains\Table\Listeners;
 
 use App\Domains\Order\Events\OrderPlaced;
 use App\Domains\Table\Actions\ClaimTableForOrderAction;
-use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\Repositories\TableRepository;
 
 /**
  * The floor's reaction to an order landing: move the table to "order_in".
@@ -16,7 +16,7 @@ use App\Domains\Table\Repositories\TableRepositoryInterface;
 class ClaimTableOnOrderPlaced
 {
     public function __construct(
-        private readonly TableRepositoryInterface $tables,
+        private readonly TableRepository $tables,
         private readonly ClaimTableForOrderAction $claimTable,
     ) {}
 

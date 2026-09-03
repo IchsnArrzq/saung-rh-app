@@ -3,7 +3,7 @@
 namespace App\Domains\Table\Listeners;
 
 use App\Domains\Order\Events\TableBillsCleared;
-use App\Domains\Table\Repositories\TableRepositoryInterface;
+use App\Domains\Table\Repositories\TableRepository;
 use App\Domains\Table\UseCases\ReleaseTableUseCase;
 
 /**
@@ -15,7 +15,7 @@ use App\Domains\Table\UseCases\ReleaseTableUseCase;
 class ReleaseTableOnBillsCleared
 {
     public function __construct(
-        private readonly TableRepositoryInterface $tables,
+        private readonly TableRepository $tables,
         private readonly ReleaseTableUseCase $releaseTable,
     ) {}
 

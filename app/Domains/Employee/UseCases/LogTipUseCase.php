@@ -2,14 +2,14 @@
 
 namespace App\Domains\Employee\UseCases;
 
-use App\Domains\Employee\Repositories\StaffActivityRepositoryInterface;
+use App\Domains\Employee\Repositories\StaffActivityRepository;
 use App\Models\Tip;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class LogTipUseCase
 {
-    public function __construct(private readonly StaffActivityRepositoryInterface $activity) {}
+    public function __construct(private readonly StaffActivityRepository $activity) {}
 
     public function handle(
         float $amount,

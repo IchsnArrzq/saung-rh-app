@@ -10,13 +10,19 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 
-class ShiftRepository implements ShiftRepositoryInterface
+class ShiftRepository
 {
     public function find(string $id): ?Shift
     {
         return Shift::query()->find($id);
     }
 
+    /**
+     * One week of the roster (Mon–Sun around `$anchor`), grouped by date key
+     * `Y-m-d` — the shape the scheduler grid renders from.
+     *
+     * @return SupportCollection<string, Collection<int, Shift>>
+     */
     public function week(CarbonInterface $anchor): SupportCollection
     {
         $start = $anchor->copy()->startOfWeek();
@@ -30,6 +36,14 @@ class ShiftRepository implements ShiftRepositoryInterface
             ->groupBy(fn (Shift $shift): string => $shift->shift_date->toDateString());
     }
 
+    /**
+     * Everyone who may be put on the roster — every role except customers.
+     *
+     * Lives here rather than in a User repository because "who is rosterable"
+     * is a rostering rule, not a fact about the user record.
+     *
+     * @return Collection<int, User>
+     */
     public function schedulableStaff(): Collection
     {
         return User::query()
@@ -38,6 +52,12 @@ class ShiftRepository implements ShiftRepositoryInterface
             ->get();
     }
 
+    /**
+     * Which of the given users are rostered (still `scheduled`) on a date.
+     *
+     * @param  array<int, string>  $userIds
+     * @return array<int, string>
+     */
     public function onShiftUserIdsForDate(array $userIds, CarbonInterface $date): array
     {
         return Shift::query()
@@ -48,11 +68,17 @@ class ShiftRepository implements ShiftRepositoryInterface
             ->all();
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function create(array $attributes): Shift
     {
         return Shift::query()->create($attributes);
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function update(Shift $shift, array $attributes): Shift
     {
         $shift->update($attributes);
