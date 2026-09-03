@@ -2,19 +2,28 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Domains\Menu\Services\MediaService;
 use App\Livewire\Admin\Menus\Form;
 use App\Models\Media;
 use App\Models\Menu;
-use App\Domains\Menu\Services\MediaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Tests\Concerns\InteractsWithAuthorization;
 use Tests\TestCase;
 
 class MenuFormMediaTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithAuthorization, RefreshDatabase;
+
+    /** Yang diuji unggahan media, bukan otorisasi. */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAsSuperadmin();
+    }
 
     public function test_create_menu_with_staged_images_and_video(): void
     {

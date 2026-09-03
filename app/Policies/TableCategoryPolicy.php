@@ -12,7 +12,7 @@ class TableCategoryPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('table_category.viewAny');
+        return $user->checkPermissionTo('table_category.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class TableCategoryPolicy
      */
     public function view(User $user, TableCategory $tableCategory): bool
     {
-        return $user->hasPermissionTo('table_category.view');
+        return $user->checkPermissionTo('table_category.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class TableCategoryPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('table_category.create');
+        return $user->checkPermissionTo('table_category.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class TableCategoryPolicy
      */
     public function update(User $user, TableCategory $tableCategory): bool
     {
-        return $user->hasPermissionTo('table_category.update');
+        return $user->checkPermissionTo('table_category.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class TableCategoryPolicy
      */
     public function delete(User $user, TableCategory $tableCategory): bool
     {
-        return $user->hasPermissionTo('table_category.delete');
+        return $user->checkPermissionTo('table_category.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class TableCategoryPolicy
      */
     public function restore(User $user, TableCategory $tableCategory): bool
     {
-        return $user->hasPermissionTo('table_category.restore');
+        return $user->checkPermissionTo('table_category.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class TableCategoryPolicy
      */
     public function forceDelete(User $user, TableCategory $tableCategory): bool
     {
-        return $user->hasPermissionTo('table_category.forceDelete');
+        return $user->checkPermissionTo('table_category.forceDelete');
     }
 }

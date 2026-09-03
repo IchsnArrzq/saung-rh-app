@@ -12,7 +12,7 @@ class MenuCategoryPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('menu_category.viewAny');
+        return $user->checkPermissionTo('menu_category.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class MenuCategoryPolicy
      */
     public function view(User $user, MenuCategory $menuCategory): bool
     {
-        return $user->hasPermissionTo('menu_category.view');
+        return $user->checkPermissionTo('menu_category.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class MenuCategoryPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('menu_category.create');
+        return $user->checkPermissionTo('menu_category.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class MenuCategoryPolicy
      */
     public function update(User $user, MenuCategory $menuCategory): bool
     {
-        return $user->hasPermissionTo('menu_category.update');
+        return $user->checkPermissionTo('menu_category.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class MenuCategoryPolicy
      */
     public function delete(User $user, MenuCategory $menuCategory): bool
     {
-        return $user->hasPermissionTo('menu_category.delete');
+        return $user->checkPermissionTo('menu_category.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class MenuCategoryPolicy
      */
     public function restore(User $user, MenuCategory $menuCategory): bool
     {
-        return $user->hasPermissionTo('menu_category.restore');
+        return $user->checkPermissionTo('menu_category.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class MenuCategoryPolicy
      */
     public function forceDelete(User $user, MenuCategory $menuCategory): bool
     {
-        return $user->hasPermissionTo('menu_category.forceDelete');
+        return $user->checkPermissionTo('menu_category.forceDelete');
     }
 }

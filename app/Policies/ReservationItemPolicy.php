@@ -12,7 +12,7 @@ class ReservationItemPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('reservation_item.viewAny');
+        return $user->checkPermissionTo('reservation_item.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class ReservationItemPolicy
      */
     public function view(User $user, ReservationItem $reservationItem): bool
     {
-        return $user->hasPermissionTo('reservation_item.view');
+        return $user->checkPermissionTo('reservation_item.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class ReservationItemPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('reservation_item.create');
+        return $user->checkPermissionTo('reservation_item.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class ReservationItemPolicy
      */
     public function update(User $user, ReservationItem $reservationItem): bool
     {
-        return $user->hasPermissionTo('reservation_item.update');
+        return $user->checkPermissionTo('reservation_item.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class ReservationItemPolicy
      */
     public function delete(User $user, ReservationItem $reservationItem): bool
     {
-        return $user->hasPermissionTo('reservation_item.delete');
+        return $user->checkPermissionTo('reservation_item.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class ReservationItemPolicy
      */
     public function restore(User $user, ReservationItem $reservationItem): bool
     {
-        return $user->hasPermissionTo('reservation_item.restore');
+        return $user->checkPermissionTo('reservation_item.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class ReservationItemPolicy
      */
     public function forceDelete(User $user, ReservationItem $reservationItem): bool
     {
-        return $user->hasPermissionTo('reservation_item.forceDelete');
+        return $user->checkPermissionTo('reservation_item.forceDelete');
     }
 }

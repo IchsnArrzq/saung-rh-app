@@ -12,7 +12,7 @@ class TablePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('table.viewAny');
+        return $user->checkPermissionTo('table.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class TablePolicy
      */
     public function view(User $user, Table $table): bool
     {
-        return $user->hasPermissionTo('table.view');
+        return $user->checkPermissionTo('table.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class TablePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('table.create');
+        return $user->checkPermissionTo('table.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class TablePolicy
      */
     public function update(User $user, Table $table): bool
     {
-        return $user->hasPermissionTo('table.update');
+        return $user->checkPermissionTo('table.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class TablePolicy
      */
     public function delete(User $user, Table $table): bool
     {
-        return $user->hasPermissionTo('table.delete');
+        return $user->checkPermissionTo('table.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class TablePolicy
      */
     public function restore(User $user, Table $table): bool
     {
-        return $user->hasPermissionTo('table.restore');
+        return $user->checkPermissionTo('table.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class TablePolicy
      */
     public function forceDelete(User $user, Table $table): bool
     {
-        return $user->hasPermissionTo('table.forceDelete');
+        return $user->checkPermissionTo('table.forceDelete');
     }
 }

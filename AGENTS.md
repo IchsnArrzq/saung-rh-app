@@ -294,17 +294,61 @@ Rule of thumb: does checking this require a DB query or state lookup?
 
 # Authorization
 
-Use Policies. Permission naming convention: `{module}.{action}`.
+**One Policy per model. Roles carry permissions; permissions are never checked
+by name outside a Policy.**
 
-order.create
-order.cancel
-reservation.approve
-payment.process
+Permission names are `{model_snake}.{ability}` over Laravel's seven default
+abilities — `menu.viewAny`, `order.update`, `payment.forceDelete`. The list is
+generated from `App\Support\PolicyPermissions`, so adding a model there mints
+its permissions and they appear on the Roles & Permissions screen. Nothing is
+typed by hand.
 
-Gate::authorize('order.cancel', $order);
+A Policy method answers exactly one question and does it by asking the
+permission table:
 
+```php
+public function update(User $user, Menu $menu): bool
+{
+    return $user->checkPermissionTo('menu.update');
+}
+```
 
-Never hardcode role checks (`if(auth()->user()->role === 'admin')`).
+`checkPermissionTo`, never `hasPermissionTo`: the latter throws
+`PermissionDoesNotExist` when the row is missing, turning a fresh database or a
+newly added model into a 500 where a 403 was meant.
+
+## Three layers, one Policy
+
+| Layer | Call | Protects |
+|---|---|---|
+| Route | `->can('update', 'menu')` | the page |
+| Livewire / Controller | `$this->authorize('update', $menu)` | the action |
+| Blade | `@can('update', $menu)` | the button |
+
+All three must be present. Blade hiding is cosmetic — a Livewire action is an
+HTTP endpoint that can be called without ever rendering its button — and route
+middleware misses actions on a component mounted elsewhere. `routes/admin/menus.php`
+plus `App\Livewire\Admin\Menus\*` is the worked reference; copy that shape.
+
+In Livewire, re-check inside the write method, not only in `mount()`: `mount()`
+runs once when the component is first rendered, while `save()` is a separate
+HTTP request afterwards.
+
+## Superadmin
+
+`AuthServiceProvider` registers a `Gate::before` that passes superadmin through
+everything. The role means "no restrictions", so it is a rule rather than 252
+permission rows that fall behind the moment a model is added.
+
+## Role gates in routes
+
+`role:superadmin|admin|cashier` on a route group is the pattern being retired:
+it hardcodes who may enter, so a role created on the Roles & Permissions screen
+can never reach the page no matter which permissions it holds. Convert groups to
+`can:` as their modules are migrated; the coarse `role:` gate in
+`routes/admin.php` comes off once every module underneath it has moved.
+
+Never hardcode role checks in code (`if (auth()->user()->role === 'admin')`).
 
 ---
 

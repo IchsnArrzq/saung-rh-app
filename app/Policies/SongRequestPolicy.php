@@ -12,7 +12,7 @@ class SongRequestPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('song_request.viewAny');
+        return $user->checkPermissionTo('song_request.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class SongRequestPolicy
      */
     public function view(User $user, SongRequest $songRequest): bool
     {
-        return $user->hasPermissionTo('song_request.view');
+        return $user->checkPermissionTo('song_request.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class SongRequestPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('song_request.create');
+        return $user->checkPermissionTo('song_request.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class SongRequestPolicy
      */
     public function update(User $user, SongRequest $songRequest): bool
     {
-        return $user->hasPermissionTo('song_request.update');
+        return $user->checkPermissionTo('song_request.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class SongRequestPolicy
      */
     public function delete(User $user, SongRequest $songRequest): bool
     {
-        return $user->hasPermissionTo('song_request.delete');
+        return $user->checkPermissionTo('song_request.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class SongRequestPolicy
      */
     public function restore(User $user, SongRequest $songRequest): bool
     {
-        return $user->hasPermissionTo('song_request.restore');
+        return $user->checkPermissionTo('song_request.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class SongRequestPolicy
      */
     public function forceDelete(User $user, SongRequest $songRequest): bool
     {
-        return $user->hasPermissionTo('song_request.forceDelete');
+        return $user->checkPermissionTo('song_request.forceDelete');
     }
 }

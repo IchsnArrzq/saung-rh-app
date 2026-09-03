@@ -12,7 +12,7 @@ class SubscriptionPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('subscription.viewAny');
+        return $user->checkPermissionTo('subscription.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class SubscriptionPolicy
      */
     public function view(User $user, Subscription $subscription): bool
     {
-        return $user->hasPermissionTo('subscription.view');
+        return $user->checkPermissionTo('subscription.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class SubscriptionPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('subscription.create');
+        return $user->checkPermissionTo('subscription.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class SubscriptionPolicy
      */
     public function update(User $user, Subscription $subscription): bool
     {
-        return $user->hasPermissionTo('subscription.update');
+        return $user->checkPermissionTo('subscription.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class SubscriptionPolicy
      */
     public function delete(User $user, Subscription $subscription): bool
     {
-        return $user->hasPermissionTo('subscription.delete');
+        return $user->checkPermissionTo('subscription.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class SubscriptionPolicy
      */
     public function restore(User $user, Subscription $subscription): bool
     {
-        return $user->hasPermissionTo('subscription.restore');
+        return $user->checkPermissionTo('subscription.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class SubscriptionPolicy
      */
     public function forceDelete(User $user, Subscription $subscription): bool
     {
-        return $user->hasPermissionTo('subscription.forceDelete');
+        return $user->checkPermissionTo('subscription.forceDelete');
     }
 }

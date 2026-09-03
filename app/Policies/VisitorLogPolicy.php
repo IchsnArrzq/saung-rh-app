@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\VisitorLog;
 use App\Models\User;
+use App\Models\VisitorLog;
 
 class VisitorLogPolicy
 {
@@ -12,7 +12,7 @@ class VisitorLogPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('visitor_log.viewAny');
+        return $user->checkPermissionTo('visitor_log.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class VisitorLogPolicy
      */
     public function view(User $user, VisitorLog $visitorLog): bool
     {
-        return $user->hasPermissionTo('visitor_log.view');
+        return $user->checkPermissionTo('visitor_log.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class VisitorLogPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('visitor_log.create');
+        return $user->checkPermissionTo('visitor_log.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class VisitorLogPolicy
      */
     public function update(User $user, VisitorLog $visitorLog): bool
     {
-        return $user->hasPermissionTo('visitor_log.update');
+        return $user->checkPermissionTo('visitor_log.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class VisitorLogPolicy
      */
     public function delete(User $user, VisitorLog $visitorLog): bool
     {
-        return $user->hasPermissionTo('visitor_log.delete');
+        return $user->checkPermissionTo('visitor_log.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class VisitorLogPolicy
      */
     public function restore(User $user, VisitorLog $visitorLog): bool
     {
-        return $user->hasPermissionTo('visitor_log.restore');
+        return $user->checkPermissionTo('visitor_log.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class VisitorLogPolicy
      */
     public function forceDelete(User $user, VisitorLog $visitorLog): bool
     {
-        return $user->hasPermissionTo('visitor_log.forceDelete');
+        return $user->checkPermissionTo('visitor_log.forceDelete');
     }
 }

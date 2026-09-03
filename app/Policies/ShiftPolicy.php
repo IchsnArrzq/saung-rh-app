@@ -12,7 +12,7 @@ class ShiftPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('shift.viewAny');
+        return $user->checkPermissionTo('shift.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class ShiftPolicy
      */
     public function view(User $user, Shift $shift): bool
     {
-        return $user->hasPermissionTo('shift.view');
+        return $user->checkPermissionTo('shift.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class ShiftPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('shift.create');
+        return $user->checkPermissionTo('shift.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class ShiftPolicy
      */
     public function update(User $user, Shift $shift): bool
     {
-        return $user->hasPermissionTo('shift.update');
+        return $user->checkPermissionTo('shift.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class ShiftPolicy
      */
     public function delete(User $user, Shift $shift): bool
     {
-        return $user->hasPermissionTo('shift.delete');
+        return $user->checkPermissionTo('shift.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class ShiftPolicy
      */
     public function restore(User $user, Shift $shift): bool
     {
-        return $user->hasPermissionTo('shift.restore');
+        return $user->checkPermissionTo('shift.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class ShiftPolicy
      */
     public function forceDelete(User $user, Shift $shift): bool
     {
-        return $user->hasPermissionTo('shift.forceDelete');
+        return $user->checkPermissionTo('shift.forceDelete');
     }
 }

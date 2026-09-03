@@ -7,6 +7,7 @@ use App\Livewire\Admin\Menus\Form as MenuForm;
 use App\Models\Ingredient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Tests\Concerns\InteractsWithAuthorization;
 use Tests\TestCase;
 
 /**
@@ -17,7 +18,18 @@ use Tests\TestCase;
  */
 class FormCreateEditTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithAuthorization, RefreshDatabase;
+
+    /**
+     * Yang diuji di sini adalah resolusi parameter mount, bukan otorisasi, jadi
+     * user-nya sengaja tanpa batas supaya Policy tidak ikut mengubah hasil.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAsSuperadmin();
+    }
 
     public function test_ingredient_can_be_created(): void
     {

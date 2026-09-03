@@ -12,7 +12,7 @@ class AppSettingPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('app_setting.viewAny');
+        return $user->checkPermissionTo('app_setting.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class AppSettingPolicy
      */
     public function view(User $user, AppSetting $appSetting): bool
     {
-        return $user->hasPermissionTo('app_setting.view');
+        return $user->checkPermissionTo('app_setting.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class AppSettingPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('app_setting.create');
+        return $user->checkPermissionTo('app_setting.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class AppSettingPolicy
      */
     public function update(User $user, AppSetting $appSetting): bool
     {
-        return $user->hasPermissionTo('app_setting.update');
+        return $user->checkPermissionTo('app_setting.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class AppSettingPolicy
      */
     public function delete(User $user, AppSetting $appSetting): bool
     {
-        return $user->hasPermissionTo('app_setting.delete');
+        return $user->checkPermissionTo('app_setting.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class AppSettingPolicy
      */
     public function restore(User $user, AppSetting $appSetting): bool
     {
-        return $user->hasPermissionTo('app_setting.restore');
+        return $user->checkPermissionTo('app_setting.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class AppSettingPolicy
      */
     public function forceDelete(User $user, AppSetting $appSetting): bool
     {
-        return $user->hasPermissionTo('app_setting.forceDelete');
+        return $user->checkPermissionTo('app_setting.forceDelete');
     }
 }

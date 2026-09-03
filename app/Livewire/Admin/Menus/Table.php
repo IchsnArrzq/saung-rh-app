@@ -16,6 +16,15 @@ class Table extends Component
     #[Url(as: 'search', except: '')]
     public string $search = '';
 
+    /**
+     * Route-nya sudah dijaga `can:viewAny`, tapi komponen ini juga bisa
+     * dipasang di halaman lain — gerbangnya ikut komponen, bukan ikut route.
+     */
+    public function mount(): void
+    {
+        $this->authorize('viewAny', Menu::class);
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -24,6 +33,11 @@ class Table extends Component
     public function delete(string $id): void
     {
         $menu = Menu::query()->findOrFail($id);
+
+        // Wajib meski tombolnya sudah disembunyikan @can di Blade: aksi Livewire
+        // adalah endpoint HTTP, dan siapa pun bisa memanggilnya tanpa tombol itu.
+        $this->authorize('delete', $menu);
+
         $menu->delete();
 
         session()->flash('success', 'Menu berhasil dihapus.');

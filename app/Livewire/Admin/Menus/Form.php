@@ -2,16 +2,17 @@
 
 namespace App\Livewire\Admin\Menus;
 
-use App\Models\Menu;
-use App\Models\MenuCategory;
 use App\Domains\Menu\Enums\MenuAvailability;
 use App\Domains\Menu\Services\MediaService;
+use App\Models\Menu;
+use App\Models\MenuCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 class Form extends Component
@@ -40,7 +41,7 @@ class Form extends Component
      * Staged image uploads (persisted on save). Kept separate from existing
      * media so the same form works on both the create and edit routes.
      *
-     * @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile>
+     * @var array<int, TemporaryUploadedFile>
      */
     public array $newImages = [];
 
@@ -49,6 +50,12 @@ class Form extends Component
     public function mount(?Menu $menu = null): void
     {
         $this->menu = $menu?->exists ? $menu : null;
+
+        // Satu form melayani dua ability: `update` pada menu yang sudah ada,
+        // `create` pada yang baru.
+        $this->menu
+            ? $this->authorize('update', $this->menu)
+            : $this->authorize('create', Menu::class);
 
         if ($this->menu) {
 
@@ -104,6 +111,8 @@ class Form extends Component
             return;
         }
 
+        $this->authorize('update', $this->menu);
+
         $media = $this->menu->media()->find($mediaId);
 
         if ($media) {
@@ -118,12 +127,21 @@ class Form extends Component
             return;
         }
 
+        $this->authorize('update', $this->menu);
+
         $mediaService->setPrimaryImage($this->menu, $mediaId);
         session()->flash('success', 'Gambar utama diperbarui.');
     }
 
     public function save(MediaService $mediaService)
     {
+        // Diulang di sini, bukan hanya di mount(): mount() dijalankan sekali
+        // saat komponen pertama kali dirender, sedangkan save() adalah request
+        // HTTP tersendiri sesudahnya.
+        $this->menu
+            ? $this->authorize('update', $this->menu)
+            : $this->authorize('create', Menu::class);
+
         $validated = $this->validate($this->rules());
         $validated['slug'] = Str::slug($validated['slug'] ?: $validated['name']);
         $validated['menu_category_id'] = $this->menu_category_id ?: null;

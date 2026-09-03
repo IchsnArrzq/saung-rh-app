@@ -12,7 +12,7 @@ class TipPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('tip.viewAny');
+        return $user->checkPermissionTo('tip.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class TipPolicy
      */
     public function view(User $user, Tip $tip): bool
     {
-        return $user->hasPermissionTo('tip.view');
+        return $user->checkPermissionTo('tip.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class TipPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('tip.create');
+        return $user->checkPermissionTo('tip.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class TipPolicy
      */
     public function update(User $user, Tip $tip): bool
     {
-        return $user->hasPermissionTo('tip.update');
+        return $user->checkPermissionTo('tip.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class TipPolicy
      */
     public function delete(User $user, Tip $tip): bool
     {
-        return $user->hasPermissionTo('tip.delete');
+        return $user->checkPermissionTo('tip.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class TipPolicy
      */
     public function restore(User $user, Tip $tip): bool
     {
-        return $user->hasPermissionTo('tip.restore');
+        return $user->checkPermissionTo('tip.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class TipPolicy
      */
     public function forceDelete(User $user, Tip $tip): bool
     {
-        return $user->hasPermissionTo('tip.forceDelete');
+        return $user->checkPermissionTo('tip.forceDelete');
     }
 }

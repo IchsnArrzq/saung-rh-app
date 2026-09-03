@@ -12,7 +12,7 @@ class IngredientPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('ingredient.viewAny');
+        return $user->checkPermissionTo('ingredient.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class IngredientPolicy
      */
     public function view(User $user, Ingredient $ingredient): bool
     {
-        return $user->hasPermissionTo('ingredient.view');
+        return $user->checkPermissionTo('ingredient.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class IngredientPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('ingredient.create');
+        return $user->checkPermissionTo('ingredient.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class IngredientPolicy
      */
     public function update(User $user, Ingredient $ingredient): bool
     {
-        return $user->hasPermissionTo('ingredient.update');
+        return $user->checkPermissionTo('ingredient.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class IngredientPolicy
      */
     public function delete(User $user, Ingredient $ingredient): bool
     {
-        return $user->hasPermissionTo('ingredient.delete');
+        return $user->checkPermissionTo('ingredient.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class IngredientPolicy
      */
     public function restore(User $user, Ingredient $ingredient): bool
     {
-        return $user->hasPermissionTo('ingredient.restore');
+        return $user->checkPermissionTo('ingredient.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class IngredientPolicy
      */
     public function forceDelete(User $user, Ingredient $ingredient): bool
     {
-        return $user->hasPermissionTo('ingredient.forceDelete');
+        return $user->checkPermissionTo('ingredient.forceDelete');
     }
 }

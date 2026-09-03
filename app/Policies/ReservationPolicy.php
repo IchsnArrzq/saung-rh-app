@@ -12,7 +12,7 @@ class ReservationPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('reservation.viewAny');
+        return $user->checkPermissionTo('reservation.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class ReservationPolicy
      */
     public function view(User $user, Reservation $reservation): bool
     {
-        return $user->hasPermissionTo('reservation.view');
+        return $user->checkPermissionTo('reservation.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class ReservationPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('reservation.create');
+        return $user->checkPermissionTo('reservation.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class ReservationPolicy
      */
     public function update(User $user, Reservation $reservation): bool
     {
-        return $user->hasPermissionTo('reservation.update');
+        return $user->checkPermissionTo('reservation.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class ReservationPolicy
      */
     public function delete(User $user, Reservation $reservation): bool
     {
-        return $user->hasPermissionTo('reservation.delete');
+        return $user->checkPermissionTo('reservation.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class ReservationPolicy
      */
     public function restore(User $user, Reservation $reservation): bool
     {
-        return $user->hasPermissionTo('reservation.restore');
+        return $user->checkPermissionTo('reservation.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class ReservationPolicy
      */
     public function forceDelete(User $user, Reservation $reservation): bool
     {
-        return $user->hasPermissionTo('reservation.forceDelete');
+        return $user->checkPermissionTo('reservation.forceDelete');
     }
 }

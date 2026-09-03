@@ -12,7 +12,7 @@ class MenuPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('menu.viewAny');
+        return $user->checkPermissionTo('menu.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class MenuPolicy
      */
     public function view(User $user, Menu $menu): bool
     {
-        return $user->hasPermissionTo('menu.view');
+        return $user->checkPermissionTo('menu.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class MenuPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('menu.create');
+        return $user->checkPermissionTo('menu.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class MenuPolicy
      */
     public function update(User $user, Menu $menu): bool
     {
-        return $user->hasPermissionTo('menu.update');
+        return $user->checkPermissionTo('menu.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class MenuPolicy
      */
     public function delete(User $user, Menu $menu): bool
     {
-        return $user->hasPermissionTo('menu.delete');
+        return $user->checkPermissionTo('menu.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class MenuPolicy
      */
     public function restore(User $user, Menu $menu): bool
     {
-        return $user->hasPermissionTo('menu.restore');
+        return $user->checkPermissionTo('menu.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class MenuPolicy
      */
     public function forceDelete(User $user, Menu $menu): bool
     {
-        return $user->hasPermissionTo('menu.forceDelete');
+        return $user->checkPermissionTo('menu.forceDelete');
     }
 }

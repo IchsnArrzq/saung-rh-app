@@ -12,9 +12,11 @@
                 @endif
             </div>
 
-            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('menus.create')">
-                Tambah Menu
-            </x-button>
+            @can('create', App\Models\Menu::class)
+                <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('menus.create')">
+                    Tambah Menu
+                </x-button>
+            @endcan
         </div>
     </x-card>
 
@@ -49,12 +51,17 @@
                             target="_blank" rel="noopener">
                             Detail
                         </x-button>
-                        <x-button variant="warning" size="sm" :href="route('menus.edit', $menu)">Edit</x-button>
-                        <x-button variant="error" size="sm" class="ml-auto text-white"
-                            data-confirm="Hapus menu ini?" wire:click="delete('{{ $menu->id }}')"
-                            loading="delete('{{ $menu->id }}')">
-                            Hapus
-                        </x-button>
+                        @can('update', $menu)
+                            <x-button variant="warning" size="sm" :href="route('menus.edit', $menu)">Edit</x-button>
+                        @endcan
+
+                        @can('delete', $menu)
+                            <x-button variant="error" size="sm" class="ml-auto text-white"
+                                data-confirm="Hapus menu ini?" wire:click="delete('{{ $menu->id }}')"
+                                loading="delete('{{ $menu->id }}')">
+                                Hapus
+                            </x-button>
+                        @endcan
                     </div>
                 </div>
             </article>
@@ -62,9 +69,11 @@
             <x-empty-state class="col-span-full" icon="ri-restaurant-line" title="Belum ada data menu"
                 description="Tambahkan menu pertama untuk mulai berjualan.">
                 <x-slot:actions>
-                    <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('menus.create')">
-                        Tambah Menu
-                    </x-button>
+                    @can('create', App\Models\Menu::class)
+                        <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('menus.create')">
+                            Tambah Menu
+                        </x-button>
+                    @endcan
                 </x-slot:actions>
             </x-empty-state>
         @endforelse

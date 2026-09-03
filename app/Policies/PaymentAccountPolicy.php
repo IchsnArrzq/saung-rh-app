@@ -12,7 +12,7 @@ class PaymentAccountPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('payment_account.viewAny');
+        return $user->checkPermissionTo('payment_account.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class PaymentAccountPolicy
      */
     public function view(User $user, PaymentAccount $paymentAccount): bool
     {
-        return $user->hasPermissionTo('payment_account.view');
+        return $user->checkPermissionTo('payment_account.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class PaymentAccountPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('payment_account.create');
+        return $user->checkPermissionTo('payment_account.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class PaymentAccountPolicy
      */
     public function update(User $user, PaymentAccount $paymentAccount): bool
     {
-        return $user->hasPermissionTo('payment_account.update');
+        return $user->checkPermissionTo('payment_account.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class PaymentAccountPolicy
      */
     public function delete(User $user, PaymentAccount $paymentAccount): bool
     {
-        return $user->hasPermissionTo('payment_account.delete');
+        return $user->checkPermissionTo('payment_account.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class PaymentAccountPolicy
      */
     public function restore(User $user, PaymentAccount $paymentAccount): bool
     {
-        return $user->hasPermissionTo('payment_account.restore');
+        return $user->checkPermissionTo('payment_account.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class PaymentAccountPolicy
      */
     public function forceDelete(User $user, PaymentAccount $paymentAccount): bool
     {
-        return $user->hasPermissionTo('payment_account.forceDelete');
+        return $user->checkPermissionTo('payment_account.forceDelete');
     }
 }

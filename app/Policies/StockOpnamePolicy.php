@@ -12,7 +12,7 @@ class StockOpnamePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('stock_opname.viewAny');
+        return $user->checkPermissionTo('stock_opname.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class StockOpnamePolicy
      */
     public function view(User $user, StockOpname $stockOpname): bool
     {
-        return $user->hasPermissionTo('stock_opname.view');
+        return $user->checkPermissionTo('stock_opname.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class StockOpnamePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('stock_opname.create');
+        return $user->checkPermissionTo('stock_opname.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class StockOpnamePolicy
      */
     public function update(User $user, StockOpname $stockOpname): bool
     {
-        return $user->hasPermissionTo('stock_opname.update');
+        return $user->checkPermissionTo('stock_opname.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class StockOpnamePolicy
      */
     public function delete(User $user, StockOpname $stockOpname): bool
     {
-        return $user->hasPermissionTo('stock_opname.delete');
+        return $user->checkPermissionTo('stock_opname.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class StockOpnamePolicy
      */
     public function restore(User $user, StockOpname $stockOpname): bool
     {
-        return $user->hasPermissionTo('stock_opname.restore');
+        return $user->checkPermissionTo('stock_opname.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class StockOpnamePolicy
      */
     public function forceDelete(User $user, StockOpname $stockOpname): bool
     {
-        return $user->hasPermissionTo('stock_opname.forceDelete');
+        return $user->checkPermissionTo('stock_opname.forceDelete');
     }
 }

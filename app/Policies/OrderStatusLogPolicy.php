@@ -12,7 +12,7 @@ class OrderStatusLogPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('order_status_log.viewAny');
+        return $user->checkPermissionTo('order_status_log.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class OrderStatusLogPolicy
      */
     public function view(User $user, OrderStatusLog $orderStatusLog): bool
     {
-        return $user->hasPermissionTo('order_status_log.view');
+        return $user->checkPermissionTo('order_status_log.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class OrderStatusLogPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('order_status_log.create');
+        return $user->checkPermissionTo('order_status_log.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class OrderStatusLogPolicy
      */
     public function update(User $user, OrderStatusLog $orderStatusLog): bool
     {
-        return $user->hasPermissionTo('order_status_log.update');
+        return $user->checkPermissionTo('order_status_log.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class OrderStatusLogPolicy
      */
     public function delete(User $user, OrderStatusLog $orderStatusLog): bool
     {
-        return $user->hasPermissionTo('order_status_log.delete');
+        return $user->checkPermissionTo('order_status_log.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class OrderStatusLogPolicy
      */
     public function restore(User $user, OrderStatusLog $orderStatusLog): bool
     {
-        return $user->hasPermissionTo('order_status_log.restore');
+        return $user->checkPermissionTo('order_status_log.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class OrderStatusLogPolicy
      */
     public function forceDelete(User $user, OrderStatusLog $orderStatusLog): bool
     {
-        return $user->hasPermissionTo('order_status_log.forceDelete');
+        return $user->checkPermissionTo('order_status_log.forceDelete');
     }
 }

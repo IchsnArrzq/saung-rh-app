@@ -12,7 +12,7 @@ class TableSessionPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('table_session.viewAny');
+        return $user->checkPermissionTo('table_session.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class TableSessionPolicy
      */
     public function view(User $user, TableSession $tableSession): bool
     {
-        return $user->hasPermissionTo('table_session.view');
+        return $user->checkPermissionTo('table_session.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class TableSessionPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('table_session.create');
+        return $user->checkPermissionTo('table_session.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class TableSessionPolicy
      */
     public function update(User $user, TableSession $tableSession): bool
     {
-        return $user->hasPermissionTo('table_session.update');
+        return $user->checkPermissionTo('table_session.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class TableSessionPolicy
      */
     public function delete(User $user, TableSession $tableSession): bool
     {
-        return $user->hasPermissionTo('table_session.delete');
+        return $user->checkPermissionTo('table_session.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class TableSessionPolicy
      */
     public function restore(User $user, TableSession $tableSession): bool
     {
-        return $user->hasPermissionTo('table_session.restore');
+        return $user->checkPermissionTo('table_session.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class TableSessionPolicy
      */
     public function forceDelete(User $user, TableSession $tableSession): bool
     {
-        return $user->hasPermissionTo('table_session.forceDelete');
+        return $user->checkPermissionTo('table_session.forceDelete');
     }
 }

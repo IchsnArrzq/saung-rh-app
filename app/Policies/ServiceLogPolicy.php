@@ -12,7 +12,7 @@ class ServiceLogPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('service_log.viewAny');
+        return $user->checkPermissionTo('service_log.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class ServiceLogPolicy
      */
     public function view(User $user, ServiceLog $serviceLog): bool
     {
-        return $user->hasPermissionTo('service_log.view');
+        return $user->checkPermissionTo('service_log.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class ServiceLogPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('service_log.create');
+        return $user->checkPermissionTo('service_log.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class ServiceLogPolicy
      */
     public function update(User $user, ServiceLog $serviceLog): bool
     {
-        return $user->hasPermissionTo('service_log.update');
+        return $user->checkPermissionTo('service_log.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class ServiceLogPolicy
      */
     public function delete(User $user, ServiceLog $serviceLog): bool
     {
-        return $user->hasPermissionTo('service_log.delete');
+        return $user->checkPermissionTo('service_log.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class ServiceLogPolicy
      */
     public function restore(User $user, ServiceLog $serviceLog): bool
     {
-        return $user->hasPermissionTo('service_log.restore');
+        return $user->checkPermissionTo('service_log.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class ServiceLogPolicy
      */
     public function forceDelete(User $user, ServiceLog $serviceLog): bool
     {
-        return $user->hasPermissionTo('service_log.forceDelete');
+        return $user->checkPermissionTo('service_log.forceDelete');
     }
 }

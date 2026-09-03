@@ -16,6 +16,11 @@ class MenuCard extends Component
     #[Url(as: 'search', except: '')]
     public string $search = '';
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', Menu::class);
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -24,6 +29,9 @@ class MenuCard extends Component
     public function delete(string $id): void
     {
         $menu = Menu::query()->findOrFail($id);
+
+        $this->authorize('delete', $menu);
+
         $menu->delete();
 
         session()->flash('success', 'Menu berhasil dihapus.');

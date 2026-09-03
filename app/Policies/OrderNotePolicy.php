@@ -12,7 +12,7 @@ class OrderNotePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('order_note.viewAny');
+        return $user->checkPermissionTo('order_note.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class OrderNotePolicy
      */
     public function view(User $user, OrderNote $orderNote): bool
     {
-        return $user->hasPermissionTo('order_note.view');
+        return $user->checkPermissionTo('order_note.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class OrderNotePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('order_note.create');
+        return $user->checkPermissionTo('order_note.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class OrderNotePolicy
      */
     public function update(User $user, OrderNote $orderNote): bool
     {
-        return $user->hasPermissionTo('order_note.update');
+        return $user->checkPermissionTo('order_note.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class OrderNotePolicy
      */
     public function delete(User $user, OrderNote $orderNote): bool
     {
-        return $user->hasPermissionTo('order_note.delete');
+        return $user->checkPermissionTo('order_note.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class OrderNotePolicy
      */
     public function restore(User $user, OrderNote $orderNote): bool
     {
-        return $user->hasPermissionTo('order_note.restore');
+        return $user->checkPermissionTo('order_note.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class OrderNotePolicy
      */
     public function forceDelete(User $user, OrderNote $orderNote): bool
     {
-        return $user->hasPermissionTo('order_note.forceDelete');
+        return $user->checkPermissionTo('order_note.forceDelete');
     }
 }

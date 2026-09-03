@@ -12,7 +12,7 @@ class SpecialRequestPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('special_request.viewAny');
+        return $user->checkPermissionTo('special_request.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class SpecialRequestPolicy
      */
     public function view(User $user, SpecialRequest $specialRequest): bool
     {
-        return $user->hasPermissionTo('special_request.view');
+        return $user->checkPermissionTo('special_request.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class SpecialRequestPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('special_request.create');
+        return $user->checkPermissionTo('special_request.create');
     }
 
     /**
@@ -36,7 +36,7 @@ class SpecialRequestPolicy
      */
     public function update(User $user, SpecialRequest $specialRequest): bool
     {
-        return $user->hasPermissionTo('special_request.update');
+        return $user->checkPermissionTo('special_request.update');
     }
 
     /**
@@ -44,7 +44,7 @@ class SpecialRequestPolicy
      */
     public function delete(User $user, SpecialRequest $specialRequest): bool
     {
-        return $user->hasPermissionTo('special_request.delete');
+        return $user->checkPermissionTo('special_request.delete');
     }
 
     /**
@@ -52,7 +52,7 @@ class SpecialRequestPolicy
      */
     public function restore(User $user, SpecialRequest $specialRequest): bool
     {
-        return $user->hasPermissionTo('special_request.restore');
+        return $user->checkPermissionTo('special_request.restore');
     }
 
     /**
@@ -60,6 +60,6 @@ class SpecialRequestPolicy
      */
     public function forceDelete(User $user, SpecialRequest $specialRequest): bool
     {
-        return $user->hasPermissionTo('special_request.forceDelete');
+        return $user->checkPermissionTo('special_request.forceDelete');
     }
 }

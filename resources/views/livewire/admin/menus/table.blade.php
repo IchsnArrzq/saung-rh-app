@@ -12,9 +12,11 @@
                 @endif
             </div>
 
-            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('menus.create')">
-                Tambah Menu
-            </x-button>
+            @can('create', App\Models\Menu::class)
+                <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('menus.create')">
+                    Tambah Menu
+                </x-button>
+            @endcan
         </div>
     </x-card>
 
@@ -48,21 +50,28 @@
                             target="_blank" rel="noopener">
                             Detail
                         </x-button>
-                        <x-button variant="info" size="sm" icon="ri-flask-line" class="text-white"
-                            :href="route('menus.ingredients.edit', $menu)" title="Resep / Bahan">
-                            Resep
-                        </x-button>
-                        <x-button variant="neutral" size="sm" icon="ri-image-line" class="text-white"
-                            :href="route('menus.media.edit', $menu)" title="Gambar & Video">
-                            Media
-                        </x-button>
-                        <x-button variant="warning" size="sm" :href="route('menus.edit', $menu)">Edit</x-button>
-                        <x-button variant="error" size="sm" class="text-white"
-                            data-confirm="Hapus menu ini?"
-                            wire:click="delete('{{ $menu->id }}')"
-                            loading="delete('{{ $menu->id }}')">
-                            Hapus
-                        </x-button>
+                        {{-- Resep, Media dan Edit sama-sama mengubah menu, jadi
+                             satu ability yang menjaga ketiganya. --}}
+                        @can('update', $menu)
+                            <x-button variant="info" size="sm" icon="ri-flask-line" class="text-white"
+                                :href="route('menus.ingredients.edit', $menu)" title="Resep / Bahan">
+                                Resep
+                            </x-button>
+                            <x-button variant="neutral" size="sm" icon="ri-image-line" class="text-white"
+                                :href="route('menus.media.edit', $menu)" title="Gambar & Video">
+                                Media
+                            </x-button>
+                            <x-button variant="warning" size="sm" :href="route('menus.edit', $menu)">Edit</x-button>
+                        @endcan
+
+                        @can('delete', $menu)
+                            <x-button variant="error" size="sm" class="text-white"
+                                data-confirm="Hapus menu ini?"
+                                wire:click="delete('{{ $menu->id }}')"
+                                loading="delete('{{ $menu->id }}')">
+                                Hapus
+                            </x-button>
+                        @endcan
                     </div>
                 </td>
             </tr>
