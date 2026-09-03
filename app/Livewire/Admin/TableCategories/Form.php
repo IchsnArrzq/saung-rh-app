@@ -10,7 +10,6 @@ use Livewire\Component;
 
 class Form extends Component
 {
-
     public ?TableCategory $tableCategory = null;
 
     public string $name = '';
@@ -27,6 +26,8 @@ class Form extends Component
     {
         $this->tableCategory = $tableCategory?->exists ? $tableCategory : null;
 
+        $this->authorizeWrite();
+
         if ($this->tableCategory) {
 
             $this->name = (string) $this->tableCategory->name;
@@ -40,8 +41,21 @@ class Form extends Component
 
     }
 
+    /**
+     * Dipanggil di mount() untuk menutup halamannya dan diulang di save():
+     * mount() jalan sekali, save() adalah request HTTP tersendiri sesudahnya.
+     */
+    private function authorizeWrite(): void
+    {
+        $this->tableCategory
+            ? $this->authorize('update', $this->tableCategory)
+            : $this->authorize('create', TableCategory::class);
+    }
+
     public function save()
     {
+        $this->authorizeWrite();
+
         $validated = $this->validate($this->rules());
         $validated['slug'] = Str::slug($validated['slug'] ?: $validated['name']);
         $validated['sort_order'] = (int) $validated['sort_order'];

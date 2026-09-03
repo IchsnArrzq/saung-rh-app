@@ -14,6 +14,8 @@ class TableQrPage extends Component
 
     public function mount(Table $table): void
     {
+        $this->authorize('view', $table);
+
         if (empty($table->qr_token)) {
             $table->update(['qr_token' => (string) Str::random(24)]);
         }

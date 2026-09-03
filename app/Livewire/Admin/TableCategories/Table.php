@@ -19,6 +19,7 @@ class Table extends Component
 
     public function mount(): void
     {
+        $this->authorize('viewAny', TableCategory::class);
     }
 
     public function updatingSearch(): void
@@ -29,6 +30,8 @@ class Table extends Component
     public function delete(string $id): void
     {
         $tableCategory = TableCategory::query()->findOrFail($id);
+
+        $this->authorize('delete', $tableCategory);
 
         if ($tableCategory->tables()->exists()) {
             throw ValidationException::withMessages([
@@ -62,4 +65,3 @@ class Table extends Component
         ]);
     }
 }
-

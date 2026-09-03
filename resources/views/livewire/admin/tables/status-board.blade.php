@@ -20,9 +20,11 @@
                 Drag kartu meja ke kolom status tujuan.
             </div>
 
-            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('tables.create')">
-                Tambah Meja
-            </x-button>
+            @can('create', App\Models\Table::class)
+                <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('tables.create')">
+                    Tambah Meja
+                </x-button>
+            @endcan
         </div>
     </section>
 
@@ -66,9 +68,14 @@
                             overStatusId = null;
                         ">
                         @forelse ($statusTables as $table)
-                            <div class="cursor-grab rounded-xl border border-base-300 bg-base-100 p-3 shadow-sm transition active:cursor-grabbing"
-                                draggable="true" wire:key="status-board-table-{{ $table->id }}"
+                            {{-- Kartu hanya bisa diseret oleh yang berhak mengubah
+                                 meja. Ini lapisan kosmetik; penolakan sebenarnya
+                                 ada di StatusBoard::moveTable. --}}
+                            <div class="rounded-xl border border-base-300 bg-base-100 p-3 shadow-sm transition @can('update', $table) cursor-grab active:cursor-grabbing @endcan"
+                                @can('update', $table) draggable="true" @endcan
+                                wire:key="status-board-table-{{ $table->id }}"
                                 x-bind:class="draggingTableId === '{{ $table->id }}' ? 'scale-[0.98] opacity-40' : ''"
+                                @can('update', $table)
                                 x-on:dragstart="
                                     draggingTableId = '{{ $table->id }}';
                                     fromStatusId = '{{ $status->value }}';
@@ -77,7 +84,8 @@
                                     draggingTableId = null;
                                     fromStatusId = null;
                                     overStatusId = null;
-                                ">
+                                "
+                                @endcan>
                                 <div class="flex items-center justify-between gap-2">
                                     <p class="text-sm font-semibold text-base-content">{{ $table->code }}</p>
                                     <span class="badge badge-ghost">Kapasitas {{ $table->capacity }}</span>
@@ -87,8 +95,12 @@
                                     {{ $table->tableCategory?->name ? 'Kategori: '.$table->tableCategory->name : 'Tanpa kategori' }}
                                 </p>
                                 <div class="mt-3 flex gap-2">
-                                    <x-button variant="warning" size="sm" :href="route('tables.edit', $table)">Edit</x-button>
-                                    <x-button variant="outline" size="sm" :href="route('tables.qr', $table)">QR</x-button>
+                                    @can('update', $table)
+                                        <x-button variant="warning" size="sm" :href="route('tables.edit', $table)">Edit</x-button>
+                                    @endcan
+                                    @can('view', $table)
+                                        <x-button variant="outline" size="sm" :href="route('tables.qr', $table)">QR</x-button>
+                                    @endcan
                                 </div>
                             </div>
                         @empty

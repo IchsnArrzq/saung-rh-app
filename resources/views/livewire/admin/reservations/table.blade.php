@@ -16,9 +16,11 @@
                 @endif
             </div>
 
-            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('reservations.create')">
-                Tambah Reservasi
-            </x-button>
+            @can('create', App\Models\Reservation::class)
+                <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('reservations.create')">
+                    Tambah Reservasi
+                </x-button>
+            @endcan
         </div>
     </x-card>
 
@@ -51,26 +53,41 @@
                 </td>
                 <td class="text-right">
                     <div class="inline-flex flex-wrap justify-end gap-2">
-                        <x-button variant="outline" size="sm" wire:click="showDetail('{{ $reservation->id }}')">
-                            Detail
-                        </x-button>
-                        <x-button variant="accent" size="sm"
-                            data-confirm="Generate order dan order item dari reservasi ini?"
-                            data-confirm-title="Generate Order"
-                            data-confirm-yes="Ya, Generate"
-                            wire:click="generateOrder('{{ $reservation->id }}')"
-                            loading="generateOrder('{{ $reservation->id }}')">
-                            Generate Order
-                        </x-button>
-                        <x-button variant="warning" size="sm" :href="route('reservations.edit', $reservation)">
-                            Edit
-                        </x-button>
-                        <x-button variant="error" size="sm" class="text-white"
-                            data-confirm="Hapus reservasi ini?"
-                            wire:click="delete('{{ $reservation->id }}')"
-                            loading="delete('{{ $reservation->id }}')">
-                            Hapus
-                        </x-button>
+                        @can('view', $reservation)
+                            <x-button variant="outline" size="sm" wire:click="showDetail('{{ $reservation->id }}')">
+                                Detail
+                            </x-button>
+                        @endcan
+
+                        {{-- Aksi ini membuat Order sekaligus mengubah reservasi,
+                             jadi tombolnya hanya muncul kalau keduanya boleh. --}}
+                        @can('create', App\Models\Order::class)
+                            @can('update', $reservation)
+                                <x-button variant="accent" size="sm"
+                                    data-confirm="Generate order dan order item dari reservasi ini?"
+                                    data-confirm-title="Generate Order"
+                                    data-confirm-yes="Ya, Generate"
+                                    wire:click="generateOrder('{{ $reservation->id }}')"
+                                    loading="generateOrder('{{ $reservation->id }}')">
+                                    Generate Order
+                                </x-button>
+                            @endcan
+                        @endcan
+
+                        @can('update', $reservation)
+                            <x-button variant="warning" size="sm" :href="route('reservations.edit', $reservation)">
+                                Edit
+                            </x-button>
+                        @endcan
+
+                        @can('delete', $reservation)
+                            <x-button variant="error" size="sm" class="text-white"
+                                data-confirm="Hapus reservasi ini?"
+                                wire:click="delete('{{ $reservation->id }}')"
+                                loading="delete('{{ $reservation->id }}')">
+                                Hapus
+                            </x-button>
+                        @endcan
                     </div>
                 </td>
             </tr>

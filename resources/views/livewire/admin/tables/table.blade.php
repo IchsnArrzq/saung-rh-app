@@ -16,9 +16,11 @@
                 @endif
             </div>
 
-            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('tables.create')">
-                Tambah Meja
-            </x-button>
+            @can('create', App\Models\Table::class)
+                <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('tables.create')">
+                    Tambah Meja
+                </x-button>
+            @endcan
         </div>
     </x-card>
 
@@ -41,31 +43,44 @@
                 <td>{{ $table->capacity }}</td>
                 <td>{{ $table->tableCategory->name ?? '-' }}</td>
                 <td>
-                    <div class="flex items-center gap-2">
-                        <x-select :bare="true" size="xs" class="w-40" placeholder="Pilih status"
-                            label="Status meja {{ $table->code }}"
-                            wire:model="statusDrafts.{{ $table->id }}">
-                            @foreach ($statusOptions as $status)
-                                <option value="{{ $status->value }}">{{ $status->label() }}</option>
-                            @endforeach
-                        </x-select>
+                    @can('update', $table)
+                        <div class="flex items-center gap-2">
+                            <x-select :bare="true" size="xs" class="w-40" placeholder="Pilih status"
+                                label="Status meja {{ $table->code }}"
+                                wire:model="statusDrafts.{{ $table->id }}">
+                                @foreach ($statusOptions as $status)
+                                    <option value="{{ $status->value }}">{{ $status->label() }}</option>
+                                @endforeach
+                            </x-select>
 
-                        <x-button variant="outline" size="sm" wire:click="updateStatus('{{ $table->id }}')"
-                            loading="updateStatus('{{ $table->id }}')">
-                            Update
-                        </x-button>
-                    </div>
+                            <x-button variant="outline" size="sm" wire:click="updateStatus('{{ $table->id }}')"
+                                loading="updateStatus('{{ $table->id }}')">
+                                Update
+                            </x-button>
+                        </div>
+                    @else
+                        {{-- Tanpa hak ubah, status tetap perlu terbaca. --}}
+                        <x-badge>{{ \App\Domains\Table\Enums\TableStatus::tryFrom((string) $table->status)?->label() ?? '-' }}</x-badge>
+                    @endcan
                 </td>
                 <td class="text-right">
                     <div class="inline-flex gap-2">
-                        <x-button variant="outline" size="sm" :href="route('tables.qr', $table)">QR</x-button>
-                        <x-button variant="warning" size="sm" :href="route('tables.edit', $table)">Edit</x-button>
-                        <x-button variant="error" size="sm" class="text-white"
-                            data-confirm="Hapus meja ini?"
-                            wire:click="delete('{{ $table->id }}')"
-                            loading="delete('{{ $table->id }}')">
-                            Hapus
-                        </x-button>
+                        @can('view', $table)
+                            <x-button variant="outline" size="sm" :href="route('tables.qr', $table)">QR</x-button>
+                        @endcan
+
+                        @can('update', $table)
+                            <x-button variant="warning" size="sm" :href="route('tables.edit', $table)">Edit</x-button>
+                        @endcan
+
+                        @can('delete', $table)
+                            <x-button variant="error" size="sm" class="text-white"
+                                data-confirm="Hapus meja ini?"
+                                wire:click="delete('{{ $table->id }}')"
+                                loading="delete('{{ $table->id }}')">
+                                Hapus
+                            </x-button>
+                        @endcan
                     </div>
                 </td>
             </tr>

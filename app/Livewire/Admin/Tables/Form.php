@@ -13,7 +13,6 @@ use Livewire\Component;
 
 class Form extends Component
 {
-
     public ?DiningTable $table = null;
 
     public string $code = '';
@@ -32,6 +31,8 @@ class Form extends Component
     {
         $this->table = $table?->exists ? $table : null;
 
+        $this->authorizeWrite();
+
         if ($this->table) {
 
             $this->code = (string) $this->table->code;
@@ -44,12 +45,24 @@ class Form extends Component
             return;
         }
 
-
         $this->status = TableStatus::default()->value;
+    }
+
+    /**
+     * Dipanggil di mount() untuk menutup halamannya dan diulang di save():
+     * mount() jalan sekali, save() adalah request HTTP tersendiri sesudahnya.
+     */
+    private function authorizeWrite(): void
+    {
+        $this->table
+            ? $this->authorize('update', $this->table)
+            : $this->authorize('create', DiningTable::class);
     }
 
     public function save()
     {
+        $this->authorizeWrite();
+
         $validated = $this->validate($this->rules());
 
         $payload = [

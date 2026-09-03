@@ -142,12 +142,25 @@ class OrderPaymentAuthorizationTest extends TestCase
         Livewire::test(OrderForm::class, ['order' => $order])->assertForbidden();
     }
 
+    /**
+     * Nama role-nya harus 'cashier' — bukan nama karangan.
+     *
+     * Grup di routes/admin.php masih dijaga `role:superadmin|admin|cashier`.
+     * Role di luar daftar itu ditolak sebelum `can:` sempat dijalankan, jadi
+     * test-nya akan hijau tanpa membuktikan apa pun tentang policy. Dengan role
+     * yang lolos gerbang kasar itu tapi tanpa permission, yang menolak sudah
+     * pasti `can:`.
+     */
     public function test_route_order_menolak_tanpa_permission(): void
     {
-        $this->actingAsRole('tanpa-akses');
+        $this->actingAsRole('cashier');
 
         $this->get(route('orders.index'))->assertForbidden();
         $this->get(route('orders.create'))->assertForbidden();
+
+        $this->actingAsRole('cashier', self::ORDER_READ);
+
+        $this->get(route('orders.index'))->assertOk();
     }
 
     public function test_pembaca_payment_tidak_melihat_tombol_tulis(): void
@@ -195,11 +208,16 @@ class OrderPaymentAuthorizationTest extends TestCase
         Livewire::test(PaymentForm::class, ['payment' => $payment])->assertForbidden();
     }
 
+    /** Role 'cashier' dipakai dengan alasan yang sama seperti di atas. */
     public function test_route_payment_menolak_tanpa_permission(): void
     {
-        $this->actingAsRole('tanpa-akses');
+        $this->actingAsRole('cashier');
 
         $this->get(route('payments.index'))->assertForbidden();
         $this->get(route('payments.create'))->assertForbidden();
+
+        $this->actingAsRole('cashier', self::PAYMENT_READ);
+
+        $this->get(route('payments.index'))->assertOk();
     }
 }

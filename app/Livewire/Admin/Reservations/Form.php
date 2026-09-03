@@ -14,11 +14,9 @@ use Livewire\Component;
 
 class Form extends Component
 {
-
     /**
      * @var array<int, string>
      */
-
     public ?Reservation $reservation = null;
 
     public string $table_id = '';
@@ -45,6 +43,8 @@ class Form extends Component
     public function mount(?Reservation $reservation = null): void
     {
         $this->reservation = $reservation?->exists ? $reservation : null;
+
+        $this->authorizeWrite();
 
         if ($this->reservation) {
             $this->reservation->loadMissing('items');
@@ -86,8 +86,21 @@ class Form extends Component
         $this->items = array_values($this->items);
     }
 
+    /**
+     * Dipanggil di mount() untuk menutup halamannya dan diulang di save():
+     * mount() jalan sekali, save() adalah request HTTP tersendiri sesudahnya.
+     */
+    private function authorizeWrite(): void
+    {
+        $this->reservation
+            ? $this->authorize('update', $this->reservation)
+            : $this->authorize('create', Reservation::class);
+    }
+
     public function save()
     {
+        $this->authorizeWrite();
+
         $validated = $this->validate($this->rules());
         $validated['table_id'] = $validated['table_id'] ?: null;
         $validated['phone'] = $validated['phone'] ?: null;

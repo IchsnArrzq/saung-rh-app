@@ -3,9 +3,10 @@
 namespace App\Livewire\Admin\Tables;
 
 use App\Domains\Table\Enums\TableStatus;
+use App\Domains\Table\QueryUseCases\FindTableQueryUseCase;
 use App\Domains\Table\QueryUseCases\GetTableListQueryUseCase;
-use App\Domains\Table\Repositories\TableRepository;
 use App\Domains\Table\UseCases\ChangeTableStatusUseCase;
+use App\Models\Table;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -20,14 +21,25 @@ class StatusBoard extends Component
      * Every status is always shown — the old `showInactiveStatuses` toggle
      * disappeared with the `is_active` column.
      */
-    public function moveTable(string $tableId, string $targetStatus, ChangeTableStatusUseCase $changeStatus, TableRepository $tables): void
+    public function mount(): void
+    {
+        $this->authorize('viewAny', Table::class);
+    }
+
+    public function moveTable(string $tableId, string $targetStatus, ChangeTableStatusUseCase $changeStatus, FindTableQueryUseCase $findTable): void
     {
         $target = TableStatus::tryFrom($targetStatus);
-        $table = $tables->find($tableId);
+        // Lewat QueryUseCase, bukan TableRepository langsung dari Livewire —
+        // AGENTS.md § Database Rules.
+        $table = $findTable->byId($tableId);
 
         if (! $target || ! $table) {
             return;
         }
+
+        // Menyeret kartu di papan adalah cara lain memanggil aksi yang sama
+        // dengan dropdown status di tabel meja, jadi gerbangnya juga sama.
+        $this->authorize('update', $table);
 
         $changeStatus->handle($table, $target);
 

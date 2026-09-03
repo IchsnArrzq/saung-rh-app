@@ -84,11 +84,24 @@ class MenuAuthorizationTest extends TestCase
         Livewire::test(MenuForm::class, ['menu' => $menu])->assertForbidden();
     }
 
+    /**
+     * Nama role-nya harus 'cashier' — bukan nama karangan.
+     *
+     * Grup di routes/admin.php masih dijaga `role:superadmin|admin|cashier`.
+     * Role di luar daftar itu ditolak sebelum `can:` sempat dijalankan, jadi
+     * test-nya akan hijau tanpa membuktikan apa pun tentang policy. Dengan role
+     * yang lolos gerbang kasar itu tapi tanpa permission, yang menolak sudah
+     * pasti `can:`.
+     */
     public function test_route_daftar_menu_menolak_tanpa_permission(): void
     {
-        $this->actingAsRole('tamu');
+        $this->actingAsRole('cashier');
 
         $this->get(route('menus.index'))->assertForbidden();
+
+        $this->actingAsRole('cashier', ['menu.viewAny', 'menu.view']);
+
+        $this->get(route('menus.index'))->assertOk();
     }
 
     public function test_superadmin_lolos_tanpa_memegang_permission(): void

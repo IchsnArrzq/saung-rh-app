@@ -16,9 +16,11 @@
                 @endif
             </div>
 
-            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('table-categories.create')">
-                Tambah Kategori
-            </x-button>
+            @can('create', App\Models\TableCategory::class)
+                <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('table-categories.create')">
+                    Tambah Kategori
+                </x-button>
+            @endcan
         </div>
     </x-card>
 
@@ -45,15 +47,20 @@
                 </td>
                 <td class="text-right">
                     <div class="inline-flex gap-2">
-                        <x-button variant="warning" size="sm" :href="route('table-categories.edit', $tableCategory)">
-                            Edit
-                        </x-button>
-                        <x-button variant="error" size="sm" class="text-white"
-                            data-confirm="Hapus kategori meja ini?"
-                            wire:click="delete('{{ $tableCategory->id }}')"
-                            loading="delete('{{ $tableCategory->id }}')">
-                            Hapus
-                        </x-button>
+                        @can('update', $tableCategory)
+                            <x-button variant="warning" size="sm" :href="route('table-categories.edit', $tableCategory)">
+                                Edit
+                            </x-button>
+                        @endcan
+
+                        @can('delete', $tableCategory)
+                            <x-button variant="error" size="sm" class="text-white"
+                                data-confirm="Hapus kategori meja ini?"
+                                wire:click="delete('{{ $tableCategory->id }}')"
+                                loading="delete('{{ $tableCategory->id }}')">
+                                Hapus
+                            </x-button>
+                        @endcan
                     </div>
                 </td>
             </tr>

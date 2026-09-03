@@ -30,6 +30,7 @@ class Table extends Component
 
     public function mount(): void
     {
+        $this->authorize('viewAny', Reservation::class);
     }
 
     public function updatingSearch(): void
@@ -37,9 +38,16 @@ class Table extends Component
         $this->resetPage();
     }
 
-    public function delete(string $id): void
+    public function delete(string $id, GetReservationListQueryUseCase $reservationList): void
     {
-        $reservation = Reservation::query()->findOrFail($id);
+        $reservation = $reservationList->find($id);
+
+        if (! $reservation) {
+            return;
+        }
+
+        $this->authorize('delete', $reservation);
+
         $reservation->delete();
 
         session()->flash('success', 'Reservasi berhasil dihapus.');
@@ -50,6 +58,8 @@ class Table extends Component
         $reservation = Reservation::query()
             ->with(['table', 'user', 'items.menu'])
             ->findOrFail($id);
+
+        $this->authorize('view', $reservation);
 
         $this->selectedReservation = [
             'id' => (string) $reservation->id,
@@ -81,6 +91,11 @@ class Table extends Component
         $reservation = Reservation::query()
             ->with(['table', 'items'])
             ->findOrFail($id);
+
+        // Aksi ini menyentuh dua model: ia MEMBUAT Order dan MENGUBAH status
+        // reservasinya jadi seated. Dua-duanya harus boleh, bukan salah satu.
+        $this->authorize('create', Order::class);
+        $this->authorize('update', $reservation);
 
         if ($reservation->items->isEmpty()) {
             $this->addError('reservation', 'Reservasi belum memiliki item menu.');

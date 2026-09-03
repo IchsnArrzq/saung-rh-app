@@ -38,7 +38,11 @@ trait InteractsWithAuthorization
             Permission::query()->firstOrCreate(['name' => $name, 'guard_name' => 'web']);
         }
 
-        $role->givePermissionTo($permissions);
+        // sync, bukan give: satu test sering memanggil helper ini dua kali
+        // dengan nama role yang sama untuk membandingkan "dengan izin" lawan
+        // "tanpa izin". Kalau menambah, panggilan pertama akan membocorkan
+        // permission-nya ke panggilan kedua dan hasilnya bergantung urutan.
+        $role->syncPermissions($permissions);
 
         $user = User::factory()->create();
         $user->assignRole($role);

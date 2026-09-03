@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Tables;
 
 use App\Domains\Table\Enums\TableStatus;
+use App\Domains\Table\QueryUseCases\FindTableQueryUseCase;
 use App\Domains\Table\QueryUseCases\GetTableListQueryUseCase;
 use App\Domains\Table\UseCases\ChangeTableStatusUseCase;
 use App\Models\Table as DiningTable;
@@ -26,6 +27,7 @@ class Table extends Component
 
     public function mount(): void
     {
+        $this->authorize('viewAny', DiningTable::class);
     }
 
     public function updatingSearch(): void
@@ -33,9 +35,15 @@ class Table extends Component
         $this->resetPage();
     }
 
-    public function updateStatus(string $tableId, ChangeTableStatusUseCase $changeStatus): void
+    public function updateStatus(string $tableId, ChangeTableStatusUseCase $changeStatus, FindTableQueryUseCase $findTable): void
     {
-        $table = DiningTable::query()->findOrFail($tableId);
+        $table = $findTable->byId($tableId);
+
+        if (! $table) {
+            return;
+        }
+
+        $this->authorize('update', $table);
 
         $status = TableStatus::tryFrom((string) ($this->statusDrafts[$tableId] ?? ''));
 
@@ -50,9 +58,16 @@ class Table extends Component
         session()->flash('success', 'Status meja berhasil diperbarui.');
     }
 
-    public function delete(string $id): void
+    public function delete(string $id, FindTableQueryUseCase $findTable): void
     {
-        $table = DiningTable::query()->findOrFail($id);
+        $table = $findTable->byId($id);
+
+        if (! $table) {
+            return;
+        }
+
+        $this->authorize('delete', $table);
+
         $table->delete();
 
         session()->flash('success', 'Meja berhasil dihapus.');
@@ -80,4 +95,3 @@ class Table extends Component
         ]);
     }
 }
-
