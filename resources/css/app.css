@@ -197,6 +197,23 @@ body {
     box-shadow: none !important;
 }
 
+/* Topbar drawer toggle: the chevron points the way the sidebar will move, so
+   it has to flip with the drawer state. daisyUI's `is-drawer-open:` /
+   `is-drawer-close:` variants cannot express this -- they only match inside
+   `.drawer-side`, and this button sits in `.drawer-content` -- so it keys off
+   the checkbox directly. `transform-box: fill-box` keeps the mirror centred on
+   the chevron itself instead of the SVG origin, leaving the panel outline and
+   its rail untouched. */
+[data-drawer-toggle-chevron] {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 0.2s ease-out;
+}
+
+.drawer-toggle:checked ~ .drawer-content [data-drawer-toggle-chevron] {
+    transform: scaleX(-1);
+}
+
 /* Sidebar: the native scrollbar is removed from the layout entirely and drawn
    by floating-scrollbar.js as an overlay thumb instead. A native scrollbar --
    even a thin one -- takes width out of the container's content box, which is

@@ -11,7 +11,10 @@
         'drawer lg:drawer-open' => $navigationMenuPreference === 'sidebar',
     ])>
     @if ($navigationMenuPreference === 'sidebar')
-        <input id="admin-drawer" checked type="checkbox" class="drawer-toggle">
+        {{-- Deliberately unchecked: see partials/drawer-state for why the
+             initial value has to be settled client-side. --}}
+        <input id="admin-drawer" type="checkbox" class="drawer-toggle">
+        @include('layouts.portals.admin.partials.drawer-state')
     @endif
     <div class="drawer-content">
         @include('layouts.portals.admin.partials.topbar')

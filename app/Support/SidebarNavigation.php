@@ -52,7 +52,14 @@ class SidebarNavigation
             ->all();
 
         $group['items'] = $items;
-        $group['is_open'] = (bool) ($group['open'] ?? false) || collect($items)->contains(fn (array $item) => $item['is_active']);
+
+        // Two distinct questions that used to share one flag: `is_active` means
+        // "the current page lives in this group" and drives the highlight;
+        // `is_open` means "render the accordion expanded" and additionally
+        // covers groups pinned open by config. Conflating them made a pinned
+        // group look selected on every page.
+        $group['is_active'] = collect($items)->contains(fn (array $item) => $item['is_active']);
+        $group['is_open'] = (bool) ($group['open'] ?? false) || $group['is_active'];
 
         return $group;
     }

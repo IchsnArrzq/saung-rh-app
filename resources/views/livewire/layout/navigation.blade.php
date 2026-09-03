@@ -39,13 +39,22 @@ new class extends Component {
     <div class="flex items-center gap-3">
 
         @if ($navigationMenuPreference === 'sidebar')
-            <x-button as="label" for="admin-drawer" variant="ghost" shape="square" label="Buka menu samping">
+            {{-- Stays a <label> so a click still toggles the drawer without JS.
+                 `drawer-button` is what earns the focus ring daisyUI draws when
+                 the hidden checkbox takes focus. role/tabindex plus the keydown
+                 handler in partials/drawer-state cover the keyboard: at >=lg
+                 daisyUI sets `display:none` on the checkbox, so without them
+                 the control is unreachable by keyboard on desktop. --}}
+            <x-button as="label" for="admin-drawer" variant="ghost" shape="square" class="drawer-button"
+                data-drawer-toggle role="button" tabindex="0" aria-controls="admin-sidebar" aria-expanded="false"
+                label="Buka menu samping">
                 <!-- Sidebar toggle icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round" stroke-linecap="round"
-                    stroke-width="2" fill="none" stroke="currentColor" class="my-1.5 inline-block size-4">
+                    stroke-width="2" fill="none" stroke="currentColor" class="my-1.5 inline-block size-4"
+                    aria-hidden="true">
                     <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path>
                     <path d="M9 4v16"></path>
-                    <path d="M14 10l2 2l-2 2"></path>
+                    <path d="M14 10l2 2l-2 2" data-drawer-toggle-chevron></path>
                 </svg>
             </x-button>
         @endif
@@ -127,7 +136,7 @@ new class extends Component {
                         <li>
                             <details @if ($group['is_open']) open @endif>
                                 <summary
-                                    class="{{ $group['is_open'] ? 'bg-base-300 text-primary font-semibold' : 'text-stone-700 hover:bg-base-300' }}">
+                                    class="{{ $group['is_active'] ? 'bg-base-300 text-primary font-semibold' : 'text-stone-700 hover:bg-base-300' }}">
                                     <i class="{{ $group['icon'] }}"></i>
                                     {{ $group['label'] }}
                                 </summary>
