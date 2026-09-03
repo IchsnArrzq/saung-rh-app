@@ -24,4 +24,14 @@ class GetOrderListQueryUseCase
     {
         return $this->orders->findForDetail($id);
     }
+
+    /**
+     * The bare row, no relations — enough to hand a Policy something to judge
+     * before an action runs. `detail()` would load items and payments that the
+     * check never reads.
+     */
+    public function find(string $id): ?Order
+    {
+        return $this->orders->find($id);
+    }
 }

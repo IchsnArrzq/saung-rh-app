@@ -18,6 +18,7 @@ class Table extends Component
 
     public function mount(): void
     {
+        $this->authorize('viewAny', Payment::class);
     }
 
     public function updatingSearch(): void
@@ -25,9 +26,18 @@ class Table extends Component
         $this->resetPage();
     }
 
-    public function delete(string $id): void
+    public function delete(string $id, GetPaymentListQueryUseCase $paymentList): void
     {
-        $payment = Payment::query()->findOrFail($id);
+        // Lewat QueryUseCase, bukan Payment::query() langsung dari Livewire —
+        // AGENTS.md § Database Rules.
+        $payment = $paymentList->find($id);
+
+        if (! $payment) {
+            return;
+        }
+
+        $this->authorize('delete', $payment);
+
         $payment->delete();
 
         session()->flash('success', 'Pembayaran berhasil dihapus.');
@@ -40,4 +50,3 @@ class Table extends Component
         ]);
     }
 }
-

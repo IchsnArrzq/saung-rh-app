@@ -12,9 +12,11 @@
                 @endif
             </div>
 
-            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('orders.create')">
-                Buat Order
-            </x-button>
+            @can('create', App\Models\Order::class)
+                <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('orders.create')">
+                    Buat Order
+                </x-button>
+            @endcan
         </div>
     </x-card>
 
@@ -47,24 +49,37 @@
                 </td>
                 <td class="text-right">
                     <div class="inline-flex flex-wrap justify-end gap-2">
-                        <x-button variant="outline" size="sm" wire:click="showDetail('{{ $order->id }}')">
-                            Detail
-                        </x-button>
-                        <x-button variant="accent" size="sm"
-                            data-confirm="Buat payment cash untuk sisa tagihan order ini?"
-                            data-confirm-title="Buat Payment"
-                            data-confirm-yes="Ya, Buat"
-                            wire:click="createPayment('{{ $order->id }}')"
-                            loading="createPayment('{{ $order->id }}')">
-                            Payment
-                        </x-button>
-                        <x-button variant="warning" size="sm" :href="route('orders.edit', $order)">Edit</x-button>
-                        <x-button variant="error" size="sm" class="text-white"
-                            data-confirm="Hapus order ini?"
-                            wire:click="delete('{{ $order->id }}')"
-                            loading="delete('{{ $order->id }}')">
-                            Hapus
-                        </x-button>
+                        @can('view', $order)
+                            <x-button variant="outline" size="sm" wire:click="showDetail('{{ $order->id }}')">
+                                Detail
+                            </x-button>
+                        @endcan
+
+                        {{-- Tombol ini membuat Payment, jadi yang ditanya
+                             PaymentPolicy — bukan OrderPolicy. --}}
+                        @can('create', App\Models\Payment::class)
+                            <x-button variant="accent" size="sm"
+                                data-confirm="Buat payment cash untuk sisa tagihan order ini?"
+                                data-confirm-title="Buat Payment"
+                                data-confirm-yes="Ya, Buat"
+                                wire:click="createPayment('{{ $order->id }}')"
+                                loading="createPayment('{{ $order->id }}')">
+                                Payment
+                            </x-button>
+                        @endcan
+
+                        @can('update', $order)
+                            <x-button variant="warning" size="sm" :href="route('orders.edit', $order)">Edit</x-button>
+                        @endcan
+
+                        @can('delete', $order)
+                            <x-button variant="error" size="sm" class="text-white"
+                                data-confirm="Hapus order ini?"
+                                wire:click="delete('{{ $order->id }}')"
+                                loading="delete('{{ $order->id }}')">
+                                Hapus
+                            </x-button>
+                        @endcan
                     </div>
                 </td>
             </tr>

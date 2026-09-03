@@ -8,6 +8,8 @@ use App\Domains\Order\UseCases\DeleteOrderUseCase;
 use App\Domains\Order\UseCases\SettleBillUseCase;
 use App\Domains\Payment\Enums\PaymentMethod;
 use App\Domains\Payment\Enums\PaymentStatus;
+use App\Models\Order;
+use App\Models\Payment;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -27,6 +29,7 @@ class Table extends Component
 
     public function mount(): void
     {
+        $this->authorize('viewAny', Order::class);
     }
 
     public function updatingSearch(): void
@@ -34,8 +37,16 @@ class Table extends Component
         $this->resetPage();
     }
 
-    public function delete(string $id, DeleteOrderUseCase $deleteOrder): void
+    public function delete(string $id, GetOrderListQueryUseCase $orderList, DeleteOrderUseCase $deleteOrder): void
     {
+        $order = $orderList->find($id);
+
+        if (! $order) {
+            return;
+        }
+
+        $this->authorize('delete', $order);
+
         $deleteOrder->handle($id);
 
         session()->flash('success', 'Order berhasil dihapus.');
@@ -48,6 +59,8 @@ class Table extends Component
         if (! $order) {
             return;
         }
+
+        $this->authorize('view', $order);
 
         $paidTotal = $billing->paidAmount($order);
 
@@ -99,6 +112,10 @@ class Table extends Component
      */
     public function createPayment(string $id, SettleBillUseCase $settleBill): void
     {
+        // Yang dilakukan tombol ini adalah membuat Payment, jadi itu pula
+        // ability yang dijaga — bukan `update` pada Order-nya.
+        $this->authorize('create', Payment::class);
+
         // A rejected settle (already paid, wrong status) surfaces as a
         // ValidationException, which Livewire renders through $errors.
         $payment = $settleBill->handle($id, PaymentMethod::Cash->value);

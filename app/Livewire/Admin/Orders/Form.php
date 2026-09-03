@@ -40,6 +40,8 @@ class Form extends Component
     {
         $this->order = $order?->exists ? $order->load('items') : null;
 
+        $this->authorizeWrite();
+
         if ($this->order) {
 
             $this->table_id = (string) ($this->order->table_id ?? '');
@@ -67,6 +69,18 @@ class Form extends Component
 
         $this->ordered_at = now()->format('Y-m-d\TH:i');
         $this->items = [$this->emptyItem()];
+    }
+
+    /**
+     * Satu form melayani dua ability, dan dipanggil dua kali: di mount() untuk
+     * menutup halamannya, lalu di save() karena mount() hanya jalan sekali
+     * sedangkan save() adalah request HTTP tersendiri.
+     */
+    private function authorizeWrite(): void
+    {
+        $this->order
+            ? $this->authorize('update', $this->order)
+            : $this->authorize('create', Order::class);
     }
 
     public function addItem(): void
@@ -104,6 +118,8 @@ class Form extends Component
 
     public function save(CreateOrderUseCase $createOrder, UpdateOrderUseCase $updateOrder)
     {
+        $this->authorizeWrite();
+
         $validated = $this->validate($this->rules());
 
         $status = OrderStatus::from($validated['status']);

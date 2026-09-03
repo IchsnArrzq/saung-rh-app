@@ -13,7 +13,6 @@ Route::resource('table-categories', TableCategoryController::class)
     ->parameters(['table-categories' => 'tableCategory']);
 Route::resource('tables', TableController::class)->except('show');
 
-
 Route::get('table-categories', [TableCategoryController::class, 'index'])->name('table-categories.index');
 Route::get('table-categories/create', [TableCategoryController::class, 'create'])->name('table-categories.create');
 Route::get('table-categories/{tableCategory}/edit', [TableCategoryController::class, 'edit'])->name('table-categories.edit');

@@ -13,7 +13,6 @@ use Livewire\Component;
 
 class Form extends Component
 {
-
     public ?Payment $payment = null;
 
     public string $order_id = '';
@@ -36,6 +35,8 @@ class Form extends Component
     {
         $this->payment = $payment?->exists ? $payment : null;
 
+        $this->authorizeWrite();
+
         if ($this->payment) {
 
             $this->order_id = (string) $this->payment->order_id;
@@ -52,8 +53,21 @@ class Form extends Component
 
     }
 
+    /**
+     * Dipanggil di mount() untuk menutup halamannya dan diulang di save():
+     * mount() jalan sekali, save() adalah request HTTP tersendiri sesudahnya.
+     */
+    private function authorizeWrite(): void
+    {
+        $this->payment
+            ? $this->authorize('update', $this->payment)
+            : $this->authorize('create', Payment::class);
+    }
+
     public function save()
     {
+        $this->authorizeWrite();
+
         $validated = $this->validate($this->rules());
         $validated['paid_at'] = $validated['paid_at']
             ?: (PaymentStatus::tryFrom($validated['status'])?->isSettled() ? now() : null);

@@ -12,9 +12,11 @@
                 @endif
             </div>
 
-            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('payments.create')">
-                Tambah Pembayaran
-            </x-button>
+            @can('create', App\Models\Payment::class)
+                <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('payments.create')">
+                    Tambah Pembayaran
+                </x-button>
+            @endcan
         </div>
     </x-card>
 
@@ -40,15 +42,20 @@
                 <td>Rp {{ number_format((float) $payment->amount, 0, ',', '.') }}</td>
                 <td class="text-right">
                     <div class="inline-flex gap-2">
-                        <x-button variant="warning" size="sm" :href="route('payments.edit', $payment)">
-                            Edit
-                        </x-button>
-                        <x-button variant="error" size="sm" class="text-white"
-                            data-confirm="Hapus pembayaran ini?"
-                            wire:click="delete('{{ $payment->id }}')"
-                            loading="delete('{{ $payment->id }}')">
-                            Hapus
-                        </x-button>
+                        @can('update', $payment)
+                            <x-button variant="warning" size="sm" :href="route('payments.edit', $payment)">
+                                Edit
+                            </x-button>
+                        @endcan
+
+                        @can('delete', $payment)
+                            <x-button variant="error" size="sm" class="text-white"
+                                data-confirm="Hapus pembayaran ini?"
+                                wire:click="delete('{{ $payment->id }}')"
+                                loading="delete('{{ $payment->id }}')">
+                                Hapus
+                            </x-button>
+                        @endcan
                     </div>
                 </td>
             </tr>
