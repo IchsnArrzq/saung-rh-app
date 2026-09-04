@@ -1,6 +1,6 @@
 <div class="space-y-4">
     @if (session('success'))
-        <div class="alert alert-success py-2 text-sm"><i class="ri-checkbox-circle-line"></i><span>{{ session('success') }}</span></div>
+        <x-alert type="success">{{ session('success') }}</x-alert>
     @endif
 
     @php
@@ -23,37 +23,24 @@
         <div class="card-body gap-3">
             <h3 class="card-title text-base"><i class="ri-key-2-line text-primary"></i> Detail Lisensi</h3>
             <form wire:submit="save" class="grid gap-3 sm:grid-cols-2">
-                <label class="form-control">
-                    <span class="label-text mb-1">Paket</span>
-                    <input type="text" wire:model="plan" class="input input-bordered input-sm">
-                    @error('plan') <span class="text-error text-xs">{{ $message }}</span> @enderror
-                </label>
-                <label class="form-control">
-                    <span class="label-text mb-1">License Key</span>
-                    <input type="text" wire:model="license_key" class="input input-bordered input-sm font-mono">
-                    @error('license_key') <span class="text-error text-xs">{{ $message }}</span> @enderror
-                </label>
-                <label class="form-control">
-                    <span class="label-text mb-1">Status</span>
-                    <select wire:model="status" class="select select-bordered select-sm">
-                        @foreach ($statuses as $st)
-                            <option value="{{ $st->value }}">{{ $st->label() }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <label class="form-control">
-                    <span class="label-text mb-1">Jumlah Seat</span>
-                    <input type="number" wire:model="seats" min="1" class="input input-bordered input-sm">
-                    @error('seats') <span class="text-error text-xs">{{ $message }}</span> @enderror
-                </label>
-                <label class="form-control">
-                    <span class="label-text mb-1">Berlaku Hingga</span>
-                    <input type="date" wire:model="expires_at" class="input input-bordered input-sm">
-                </label>
-                <label class="form-control sm:col-span-2">
-                    <span class="label-text mb-1">Catatan</span>
-                    <textarea wire:model="notes" rows="2" class="textarea textarea-bordered textarea-sm"></textarea>
-                </label>
+                <x-input label="Paket" name="plan" size="sm" wire:model="plan" />
+
+                <x-input label="License Key" name="license_key" size="sm" class="font-mono"
+                    wire:model="license_key" />
+
+                <x-select label="Status" name="status" size="sm" wire:model="status">
+                    @foreach ($statuses as $st)
+                        <option value="{{ $st->value }}">{{ $st->label() }}</option>
+                    @endforeach
+                </x-select>
+
+                <x-input label="Jumlah Seat" name="seats" type="number" size="sm" min="1" wire:model="seats" />
+
+                <x-input label="Berlaku Hingga" name="expires_at" type="date" size="sm" wire:model="expires_at" />
+
+                <x-textarea field-class="sm:col-span-2" label="Catatan" name="notes" size="sm" :rows="2"
+                    wire:model="notes" />
+
                 <div class="sm:col-span-2 flex justify-end">
                     <x-button type="submit" variant="primary" size="sm" icon="ri-save-line">Simpan Lisensi</x-button>
                 </div>

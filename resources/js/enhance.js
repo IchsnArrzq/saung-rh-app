@@ -1,17 +1,20 @@
 import TomSelect from 'tom-select';
-import 'tom-select/dist/css/tom-select.css';
 import flatpickr from 'flatpickr';
-import 'flatpickr/dist/flatpickr.min.css';
 import { Indonesian } from 'flatpickr/dist/l10n/id.js';
+
+// Their stylesheets are imported from resources/css/app.css instead of here:
+// bundled through JS they land in a second <link> that loads *after* app.css,
+// where every vendor rule beats our same-specificity theme overrides.
 
 flatpickr.localize(Indonesian);
 
 /**
  * Progressive enhancement for native form controls.
  *
- * Every <select> becomes a Tom Select and every date/time input becomes a
- * flatpickr, without touching the Blade markup. Opt a field (or a whole
- * subtree) out with data-enhance="off".
+ * Every <select> becomes a Tom Select -- searchable, clearable and keyboard
+ * driven -- and every date/time input becomes a flatpickr, without touching
+ * the Blade markup. Opt a field (or a whole subtree) out with
+ * data-enhance="off".
  *
  * Both libraries inject sibling nodes that Livewire's morph would treat as
  * unexpected DOM, so enhancement is torn down before a morph and reapplied
@@ -24,9 +27,6 @@ const DATE_SELECTOR = 'input[type="date"], input[type="datetime-local"], input[t
 // flatpickr builds its month picker out of a real <select>, and Tom Select
 // renders <input>s of its own. Neither may be enhanced recursively.
 const GENERATED_DOM = '.flatpickr-calendar, .ts-wrapper, .ts-dropdown';
-
-// Below this many options a search box costs more than it helps.
-const SEARCH_THRESHOLD = 8;
 
 // Native value formats, preserved so the server contract never changes.
 const FLATPICKR_CONFIG = {
@@ -105,9 +105,116 @@ function livewireValue(el) {
 // daisyUI field classes carry their own height, border and dropdown arrow.
 // Tom Select copies the original element's classes onto its wrapper, where
 // those would stack on top of .ts-control's styling and produce a double
-// border. Strip them for the lifetime of the enhancement.
-const DAISY_FIELD_CLASS = /\bselect(-bordered|-ghost|-xs|-sm|-md|-lg|-primary|-secondary|-accent|-info|-success|-warning|-error)?\b/g;
-const SMALL_FIELD_CLASS = /\bselect-(xs|sm)\b/;
+// border. Strip them for the lifetime of the enhancement -- then re-express
+// the ones that still carry meaning (size, error state) as the `ts-*` classes
+// the stylesheet understands.
+const DAISY_FIELD_CLASS =
+    /\bselect(-bordered|-ghost|-xs|-sm|-md|-lg|-xl|-primary|-secondary|-accent|-info|-success|-warning|-error)?\b/g;
+
+const SIZE_CLASS = {
+    'select-xs': 'ts-xs',
+    'select-sm': 'ts-sm',
+    'select-lg': 'ts-lg',
+    'select-xl': 'ts-xl',
+};
+
+/** Translate the daisyUI classes we strip into their `ts-*` equivalents. */
+function wrapperClasses(originalClass) {
+    const classes = [];
+
+    for (const [daisy, ts] of Object.entries(SIZE_CLASS)) {
+        if (new RegExp('\\b' + daisy + '\\b').test(originalClass)) {
+            classes.push(ts);
+        }
+    }
+
+    if (/\bselect-error\b/.test(originalClass)) {
+        classes.push('ts-error');
+    }
+
+    return classes;
+}
+
+/**
+ * The ancestors that would clip a dropdown rendered inside the wrapper.
+ *
+ * Tom Select renders the menu as a child of its own wrapper, so a scrollable
+ * ancestor cuts it off -- `<x-data-table>` wraps every table in
+ * `overflow-x-auto`, and a box that scrolls on one axis clips the other, which
+ * left the menu on the last table row all but invisible. daisyUI's
+ * `.modal-box` (`overflow-y: auto`) does the same. Such fields get their
+ * dropdown re-parented to <body>, and these are the nodes whose scrolling it
+ * then has to follow.
+ */
+function clippingAncestors(el) {
+    const clippers = [];
+
+    for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+        const { overflowX, overflowY } = getComputedStyle(node);
+
+        if (overflowX !== 'visible' || overflowY !== 'visible') {
+            clippers.push(node);
+        }
+    }
+
+    return clippers;
+}
+
+/**
+ * Tom Select only ever drops the menu downwards. For a field near the bottom of
+ * the window -- the last rows of a table, exactly the ones re-parenting just
+ * rescued -- that runs off the fold. Flip it above the control when there is no
+ * room below and more room above.
+ *
+ * Overriding the instance method rather than listening for `dropdown_open` is
+ * deliberate: Tom Select re-runs `positionDropdown()` on window scroll and
+ * resize, and anything it recomputes there would undo a flip applied elsewhere.
+ * `open()` gives the dropdown `display: block` before positioning it, so it is
+ * measurable by the time this runs.
+ */
+function keepDropdownInView(instance, clippers) {
+    const position = instance.positionDropdown.bind(instance);
+
+    instance.positionDropdown = () => {
+        position();
+
+        const control = instance.control.getBoundingClientRect();
+        const height = instance.dropdown.offsetHeight;
+        const roomBelow = window.innerHeight - control.bottom;
+
+        if (height <= roomBelow || control.top <= roomBelow) {
+            return;
+        }
+
+        // `top` is a document-space offset that the dropdown's own margin then
+        // shifts down by, so the gap has to be subtracted twice to end up the
+        // same distance above the control as it would sit below it.
+        const gap = parseFloat(getComputedStyle(instance.dropdown).marginTop) || 0;
+
+        instance.dropdown.style.top = `${control.top + window.scrollY - height - gap * 2}px`;
+    };
+
+    const reposition = () => {
+        if (instance.isOpen) {
+            instance.positionDropdown();
+        }
+    };
+
+    // Re-run once the menu is on screen. Tom Select positions from inside
+    // open(), which some paths reach before the option list has been rendered
+    // -- measuring an all-but-empty dropdown there would decide it fits.
+    // positionDropdown() recomputes from scratch, so repeating it is free.
+    instance.on('dropdown_open', reposition);
+
+    // Tom Select watches only the window for scroll, but the field that needed
+    // re-parenting is by definition inside something that scrolls. Bind to
+    // those boxes rather than to `document`: scroll does not bubble, and a
+    // document-level listener would outlive the page a wire:navigate replaces.
+    clippers.forEach((node) => node.addEventListener('scroll', reposition, { passive: true }));
+    instance.on('destroy', () => {
+        clippers.forEach((node) => node.removeEventListener('scroll', reposition));
+    });
+}
 
 function enhanceSelect(el) {
     if (el.tomselect || isOptedOut(el)) {
@@ -118,31 +225,54 @@ function enhanceSelect(el) {
     originalState.set(el, { originalClass });
     el.setAttribute('class', originalClass.replace(DAISY_FIELD_CLASS, '').replace(/\s+/g, ' ').trim());
 
+    // `dropdown_input` puts the search box at the top of the dropdown instead
+    // of inside the control, so the chosen value stays readable while typing.
+    const plugins = { dropdown_input: {} };
+
+    // A required field has no valid empty state, so a clear button there could
+    // only ever produce a validation error. `<x-select :required>` marks itself
+    // with data-clearable="false" even when it leaves the HTML attribute off.
+    if (!el.required && el.dataset.clearable !== 'false') {
+        plugins.clear_button = { title: 'Kosongkan pilihan' };
+    }
+
     const settings = {
         allowEmptyOption: true,
         maxOptions: null,
+        plugins,
+        placeholder: el.dataset.placeholder || 'Pilih...',
+        render: {
+            no_results: () => '<div class="no-results">Tidak ada hasil yang cocok.</div>',
+        },
         onChange() {
             notify(el);
         },
     };
 
-    // Tom Select merges settings over its defaults with Object.assign, so an
-    // explicit `undefined` would overwrite a default rather than fall back to
-    // it -- passing `controlInput: undefined` silently removes the search box.
-    // Only set these keys when there is a real value to set.
-    if (el.options.length < SEARCH_THRESHOLD) {
-        // `null` drops the text field, leaving a plain dropdown.
-        settings.controlInput = null;
-    }
+    // Tom Select keeps a body-parented dropdown aligned on window scroll and
+    // resize by itself; `ts-dropdown-floating` is what lifts it clear of
+    // daisyUI's `.modal` (z-index 999), which it no longer nests inside.
+    const clippers = clippingAncestors(el);
 
-    if (el.dataset.placeholder) {
-        settings.placeholder = el.dataset.placeholder;
+    if (clippers.length > 0) {
+        settings.dropdownParent = 'body';
+        settings.dropdownClass = 'ts-dropdown ts-dropdown-floating';
     }
 
     const instance = new TomSelect(el, settings);
 
-    if (SMALL_FIELD_CLASS.test(originalClass)) {
-        instance.wrapper.classList.add('ts-sm');
+    // Only a body-parented dropdown is positioned by script at all; the rest is
+    // laid out by CSS directly under its control and cannot be moved from here.
+    if (clippers.length > 0) {
+        keepDropdownInView(instance, clippers);
+    }
+
+    instance.control_input.placeholder = el.dataset.searchPlaceholder || 'Cari...';
+    instance.control_input.setAttribute('aria-label', 'Cari pilihan');
+
+    const extra = wrapperClasses(originalClass);
+    if (extra.length > 0) {
+        instance.wrapper.classList.add(...extra);
     }
 
     // Silent: this reflects existing state, it isn't a user edit.

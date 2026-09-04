@@ -7,7 +7,7 @@
                 <x-search-input class="max-w-xs" wire:model.live.debounce.300ms="search"
                     placeholder="Cari kode / supplier / catatan..." label="Cari pembelian" />
 
-                <x-select :bare="true" label="Filter status" wire:model.live="statusFilter"
+                <x-select :bare="true" class="w-full max-w-64" label="Filter status" wire:model.live="statusFilter"
                     placeholder="Semua Status" :options="['draft' => 'Draft', 'posted' => 'Diposting']" />
             </div>
 

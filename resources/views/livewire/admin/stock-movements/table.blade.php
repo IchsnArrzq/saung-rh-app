@@ -9,19 +9,12 @@
                     placeholder="Cari catatan / bahan...">
             </div>
 
-            <select class="select select-bordered" wire:model.live="typeFilter">
-                <option value="">Semua Tipe</option>
-                <option value="in">Masuk</option>
-                <option value="out">Keluar</option>
-                <option value="adjustment">Koreksi</option>
-            </select>
+            <x-select :bare="true" class="w-full max-w-64" label="Tipe" name="typeFilter" placeholder="Semua Tipe"
+                wire:model.live="typeFilter"
+                :options="['in' => 'Masuk', 'out' => 'Keluar', 'adjustment' => 'Koreksi']" />
 
-            <select class="select select-bordered" wire:model.live="ingredientFilter">
-                <option value="">Semua Bahan</option>
-                @foreach ($ingredients as $ingredient)
-                    <option value="{{ $ingredient->id }}">{{ $ingredient->name }}</option>
-                @endforeach
-            </select>
+            <x-select :bare="true" class="w-full max-w-64" label="Bahan" name="ingredientFilter" placeholder="Semua Bahan"
+                wire:model.live="ingredientFilter" :options="$ingredients->pluck('name', 'id')->all()" />
         </div>
     </section>
 

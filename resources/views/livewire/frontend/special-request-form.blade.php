@@ -11,11 +11,8 @@
         @endif
 
         <form wire:submit="submit" class="space-y-2">
-            <select wire:model="category" class="select select-bordered select-sm w-full">
-                @foreach ($categories as $key => $label)
-                    <option value="{{ $key }}">{{ $label }}</option>
-                @endforeach
-            </select>
+            <x-select :bare="true" label="Kategori permintaan" name="category" size="sm" class="w-full"
+                wire:model="category" :options="$categories" />
             <textarea wire:model="description" rows="2" maxlength="280"
                 placeholder="Mis. tolong siapkan kue ulang tahun, atau kecilkan AC..."
                 class="textarea textarea-bordered textarea-sm w-full"></textarea>

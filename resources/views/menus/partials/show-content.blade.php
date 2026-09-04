@@ -170,15 +170,9 @@
                     <input type="hidden" name="redirect_to" value="{{ $currentUrl }}">
 
                     <div class="grid gap-3 sm:grid-cols-[110px_1fr]">
-                        <label class="form-control">
-                            <span class="label-text">Jumlah</span>
-                            <input type="number" name="qty" min="1" max="20" value="1" class="input input-bordered" required>
-                        </label>
+                        <x-input label="Jumlah" name="qty" type="number" min="1" max="20" value="1" :required="true" />
 
-                        <label class="form-control">
-                            <span class="label-text">Catatan</span>
-                            <input type="text" name="notes" class="input input-bordered" placeholder="contoh: ekstra pedas">
-                        </label>
+                        <x-input label="Catatan" name="notes" placeholder="contoh: ekstra pedas" />
                     </div>
 
                     <x-button type="submit" variant="primary" :block="true" icon="ri-shopping-cart-2-line"

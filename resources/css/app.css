@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Vendor stylesheets belong here, not in resources/js/enhance.js: a JS import
+   emits its own <link> after this file, so the vendor defaults would win every
+   tie against the Tom Select / flatpickr theming further down. */
+@import "tom-select/dist/css/tom-select.css";
+@import "flatpickr/dist/flatpickr.min.css";
+
 @source "../**/*.blade.php";
 @source "../**/*.js";
 @source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
@@ -271,61 +277,325 @@ body {
     }
 }
 
-/* Tom Select: adopt daisyUI's field tokens so an enhanced <select> is
-   indistinguishable from a native `.select`. */
+/* Tom Select: every <select> is enhanced (see resources/js/enhance.js), so this
+   block is what a select actually looks like in the app. It mirrors daisyUI's
+   field tokens -- same height per size, same radius, same focus ring -- and
+   adds the two affordances a native select lacks: a search box and a clear
+   button. */
+/* These live on the root rather than on `.ts-wrapper` because a dropdown that
+   would be clipped is re-parented to <body> (see resources/js/enhance.js) and
+   inherits nothing from its wrapper any more. */
+:root {
+    --ts-border-color: #dfe3ea;
+    --ts-focus-ring: 0 0 0 3px rgb(255 79 85 / 0.12);
+    --ts-search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.6-3.6'/%3E%3C/svg%3E");
+}
+
 .ts-wrapper {
-    --ts-height: 3rem;
+    /* daisyUI: `.select` is `--size-field * 10`, i.e. 2.5rem at the default
+       `--size-field: 0.25rem`. Matching it keeps an enhanced select the same
+       height as the <input> sitting next to it in a grid. */
+    --ts-height: calc(var(--size-field, 0.25rem) * 10);
+    --ts-font-size: 0.875rem;
+
+    /* Tom Select derives the control's right padding from these, so the value
+       can never slide under the caret or the clear button. */
+    --ts-pr-caret: 1.75rem;
+
+    position: relative;
+    width: 100%;
+}
+
+.ts-wrapper.ts-xs {
+    --ts-height: calc(var(--size-field, 0.25rem) * 6);
+    --ts-font-size: 0.6875rem;
+    --ts-pr-caret: 1.5rem;
+}
+
+.ts-wrapper.ts-sm {
+    --ts-height: calc(var(--size-field, 0.25rem) * 8);
+    --ts-font-size: 0.75rem;
+    --ts-pr-caret: 1.5rem;
+}
+
+.ts-wrapper.ts-lg {
+    --ts-height: calc(var(--size-field, 0.25rem) * 12);
+    --ts-font-size: 1.125rem;
+}
+
+.ts-wrapper.ts-xl {
+    --ts-height: calc(var(--size-field, 0.25rem) * 14);
+    --ts-font-size: 1.375rem;
+}
+
+.ts-wrapper.plugin-clear_button {
+    --ts-pr-clear-button: 1.5rem;
 }
 
 .ts-wrapper.single .ts-control,
 .ts-wrapper.multi .ts-control {
     min-height: var(--ts-height);
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #dfe3ea;
+    padding-block: 0;
+    padding-inline-start: 0.75rem;
+    border: 1px solid var(--ts-border-color);
     border-radius: var(--radius-field, 0.5rem);
     background: var(--color-base-100);
     background-image: none;
     color: var(--color-base-content);
     box-shadow: none;
-    font-size: 0.875rem;
+    font-size: var(--ts-font-size);
+    line-height: 1.25rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.ts-wrapper.single.input-active .ts-control {
+/* A single-value control is one row: the item (or placeholder) must ellipsize
+   rather than wrap the control open. */
+.ts-wrapper.single .ts-control {
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.ts-wrapper.single .ts-control > .item,
+.ts-wrapper.single .ts-control > .items-placeholder {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.ts-wrapper.multi .ts-control {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    padding-block: 0.375rem;
+}
+
+/* The control keeps its resting look while the dropdown is open; only the
+   focus ring changes. Tom Select's own `input-active` rule would otherwise
+   turn the background into a text field. */
+.ts-wrapper.single.input-active .ts-control,
+.ts-wrapper.plugin-dropdown_input.focus.dropdown-active .ts-control {
+    border: 1px solid var(--ts-border-color);
     background: var(--color-base-100);
+    box-shadow: none;
 }
 
-.ts-wrapper.focus .ts-control {
+.ts-wrapper.focus .ts-control,
+.ts-wrapper.plugin-dropdown_input.focus.dropdown-active .ts-control {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgb(255 79 85 / 0.12);
+    box-shadow: var(--ts-focus-ring);
+}
+
+.ts-wrapper.ts-error .ts-control {
+    border-color: var(--color-error);
+}
+
+.ts-wrapper.ts-error.focus .ts-control {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-error) 18%, transparent);
+}
+
+.ts-wrapper.disabled {
+    pointer-events: none;
 }
 
 .ts-wrapper.disabled .ts-control {
-    opacity: 0.5;
+    background: var(--color-base-200);
+    opacity: 0.55;
 }
 
-.ts-wrapper .ts-control > input,
-.ts-wrapper .ts-control > .item {
+.ts-wrapper .ts-control > .item,
+.ts-wrapper .ts-control > input {
     color: var(--color-base-content);
 }
 
+/* `dropdown_input` leaves a real <input> in the control to carry the
+   placeholder. It must look like text, never like a nested field. */
+.ts-wrapper .ts-control > .items-placeholder {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: auto;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--color-base-content);
+    font-size: inherit;
+    outline: none;
+    cursor: pointer;
+}
+
+.ts-wrapper .ts-control > .items-placeholder::placeholder {
+    color: color-mix(in oklab, var(--color-base-content) 45%, transparent);
+}
+
+/* Chevron, drawn rather than imported so it can flip when the menu opens. */
 .ts-wrapper .ts-control::after {
-    border-color: var(--color-secondary) transparent transparent;
+    content: "";
+    position: absolute;
+    inset-inline-end: 0.85rem;
+    top: 50%;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    opacity: 0.5;
+    transform: translateY(-70%) rotate(45deg);
+    transform-origin: center;
+    transition: transform 0.15s ease;
+    pointer-events: none;
+}
+
+.ts-wrapper.dropdown-active .ts-control::after {
+    transform: translateY(-25%) rotate(-135deg);
+}
+
+.ts-wrapper.ts-xs .ts-control::after,
+.ts-wrapper.ts-sm .ts-control::after {
+    inset-inline-end: 0.6rem;
+    width: 0.35rem;
+    height: 0.35rem;
+}
+
+/* Clear button: a quiet target that only appears once there is something worth
+   clearing, so it never competes with the value for attention. */
+.ts-wrapper.plugin-clear_button .clear-button {
+    display: grid;
+    place-items: center;
+    inset-inline-end: var(--ts-pr-caret);
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    background: transparent !important;
+    color: var(--color-base-content);
+    font-size: 1.05rem;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.ts-wrapper.plugin-clear_button.focus.has-items .clear-button,
+.ts-wrapper.plugin-clear_button:not(.disabled):hover.has-items .clear-button {
+    opacity: 0.55;
+}
+
+.ts-wrapper.plugin-clear_button .clear-button:hover {
+    background: var(--color-base-200) !important;
+    opacity: 1;
+}
+
+/* An xs/sm control is only 24-32px tall; the full-size button would crowd out
+   the value it sits next to. */
+.ts-wrapper.plugin-clear_button.ts-xs,
+.ts-wrapper.plugin-clear_button.ts-sm {
+    --ts-pr-clear-button: 1.15rem;
+}
+
+.ts-wrapper.ts-xs .clear-button,
+.ts-wrapper.ts-sm .clear-button {
+    width: 1rem;
+    height: 1rem;
+    font-size: 0.85rem;
+}
+
+/* The empty option is already "nothing selected" -- clearing it is a no-op, so
+   the button stays hidden until a real value is picked. */
+.ts-wrapper.plugin-clear_button:has(.ts-control > .item[data-value=""]) .clear-button,
+.ts-wrapper.plugin-clear_button:not(.has-items) .clear-button {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .ts-dropdown {
     z-index: 70;
+    margin-top: 0.375rem;
     border: 1px solid var(--color-base-300);
+    border-top: 1px solid var(--color-base-300);
     border-radius: var(--radius-box, 0.75rem);
     background: var(--color-base-100);
     color: var(--color-base-content);
-    box-shadow: 0 14px 44px rgb(17 19 21 / 0.12);
-    margin-top: 0.25rem;
+    box-shadow: 0 14px 44px rgb(17 19 21 / 0.14);
     overflow: hidden;
 }
 
-.ts-dropdown .option {
-    padding: 0.5rem 0.75rem;
+/* Re-parented to <body> because a scrollable ancestor would clip it, so it no
+   longer nests inside whatever it visually belongs to -- it has to clear
+   daisyUI's `.modal` at z-index 999 on its own. */
+.ts-dropdown.ts-dropdown-floating {
+    z-index: 1000;
+}
+
+/* Search box, courtesy of the `dropdown_input` plugin. */
+.ts-dropdown .dropdown-input-wrap {
+    position: relative;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--color-base-300);
+    background: var(--color-base-100);
+}
+
+.ts-dropdown .dropdown-input-wrap::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 1.125rem;
+    top: 50%;
+    width: 0.95rem;
+    height: 0.95rem;
+    transform: translateY(-50%);
+    background-color: currentColor;
+    opacity: 0.45;
+    -webkit-mask: var(--ts-search-icon) center / contain no-repeat;
+    mask: var(--ts-search-icon) center / contain no-repeat;
+    pointer-events: none;
+}
+
+.ts-dropdown .dropdown-input {
+    width: 100%;
+    height: 2.25rem;
+    padding: 0 0.75rem 0 2.25rem;
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field, 0.5rem);
+    background: var(--color-base-200);
+    color: var(--color-base-content);
     font-size: 0.875rem;
+    box-shadow: none;
+    outline: none;
+}
+
+.ts-dropdown .dropdown-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: var(--ts-focus-ring);
+}
+
+.ts-dropdown .dropdown-input::placeholder {
+    color: color-mix(in oklab, var(--color-base-content) 45%, transparent);
+}
+
+.ts-dropdown-content {
+    max-height: 15rem;
+    padding: 0.25rem;
+}
+
+.ts-dropdown .option {
+    padding: 0.5rem 0.625rem;
+    border-radius: var(--radius-selector, 0.5rem);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.ts-dropdown .optgroup-header {
+    padding: 0.5rem 0.625rem 0.25rem;
+    background: transparent;
+    color: color-mix(in oklab, var(--color-base-content) 55%, transparent);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.ts-dropdown .optgroup + .optgroup .optgroup-header {
+    margin-top: 0.25rem;
+    border-top: 1px solid var(--color-base-300);
 }
 
 .ts-dropdown .active {
@@ -339,35 +609,56 @@ body {
     color: var(--color-primary-content);
 }
 
+/* The substring Tom Select matched, so the reason a row survived the filter is
+   visible at a glance. */
+.ts-dropdown [data-selectable] .highlight {
+    padding: 0 0.05em;
+    border-radius: 0.15rem;
+    background: color-mix(in oklab, var(--color-primary) 22%, transparent);
+    color: inherit;
+}
+
+.ts-dropdown .selected .highlight,
+.ts-dropdown .option.selected.active .highlight {
+    background: rgb(255 255 255 / 0.28);
+}
+
 .ts-dropdown .no-results {
-    padding: 0.5rem 0.75rem;
-    color: var(--color-secondary);
-    font-size: 0.875rem;
+    padding: 0.75rem 0.625rem;
+    color: color-mix(in oklab, var(--color-base-content) 55%, transparent);
+    font-size: 0.8125rem;
+    text-align: center;
 }
 
 .ts-wrapper.multi .ts-control > div {
+    margin: 0;
+    padding: 0.125rem 0.5rem;
     border-radius: var(--radius-selector, 0.5rem);
     background: var(--color-primary);
     color: var(--color-primary-content);
+    font-size: 0.8125rem;
 }
 
-/* Match daisyUI's `select-sm`/`select-xs` when the original field carried it. */
-.ts-wrapper.ts-sm {
-    --ts-height: 2rem;
-}
-
-.ts-wrapper.ts-sm .ts-control {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-}
-
-[data-theme="cr-cafe-resto-dark"] .ts-wrapper.single .ts-control,
-[data-theme="cr-cafe-resto-dark"] .ts-wrapper.multi .ts-control {
-    border-color: var(--color-base-300);
+[data-theme="cr-cafe-resto-dark"] {
+    --ts-border-color: var(--color-base-300);
+    --ts-focus-ring: 0 0 0 3px color-mix(in oklab, var(--color-primary) 22%, transparent);
 }
 
 [data-theme="cr-cafe-resto-dark"] .ts-dropdown {
     box-shadow: none;
+}
+
+[data-theme="cr-cafe-resto-dark"] .ts-dropdown .selected .highlight,
+[data-theme="cr-cafe-resto-dark"] .ts-dropdown .option.selected.active .highlight {
+    background: rgb(17 19 21 / 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ts-wrapper .ts-control,
+    .ts-wrapper .ts-control::after,
+    .ts-wrapper.plugin-clear_button .clear-button {
+        transition: none;
+    }
 }
 
 /* flatpickr: same treatment against the daisyUI palette. */

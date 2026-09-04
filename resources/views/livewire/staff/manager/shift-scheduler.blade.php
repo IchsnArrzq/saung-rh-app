@@ -9,12 +9,9 @@
             <div class="card-body gap-2 p-4">
                 <h3 class="card-title text-sm"><i class="ri-calendar-schedule-line text-primary"></i> Jadwalkan Shift</h3>
                 <form wire:submit="save" class="space-y-2">
-                    <select wire:model="userId" class="select select-bordered select-sm w-full">
-                        <option value="">Pilih staf...</option>
-                        @foreach ($staff as $person)
-                            <option value="{{ $person->id }}">{{ $person->name }}</option>
-                        @endforeach
-                    </select>
+                    <x-select :bare="true" label="Staf" name="userId" size="sm" class="w-full"
+                        placeholder="Pilih staf..." wire:model="userId"
+                        :options="$staff->pluck('name', 'id')->all()" />
                     @error('userId') <span class="text-error text-xs">{{ $message }}</span> @enderror
                     <input type="date" wire:model="shiftDate" class="input input-bordered input-sm w-full">
                     <div class="flex gap-2">

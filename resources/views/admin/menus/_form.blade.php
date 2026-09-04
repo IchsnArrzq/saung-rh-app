@@ -13,14 +13,9 @@
 
     <fieldset class="fieldset">
         <legend class="fieldset-legend">Kategori</legend>
-        <select name="menu_category_id" class="select select-bordered w-full">
-            <option value="">Tanpa kategori</option>
-            @foreach ($categories as $category)
-                <option value="{{ $category->id }}" @selected((string) old('menu_category_id', $menu->menu_category_id) === (string) $category->id)>
-                    {{ $category->name }}
-                </option>
-            @endforeach
-        </select>
+        <x-select :bare="true" label="Kategori" name="menu_category_id" class="w-full"
+            placeholder="Tanpa kategori" :selected="old('menu_category_id', $menu->menu_category_id)"
+            :options="$categories->pluck('name', 'id')->all()" />
         @error('menu_category_id')
             <p class="label text-error">{{ $message }}</p>
         @enderror

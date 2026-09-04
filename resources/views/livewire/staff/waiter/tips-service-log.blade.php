@@ -30,24 +30,13 @@
                     @error('tipAmount') <span class="text-error text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-xs text-secondary">Meja (opsional)</label>
-                        <select wire:model="tipTableId" class="select select-bordered w-full">
-                            <option value="">—</option>
-                            @foreach ($tables as $t)
-                                <option value="{{ $t->id }}">{{ $t->code }} - {{ $t->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs text-secondary">Order (opsional)</label>
-                        <select wire:model="tipOrderId" class="select select-bordered w-full">
-                            <option value="">—</option>
-                            @foreach ($activeOrders as $o)
-                                <option value="{{ $o->id }}">#{{ $o->order_number }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    <x-select label="Meja (opsional)" name="tipTableId" placeholder="Tanpa meja"
+                        wire:model="tipTableId"
+                        :options="$tables->mapWithKeys(fn ($t) => [$t->id => $t->code . ' - ' . $t->name])->all()" />
+
+                    <x-select label="Order (opsional)" name="tipOrderId" placeholder="Tanpa order"
+                        wire:model="tipOrderId"
+                        :options="$activeOrders->mapWithKeys(fn ($o) => [$o->id => '#' . $o->order_number])->all()" />
                 </div>
                 <div>
                     <label class="text-xs text-secondary">Catatan (opsional)</label>
@@ -67,24 +56,12 @@
 
             <form wire:submit="saveService" class="mt-4 space-y-3">
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-xs text-secondary">Jenis Layanan</label>
-                        <select wire:model="svcType" class="select select-bordered w-full">
-                            @foreach ($serviceTypes as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        @error('svcType') <span class="text-error text-xs">{{ $message }}</span> @enderror
-                    </div>
-                    <div>
-                        <label class="text-xs text-secondary">Meja (opsional)</label>
-                        <select wire:model="svcTableId" class="select select-bordered w-full">
-                            <option value="">—</option>
-                            @foreach ($tables as $t)
-                                <option value="{{ $t->id }}">{{ $t->code }} - {{ $t->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    <x-select label="Jenis Layanan" name="svcType" wire:model="svcType"
+                        :options="$serviceTypes" />
+
+                    <x-select label="Meja (opsional)" name="svcTableId" placeholder="Tanpa meja"
+                        wire:model="svcTableId"
+                        :options="$tables->mapWithKeys(fn ($t) => [$t->id => $t->code . ' - ' . $t->name])->all()" />
                 </div>
                 <div>
                     <label class="text-xs text-secondary">Deskripsi (opsional)</label>

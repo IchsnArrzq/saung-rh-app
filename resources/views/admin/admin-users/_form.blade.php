@@ -23,10 +23,8 @@
         @php($currentRole = old('role', $admin_user->roles->pluck('name')->first() ?? 'admin'))
         <fieldset class="fieldset md:col-span-2">
             <legend class="fieldset-legend">Role</legend>
-            <select name="role" class="select select-bordered w-full" required>
-                <option value="admin" @selected($currentRole === 'admin')>Admin</option>
-                <option value="cashier" @selected($currentRole === 'cashier')>Kasir</option>
-            </select>
+            <x-select :bare="true" label="Role" name="role" class="w-full" :required="true"
+                :options="['admin' => 'Admin', 'cashier' => 'Kasir']" :selected="$currentRole" />
             @error('role')
                 <p class="label text-error">{{ $message }}</p>
             @enderror

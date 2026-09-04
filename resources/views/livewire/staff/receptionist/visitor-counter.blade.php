@@ -54,15 +54,9 @@
                     <input type="number" min="1" max="50" wire:model="walkInPax" class="input input-bordered w-full">
                     @error('walkInPax') <span class="text-error text-xs">{{ $message }}</span> @enderror
                 </div>
-                <div>
-                    <label class="text-xs text-secondary">Meja (opsional)</label>
-                    <select wire:model="walkInTableId" class="select select-bordered w-full">
-                        <option value="">—</option>
-                        @foreach ($tables as $t)
-                            <option value="{{ $t->id }}">{{ $t->code }} - {{ $t->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-select label="Meja (opsional)" name="walkInTableId" placeholder="Tanpa meja"
+                    wire:model="walkInTableId"
+                    :options="$tables->mapWithKeys(fn ($t) => [$t->id => $t->code . ' - ' . $t->name])->all()" />
                 <x-button type="submit" variant="primary" :block="true" loading="addWalkIn">
                     Tambah Pengunjung
                 </x-button>
