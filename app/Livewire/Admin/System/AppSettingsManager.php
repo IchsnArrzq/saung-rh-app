@@ -4,28 +4,49 @@ namespace App\Livewire\Admin\System;
 
 use App\Domains\System\Repositories\AppSettingRepository;
 use App\Domains\System\Services\AppSettings;
+use Illuminate\Support\Arr;
 use Illuminate\View\View;
 use Livewire\Component;
 
 class AppSettingsManager extends Component
 {
     /**
-     * key => value map bound to the form inputs.
+     * Settings nested by their dotted key, e.g. `app.name` lives at
+     * $values['app']['name'].
      *
-     * @var array<string, string>
+     * Setting keys are namespaced with dots, and `wire:model="values.app.name"`
+     * resolves that path *nested* -- bound against a flat `['app.name' => ...]`
+     * map it reads nothing, which left every field on the form blank and made
+     * saving write the values back under the wrong shape. The form binds to the
+     * nested array; save() flattens it again on the way out.
+     *
+     * @var array<string, mixed>
      */
     public array $values = [];
 
     public function mount(AppSettingRepository $settings): void
     {
-        $this->values = collect($settings->allKeyValue())
-            ->map(fn ($value) => (string) $value)
-            ->all();
+        foreach ($settings->allKeyValue() as $key => $value) {
+            Arr::set($this->values, $key, (string) $value);
+        }
     }
 
-    public function save(AppSettings $settings): void
+    public function save(AppSettingRepository $repository, AppSettings $settings): void
     {
-        $settings->setMany($this->values);
+        $payload = [];
+
+        // Drive the write from the keys that exist in the database rather than
+        // from $values: it is a public property, so its shape is whatever the
+        // browser last sent, and iterating it would let the form create rows.
+        foreach (array_keys($repository->allKeyValue()) as $key) {
+            $value = Arr::get($this->values, $key);
+
+            if (is_scalar($value)) {
+                $payload[$key] = (string) $value;
+            }
+        }
+
+        $settings->setMany($payload);
 
         session()->flash('success', 'Pengaturan aplikasi disimpan.');
     }

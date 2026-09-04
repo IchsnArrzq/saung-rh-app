@@ -1,6 +1,6 @@
 <div class="space-y-4">
     @if (session('success'))
-        <div class="alert alert-success py-2 text-sm"><i class="ri-checkbox-circle-line"></i><span>{{ session('success') }}</span></div>
+        <x-alert type="success">{{ session('success') }}</x-alert>
     @endif
 
     @php
@@ -20,11 +20,14 @@
                     <h3 class="card-title text-base"><i class="ri-settings-3-line text-primary"></i> {{ $groupLabels[$group] ?? ucfirst($group) }}</h3>
                     <div class="grid gap-3 sm:grid-cols-2">
                         @foreach ($items as $item)
-                            <label class="form-control">
-                                <span class="label-text mb-1">{{ $keyLabels[$item->key] ?? $item->key }}</span>
-                                <input type="{{ $item->type === 'number' ? 'number' : 'text' }}"
-                                    wire:model="values.{{ $item->key }}" class="input input-bordered input-sm">
-                            </label>
+                            {{-- `step` defaults to 1 on a number input, which would have the
+                                 browser reject a decimal tax rate like 12.5 and silently refuse
+                                 to submit the whole form. --}}
+                            <x-input :label="$keyLabels[$item->key] ?? $item->key"
+                                name="values.{{ $item->key }}" size="sm"
+                                :type="$item->type === 'number' ? 'number' : 'text'"
+                                :step="$item->type === 'number' ? 'any' : null"
+                                wire:model="values.{{ $item->key }}" />
                         @endforeach
                     </div>
                 </div>
