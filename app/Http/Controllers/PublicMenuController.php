@@ -20,7 +20,11 @@ class PublicMenuController extends Controller
     {
         $context = RestaurantCart::syncContextFromRequest($request);
 
-        $menu->loadMissing(['category', 'status']);
+        // `status` is a plain column on `menus` (backed by MenuAvailability),
+        // not a relationship -- eager-loading it threw on every request. The
+        // media relations are what the page actually reads: `images` also backs
+        // `display_image_url` via primaryImage().
+        $menu->loadMissing(['category', 'images', 'videos']);
 
         $relatedMenus = Menu::query()
             ->with('category')
