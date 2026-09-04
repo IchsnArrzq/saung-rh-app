@@ -22,9 +22,10 @@ class SystemSettingsSeeder extends Seeder
         $settings = [
             ['key' => 'app.name', 'value' => 'CR Cafe & Resto', 'group' => 'profile'],
             ['key' => 'app.tagline', 'value' => 'Smart Cafe & Resto Experience', 'group' => 'profile'],
-            ['key' => 'contact.address', 'value' => '`Kp. Paku Haji, Tobat, Kec. Balaraja, Kabupaten Tangerang, Banten', 'group' => 'profile'],
+            ['key' => 'contact.address', 'value' => 'Kp. Paku Haji, Tobat, Kec. Balaraja, Kabupaten Tangerang, Banten', 'group' => 'profile'],
             ['key' => 'contact.phone', 'value' => '0812-3456-7890', 'group' => 'profile'],
             ['key' => 'contact.email', 'value' => 'halo@crcafe.test', 'group' => 'profile'],
+            ['key' => 'contact.hours', 'value' => '08.00 - 21.00', 'group' => 'profile'],
             ['key' => 'finance.currency', 'value' => 'IDR', 'group' => 'finance'],
             ['key' => 'finance.tax_percent', 'value' => '11', 'group' => 'finance', 'type' => 'number'],
             ['key' => 'finance.service_charge_percent', 'value' => '5', 'group' => 'finance', 'type' => 'number'],

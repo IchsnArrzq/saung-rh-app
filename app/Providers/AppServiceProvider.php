@@ -4,12 +4,14 @@ namespace App\Providers;
 
 use App\Domains\Order\Events\OrderPlaced;
 use App\Domains\Order\Events\TableBillsCleared;
+use App\Domains\System\Services\BusinessProfile;
 use App\Domains\Table\Listeners\ClaimTableOnOrderPlaced;
 use App\Domains\Table\Listeners\ReleaseTableOnBillsCleared;
 use App\Models\Payment;
 use App\Observers\PaymentObserver;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Payment::observe(PaymentObserver::class);
         $this->registerDomainListeners();
+        $this->shareBusinessProfile();
 
         if (app()->environment('production')) {
             URL::forceScheme('https');
@@ -43,5 +46,19 @@ class AppServiceProvider extends ServiceProvider
     {
         Event::listen(OrderPlaced::class, ClaimTableOnOrderPlaced::class);
         Event::listen(TableBillsCleared::class, ReleaseTableOnBillsCleared::class);
+    }
+
+    /**
+     * Layouts, navs and the printed receipt all render the business name, so
+     * `$business` is shared rather than passed: a layout has no controller of
+     * its own to pass it from, and Livewire views pick it up the same way.
+     *
+     * Sharing the object rather than its values keeps this lazy — the settings
+     * query only fires when a view calls an accessor, and AppSettings caches
+     * the result for every later call.
+     */
+    private function shareBusinessProfile(): void
+    {
+        View::share('business', $this->app->make(BusinessProfile::class));
     }
 }

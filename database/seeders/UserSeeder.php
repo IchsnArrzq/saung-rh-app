@@ -24,7 +24,7 @@ class UserSeeder extends Seeder
         $admin = User::query()->firstOrCreate([
             'email' => 'admin@example.com',
         ], [
-            'name' => 'Admin Saung RH',
+            'name' => 'Admin',
             'password' => Hash::make('password'),
         ]);
         $admin->syncRoles(['admin']);
@@ -32,17 +32,20 @@ class UserSeeder extends Seeder
         $cashier = User::query()->firstOrCreate([
             'email' => 'cashier@example.com',
         ], [
-            'name' => 'Cashier Saung RH',
+            'name' => 'Kasir',
             'password' => Hash::make('password'),
         ]);
         $cashier->syncRoles(['cashier']);
 
+        // Named for the role, not the restaurant: the business name lives in
+        // app settings now (see BusinessProfile), and baking a copy of it into
+        // demo accounts only creates a second place to rename.
         $staffRoles = [
-            'manager' => 'Manager Saung RH',
-            'receptionist' => 'Resepsionis Saung RH',
-            'waiter' => 'Waiter Saung RH',
-            'chef' => 'Chef Saung RH',
-            'ob' => 'Office Boy Saung RH',
+            'manager' => 'Manager',
+            'receptionist' => 'Resepsionis',
+            'waiter' => 'Waiter',
+            'chef' => 'Chef',
+            'ob' => 'Office Boy',
         ];
 
         foreach ($staffRoles as $role => $name) {

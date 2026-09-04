@@ -4,10 +4,10 @@
             class="drawer-button" icon="ri-menu-line text-xl" label="Buka menu samping" />
 
         <a href="{{ route('public.home') }}" class="flex items-center gap-2 font-bold text-base-content md:hidden">
-            <span class="inline-flex h-9 w-9 items-center justify-center rounded-box bg-primary text-sm text-primary-content">
-                SR
+            <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-box bg-primary text-sm text-primary-content">
+                {{ $business->initials() }}
             </span>
-            SaungRH
+            <span class="truncate">{{ $business->name() }}</span>
         </a>
 
         <div class="mr-auto hidden md:block">

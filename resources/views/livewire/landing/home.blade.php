@@ -23,7 +23,7 @@
             
             <div class="w-full lg:w-1/2 text-center lg:text-left">
                 <h1 class="text-4xl font-extrabold tracking-tight text-base-content sm:text-5xl lg:text-6xl">
-                    SAUNG<span class="text-primary">RH.</span><br>
+                    <span class="uppercase">{{ $business->name() }}</span><span class="text-primary">.</span><br>
                     <span class="text-3xl sm:text-4xl font-bold text-base-content/80 mt-3 block leading-tight">Cita Rasa Autentik <br>& Hangat.</span>
                 </h1>
                 <p class="mx-auto lg:mx-0 mt-6 max-w-xl text-lg text-secondary">

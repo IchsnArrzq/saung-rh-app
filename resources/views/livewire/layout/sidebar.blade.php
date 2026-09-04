@@ -40,10 +40,10 @@ new class extends Component {
                 class="flex items-center gap-3 rounded-box px-3 py-2 is-drawer-close:justify-center is-drawer-close:px-2">
                 <span
                     class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-box bg-primary text-lg font-bold text-primary-content">
-                    SR
+                    {{ $business->initials() }}
                 </span>
-                <span class="is-drawer-close:hidden">
-                    <span class="block text-lg font-bold text-base-content">SaungRH</span>
+                <span class="min-w-0 is-drawer-close:hidden">
+                    <span class="block truncate text-lg font-bold text-base-content">{{ $business->name() }}</span>
                     <span class="block text-xs font-medium text-secondary">Admin Portal</span>
                 </span>
             </a>

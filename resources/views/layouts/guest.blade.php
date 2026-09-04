@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Resto App') }}</title>
+    <title>{{ $business->name() }}</title>
 
     @include('layouts.partials.theme-script')
     @include('layouts.partials.pwa-head')
@@ -33,8 +33,8 @@
         <header class="relative z-30 border-b border-base-300/90 bg-base-100/95 px-4 py-4 backdrop-blur md:px-8">
             <div class="flex flex-wrap items-center gap-3">
                 <a href="{{ route('public.home') }}" class="mr-auto inline-flex items-center gap-3"
-                    aria-label="CR Cafe & Resto">
-                    <img src="{{ asset('assets/logo-cr-cafe-resto.png') }}" alt="CR Cafe & Resto logo"
+                    aria-label="{{ $business->name() }}">
+                    <img src="{{ asset('assets/logo-cr-cafe-resto.png') }}" alt="Logo {{ $business->name() }}"
                         class="h-11 w-auto">
                 </a>
 
@@ -86,10 +86,10 @@
             <div class="grid gap-8 md:grid-cols-4">
                 <div class="md:col-span-2">
                     <div class="inline-flex items-center gap-3">
-                        <img src="{{ asset('assets/logo-cr-mark.png') }}" alt="CR logo mark"
+                        <img src="{{ asset('assets/logo-cr-mark.png') }}" alt="Logo {{ $business->name() }}"
                             class="h-10 w-10 rounded-lg border border-base-300 bg-base-100 p-1 object-contain">
                         <p class="text-xl font-semibold text-base-content">
-                            CR Cafe & Resto
+                            {{ $business->name() }}
                         </p>
                     </div>
                     <p class="mt-3 max-w-xl text-sm text-secondary">
@@ -101,16 +101,19 @@
 
                 <div>
                     <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Visit</p>
-                    <p class="mt-3 text-sm text-base-content">Kp. Paku Haji, Tobat, Kec. Balaraja, Kabupaten Tangerang</p>
-                    <p class="text-sm text-base-content">Banten, Indonesia</p>
-                    <p class="mt-3 text-sm font-semibold text-base-content">08.00 - 21.00</p>
+                    @if ($business->address() !== '')
+                        <p class="mt-3 text-sm text-base-content">{{ $business->address() }}</p>
+                    @endif
+                    @if ($business->hours() !== '')
+                        <p class="mt-3 text-sm font-semibold text-base-content">{{ $business->hours() }}</p>
+                    @endif
                 </div>
 
                 <div>
                     <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Connect</p>
                     <div class="mt-3 flex flex-wrap gap-2">
                         <span
-                            class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">Instagram</span>
+                            class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">{{ $business->instagram() ?: 'Instagram' }}</span>
                         <span
                             class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">Facebook</span>
                         <span
@@ -120,7 +123,7 @@
             </div>
 
             <p class="mt-8 border-t border-base-300 pt-5 text-xs text-secondary">
-                &copy; {{ now()->year }} CR Cafe & Resto. All rights reserved.
+                &copy; {{ now()->year }} {{ $business->name() }}. All rights reserved.
             </p>
         </footer>
     </div>

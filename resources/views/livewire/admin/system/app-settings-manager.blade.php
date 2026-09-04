@@ -6,8 +6,9 @@
     @php
         $groupLabels = ['profile' => 'Profil Bisnis', 'finance' => 'Keuangan', 'social' => 'Media Sosial', 'general' => 'Umum'];
         $keyLabels = [
-            'app.name' => 'Nama Aplikasi', 'app.tagline' => 'Tagline',
+            'app.name' => 'Nama Bisnis', 'app.tagline' => 'Tagline',
             'contact.address' => 'Alamat', 'contact.phone' => 'Telepon', 'contact.email' => 'Email',
+            'contact.hours' => 'Jam Operasional',
             'finance.currency' => 'Mata Uang', 'finance.tax_percent' => 'Pajak (%)',
             'finance.service_charge_percent' => 'Service Charge (%)', 'social.instagram' => 'Instagram',
         ];

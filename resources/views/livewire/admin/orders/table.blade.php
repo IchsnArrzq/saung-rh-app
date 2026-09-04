@@ -119,8 +119,14 @@
 
                 <div id="order-receipt-print" class="rounded-xl border border-base-300 bg-base-100 p-4">
                     <div class="center">
-                        <h2 style="margin:0;font-size:18px;">SaungRH</h2>
-                        <p style="margin:4px 0 12px;">Struk Order</p>
+                        <h2 style="margin:0;font-size:18px;">{{ $business->name() }}</h2>
+                        @if ($business->address() !== '')
+                            <p style="margin:4px 0 0;font-size:11px;">{{ $business->address() }}</p>
+                        @endif
+                        @if ($business->phone() !== '')
+                            <p style="margin:2px 0 0;font-size:11px;">{{ $business->phone() }}</p>
+                        @endif
+                        <p style="margin:6px 0 12px;">Struk Order</p>
                     </div>
 
                     <div class="row"><span>No Order</span><strong>{{ $selectedOrder['order_number'] }}</strong></div>
