@@ -72,8 +72,8 @@ new #[Layout('layouts.auth')] class extends Component
 <div>
     <!-- Heading -->
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-stone-900">Atur ulang password</h1>
-        <p class="mt-1 text-sm text-stone-500">Buat password baru untuk akun Anda.</p>
+        <h1 class="text-2xl font-bold text-base-content">Atur ulang password</h1>
+        <p class="mt-1 text-sm text-base-content/60">Buat password baru untuk akun Anda.</p>
     </div>
 
     <form wire:submit="resetPassword" class="space-y-4">

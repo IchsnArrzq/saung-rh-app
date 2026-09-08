@@ -47,7 +47,7 @@
                         <x-button variant="warning" size="sm" :href="route('customers.edit', $customer)">
                             Edit
                         </x-button>
-                        <x-button variant="error" size="sm" class="text-white"
+                        <x-button variant="error" size="sm"
                             data-confirm="Hapus pelanggan ini?"
                             wire:click="delete('{{ $customer->id }}')"
                             loading="delete('{{ $customer->id }}')">

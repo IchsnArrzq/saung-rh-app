@@ -5,7 +5,7 @@
 
     <div class="flex items-center gap-3">
         <span class="text-sm font-semibold"><i class="ri-customer-service-2-line text-primary"></i> Permintaan Ditugaskan ke Saya</span>
-        <span class="badge badge-success badge-sm ml-auto">Selesai hari ini: {{ $doneToday }}</span>
+        <x-badge color="success" size="sm" class="ml-auto tabular-nums">Selesai hari ini: {{ $doneToday }}</x-badge>
     </div>
 
     <div class="grid gap-3 sm:grid-cols-2">
@@ -13,7 +13,7 @@
             <div class="card border border-warning/40 bg-warning/5 rounded-xl">
                 <div class="card-body gap-2 p-4">
                     <div class="flex items-center gap-2">
-                        <span class="badge badge-ghost badge-sm">{{ $req->category->label() }}</span>
+                        <x-badge color="ghost" size="sm">{{ $req->category->label() }}</x-badge>
                         <span class="text-xs text-secondary">Meja {{ $req->table_code ?? '-' }} · {{ $req->requested_by ?? 'Tamu' }}</span>
                     </div>
                     <p class="text-sm">{{ $req->description }}</p>

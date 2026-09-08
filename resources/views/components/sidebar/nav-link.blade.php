@@ -9,7 +9,7 @@
 
 <li>
     <a wire:navigate href="{{ $item['url'] }}" @if ($item['is_active']) aria-current="page" @endif
-        class="{{ $item['is_active'] ? 'text-primary font-semibold' : 'text-stone-700' }}">
+        class="{{ $item['is_active'] ? 'text-primary font-semibold' : '' }}">
         <i class="{{ $item['icon'] }}" aria-hidden="true"></i>
         <span class="grow">{{ $item['label'] }}</span>
         @if (!empty($item['badge_value']))

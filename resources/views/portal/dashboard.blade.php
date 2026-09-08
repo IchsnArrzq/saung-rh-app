@@ -10,25 +10,25 @@
         @foreach ($modules as $module)
             @php
                 $hasLink = isset($module['route']) && \Illuminate\Support\Facades\Route::has($module['route']);
-                $url = $hasLink ? route($module['route']) : null;
-                $isActive = ($module['phase'] ?? '') === 'Aktif';
             @endphp
-            <a
-                @if ($hasLink) href="{{ $url }}" wire:navigate @else href="#" onclick="return false;" @endif
-                class="card border border-base-300 bg-base-100 rounded-xl p-5 transition {{ $hasLink ? 'hover:border-primary hover:shadow-sm' : 'cursor-default opacity-90' }}"
-            >
-                <div class="flex items-start justify-between gap-3">
-                    <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/15 text-primary text-xl">
-                        <i class="{{ $module['icon'] }}"></i>
-                    </span>
-                    <span class="badge badge-sm {{ $isActive ? 'badge-success' : 'badge-ghost' }}">{{ $module['phase'] }}</span>
-                </div>
+
+            {{-- Modul tanpa rute dirender sebagai <div>, bukan tautan buntu: kalau tidak
+                 bisa dibuka, ia tidak boleh terlihat seperti tautan. --}}
+            <{{ $hasLink ? 'a' : 'div' }}
+                @if ($hasLink) href="{{ route($module['route']) }}" wire:navigate @endif
+                class="rounded-xl border border-base-300 bg-base-100 p-5 transition {{ $hasLink ? 'hover:border-primary hover:bg-base-200' : 'opacity-70' }}">
+
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-xl text-primary">
+                    <i class="{{ $module['icon'] }}" aria-hidden="true"></i>
+                </span>
+
                 <h3 class="mt-3 font-semibold">{{ $module['label'] }}</h3>
                 <p class="mt-1 text-sm text-secondary">{{ $module['desc'] }}</p>
+
                 @unless ($hasLink)
-                    <p class="mt-3 text-xs text-secondary/70">Segera hadir.</p>
+                    <p class="mt-3 text-xs text-base-content/60">Belum tersedia.</p>
                 @endunless
-            </a>
+            </{{ $hasLink ? 'a' : 'div' }}>
         @endforeach
     </section>
 </x-admin-layout>

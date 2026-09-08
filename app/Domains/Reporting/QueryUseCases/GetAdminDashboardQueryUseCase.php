@@ -112,20 +112,22 @@ class GetAdminDashboardQueryUseCase
      */
     private function orderStatusChips(): array
     {
-        $chips = [
-            [OrderStatus::Draft, 'badge-ghost'],
-            [OrderStatus::Confirmed, 'badge-primary'],
-            [OrderStatus::Preparing, 'badge-warning'],
-            [OrderStatus::Ready, 'badge-info'],
-            [OrderStatus::Served, 'badge-success'],
-            [OrderStatus::Cancelled, 'badge-error'],
+        // Warna diambil dari Enum, bukan ditulis ulang di sini: dulu Confirmed tampil
+        // `badge-primary` di dashboard tapi `info` di layar lain untuk status yang sama.
+        $statuses = [
+            OrderStatus::Draft,
+            OrderStatus::Confirmed,
+            OrderStatus::Preparing,
+            OrderStatus::Ready,
+            OrderStatus::Served,
+            OrderStatus::Cancelled,
         ];
 
-        return array_map(fn (array $chip): array => [
-            'label' => $chip[0]->label(),
-            'value' => $this->orders->countByStatus($chip[0]->value),
-            'class' => $chip[1],
-        ], $chips);
+        return array_map(fn (OrderStatus $status): array => [
+            'label' => $status->label(),
+            'value' => $this->orders->countByStatus($status->value),
+            'color' => $status->color(),
+        ], $statuses);
     }
 
     /**

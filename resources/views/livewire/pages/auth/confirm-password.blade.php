@@ -36,8 +36,8 @@ new #[Layout('layouts.auth')] class extends Component
 <div>
     <!-- Heading -->
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-stone-900">Konfirmasi password</h1>
-        <p class="mt-1 text-sm text-stone-500">
+        <h1 class="text-2xl font-bold text-base-content">Konfirmasi password</h1>
+        <p class="mt-1 text-sm text-base-content/60">
             Ini adalah area aman. Silakan konfirmasi password Anda sebelum melanjutkan.
         </p>
     </div>

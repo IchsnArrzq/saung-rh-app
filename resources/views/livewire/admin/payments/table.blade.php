@@ -49,7 +49,7 @@
                         @endcan
 
                         @can('delete', $payment)
-                            <x-button variant="error" size="sm" class="text-white"
+                            <x-button variant="error" size="sm"
                                 data-confirm="Hapus pembayaran ini?"
                                 wire:click="delete('{{ $payment->id }}')"
                                 loading="delete('{{ $payment->id }}')">

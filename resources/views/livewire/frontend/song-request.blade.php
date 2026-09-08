@@ -1,9 +1,9 @@
 <div wire:key="song-request">
     <div class="flex items-center justify-between mb-2">
-        <span class="text-sm font-semibold"><i class="ri-music-2-line text-secondary"></i> Request Lagu</span>
-        <span class="badge badge-sm {{ $activeCount >= $queueMax ? 'badge-error' : 'badge-ghost' }}">
+        <span class="text-sm font-semibold"><i class="ri-music-2-line text-secondary"></i> Permintaan lagu</span>
+        <x-badge size="sm" :color="$activeCount >= $queueMax ? 'error' : 'ghost'" class="tabular-nums">
             {{ $activeCount }}/{{ $queueMax }} antrean
-        </span>
+        </x-badge>
     </div>
 
     @if (! $sessionId)
@@ -14,15 +14,18 @@
         @endif
 
         <form wire:submit="submit" class="space-y-2">
-            <input type="text" wire:model="title" placeholder="Judul lagu" class="input input-bordered input-sm w-full">
-            @error('title') <span class="text-error text-xs">{{ $message }}</span> @enderror
+            <x-input bare size="sm" class="w-full" name="title" label="Judul lagu" placeholder="Judul lagu"
+                wire:model="title" />
+            @error('title') <span class="text-xs text-error">{{ $message }}</span> @enderror
             <div class="flex gap-2">
-                <input type="text" wire:model="artist" placeholder="Artis (opsional)" class="input input-bordered input-sm grow">
-                <input type="text" wire:model="requestedBy" placeholder="Nama (opsional)" class="input input-bordered input-sm grow">
+                <x-input bare size="sm" class="grow" name="artist" label="Artis" placeholder="Artis (opsional)"
+                    wire:model="artist" />
+                <x-input bare size="sm" class="grow" name="requestedBy" label="Nama pemesan"
+                    placeholder="Nama (opsional)" wire:model="requestedBy" />
             </div>
             <x-button type="submit" variant="secondary" size="sm" :block="true" icon="ri-add-line"
                 loading="submit" :disabled="$activeCount >= $queueMax">
-                Tambah ke Antrean
+                Tambah ke antrean
             </x-button>
         </form>
 

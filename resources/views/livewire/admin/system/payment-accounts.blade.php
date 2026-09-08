@@ -45,7 +45,9 @@
     </x-data-table>
 
     @if ($showForm)
+        {{-- check-ui-allow: dialog melayang di atas halaman, scrim gelap memang bukan permukaan tema. --}}
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" wire:key="pa-modal">
+            {{-- check-ui-allow: isi dialog. --}}
             <div class="card w-full max-w-md bg-base-100 shadow-xl">
                 <div class="card-body gap-3">
                     <h3 class="card-title text-base">{{ $editingId ? 'Edit' : 'Tambah' }} Akun Pembayaran</h3>

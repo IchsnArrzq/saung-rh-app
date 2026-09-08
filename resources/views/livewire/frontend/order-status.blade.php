@@ -1,20 +1,20 @@
 <div wire:key="order-status" wire:poll.10s>
     <div class="mb-2 flex items-center justify-between">
-        <span class="text-sm font-semibold"><i class="ri-timer-flash-line text-primary"></i> Status Antrian Pesanan</span>
+        <span class="text-sm font-semibold"><i class="ri-timer-flash-line text-primary"></i> Status pesanan</span>
         @if ($queueTotal > 0)
-            <span class="badge badge-ghost badge-sm">{{ $queueTotal }} order di dapur</span>
+            <x-badge color="ghost" size="sm" class="tabular-nums">{{ $queueTotal }} pesanan di dapur</x-badge>
         @endif
     </div>
 
     @if (! $tableId)
         <div class="alert alert-info text-sm">
             <i class="ri-qr-scan-2-line"></i>
-            <span>Scan QR meja Anda untuk memantau status pesanan.</span>
+            <span>Pindai QR di meja untuk memantau status pesanan.</span>
         </div>
     @elseif ($orders->isEmpty())
         <div class="rounded-xl border border-dashed border-base-300 bg-base-200/40 p-6 text-center">
             <i class="ri-restaurant-2-line mb-2 text-3xl text-base-content/30"></i>
-            <p class="text-sm text-base-content/60">Belum ada pesanan aktif. Yuk pesan menu favorit Anda!</p>
+            <p class="text-sm text-base-content/60">Belum ada pesanan aktif untuk meja ini.</p>
         </div>
     @else
         <div class="space-y-3">
@@ -22,10 +22,10 @@
                 @php
                     // Guest-facing wording, deliberately warmer than the Enum's
                     // operational labels ("Disiapkan"/"Siap") shown to staff.
-                    [$label, $badge, $icon] = match ($order->status) {
-                        \App\Domains\Order\Enums\OrderStatus::Preparing => ['Sedang dimasak', 'badge-info', 'ri-fire-line'],
-                        \App\Domains\Order\Enums\OrderStatus::Ready => ['Siap diantar', 'badge-success', 'ri-checkbox-circle-line'],
-                        default => ['Menunggu dapur', 'badge-warning', 'ri-time-line'],
+                    [$label, $tone, $icon] = match ($order->status) {
+                        \App\Domains\Order\Enums\OrderStatus::Preparing => ['Sedang dimasak', 'info', 'ri-fire-line'],
+                        \App\Domains\Order\Enums\OrderStatus::Ready => ['Siap diantar', 'success', 'ri-checkbox-circle-line'],
+                        default => ['Menunggu dapur', 'warning', 'ri-time-line'],
                     };
                     $itemCount = $order->items->sum('qty');
                 @endphp
@@ -37,9 +37,7 @@
                                 {{ $itemCount }} item &middot; {{ $order->ordered_at->format('H:i') }}
                             </p>
                         </div>
-                        <span class="badge {{ $badge }} badge-sm gap-1 font-semibold">
-                            <i class="{{ $icon }}"></i> {{ $label }}
-                        </span>
+                        <x-badge :color="$tone" size="sm" :icon="$icon" class="gap-1 font-semibold">{{ $label }}</x-badge>
                     </div>
 
                     <div class="mt-3 flex items-center justify-between gap-2">

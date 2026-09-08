@@ -1,26 +1,30 @@
 <div class="space-y-5">
     @include('admin.partials.flash')
 
-    <section class="rounded-2xl border border-stone-200 bg-white p-4 md:p-5">
-        <div class="flex flex-wrap items-center gap-2">
-            <div class="relative w-full max-w-xs">
-                <i class="ri-search-line pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
-                <input type="text" class="input input-bordered w-full pl-10" wire:model.live.debounce.300ms="search"
-                    placeholder="Cari catatan / bahan...">
-            </div>
+    <x-card>
+        <div class="flex flex-wrap items-center gap-3">
+            <x-search-input class="max-w-xs" placeholder="Cari catatan / bahan..."
+                wire:model.live.debounce.300ms="search" />
 
-            <x-select :bare="true" class="w-full max-w-64" label="Tipe" name="typeFilter" placeholder="Semua Tipe"
-                wire:model.live="typeFilter"
-                :options="['in' => 'Masuk', 'out' => 'Keluar', 'adjustment' => 'Koreksi']" />
+            {{-- check-ui-allow: select mengirim satu event `change` — debounce hanya menunda hasil filter. --}}
+            <x-select wire:model.live="typeFilter" :bare="true" class="w-full max-w-64" label="Tipe" name="typeFilter"
+                placeholder="Semua tipe" :options="['in' => 'Masuk', 'out' => 'Keluar', 'adjustment' => 'Koreksi']" />
 
-            <x-select :bare="true" class="w-full max-w-64" label="Bahan" name="ingredientFilter" placeholder="Semua Bahan"
-                wire:model.live="ingredientFilter" :options="$ingredients->pluck('name', 'id')->all()" />
+            {{-- check-ui-allow: sama seperti filter tipe — pilihan, bukan ketikan. --}}
+            <x-select wire:model.live="ingredientFilter" :bare="true" class="w-full max-w-64" label="Bahan"
+                name="ingredientFilter" placeholder="Semua bahan" :options="$ingredients->pluck('name', 'id')->all()" />
         </div>
-    </section>
+    </x-card>
 
-    <div class="overflow-x-auto rounded-2xl border border-stone-200 bg-white">
-        <table class="table">
-            <thead>
+    @if ($records->isEmpty())
+        <x-empty-state icon="ri-history-line"
+            :title="$search !== '' || $typeFilter !== '' || $ingredientFilter !== '' ? 'Tidak ada riwayat yang cocok' : 'Belum ada riwayat stok'"
+            :description="$search !== '' || $typeFilter !== '' || $ingredientFilter !== ''
+                ? 'Coba ubah kata kunci atau kosongkan filter tipe dan bahan.'
+                : 'Setiap pembelian, pemakaian, dan koreksi stok akan tercatat di sini.'" />
+    @else
+        <x-data-table>
+            <x-slot:head>
                 <tr>
                     <th>Tanggal</th>
                     <th>Bahan</th>
@@ -31,44 +35,39 @@
                     <th>Catatan</th>
                     <th>Oleh</th>
                 </tr>
-            </thead>
-            <tbody>
-                @forelse ($records as $record)
-                    <tr wire:key="movement-{{ $record->id }}">
-                        <td class="whitespace-nowrap text-sm text-stone-500">
-                            {{ $record->created_at->format('d M Y H:i') }}
-                        </td>
-                        <td class="font-medium">
-                            {{ $record->ingredient?->name ?? '-' }}
-                            <span class="text-xs text-stone-400">({{ $record->ingredient?->unit }})</span>
-                        </td>
-                        <td>
-                            @if ($record->type === 'in')
-                                <span class="badge badge-success badge-sm">Masuk</span>
-                            @elseif ($record->type === 'out')
-                                <span class="badge badge-error badge-sm">Keluar</span>
-                            @else
-                                <span class="badge badge-warning badge-sm">Koreksi</span>
-                            @endif
-                        </td>
-                        <td class="text-right">{{ number_format((float) $record->qty_before, 3, ',', '.') }}</td>
-                        <td class="text-right">
-                            <span class="{{ $record->qty_change >= 0 ? 'text-success' : 'text-error' }} font-semibold">
-                                {{ $record->qty_change >= 0 ? '+' : '' }}{{ number_format((float) $record->qty_change, 3, ',', '.') }}
-                            </span>
-                        </td>
-                        <td class="text-right">{{ number_format((float) $record->qty_after, 3, ',', '.') }}</td>
-                        <td class="max-w-xs truncate text-sm text-stone-500">{{ $record->notes ?: '-' }}</td>
-                        <td class="text-sm text-stone-500">{{ $record->user?->name ?? 'Sistem' }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="text-center text-stone-500">Belum ada riwayat stok.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+            </x-slot:head>
+
+            @foreach ($records as $record)
+                <tr wire:key="movement-{{ $record->id }}">
+                    <td class="whitespace-nowrap text-sm tabular-nums text-base-content/60">
+                        {{ $record->created_at->format('d M Y H:i') }}
+                    </td>
+                    <td class="font-medium">
+                        {{ $record->ingredient?->name ?? '-' }}
+                        <span class="text-xs text-base-content/60">({{ $record->ingredient?->unit }})</span>
+                    </td>
+                    <td>
+                        @if ($record->type === 'in')
+                            <x-badge color="success" size="sm">Masuk</x-badge>
+                        @elseif ($record->type === 'out')
+                            <x-badge color="error" size="sm">Keluar</x-badge>
+                        @else
+                            <x-badge color="warning" size="sm">Koreksi</x-badge>
+                        @endif
+                    </td>
+                    <td class="text-right tabular-nums">{{ number_format((float) $record->qty_before, 3, ',', '.') }}</td>
+                    <td class="text-right tabular-nums">
+                        <span class="font-semibold {{ $record->qty_change >= 0 ? 'text-success' : 'text-error' }}">
+                            {{ $record->qty_change >= 0 ? '+' : '' }}{{ number_format((float) $record->qty_change, 3, ',', '.') }}
+                        </span>
+                    </td>
+                    <td class="text-right tabular-nums">{{ number_format((float) $record->qty_after, 3, ',', '.') }}</td>
+                    <td class="max-w-xs truncate text-sm text-base-content/70">{{ $record->notes ?: '-' }}</td>
+                    <td class="text-sm text-base-content/70">{{ $record->user?->name ?? 'Sistem' }}</td>
+                </tr>
+            @endforeach
+        </x-data-table>
+    @endif
 
     <div>{{ $records->links() }}</div>
 </div>

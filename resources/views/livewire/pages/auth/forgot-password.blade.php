@@ -36,8 +36,8 @@ new #[Layout('layouts.auth')] class extends Component {
 <div>
     <!-- Heading -->
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-stone-900">Lupa password?</h1>
-        <p class="mt-1 text-sm text-stone-500">
+        <h1 class="text-2xl font-bold text-base-content">Lupa password?</h1>
+        <p class="mt-1 text-sm text-base-content/60">
             Tidak masalah. Masukkan email Anda dan kami akan mengirim tautan untuk mengatur ulang password.
         </p>
     </div>
@@ -62,7 +62,7 @@ new #[Layout('layouts.auth')] class extends Component {
         </x-primary-button>
     </form>
 
-    <p class="mt-6 text-center text-sm text-stone-600">
+    <p class="mt-6 text-center text-sm text-base-content/70">
         <a href="{{ route('login') }}" wire:navigate
             class="inline-flex items-center gap-1 font-semibold text-primary transition hover:underline">
             <i class="ri-arrow-left-line"></i> {{ __('Kembali ke halaman masuk') }}</a>

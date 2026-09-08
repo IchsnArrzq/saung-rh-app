@@ -13,9 +13,9 @@
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <span class="badge badge-ghost badge-sm">{{ $req->category->label() }}</span>
+                                    <x-badge color="ghost" size="sm">{{ $req->category->label() }}</x-badge>
                                     <span class="text-xs text-secondary">Meja {{ $req->table_code ?? '-' }} · {{ $req->requested_by ?? 'Tamu' }}</span>
-                                    @if ($req->is_paid)<span class="badge badge-secondary badge-sm">Berbayar</span>@endif
+                                    @if ($req->is_paid)<x-badge color="secondary" size="sm">Berbayar</x-badge>@endif
                                 </div>
                                 <p class="text-sm mt-1">{{ $req->description }}</p>
                             </div>

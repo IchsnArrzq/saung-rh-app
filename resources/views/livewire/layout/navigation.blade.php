@@ -7,7 +7,7 @@ use Livewire\Volt\Component;
 new class extends Component {
     public $initial;
     public $profileUrl;
-    public string $settingsUrl = '#';
+    public ?string $settingsUrl = null;
     public string $navigationMenuPreference = 'sidebar';
 
     /** @var array<int, array<string, mixed>> */
@@ -17,7 +17,8 @@ new class extends Component {
     {
         $this->initial = strtoupper(substr(auth()->user()->name ?? 'A', 0, 1));
         $this->profileUrl = route('profile');
-        $this->settingsUrl = Route::has('settings.navigation') ? route('settings.navigation') : '#';
+        // null, bukan '#': item menunya tidak dirender sama sekali kalau rutenya tidak ada.
+        $this->settingsUrl = Route::has('settings.navigation') ? route('settings.navigation') : null;
         $this->groups = $navigation->forCurrentUser();
 
         $preference = (string) (auth()->user()?->navigation_menu_preference ?? 'sidebar');
@@ -59,23 +60,18 @@ new class extends Component {
             </x-button>
         @endif
 
-        <div class="mr-auto flex items-center gap-3">
-            <div>
-                <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary"></p>
-            </div>
-        </div>
+        <div class="ml-auto flex items-center gap-2">
+            <a href="/"
+                class="hidden items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-base-content/70 transition hover:text-base-content md:inline-flex">
+                <i class="ri-external-link-line text-base" aria-hidden="true"></i>
+                <span>Situs publik</span>
+            </a>
 
-        <a href="/"
-            class="hidden items-center gap-2 rounded-xl bg-base-100 px-4 py-2 text-sm font-semibold text-stone-700 transition hover:text-secondary md:inline-flex">
-            <i class="ri-external-link-line text-base"></i>
-            <span>Public Site</span>
-        </a>
+            <x-button variant="ghost" shape="square" data-theme-toggle aria-pressed="false" label="Ganti mode gelap">
+                <i data-theme-toggle-icon class="ri-moon-line text-xl"></i>
+            </x-button>
 
-        <x-button variant="ghost" shape="square" data-theme-toggle aria-pressed="false" label="Ganti mode gelap">
-            <i data-theme-toggle-icon class="ri-moon-line text-xl"></i>
-        </x-button>
-
-        <details class="dropdown dropdown-end">
+            <details class="dropdown dropdown-end">
             <summary
                 class="flex cursor-pointer list-none items-center gap-2 rounded-xl bg-base-100 px-2 py-1 pr-3">
                 <span
@@ -83,34 +79,36 @@ new class extends Component {
                     {{ $initial }}
                 </span>
                 <span class="hidden text-left md:block">
-                    <span
-                        class="block text-sm font-semibold text-stone-800">{{ auth()->user()->name ?? 'Admin' }}</span>
-                    <span class="block text-xs text-stone-500">{{ auth()->user()->email ?? '-' }}</span>
+                    <span class="block text-sm font-semibold">{{ auth()->user()->name ?? 'Admin' }}</span>
+                    <span class="block text-xs text-base-content/60">{{ auth()->user()->email ?? '-' }}</span>
                 </span>
-                <i class="ri-arrow-down-s-line text-xl text-stone-500"></i>
+                <i class="ri-arrow-down-s-line text-xl text-base-content/60" aria-hidden="true"></i>
             </summary>
-            <ul class="menu dropdown-content mt-2 w-56 rounded-2xl bg-base-100 p-2 shadow-lg">
+            {{-- check-ui-allow: dropdown benar-benar melayang di atas halaman — satu dari sedikit tempat shadow sah. --}}
+            <ul class="menu dropdown-content mt-2 w-56 rounded-xl bg-base-100 p-2 shadow-lg">
                 <li>
-                    <a href="{{ $profileUrl }}" class="font-medium text-stone-700">
-                        <i class="ri-user-3-line"></i>
-                        Profile
+                    <a href="{{ $profileUrl }}" wire:navigate class="font-medium">
+                        <i class="ri-user-3-line" aria-hidden="true"></i>
+                        Profil
                     </a>
                 </li>
+                @if ($settingsUrl)
+                    <li>
+                        <a href="{{ $settingsUrl }}" wire:navigate class="font-medium">
+                            <i class="ri-settings-3-line" aria-hidden="true"></i>
+                            Pengaturan
+                        </a>
+                    </li>
+                @endif
                 <li>
-                    <a href="{{ $settingsUrl }}" class="font-medium text-stone-700">
-                        <i class="ri-settings-3-line"></i>
-                        Settings
-                    </a>
-                </li>
-                <li>
-                    <button type="button" wire:click="logout"
-                        class="flex w-full items-center gap-2 text-left font-medium text-stone-700">
-                        <i class="ri-logout-box-r-line"></i>
-                        Logout
+                    <button type="button" wire:click="logout" class="flex w-full items-center gap-2 text-left font-medium">
+                        <i class="ri-logout-box-r-line" aria-hidden="true"></i>
+                        Keluar
                     </button>
                 </li>
-            </ul>
-        </details>
+                </ul>
+            </details>
+        </div>
     </div>
 
     @if ($navigationMenuPreference === 'navbar' && count($groups) > 0)
@@ -122,11 +120,11 @@ new class extends Component {
                             @php($item = $group['items'][0])
                             <li>
                                 <a href="{{ $item['url'] }}"
-                                    class="{{ $item['is_active'] ? 'bg-primary text-primary-content' : 'text-stone-700 hover:bg-base-300' }}">
+                                    class="{{ $item['is_active'] ? 'bg-primary text-primary-content' : 'hover:bg-base-300' }}">
                                     <i class="{{ $item['icon'] }}"></i>
                                     {{ $item['label'] }}
                                     @if (!empty($item['badge_value']))
-                                        <span class="badge badge-sm badge-primary">{{ $item['badge_value'] }}</span>
+                                        <x-badge color="primary" size="sm" class="tabular-nums">{{ $item['badge_value'] }}</x-badge>
                                     @endif
                                 </a>
                             </li>
@@ -136,20 +134,20 @@ new class extends Component {
                         <li>
                             <details @if ($group['is_open']) open @endif>
                                 <summary
-                                    class="{{ $group['is_active'] ? 'bg-base-300 text-primary font-semibold' : 'text-stone-700 hover:bg-base-300' }}">
+                                    class="{{ $group['is_active'] ? 'bg-base-300 text-primary font-semibold' : 'hover:bg-base-300' }}">
                                     <i class="{{ $group['icon'] }}"></i>
                                     {{ $group['label'] }}
                                 </summary>
+                                {{-- check-ui-allow: submenu melayang di atas konten halaman. --}}
                                 <ul class="menu z-20 mt-1 w-72 rounded-xl bg-base-100 p-2 shadow-xl">
                                     @foreach ($group['items'] as $item)
                                         <li>
                                             <a href="{{ $item['url'] }}"
-                                                class="{{ $item['is_active'] ? 'text-primary font-semibold' : 'text-stone-700' }}">
+                                                class="{{ $item['is_active'] ? 'text-primary font-semibold' : '' }}">
                                                 <i class="{{ $item['icon'] }}"></i>
                                                 {{ $item['label'] }}
                                                 @if (!empty($item['badge_value']))
-                                                    <span
-                                                        class="badge badge-sm badge-primary">{{ $item['badge_value'] }}</span>
+                                                    <x-badge color="primary" size="sm" class="tabular-nums">{{ $item['badge_value'] }}</x-badge>
                                                 @endif
                                             </a>
                                         </li>

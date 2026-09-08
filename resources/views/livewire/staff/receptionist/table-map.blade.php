@@ -2,13 +2,18 @@
     {{-- Status summary --}}
     <div class="flex flex-wrap gap-2">
         @foreach ($summary as $key => $count)
-            <span class="badge badge-lg badge-ghost gap-1">
-                <span class="font-bold">{{ $count }}</span> {{ ucfirst(str_replace('_', ' ', $key)) }}
-            </span>
+            {{-- Label status datang dari Enum; kunci arraynya adalah nilai backing
+                 ("order_in") yang tidak boleh muncul di layar. --}}
+            @php
+                $summaryStatus = \App\Domains\Table\Enums\TableStatus::tryFrom((string) $key);
+            @endphp
+            <x-badge :color="$summaryStatus?->color() ?? 'ghost'" size="lg" class="gap-1">
+                <span class="font-bold tabular-nums">{{ $count }}</span> {{ $summaryStatus?->label() ?? $key }}
+            </x-badge>
         @endforeach
-        <span class="badge badge-lg badge-outline ml-auto gap-1">
-            <i class="ri-base-station-line text-success"></i> Live · auto-refresh 10s
-        </span>
+        <x-badge color="neutral" size="lg" outline class="ml-auto gap-1" icon="ri-base-station-line">
+            Diperbarui otomatis tiap 10 detik
+        </x-badge>
     </div>
 
     <div class="grid gap-4 lg:grid-cols-[1fr_300px]">
@@ -34,7 +39,7 @@
                     @endphp
                     <button
                         wire:click="selectTable('{{ $t->id }}')"
-                        class="absolute flex flex-col items-center justify-center rounded-xl border-2 text-center transition hover:scale-105 {{ $tileClass }} {{ $isSelected ? 'ring-2 ring-primary ring-offset-2' : '' }}"
+                        class="absolute flex flex-col items-center justify-center rounded-xl border-2 text-center transition {{ $tileClass }} {{ $isSelected ? 'ring-2 ring-primary ring-offset-2' : '' }}"
                         style="left: {{ $cell['x'] * 150 }}px; top: {{ $cell['y'] * 120 }}px; width: 130px; height: 100px;">
                         <span class="font-bold text-sm">{{ $t->code }}</span>
                         <span class="text-[11px] text-secondary leading-tight">{{ $t->name }}</span>
@@ -68,7 +73,8 @@
                         <dd>
                             @if ($selectedTable['order_number'])
                                 <span class="font-semibold">#{{ $selectedTable['order_number'] }}</span>
-                                <span class="badge badge-xs badge-info ml-1">{{ $selectedTable['order_status'] }}</span>
+                                <x-status-badge :status="$selectedTable['order_status']"
+                                    :enum="\App\Domains\Order\Enums\OrderStatus::class" size="xs" class="ml-1" />
                             @else — @endif
                         </dd>
                     </div>

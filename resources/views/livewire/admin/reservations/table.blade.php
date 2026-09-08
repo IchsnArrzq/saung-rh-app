@@ -81,7 +81,7 @@
                         @endcan
 
                         @can('delete', $reservation)
-                            <x-button variant="error" size="sm" class="text-white"
+                            <x-button variant="error" size="sm"
                                 data-confirm="Hapus reservasi ini?"
                                 wire:click="delete('{{ $reservation->id }}')"
                                 loading="delete('{{ $reservation->id }}')">

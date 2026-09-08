@@ -1,29 +1,32 @@
 <div>
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3">
-            <h2 class="text-xl font-semibold">QR Meja {{ $table->code }}</h2>
-            <x-button variant="ghost" size="sm" :href="route('tables.index')">Kembali</x-button>
+            <h2 class="text-xl font-semibold">QR meja {{ $table->code }}</h2>
+            <x-button variant="ghost" size="sm" :href="route('tables.index')" wire:navigate>Kembali</x-button>
         </div>
     </x-slot>
 
     <div class="grid gap-6 lg:grid-cols-[320px_1fr]">
-        <div class="rounded-2xl border border-stone-200 bg-white p-4">
-            <img src="{{ $qrImageUrl }}" alt="QR Meja {{ $table->code }}" class="mx-auto h-72 w-72 rounded-xl border border-stone-200 object-contain">
-            <p class="mt-3 text-center text-sm text-stone-600">Scan QR ini di meja untuk order offline.</p>
-        </div>
+        <x-card>
+            <img src="{{ $qrImageUrl }}" alt="QR meja {{ $table->code }}"
+                class="mx-auto h-72 w-72 rounded-xl object-contain">
+            <p class="mt-3 text-center text-sm text-base-content/70">
+                Tempel QR ini di meja {{ $table->code }}.
+            </p>
+        </x-card>
 
-        <div class="rounded-2xl border border-stone-200 bg-white p-5">
-            <h3 class="text-lg font-semibold text-stone-900">URL QR (Berisi Table ID)</h3>
-            <p class="mt-1 text-sm text-stone-600">URL ini membuka menu mode offline dengan konteks meja otomatis.</p>
-
-            <div class="mt-4 rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm break-all text-stone-800">
+        <x-card title="Tautan QR"
+            description="Tautan ini membuka daftar menu dengan meja {{ $table->code }} sudah terpilih.">
+            <div class="rounded-xl bg-base-200 p-3 text-sm break-all">
                 {{ $menuUrl }}
             </div>
 
-            <div class="mt-4 space-y-2 text-sm text-stone-600">
-                <p><span class="font-semibold text-stone-800">Alur Offline:</span> Scan QR -> pilih menu -> tambah ke cart -> kirim pesanan.</p>
-                <p><span class="font-semibold text-stone-800">Hasil:</span> Pesanan masuk ke modul admin `Orders` dengan catatan sumber `OFFLINE QR`.</p>
-            </div>
-        </div>
+            {{-- Penjelasan untuk staf yang memasang QR, bukan catatan implementasi:
+                 sumber pesanannya adalah OrderSource::DineInQr. --}}
+            <p class="mt-4 text-sm text-base-content/70">
+                Pelanggan memindai QR, memilih menu, lalu mengirim pesanan. Pesanannya masuk ke
+                halaman Pesanan dengan sumber “QR”.
+            </p>
+        </x-card>
     </div>
 </div>

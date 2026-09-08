@@ -13,16 +13,14 @@
         {{-- ================= Daftar percakapan (WhatsApp-style) ================= --}}
         <div class="mb-2 flex items-center justify-between">
             <span class="text-sm font-semibold"><i class="ri-chat-3-line text-primary"></i> Obrolan</span>
-            <span class="badge badge-primary badge-sm">Meja {{ $tableCode }}</span>
+            <x-badge color="primary" size="sm">Meja {{ $tableCode }}</x-badge>
         </div>
 
         {{-- Nama tampilan (opsional), berlaku untuk semua percakapan --}}
         <form wire:submit="saveName" class="mb-3 flex items-center gap-2">
-            <label class="input input-bordered input-xs flex grow items-center gap-2">
-                <i class="ri-user-smile-line text-base-content/50"></i>
-                <input type="text" wire:model="senderName" maxlength="24" placeholder="Nama tampilan (opsional)"
-                    class="grow bg-transparent">
-            </label>
+            <x-input bare size="xs" class="grow" name="senderName" label="Nama tampilan"
+                icon="ri-user-smile-line" maxlength="24" placeholder="Nama tampilan (opsional)"
+                wire:model="senderName" />
             <x-button type="submit" variant="ghost" size="xs" shape="square" icon="ri-check-line" label="Simpan nama" />
         </form>
 
@@ -120,8 +118,8 @@
         </div>
 
         <form wire:submit="send" class="mt-3 flex items-center gap-2">
-            <input type="text" wire:model="body" maxlength="280"
-                placeholder="Tulis pesan..." class="input input-bordered input-sm grow">
+            <x-input bare size="sm" class="grow" name="body" label="Pesan" maxlength="280"
+                placeholder="Tulis pesan..." wire:model="body" />
             <x-button type="submit" variant="primary" size="sm" shape="square" icon="ri-send-plane-2-line" label="Kirim pesan" />
         </form>
         @error('body') <span class="text-error text-xs mt-1">{{ $message }}</span> @enderror

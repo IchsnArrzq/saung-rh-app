@@ -47,7 +47,7 @@
                             :variant="is_null($activeCategory) ? 'primary' : 'ghost'"
                             class="rounded-full {{ is_null($activeCategory) ? '' : 'border border-base-300' }}">
                             Semua
-                            <span class="badge badge-sm">{{ $totalMenus }}</span>
+                            <x-badge size="sm" class="tabular-nums">{{ $totalMenus }}</x-badge>
                         </x-button>
 
                         @foreach ($categories as $category)
@@ -55,7 +55,7 @@
                                 :variant="$activeCategory === $category->id ? 'primary' : 'ghost'"
                                 class="rounded-full {{ $activeCategory === $category->id ? '' : 'border border-base-300' }}">
                                 {{ $category->name }}
-                                <span class="badge badge-sm">{{ $category->menus_count }}</span>
+                                <x-badge size="sm" class="tabular-nums">{{ $category->menus_count }}</x-badge>
                             </x-button>
                         @endforeach
                     </div>
@@ -67,11 +67,11 @@
                     {{-- Grid Menu --}}
                     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         @forelse ($menus as $menu)
-                            <article class="overflow-hidden rounded-2xl border border-base-200 bg-base-100 shadow-sm">
+                            <article class="overflow-hidden rounded-xl border border-base-300 bg-base-100">
                                 <div class="aspect-[4/3] bg-base-200">
                                     @if ($menu->image_url)
                                         <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}"
-                                            class="h-full w-full rounded-2xl object-cover p-1">
+                                            class="h-full w-full rounded-xl object-cover p-1">
                                     @else
                                         <div class="flex h-full items-center justify-center text-base-content/40">
                                             <i class="ri-image-line text-4xl"></i>
@@ -139,7 +139,7 @@
                                             </div>
                                         </div>
                                         <x-button variant="error" size="sm" shape="square" icon="ri-delete-bin-line"
-                                            label="Hapus {{ $item['name'] }}" class="text-white"
+                                            label="Hapus {{ $item['name'] }}" class="text-error-content"
                                             wire:click="removeItem({{ $index }})" />
                                     </div>
 

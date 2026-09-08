@@ -3,73 +3,32 @@
 @endphp
 
 <div class="grid gap-4 md:grid-cols-2">
-    <fieldset class="fieldset md:col-span-2">
-        <legend class="fieldset-legend">Nama Menu</legend>
-        <input type="text" name="name" class="input input-bordered w-full" value="{{ old('name', $menu->name) }}" required>
-        @error('name')
-            <p class="label text-error">{{ $message }}</p>
-        @enderror
-    </fieldset>
+    <x-input label="Nama menu" name="name" value="{{ old('name', $menu->name) }}" required autofocus
+        fieldClass="md:col-span-2" />
 
-    <fieldset class="fieldset">
-        <legend class="fieldset-legend">Kategori</legend>
-        <x-select :bare="true" label="Kategori" name="menu_category_id" class="w-full"
-            placeholder="Tanpa kategori" :selected="old('menu_category_id', $menu->menu_category_id)"
-            :options="$categories->pluck('name', 'id')->all()" />
-        @error('menu_category_id')
-            <p class="label text-error">{{ $message }}</p>
-        @enderror
-    </fieldset>
+    <x-select label="Kategori" name="menu_category_id" placeholder="Tanpa kategori"
+        :selected="old('menu_category_id', $menu->menu_category_id)"
+        :options="$categories->pluck('name', 'id')->all()" />
 
-    <fieldset class="fieldset">
-        <legend class="fieldset-legend">Harga</legend>
-        <input type="number" step="0.01" min="0" name="price" class="input input-bordered w-full" value="{{ old('price', $menu->price ?? 0) }}" required>
-        @error('price')
-            <p class="label text-error">{{ $message }}</p>
-        @enderror
-    </fieldset>
+    <x-input label="Harga" name="price" type="number" step="0.01" min="0" inputmode="numeric"
+        value="{{ old('price', $menu->price ?? 0) }}" required />
 
-    <fieldset class="fieldset">
-        <legend class="fieldset-legend">Slug</legend>
-        <input type="text" name="slug" class="input input-bordered w-full" value="{{ old('slug', $menu->slug) }}" placeholder="otomatis jika kosong">
-        @error('slug')
-            <p class="label text-error">{{ $message }}</p>
-        @enderror
-    </fieldset>
+    <x-input label="Slug" name="slug" value="{{ old('slug', $menu->slug) }}" placeholder="otomatis jika kosong"
+        hint="Dipakai di URL. Kosongkan untuk dibuatkan otomatis." />
 
-    <fieldset class="fieldset">
-        <legend class="fieldset-legend">SKU</legend>
-        <input type="text" name="sku" class="input input-bordered w-full" value="{{ old('sku', $menu->sku) }}">
-        @error('sku')
-            <p class="label text-error">{{ $message }}</p>
-        @enderror
-    </fieldset>
+    <x-input label="SKU" name="sku" value="{{ old('sku', $menu->sku) }}" />
 
-    <fieldset class="fieldset md:col-span-2">
-        <legend class="fieldset-legend">URL Gambar</legend>
-        <input type="text" name="image_url" class="input input-bordered w-full" value="{{ old('image_url', $menu->image_url) }}" placeholder="https://...">
-        @error('image_url')
-            <p class="label text-error">{{ $message }}</p>
-        @enderror
-    </fieldset>
+    <x-input label="URL gambar" name="image_url" type="url" value="{{ old('image_url', $menu->image_url) }}"
+        placeholder="https://..." fieldClass="md:col-span-2" />
 
-    <fieldset class="fieldset md:col-span-2">
-        <legend class="fieldset-legend">Deskripsi</legend>
-        <textarea name="description" class="textarea textarea-bordered w-full" rows="4">{{ old('description', $menu->description) }}</textarea>
-        @error('description')
-            <p class="label text-error">{{ $message }}</p>
-        @enderror
-    </fieldset>
+    <x-textarea label="Deskripsi" name="description" rows="4" fieldClass="md:col-span-2">{{ old('description', $menu->description) }}</x-textarea>
 
-    <fieldset class="fieldset md:col-span-2">
-        <legend class="fieldset-legend">Ketersediaan</legend>
-        <label class="label cursor-pointer justify-start gap-3 px-0">
-            <input type="hidden" name="is_available" value="0">
-            <input type="checkbox" name="is_available" value="1" class="checkbox checkbox-sm" @checked((bool) old('is_available', $menu->is_available ?? true))>
-            <span class="label-text">Menu tersedia</span>
-        </label>
+    <div class="md:col-span-2">
+        <input type="hidden" name="is_available" value="0">
+        <x-checkbox size="sm" name="is_available" value="1" label="Menu tersedia"
+            :checked="(bool) old('is_available', $menu->is_available ?? true)" />
         @error('is_available')
-            <p class="label text-error">{{ $message }}</p>
+            <p class="mt-1 text-xs text-error">{{ $message }}</p>
         @enderror
-    </fieldset>
+    </div>
 </div>

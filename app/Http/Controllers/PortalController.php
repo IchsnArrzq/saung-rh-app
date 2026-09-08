@@ -12,12 +12,12 @@ class PortalController extends Controller
             'title' => 'Dashboard Manager',
             'subtitle' => 'Panel kontrol produktivitas staf & analitik bisnis.',
             'modules' => [
-                ['label' => 'Employee Shifting', 'icon' => 'ri-calendar-schedule-line', 'desc' => 'Atur jadwal kerja staf.', 'phase' => 'Aktif', 'route' => 'manager.shifts'],
-                ['label' => 'Employee KPI (Top Staff)', 'icon' => 'ri-trophy-line', 'desc' => 'Performa & penilaian pegawai terbaik.', 'phase' => 'Aktif', 'route' => 'manager.kpi'],
-                ['label' => 'Customer Analytics (Top Customer)', 'icon' => 'ri-vip-crown-line', 'desc' => 'Pelanggan paling loyal.', 'phase' => 'Aktif', 'route' => 'manager.top-customers'],
-                ['label' => 'Special Order Approver', 'icon' => 'ri-checkbox-circle-line', 'desc' => 'Approve/Reject special request.', 'phase' => 'Aktif', 'route' => 'manager.special-requests'],
-                ['label' => 'F&B Top Analytics', 'icon' => 'ri-bar-chart-box-line', 'desc' => 'Menu & minuman terlaris.', 'phase' => 'Aktif', 'route' => 'receptionist.analytics'],
-                ['label' => 'Booking Management', 'icon' => 'ri-calendar-check-line', 'desc' => 'Kelola reservasi masuk.', 'phase' => 'Aktif', 'route' => 'receptionist.bookings'],
+                ['label' => 'Jadwal shift staf', 'icon' => 'ri-calendar-schedule-line', 'desc' => 'Atur jadwal kerja staf.', 'route' => 'manager.shifts'],
+                ['label' => 'KPI pegawai', 'icon' => 'ri-trophy-line', 'desc' => 'Ringkasan performa pegawai.', 'route' => 'manager.kpi'],
+                ['label' => 'Pelanggan paling sering datang', 'icon' => 'ri-vip-crown-line', 'desc' => 'Pelanggan dengan kunjungan terbanyak.', 'route' => 'manager.top-customers'],
+                ['label' => 'Persetujuan permintaan khusus', 'icon' => 'ri-checkbox-circle-line', 'desc' => 'Setujui atau tolak permintaan khusus.', 'route' => 'manager.special-requests'],
+                ['label' => 'Menu paling laku', 'icon' => 'ri-bar-chart-box-line', 'desc' => 'Menu & minuman terlaris.', 'route' => 'receptionist.analytics'],
+                ['label' => 'Kelola reservasi', 'icon' => 'ri-calendar-check-line', 'desc' => 'Kelola reservasi masuk.', 'route' => 'receptionist.bookings'],
             ],
         ]);
     }
@@ -28,12 +28,12 @@ class PortalController extends Controller
             'title' => 'Dashboard Resepsionis',
             'subtitle' => 'Monitoring operasional cafe secara real-time.',
             'modules' => [
-                ['label' => 'Live Kitchen Monitor', 'icon' => 'ri-radar-line', 'desc' => 'Pantau status makanan dari dapur.', 'phase' => 'Aktif', 'route' => 'kds.index'],
-                ['label' => 'Table Map', 'icon' => 'ri-layout-grid-line', 'desc' => 'Peta visual meja kosong/terisi.', 'phase' => 'Aktif', 'route' => 'receptionist.table-map'],
-                ['label' => 'Booking Management', 'icon' => 'ri-calendar-check-line', 'desc' => 'Kelola reservasi masuk.', 'phase' => 'Aktif', 'route' => 'receptionist.bookings'],
-                ['label' => 'Visitor Counter', 'icon' => 'ri-group-line', 'desc' => 'Jumlah pengunjung harian.', 'phase' => 'Aktif', 'route' => 'receptionist.visitors'],
-                ['label' => 'F&B Top Analytics', 'icon' => 'ri-bar-chart-box-line', 'desc' => 'Menu & minuman terlaris.', 'phase' => 'Aktif', 'route' => 'receptionist.analytics'],
-                ['label' => 'Antrean Lagu', 'icon' => 'ri-music-2-line', 'desc' => 'Kelola request lagu/karaoke meja.', 'phase' => 'Aktif', 'route' => 'songs.queue'],
+                ['label' => 'Monitor dapur', 'icon' => 'ri-radar-line', 'desc' => 'Pantau status makanan dari dapur.', 'route' => 'kds.index'],
+                ['label' => 'Peta meja', 'icon' => 'ri-layout-grid-line', 'desc' => 'Peta visual meja kosong/terisi.', 'route' => 'receptionist.table-map'],
+                ['label' => 'Kelola reservasi', 'icon' => 'ri-calendar-check-line', 'desc' => 'Kelola reservasi masuk.', 'route' => 'receptionist.bookings'],
+                ['label' => 'Hitung pengunjung', 'icon' => 'ri-group-line', 'desc' => 'Jumlah pengunjung harian.', 'route' => 'receptionist.visitors'],
+                ['label' => 'Menu paling laku', 'icon' => 'ri-bar-chart-box-line', 'desc' => 'Menu & minuman terlaris.', 'route' => 'receptionist.analytics'],
+                ['label' => 'Antrean lagu', 'icon' => 'ri-music-2-line', 'desc' => 'Kelola permintaan lagu dari meja.', 'route' => 'songs.queue'],
             ],
         ]);
     }
@@ -41,13 +41,13 @@ class PortalController extends Controller
     public function waiter(): View
     {
         return view('portal.dashboard', [
-            'title' => 'Portal Waiter',
+            'title' => 'Portal pelayan',
             'subtitle' => 'Bantuan mobilitas pelayanan di area resto.',
             'modules' => [
-                ['label' => 'Table Status Updater', 'icon' => 'ri-refresh-line', 'desc' => 'Ubah status meja secara instan.', 'phase' => 'Aktif', 'route' => 'waiter.tables'],
-                ['label' => 'Tips & Service Log', 'icon' => 'ri-hand-coin-line', 'desc' => 'Catat layanan & tip.', 'phase' => 'Aktif', 'route' => 'waiter.tips'],
-                ['label' => 'Antrean Lagu', 'icon' => 'ri-music-2-line', 'desc' => 'Kelola request lagu/karaoke meja.', 'phase' => 'Aktif', 'route' => 'songs.queue'],
-                ['label' => 'Special Request Handler', 'icon' => 'ri-customer-service-2-line', 'desc' => 'Terima instruksi pelanggan.', 'phase' => 'Aktif', 'route' => 'waiter.special-requests'],
+                ['label' => 'Ubah status meja', 'icon' => 'ri-refresh-line', 'desc' => 'Ubah status meja secara instan.', 'route' => 'waiter.tables'],
+                ['label' => 'Catatan tip & layanan', 'icon' => 'ri-hand-coin-line', 'desc' => 'Catat layanan & tip.', 'route' => 'waiter.tips'],
+                ['label' => 'Antrean lagu', 'icon' => 'ri-music-2-line', 'desc' => 'Kelola permintaan lagu dari meja.', 'route' => 'songs.queue'],
+                ['label' => 'Permintaan khusus pelanggan', 'icon' => 'ri-customer-service-2-line', 'desc' => 'Terima instruksi pelanggan.', 'route' => 'waiter.special-requests'],
             ],
         ]);
     }
@@ -55,10 +55,10 @@ class PortalController extends Controller
     public function ob(): View
     {
         return view('portal.dashboard', [
-            'title' => 'Portal Office Boy',
+            'title' => 'Portal kebersihan',
             'subtitle' => 'Dukungan kebersihan & kesiapan meja.',
             'modules' => [
-                ['label' => 'Pembersihan Meja', 'icon' => 'ri-brush-line', 'desc' => 'Set status meja menjadi siap/kosong.', 'phase' => 'Aktif', 'route' => 'ob.tables'],
+                ['label' => 'Pembersihan meja', 'icon' => 'ri-brush-line', 'desc' => 'Ubah status meja jadi siap dipakai.', 'route' => 'ob.tables'],
             ],
         ]);
     }
@@ -78,7 +78,7 @@ class PortalController extends Controller
     public function waiterTips(): View
     {
         return view('staff.page', [
-            'title' => 'Tips & Service Log',
+            'title' => 'Catatan tip & layanan',
             'subtitle' => 'Catat tip yang diterima dan aktivitas pelayanan.',
             'icon' => 'ri-hand-coin-line',
             'livewireComponent' => 'staff.waiter.tips-service-log',
@@ -88,7 +88,7 @@ class PortalController extends Controller
     public function receptionistTableMap(): View
     {
         return view('staff.page', [
-            'title' => 'Table Map',
+            'title' => 'Peta meja',
             'subtitle' => 'Peta visual status meja secara real-time.',
             'icon' => 'ri-layout-grid-line',
             'livewireComponent' => 'staff.receptionist.table-map',
@@ -98,7 +98,7 @@ class PortalController extends Controller
     public function receptionistVisitors(): View
     {
         return view('staff.page', [
-            'title' => 'Visitor Counter',
+            'title' => 'Hitung pengunjung',
             'subtitle' => 'Hitung pengunjung harian dari QR & walk-in.',
             'icon' => 'ri-group-line',
             'livewireComponent' => 'staff.receptionist.visitor-counter',
@@ -108,7 +108,7 @@ class PortalController extends Controller
     public function receptionistBookings(): View
     {
         return view('staff.page', [
-            'title' => 'Booking Management',
+            'title' => 'Kelola reservasi',
             'subtitle' => 'Kelola dan ubah status reservasi yang masuk.',
             'icon' => 'ri-calendar-check-line',
             'livewireComponent' => 'staff.receptionist.booking-board',
@@ -118,7 +118,7 @@ class PortalController extends Controller
     public function receptionistAnalytics(): View
     {
         return view('staff.page', [
-            'title' => 'F&B Top Analytics',
+            'title' => 'Menu paling laku',
             'subtitle' => 'Menu & minuman terlaris beserta pendapatan.',
             'icon' => 'ri-bar-chart-box-line',
             'livewireComponent' => 'staff.receptionist.top-analytics',
@@ -128,7 +128,7 @@ class PortalController extends Controller
     public function managerShifts(): View
     {
         return view('staff.page', [
-            'title' => 'Employee Shifting',
+            'title' => 'Jadwal shift staf',
             'subtitle' => 'Atur jadwal kerja staf per minggu.',
             'icon' => 'ri-calendar-schedule-line',
             'livewireComponent' => 'staff.manager.shift-scheduler',
@@ -158,7 +158,7 @@ class PortalController extends Controller
     public function managerSpecialRequests(): View
     {
         return view('staff.page', [
-            'title' => 'Special Order Approver',
+            'title' => 'Persetujuan permintaan khusus',
             'subtitle' => 'Setujui atau tolak permintaan khusus, lalu cocokkan ke waiter.',
             'icon' => 'ri-checkbox-circle-line',
             'livewireComponent' => 'staff.manager.special-request-approver',
@@ -168,7 +168,7 @@ class PortalController extends Controller
     public function waiterSpecialRequests(): View
     {
         return view('staff.page', [
-            'title' => 'Special Request Handler',
+            'title' => 'Permintaan khusus pelanggan',
             'subtitle' => 'Permintaan khusus yang ditugaskan kepada Anda.',
             'icon' => 'ri-customer-service-2-line',
             'livewireComponent' => 'staff.waiter.special-request-handler',

@@ -37,11 +37,12 @@
                 <i class="ri-arrow-down-s-line hidden text-xl text-secondary md:block"></i>
             </summary>
 
+            {{-- check-ui-allow: dropdown melayang di atas konten. --}}
             <ul class="menu dropdown-content z-40 mt-2 w-60 rounded-box bg-base-100 p-2 shadow-lg">
                 <li>
-                    <a href="{{ route('profile') }}" class="font-medium text-base-content">
-                        <i class="ri-user-3-line"></i>
-                        Profile
+                    <a href="{{ route('profile') }}" wire:navigate class="font-medium text-base-content">
+                        <i class="ri-user-3-line" aria-hidden="true"></i>
+                        Profil
                     </a>
                 </li>
                 <li>

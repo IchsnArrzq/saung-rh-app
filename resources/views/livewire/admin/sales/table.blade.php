@@ -7,7 +7,9 @@
                 <x-search-input class="max-w-xs" wire:model.live.debounce.300ms="search"
                     placeholder="Cari kode / pelanggan / catatan..." label="Cari penjualan" />
 
-                <x-select :bare="true" class="w-full max-w-64" label="Filter status" wire:model.live="statusFilter"
+                {{-- check-ui-allow: select mengirim satu event `change`, bukan ketikan. --}}
+            {{-- check-ui-allow: select mengirim satu event `change`, bukan ketikan. --}}
+        <x-select :bare="true" class="w-full max-w-64" label="Filter status" wire:model.live="statusFilter"
                     placeholder="Semua Status" :options="['draft' => 'Draft', 'posted' => 'Diposting']" />
             </div>
 
@@ -47,7 +49,7 @@
                         </x-button>
 
                         @unless ($sale->status === 'posted')
-                            <x-button variant="error" size="sm" class="text-white"
+                            <x-button variant="error" size="sm"
                                 data-confirm="Hapus draft penjualan ini?"
                                 wire:click="delete('{{ $sale->id }}')"
                                 loading="delete('{{ $sale->id }}')">

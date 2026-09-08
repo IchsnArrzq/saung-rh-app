@@ -68,7 +68,7 @@
                                 label="Tambah jumlah {{ $item['name'] }}"
                                 wire:click="incrementQty('{{ $item['menu_id'] }}')" />
                             <x-button variant="error" size="sm" shape="square" icon="ri-delete-bin-line"
-                                class="ml-auto text-white" label="Hapus {{ $item['name'] }}"
+                                class="ml-auto text-error-content" label="Hapus {{ $item['name'] }}"
                                 wire:click="removeItem('{{ $item['menu_id'] }}')"
                                 data-confirm="Hapus item ini dari cart?" />
                         </div>

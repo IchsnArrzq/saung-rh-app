@@ -49,17 +49,18 @@
                                 <img src="{{ $image->url }}" alt="{{ $image->original_name }}"
                                     class="aspect-square w-full object-cover">
                                 @if ($image->is_primary)
-                                    <x-badge color="success" size="xs" class="absolute left-1 top-1 text-white">
+                                    <x-badge color="success" size="xs" class="absolute left-1 top-1">
                                         Utama
                                     </x-badge>
                                 @endif
-                                <div class="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-black/50 p-1">
+                                {{-- check-ui-allow: scrim gelap di atas foto supaya tombolnya terbaca. --}}
+                            <div class="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-black/50 p-1">
                                     @unless ($image->is_primary)
-                                        <x-button variant="success" size="xs" icon="ri-star-line" class="text-white"
+                                        <x-button variant="success" size="xs" icon="ri-star-line"
                                             label="Jadikan gambar utama" wire:click="setPrimary('{{ $image->id }}')" />
                                     @endunless
                                     <x-button variant="error" size="xs" icon="ri-delete-bin-line"
-                                        class="ml-auto text-white" label="Hapus gambar"
+                                        class="ml-auto" label="Hapus gambar"
                                         data-confirm="Hapus gambar ini?"
                                         wire:click="deleteMedia('{{ $image->id }}')" />
                                 </div>
@@ -79,7 +80,7 @@
                                 class="group relative overflow-hidden rounded-xl border border-dashed border-accent">
                                 <img src="{{ $file->temporaryUrl() }}" class="aspect-square w-full object-cover">
                                 <x-button variant="error" size="xs" icon="ri-close-line"
-                                    class="absolute right-1 top-1 text-white" label="Batalkan gambar ini"
+                                    class="absolute right-1 top-1" label="Batalkan gambar ini"
                                     wire:click="removeNewImage({{ $index }})" />
                             </div>
                         @endforeach
@@ -104,7 +105,7 @@
                             <video src="{{ $video->url }}" controls class="w-full rounded-lg"></video>
                             <div class="mt-2 flex items-center justify-between gap-2">
                                 <span class="truncate text-xs text-base-content/60">{{ $video->original_name }}</span>
-                                <x-button variant="error" size="xs" icon="ri-delete-bin-line" class="text-white"
+                                <x-button variant="error" size="xs" icon="ri-delete-bin-line"
                                     label="Hapus video" data-confirm="Hapus video ini?"
                                     wire:click="deleteMedia('{{ $video->id }}')" />
                             </div>

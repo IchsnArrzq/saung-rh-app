@@ -49,7 +49,7 @@
                         <x-button variant="warning" size="sm" :href="route('suppliers.edit', $supplier)">
                             Edit
                         </x-button>
-                        <x-button variant="error" size="sm" class="text-white"
+                        <x-button variant="error" size="sm"
                             data-confirm="Hapus supplier ini?"
                             wire:click="delete('{{ $supplier->id }}')"
                             loading="delete('{{ $supplier->id }}')">

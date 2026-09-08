@@ -34,7 +34,7 @@
                         <x-button variant="warning" size="sm" :href="route('menu-categories.edit', $category)">
                             Edit
                         </x-button>
-                        <x-button variant="error" size="sm" class="text-white"
+                        <x-button variant="error" size="sm"
                             data-confirm="Hapus kategori ini?"
                             wire:click="delete('{{ $category->id }}')"
                             loading="delete('{{ $category->id }}')">

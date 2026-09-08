@@ -37,8 +37,8 @@ new #[Layout('layouts.auth')] class extends Component {
 <div>
     <!-- Heading -->
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-stone-900">Verifikasi email Anda</h1>
-        <p class="mt-1 text-sm text-stone-500">
+        <h1 class="text-2xl font-bold text-base-content">Verifikasi email Anda</h1>
+        <p class="mt-1 text-sm text-base-content/60">
             Terima kasih telah mendaftar! Sebelum mulai, silakan verifikasi email Anda melalui tautan yang baru saja kami kirim. Jika belum menerimanya, kami dengan senang hati mengirim ulang.
         </p>
     </div>
@@ -58,7 +58,7 @@ new #[Layout('layouts.auth')] class extends Component {
         </x-primary-button>
 
         <button wire:click="logout" type="submit"
-            class="rounded-md text-sm font-medium text-stone-600 underline transition hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100">
+            class="rounded-md text-sm font-medium text-base-content/70 underline transition hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100">
             {{ __('Keluar') }}
         </button>
     </div>

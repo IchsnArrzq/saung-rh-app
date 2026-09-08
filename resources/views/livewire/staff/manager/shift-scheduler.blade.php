@@ -13,14 +13,18 @@
                         placeholder="Pilih staf..." wire:model="userId"
                         :options="$staff->pluck('name', 'id')->all()" />
                     @error('userId') <span class="text-error text-xs">{{ $message }}</span> @enderror
-                    <input type="date" wire:model="shiftDate" class="input input-bordered input-sm w-full">
+                    <x-input bare size="sm" class="w-full" type="date" name="shiftDate" label="Tanggal shift"
+                        wire:model="shiftDate" />
                     <div class="flex gap-2">
-                        <input type="time" wire:model="startsAt" class="input input-bordered input-sm grow">
-                        <input type="time" wire:model="endsAt" class="input input-bordered input-sm grow">
+                        <x-input bare size="sm" class="grow" type="time" name="startsAt" label="Jam mulai"
+                            wire:model="startsAt" />
+                        <x-input bare size="sm" class="grow" type="time" name="endsAt" label="Jam selesai"
+                            wire:model="endsAt" />
                     </div>
-                    @error('endsAt') <span class="text-error text-xs">{{ $message }}</span> @enderror
-                    <input type="text" wire:model="position" placeholder="Posisi (opsional)" class="input input-bordered input-sm w-full">
-                    <x-button type="submit" variant="primary" size="sm" :block="true" icon="ri-add-line">Tambah Shift</x-button>
+                    @error('endsAt') <span class="text-xs text-error">{{ $message }}</span> @enderror
+                    <x-input bare size="sm" class="w-full" name="position" label="Posisi"
+                        placeholder="Posisi (opsional)" wire:model="position" />
+                    <x-button type="submit" variant="primary" size="sm" :block="true" icon="ri-add-line">Tambah shift</x-button>
                 </form>
             </div>
         </div>

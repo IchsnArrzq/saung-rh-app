@@ -38,14 +38,14 @@
 
         <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             @foreach ($summary['metrics'] as $metric)
-                <article class="card bg-base-100 shadow-sm">
+                <article class="card border border-base-300 bg-base-100">
                     <div class="card-body gap-4 p-5">
                         <div class="flex items-start justify-between gap-3">
                             <div>
-                                <p class="text-xs font-bold uppercase tracking-[0.16em] text-secondary">
+                                <p class="text-sm font-medium text-base-content/70">
                                     {{ $metric['label'] }}
                                 </p>
-                                <p class="mt-2 text-2xl font-bold text-base-content">{{ $metric['value'] }}</p>
+                                <p class="mt-2 text-2xl font-bold tabular-nums">{{ $metric['value'] }}</p>
                             </div>
                             <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl {{ $toneClasses[$metric['tone']] ?? $toneClasses['primary'] }}">
                                 <i class="{{ $metric['icon'] }} text-xl"></i>
@@ -58,7 +58,7 @@
         </section>
 
         <section class="grid gap-5 xl:grid-cols-12">
-            <article class="card bg-base-100 shadow-sm xl:col-span-8">
+            <article class="card border border-base-300 bg-base-100 xl:col-span-8">
                 <div class="card-body p-5">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <div>
@@ -80,14 +80,14 @@
                 </div>
             </article>
 
-            <article class="card bg-base-100 shadow-sm xl:col-span-4">
+            <article class="card border border-base-300 bg-base-100 xl:col-span-4">
                 <div class="card-body p-5">
-                    <h3 class="text-lg font-semibold text-base-content">Status Order</h3>
+                    <h3 class="text-lg font-semibold text-base-content">Status pesanan</h3>
                     <div class="mt-2 space-y-3">
                         @foreach ($summary['order_statuses'] as $status)
                             <div class="flex items-center justify-between gap-3">
                                 <span class="text-sm font-medium text-base-content">{{ $status['label'] }}</span>
-                                <span class="badge {{ $status['class'] }} badge-lg">{{ $status['value'] }}</span>
+                                <x-badge :color="$status['color']" size="lg" class="tabular-nums">{{ $status['value'] }}</x-badge>
                             </div>
                         @endforeach
                     </div>
@@ -96,17 +96,17 @@
         </section>
 
         <section class="grid gap-5 lg:grid-cols-3">
-            <article class="card bg-base-100 shadow-sm">
+            <article class="card border border-base-300 bg-base-100">
                 <div class="card-body p-5">
-                    <h3 class="text-lg font-semibold text-base-content">Status Meja</h3>
+                    <h3 class="text-lg font-semibold text-base-content">Status meja</h3>
                     <div class="mt-2 grid grid-cols-2 gap-3">
                         @foreach ($summary['table_statuses'] as $tableStatus)
                             <div class="rounded-xl bg-base-200 p-4">
                                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg {{ $toneClasses[$tableStatus['tone']] ?? $toneClasses['primary'] }}">
                                     <i class="{{ $tableStatus['icon'] }}"></i>
                                 </span>
-                                <p class="mt-3 text-2xl font-bold text-base-content">{{ $tableStatus['value'] }}</p>
-                                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
+                                <p class="mt-3 text-2xl font-bold tabular-nums">{{ $tableStatus['value'] }}</p>
+                                <p class="text-sm text-base-content/70">
                                     {{ $tableStatus['label'] }}
                                 </p>
                             </div>
@@ -115,17 +115,17 @@
                 </div>
             </article>
 
-            <article class="card bg-base-100 shadow-sm">
+            <article class="card border border-base-300 bg-base-100">
                 <div class="card-body p-5">
-                    <h3 class="text-lg font-semibold text-base-content">Menu Terlaris Hari Ini</h3>
+                    <h3 class="text-lg font-semibold text-base-content">Menu terlaris hari ini</h3>
                     <div class="mt-2 space-y-3">
                         @forelse ($summary['top_menus'] as $menu)
                             <div class="flex items-center justify-between gap-3">
                                 <div class="min-w-0">
                                     <p class="truncate font-semibold text-base-content">{{ $menu->menu_name_snapshot }}</p>
-                                    <p class="text-xs text-secondary">Rp {{ number_format((float) $menu->total_revenue, 0, ',', '.') }}</p>
+                                    <p class="text-xs tabular-nums text-secondary">Rp {{ number_format((float) $menu->total_revenue, 0, ',', '.') }}</p>
                                 </div>
-                                <span class="badge badge-primary badge-outline">{{ (int) $menu->total_qty }} terjual</span>
+                                <x-badge color="primary" outline class="tabular-nums">{{ (int) $menu->total_qty }} terjual</x-badge>
                             </div>
                         @empty
                             <p class="rounded-xl bg-base-200 p-4 text-sm text-secondary">Belum ada penjualan menu hari ini.</p>
@@ -134,7 +134,7 @@
                 </div>
             </article>
 
-            <article class="card bg-base-100 shadow-sm">
+            <article class="card border border-base-300 bg-base-100">
                 <div class="card-body p-5">
                     <h3 class="text-lg font-semibold text-base-content">Metode Pembayaran</h3>
                     <div class="mt-2 space-y-3">
@@ -155,7 +155,7 @@
         </section>
 
         <section class="grid gap-5 xl:grid-cols-2">
-            <article class="card bg-base-100 shadow-sm">
+            <article class="card border border-base-300 bg-base-100">
                 <div class="card-body p-5">
                     <div class="flex items-center justify-between gap-3">
                         <h3 class="text-lg font-semibold text-base-content">Order Terbaru</h3>
@@ -193,7 +193,7 @@
                 </div>
             </article>
 
-            <article class="card bg-base-100 shadow-sm">
+            <article class="card border border-base-300 bg-base-100">
                 <div class="card-body p-5">
                     <div class="flex items-center justify-between gap-3">
                         <h3 class="text-lg font-semibold text-base-content">Reservasi Hari Ini</h3>
@@ -212,7 +212,8 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="font-semibold text-base-content">{{ $reservation->pax }} pax</p>
-                                    <span class="badge badge-outline capitalize">{{ $reservation->status }}</span>
+                                    <x-status-badge :status="$reservation->status"
+                                        :enum="\App\Domains\Reservation\Enums\ReservationStatus::class" outline />
                                 </div>
                             </div>
                         @empty

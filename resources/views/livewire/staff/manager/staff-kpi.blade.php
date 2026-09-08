@@ -24,7 +24,7 @@
                     <div class="grow min-w-0">
                         <div class="flex items-center justify-between">
                             <span class="font-semibold truncate">{{ $s['name'] }}</span>
-                            <span class="badge badge-primary badge-sm">skor {{ $s['score'] }}</span>
+                            <x-badge color="primary" size="sm" class="tabular-nums">Skor {{ $s['score'] }}</x-badge>
                         </div>
                         <progress class="progress progress-primary h-1.5 mt-1" value="{{ $s['score'] }}" max="{{ $maxScore }}"></progress>
                         <div class="text-xs text-secondary mt-1 flex flex-wrap gap-x-3">

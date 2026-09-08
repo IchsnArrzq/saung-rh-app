@@ -70,8 +70,8 @@ new #[Layout('layouts.auth')] class extends Component
 <div>
     <!-- Heading -->
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-stone-900">Buat akun baru</h1>
-        <p class="mt-1 text-sm text-stone-500">Daftar untuk mulai memesan dengan lebih mudah.</p>
+        <h1 class="text-2xl font-bold text-base-content">Buat akun baru</h1>
+        <p class="mt-1 text-sm text-base-content/60">Daftar untuk mulai memesan dengan lebih mudah.</p>
     </div>
 
     <form wire:submit="register" class="space-y-4">
@@ -113,7 +113,7 @@ new #[Layout('layouts.auth')] class extends Component
         </x-primary-button>
     </form>
 
-    <p class="mt-6 text-center text-sm text-stone-600">
+    <p class="mt-6 text-center text-sm text-base-content/70">
         {{ __('Sudah punya akun?') }}
         <a href="{{ route('login') }}" wire:navigate
             class="font-semibold text-primary transition hover:underline">{{ __('Masuk di sini') }}</a>

@@ -1,6 +1,7 @@
 {{-- PWA (Fase 7) --}}
 <link rel="manifest" href="{{ route('pwa.manifest') }}">
-<meta name="theme-color" content="#065f46">
+{{-- check-ui-allow: <meta> butuh nilai literal; ini warna primary tema (#ff4f55). --}}
+<meta name="theme-color" content="#ff4f55">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">

@@ -7,6 +7,7 @@
         <x-search-input class="w-full sm:max-w-xs" wire:model.live.debounce.300ms="search"
             placeholder="Cari nama / telp / meja..." label="Cari reservasi" />
 
+        {{-- check-ui-allow: select mengirim satu event `change`, bukan ketikan. --}}
         <x-select :bare="true" label="Filter status" wire:model.live="statusFilter" :options="[
             'all' => 'Semua status',
             'pending' => 'Menunggu Konfirmasi',
@@ -98,7 +99,9 @@
 
     {{-- Deposit (DP) form --}}
     @if ($depositFor)
+        {{-- check-ui-allow: dialog melayang di atas halaman, scrim gelap memang bukan permukaan tema. --}}
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" wire:key="deposit-modal">
+            {{-- check-ui-allow: isi dialog. --}}
             <div class="card w-full max-w-sm bg-base-100 shadow-xl">
                 <div class="card-body gap-4">
                     <h3 class="card-title text-base"><i class="ri-hand-coin-line text-warning"></i> Catat Uang Muka (DP)</h3>

@@ -47,7 +47,7 @@
                             data-confirm="Yakin ingin menghapus customer ini?" class="inline">
                             @csrf
                             @method('DELETE')
-                            <x-button type="submit" variant="error" size="sm" class="text-white">Hapus</x-button>
+                            <x-button type="submit" variant="error" size="sm">Hapus</x-button>
                         </form>
                     </div>
                 </td>

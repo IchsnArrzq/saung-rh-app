@@ -2,8 +2,8 @@
     @include('admin.partials.flash')
 
     <form wire:submit="save" class="space-y-5">
-        <section class="rounded-2xl border border-base-300 bg-base-100 p-5">
-            <h3 class="text-lg font-semibold">Pilih Tampilan Navigasi</h3>
+        <section class="rounded-xl border border-base-300 bg-base-100 p-5">
+            <h3 class="text-lg font-semibold">Pilih tampilan navigasi</h3>
             <p class="mt-1 text-sm text-base-content/70">
                 Pilih salah satu mode navigasi. Jika memilih <strong>Sidebar</strong>, menu di navbar akan disembunyikan.
                 Jika memilih <strong>Navbar</strong>, menu di sidebar akan disembunyikan.
@@ -16,6 +16,7 @@
                         'border-primary bg-primary/10' => $navigation_menu_preference === 'sidebar',
                         'border-base-300 bg-base-100 hover:border-primary/40' => $navigation_menu_preference !== 'sidebar',
                     ])>
+                    {{-- check-ui-allow: radio mengirim satu event `change`, tidak ada ketikan untuk di-debounce. --}}
                     <input type="radio" class="radio radio-primary mt-0.5" wire:model.live="navigation_menu_preference"
                         value="sidebar">
                     <span>
@@ -30,6 +31,7 @@
                         'border-primary bg-primary/10' => $navigation_menu_preference === 'navbar',
                         'border-base-300 bg-base-100 hover:border-primary/40' => $navigation_menu_preference !== 'navbar',
                     ])>
+                    {{-- check-ui-allow: radio mengirim satu event `change`, tidak ada ketikan untuk di-debounce. --}}
                     <input type="radio" class="radio radio-primary mt-0.5" wire:model.live="navigation_menu_preference"
                         value="navbar">
                     <span>

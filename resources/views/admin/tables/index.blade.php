@@ -11,7 +11,7 @@
     @endphp
 
     <div class="space-y-4">
-        <div class="tabs tabs-boxed rounded-2xl border border-base-300 bg-base-100 p-1">
+        <div class="tabs tabs-boxed rounded-xl border border-base-300 bg-base-100 p-1">
             <a role="tab" wire:navigate href="{{ route('tables.index', ['tab' => 'board']) }}"
                 class="tab tab-lg rounded-xl {{ $activeTab === 'board' ? 'tab-active bg-primary text-primary-content' : 'text-secondary' }}">
                 Drag & Drop Status

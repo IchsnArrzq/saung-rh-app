@@ -27,8 +27,9 @@ class PwaManifestController extends Controller
                 'scope' => '/',
                 'display' => 'standalone',
                 'orientation' => 'portrait-primary',
-                'background_color' => '#ffffff',
-                'theme_color' => '#065f46',
+                // Warna tema aplikasi (resources/css/app.css): latar halaman dan primary.
+                'background_color' => '#eef2f7',
+                'theme_color' => '#ff4f55',
                 'icons' => [
                     [
                         'src' => '/assets/logo-cr-mark.png',

@@ -1,52 +1,46 @@
 <div>
     @if (session('success'))
-        <div class="mb-6 flex items-center justify-between rounded-xl border border-success/20 bg-success/10 px-4 py-3 text-sm font-medium text-success shadow-sm">
-            <div class="flex items-center gap-2">
-                <i class="ri-checkbox-circle-fill text-lg"></i>
-                {{ session('success') }}
+        <x-alert type="success" class="mb-6">
+            <div class="flex w-full flex-wrap items-center justify-between gap-3">
+                <span>{{ session('success') }}</span>
+                <a href="{{ route('public.cart.index') }}" wire:navigate class="font-semibold underline">Lihat keranjang</a>
             </div>
-            <a href="{{ route('public.cart.index') }}" class="font-bold underline hover:opacity-80">Lihat Keranjang</a>
-        </div>
+        </x-alert>
     @endif
 
     @error('cart')
-        <div class="mb-6 flex items-center gap-2 rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error shadow-sm">
-            <i class="ri-error-warning-fill text-lg"></i>
-            {{ $message }}
-        </div>
+        <x-alert type="error" class="mb-6">{{ $message }}</x-alert>
     @enderror
 
-    <section class="relative overflow-hidden rounded-[2rem] bg-primary/5 border border-primary/20 mb-16">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTQwIDBoLTQwdjQwaDQwVjB6IiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTAgMGg0MHY0MGgtNDB6IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZjRmNTUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-60"></div>
-        
-        <div class="relative z-10 mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-12 flex flex-col lg:flex-row items-center gap-12">
-            
-            <div class="w-full lg:w-1/2 text-center lg:text-left">
-                <h1 class="text-4xl font-extrabold tracking-tight text-base-content sm:text-5xl lg:text-6xl">
+    <section class="relative mb-16 overflow-hidden rounded-xl border border-primary/20 bg-primary/5">
+        <div class="relative z-10 mx-auto flex max-w-7xl flex-col items-center gap-12 px-6 py-16 sm:py-24 lg:flex-row lg:px-12">
+
+            <div class="w-full text-center lg:w-1/2 lg:text-left">
+                <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
                     <span class="uppercase">{{ $business->name() }}</span><span class="text-primary">.</span><br>
-                    <span class="text-3xl sm:text-4xl font-bold text-base-content/80 mt-3 block leading-tight">Cita Rasa Autentik <br>& Hangat.</span>
+                    <span class="mt-3 block text-3xl font-bold leading-tight text-base-content/80 sm:text-4xl">
+                        {{ $business->tagline() }}
+                    </span>
                 </h1>
-                <p class="mx-auto lg:mx-0 mt-6 max-w-xl text-lg text-secondary">
-                    Nikmati hidangan khas kami dengan kemudahan memesan langsung dari meja menggunakan QR code, atau lakukan reservasi tempat sebelum kedatangan.
+                <p class="mx-auto mt-6 max-w-xl text-lg text-secondary lg:mx-0">
+                    Pesan langsung dari meja dengan memindai QR, atau pesan meja lebih dulu sebelum datang.
                 </p>
-                <div class="mt-10 flex flex-wrap justify-center lg:justify-start gap-4">
-                    <x-button variant="primary" class="rounded-lg border-none px-8 py-3 font-semibold shadow-lg shadow-primary/30 transition-all"
-                        :href="route('public.menu')">
-                        Lihat Menu
+                <div class="mt-10 flex flex-wrap justify-center gap-4 lg:justify-start">
+                    <x-button variant="primary" size="lg" :href="route('public.menu')" wire:navigate>
+                        Lihat menu
                     </x-button>
                     @if (Route::has('customer.bookings.create'))
-                        <x-button variant="outline" class="rounded-lg border-base-300 bg-base-100 px-8 py-3 font-semibold shadow-sm transition-all"
-                            :href="route('customer.bookings.create')">
-                            Pesan Meja
+                        <x-button variant="outline" size="lg" :href="route('customer.bookings.create')" wire:navigate>
+                            Pesan meja
                         </x-button>
                     @endif
                 </div>
             </div>
 
             <div class="w-full lg:w-1/2">
-                <div class="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-base-100 aspect-[4/3] bg-base-200 group">
-                    <img src="{{ asset('assets/media/stock/900x600/12.jpg') }}" alt="Suasana Restoran" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent"></div>
+                <div class="relative aspect-[4/3] overflow-hidden rounded-xl bg-base-200">
+                    <img src="{{ asset('assets/media/stock/900x600/12.jpg') }}" alt="Suasana restoran"
+                        class="h-full w-full object-cover">
                 </div>
             </div>
         </div>
@@ -54,92 +48,75 @@
 
     <section class="mb-20">
         <div class="grid gap-6 md:grid-cols-3">
-            <div class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm transition-shadow hover:shadow-md">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                        <i class="ri-qr-code-line text-2xl text-primary"></i>
+            @foreach ([
+                ['ri-qr-code-line', 'Pesan lewat QR di meja', 'Pindai QR di meja untuk melihat daftar menu dan mengirim pesanan tanpa menunggu.'],
+                ['ri-calendar-check-line', 'Reservasi tempat', 'Pesan meja lebih dulu supaya tempatnya sudah siap saat kamu datang.'],
+                ['ri-shopping-bag-3-line', 'Pesan lebih awal', 'Pilih menu dari rumah, lalu nikmati begitu tiba di lokasi.'],
+            ] as [$icon, $title, $description])
+                <x-card padding="lg">
+                    <div class="mb-4 flex items-center gap-4">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                            <i class="{{ $icon }} text-2xl text-primary" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold">{{ $title }}</h3>
                     </div>
-                    <h3 class="text-sm font-bold text-base-content uppercase tracking-wide">Scan & Dine-In</h3>
-                </div>
-                <p class="text-sm text-secondary leading-relaxed">Pindai QR code di meja untuk melihat daftar menu dan memesan makanan langsung tanpa harus menunggu lama.</p>
-            </div>
-            
-            <div class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm transition-shadow hover:shadow-md">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                        <i class="ri-calendar-check-line text-2xl text-primary"></i>
-                    </div>
-                    <h3 class="text-sm font-bold text-base-content uppercase tracking-wide">Reservasi Tempat</h3>
-                </div>
-                <p class="text-sm text-secondary leading-relaxed">Pesan meja pilihan Anda secara online untuk memastikan tempat tersedia saat Anda datang bersama keluarga.</p>
-            </div>
-            
-            <div class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm transition-shadow hover:shadow-md">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                        <i class="ri-shopping-bag-3-line text-2xl text-primary"></i>
-                    </div>
-                    <h3 class="text-sm font-bold text-base-content uppercase tracking-wide">Pre-Order Menu</h3>
-                </div>
-                <p class="text-sm text-secondary leading-relaxed">Pilih dan pesan menu favorit dari rumah, lalu ambil atau nikmati langsung saat Anda tiba di lokasi.</p>
-            </div>
+                    <p class="text-sm leading-relaxed text-secondary">{{ $description }}</p>
+                </x-card>
+            @endforeach
         </div>
     </section>
 
     <section class="mb-20">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-extrabold text-base-content">Rekomendasi Menu</h2>
-            <p class="mt-3 text-secondary">Beberapa hidangan pilihan khas dari dapur kami.</p>
+        {{-- Bukan "Rekomendasi": daftar ini hanya menu tersedia pertama menurut abjad
+             (MenuRepository::featured), tidak ada kolom unggulan atau data terlaris. --}}
+        <div class="mb-12 text-center">
+            <h2 class="text-3xl font-extrabold">Menu kami</h2>
+            <p class="mt-3 text-secondary">Beberapa menu yang tersedia hari ini.</p>
         </div>
 
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             @forelse ($menus as $menu)
-                <article class="flex flex-col overflow-hidden rounded-2xl border border-base-300 bg-base-100 p-2 transition-all hover:shadow-xl hover:border-success/50 hover:-translate-y-1">
-                    <div class="aspect-[4/3] w-full overflow-hidden rounded-xl bg-base-200 relative group">
+                <article class="flex flex-col overflow-hidden rounded-xl border border-base-300 bg-base-100 p-2">
+                    <div class="aspect-[4/3] w-full overflow-hidden rounded-xl bg-base-200">
                         <img src="{{ $menu->image_url ?: asset('assets/media/stock/900x600/12.jpg') }}"
-                            alt="{{ $menu->name }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110">
-                        
-                        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
-                            <x-button variant="neutral" :outline="true" size="sm" class="rounded-lg bg-base-100 font-medium shadow-lg"
-                                icon="ri-eye-line" :href="route('public.menu.show', $menu)">
-                                Detail
-                            </x-button>
-                            <x-button variant="success" size="sm" class="rounded-lg font-medium shadow-lg"
-                                icon="ri-shopping-cart-2-line" wire:click="quickAdd('{{ $menu->id }}')"
-                                loading="quickAdd('{{ $menu->id }}')">
-                                Tambah
-                            </x-button>
-                        </div>
+                            alt="{{ $menu->name }}" class="h-full w-full object-cover">
                     </div>
 
-                    <div class="p-4 flex flex-col flex-1">
-                        <div class="flex items-center gap-1 mb-1">
-                            <i class="ri-restaurant-fill text-success text-xs"></i>
-                            <p class="text-xs font-bold uppercase tracking-wider text-success">{{ $menu->category->name ?? 'Menu' }}</p>
-                        </div>
-                        <h3 class="text-lg font-bold text-base-content leading-tight">{{ $menu->name }}</h3>
-                        <p class="mt-2 text-sm text-secondary line-clamp-2 flex-1">{{ $menu->description ?: 'Hidangan khas yang disiapkan segar dengan bahan pilihan.' }}</p>
-                        
-                        <div class="mt-5 pt-4 border-t border-base-200 flex items-center justify-between gap-2">
-                            <p class="text-lg font-extrabold text-success">Rp {{ number_format((float) $menu->price, 0, ',', '.') }}</p>
-                            <x-button variant="ghost" size="xs" :href="route('public.menu.show', $menu)">Detail</x-button>
-                            <button type="button" wire:click="quickAdd('{{ $menu->id }}')" class="flex h-8 w-8 items-center justify-center rounded-full bg-success/10 text-success hover:bg-success hover:text-success-content transition-colors lg:hidden">
-                                <i class="ri-add-line text-lg font-bold"></i>
-                            </button>
+                    <div class="flex flex-1 flex-col p-4">
+                        <p class="text-xs text-base-content/60">{{ $menu->category->name ?? 'Menu' }}</p>
+                        <h3 class="mt-1 text-lg font-semibold leading-tight">{{ $menu->name }}</h3>
+
+                        @if ($menu->description)
+                            <p class="mt-2 line-clamp-2 text-sm text-secondary">{{ $menu->description }}</p>
+                        @endif
+
+                        {{-- mt-auto: harga dan aksi tetap sejajar walau judulnya dua baris. --}}
+                        <div class="mt-auto flex items-center justify-between gap-2 border-t border-base-300 pt-4">
+                            <p class="text-lg font-bold tabular-nums">Rp {{ number_format((float) $menu->price, 0, ',', '.') }}</p>
+                            <div class="flex items-center gap-1">
+                                <x-button variant="ghost" size="sm" :href="route('public.menu.show', $menu)" wire:navigate>
+                                    Detail
+                                </x-button>
+                                <x-button variant="accent" size="sm" shape="square" icon="ri-add-line"
+                                    label="Tambah {{ $menu->name }} ke keranjang"
+                                    wire:click="quickAdd('{{ $menu->id }}')" loading="quickAdd" />
+                            </div>
                         </div>
                     </div>
                 </article>
             @empty
-                <p class="col-span-full rounded-2xl border-2 border-dashed border-base-300 bg-base-200 p-10 text-center text-secondary">
-                    Menu belum tersedia saat ini.
-                </p>
+                <div class="col-span-full">
+                    <x-empty-state icon="ri-restaurant-line" title="Menu belum tersedia"
+                        description="Menu yang ditandai tersedia akan muncul di sini." />
+                </div>
             @endforelse
         </div>
-        
+
         <div class="mt-12 text-center">
-            <a href="{{ route('public.menu') }}" class="inline-flex items-center justify-center rounded-lg border-2 border-base-300 px-8 py-3 font-semibold text-base-content transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary">
-                Lihat Semua Menu <i class="ri-arrow-right-line ml-2"></i>
-            </a>
+            <x-button variant="outline" size="lg" iconRight="ri-arrow-right-line" :href="route('public.menu')"
+                wire:navigate>
+                Lihat semua menu
+            </x-button>
         </div>
     </section>
 </div>

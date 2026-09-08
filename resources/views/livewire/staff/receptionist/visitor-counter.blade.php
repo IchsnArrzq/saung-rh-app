@@ -49,11 +49,8 @@
             @endif
 
             <form wire:submit="addWalkIn" class="mt-4 space-y-3">
-                <div>
-                    <label class="text-xs text-secondary">Jumlah Orang</label>
-                    <input type="number" min="1" max="50" wire:model="walkInPax" class="input input-bordered w-full">
-                    @error('walkInPax') <span class="text-error text-xs">{{ $message }}</span> @enderror
-                </div>
+                <x-input label="Jumlah orang" name="walkInPax" type="number" min="1" max="50" inputmode="numeric"
+                    wire:model="walkInPax" required />
                 <x-select label="Meja (opsional)" name="walkInTableId" placeholder="Tanpa meja"
                     wire:model="walkInTableId"
                     :options="$tables->mapWithKeys(fn ($t) => [$t->id => $t->code . ' - ' . $t->name])->all()" />

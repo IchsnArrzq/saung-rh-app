@@ -1,49 +1,27 @@
 @php
     $customer = $customer ?? new \App\Models\User();
+    $isEdit = isset($customer->id);
 @endphp
 
 <div class="grid gap-4 md:grid-cols-2">
-    <fieldset class="fieldset">
-        <legend class="fieldset-legend">Nama Lengkap</legend>
-        <input type="text" name="name" class="input input-bordered w-full" value="{{ old('name', $customer->name) }}" required autofocus autocomplete="name">
-        @error('name')
-            <p class="label text-error">{{ $message }}</p>
-        @enderror
-    </fieldset>
+    <x-input label="Nama lengkap" name="name" value="{{ old('name', $customer->name) }}" required autofocus
+        autocomplete="name" />
 
-    <fieldset class="fieldset">
-        <legend class="fieldset-legend">Email</legend>
-        <input type="email" name="email" class="input input-bordered w-full" value="{{ old('email', $customer->email) }}" required autocomplete="username">
-        @error('email')
-            <p class="label text-error">{{ $message }}</p>
-        @enderror
-    </fieldset>
+    <x-input label="Email" name="email" type="email" value="{{ old('email', $customer->email) }}" required
+        autocomplete="username" />
 
-    <fieldset class="fieldset">
-        <legend class="fieldset-legend">{{ isset($customer->id) ? 'Password (Kosongkan jika tidak diubah)' : 'Password' }}</legend>
-        <input type="password" name="password" class="input input-bordered w-full" autocomplete="new-password" {{ isset($customer->id) ? '' : 'required' }}>
-        @error('password')
-            <p class="label text-error">{{ $message }}</p>
-        @enderror
-    </fieldset>
+    <x-input label="{{ $isEdit ? 'Password (kosongkan jika tidak diubah)' : 'Password' }}" name="password"
+        type="password" autocomplete="new-password" :required="! $isEdit" />
 
-    <fieldset class="fieldset">
-        <legend class="fieldset-legend">Konfirmasi Password</legend>
-        <input type="password" name="password_confirmation" class="input input-bordered w-full" autocomplete="new-password" {{ isset($customer->id) ? '' : 'required' }}>
-        @error('password_confirmation')
-            <p class="label text-error">{{ $message }}</p>
-        @enderror
-    </fieldset>
+    <x-input label="Konfirmasi password" name="password_confirmation" type="password" autocomplete="new-password"
+        :required="! $isEdit" />
 
-    <fieldset class="fieldset md:col-span-2">
-        <legend class="fieldset-legend">Status Akun</legend>
-        <label class="label cursor-pointer justify-start gap-3 px-0">
-            <input type="hidden" name="is_active" value="0">
-            <input type="checkbox" name="is_active" value="1" class="checkbox checkbox-sm" @checked((bool) old('is_active', $customer->is_active ?? true))>
-            <span class="label-text">Akun Aktif</span>
-        </label>
+    <div class="md:col-span-2">
+        <input type="hidden" name="is_active" value="0">
+        <x-checkbox size="sm" name="is_active" value="1" label="Akun aktif"
+            :checked="(bool) old('is_active', $customer->is_active ?? true)" />
         @error('is_active')
-            <p class="label text-error">{{ $message }}</p>
+            <p class="mt-1 text-xs text-error">{{ $message }}</p>
         @enderror
-    </fieldset>
+    </div>
 </div>

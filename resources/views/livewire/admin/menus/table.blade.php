@@ -53,11 +53,11 @@
                         {{-- Resep, Media dan Edit sama-sama mengubah menu, jadi
                              satu ability yang menjaga ketiganya. --}}
                         @can('update', $menu)
-                            <x-button variant="info" size="sm" icon="ri-flask-line" class="text-white"
+                            <x-button variant="info" size="sm" icon="ri-flask-line"
                                 :href="route('menus.ingredients.edit', $menu)" title="Resep / Bahan">
                                 Resep
                             </x-button>
-                            <x-button variant="neutral" size="sm" icon="ri-image-line" class="text-white"
+                            <x-button variant="neutral" size="sm" icon="ri-image-line"
                                 :href="route('menus.media.edit', $menu)" title="Gambar & Video">
                                 Media
                             </x-button>
@@ -65,7 +65,7 @@
                         @endcan
 
                         @can('delete', $menu)
-                            <x-button variant="error" size="sm" class="text-white"
+                            <x-button variant="error" size="sm"
                                 data-confirm="Hapus menu ini?"
                                 wire:click="delete('{{ $menu->id }}')"
                                 loading="delete('{{ $menu->id }}')">

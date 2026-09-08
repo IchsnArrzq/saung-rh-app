@@ -73,7 +73,7 @@
                         @endcan
 
                         @can('delete', $order)
-                            <x-button variant="error" size="sm" class="text-white"
+                            <x-button variant="error" size="sm"
                                 data-confirm="Hapus order ini?"
                                 wire:click="delete('{{ $order->id }}')"
                                 loading="delete('{{ $order->id }}')">

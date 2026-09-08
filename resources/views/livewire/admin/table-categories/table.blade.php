@@ -54,7 +54,7 @@
                         @endcan
 
                         @can('delete', $tableCategory)
-                            <x-button variant="error" size="sm" class="text-white"
+                            <x-button variant="error" size="sm"
                                 data-confirm="Hapus kategori meja ini?"
                                 wire:click="delete('{{ $tableCategory->id }}')"
                                 loading="delete('{{ $tableCategory->id }}')">

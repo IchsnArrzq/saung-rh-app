@@ -24,8 +24,8 @@
 </head>
 
 <body class="min-h-screen bg-neutral text-base-content antialiased">
-    <div
-        class="relative mx-auto min-h-screen w-full max-w-[1560px] overflow-hidden border border-base-300 bg-base-100 shadow-[0_30px_100px_rgba(0,0,0,0.35)]">
+    {{-- Tanpa shadow: kerangka halaman dipisah oleh permukaan (base-100 di atas latar), bukan elevasi. --}}
+    <div class="relative mx-auto min-h-screen w-full max-w-[1560px] overflow-hidden border border-base-300 bg-base-100">
         <div
             class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(39,39,42,0.12),transparent_55%)]">
         </div>
@@ -100,7 +100,7 @@
                 </div>
 
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Visit</p>
+                    <p class="text-sm font-semibold">Kunjungi</p>
                     @if ($business->address() !== '')
                         <p class="mt-3 text-sm text-base-content">{{ $business->address() }}</p>
                     @endif
@@ -110,7 +110,7 @@
                 </div>
 
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Connect</p>
+                    <p class="text-sm font-semibold">Terhubung</p>
                     <div class="mt-3 flex flex-wrap gap-2">
                         <span
                             class="rounded-full border border-base-300 bg-base-100 px-3 py-1 text-xs font-semibold text-base-content">{{ $business->instagram() ?: 'Instagram' }}</span>

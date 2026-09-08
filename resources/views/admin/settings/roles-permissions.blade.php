@@ -13,7 +13,7 @@
     @include('admin.partials.flash')
 
     <div class="space-y-4 mt-5">
-        <div class="tabs tabs-boxed rounded-2xl border border-base-300 bg-base-100 p-1 flex-wrap">
+        <div class="tabs tabs-boxed rounded-xl border border-base-300 bg-base-100 p-1 flex-wrap">
             @foreach ($roles as $role)
                 <a role="tab" href="{{ route('settings.roles-permissions', ['role' => $role->name]) }}"
                     class="tab capitalize {{ $activeRole && $activeRole->is($role) ? 'tab-active bg-primary text-primary-content' : 'text-secondary' }}">
@@ -23,9 +23,9 @@
         </div>
 
         @if ($activeRole)
-            <div class="rounded-2xl border border-stone-200 bg-white p-5">
+            <div class="rounded-xl border border-base-300 bg-base-100 p-5">
                 @if ($isSuperadmin)
-                    <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+                    <div class="mb-4 rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm font-medium text-warning">
                         Role Superadmin memiliki seluruh permission secara permanen dan tidak dapat diubah dari sini.
                     </div>
                 @endif
@@ -34,7 +34,7 @@
                     @csrf
                     @method('PATCH')
 
-                    <div class="overflow-x-auto rounded-2xl border border-stone-200">
+                    <div class="overflow-x-auto rounded-xl border border-base-300">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -47,7 +47,7 @@
                             <tbody>
                                 @foreach ($permissionGroups as $group)
                                     <tr>
-                                        <td class="font-semibold text-stone-800">
+                                        <td class="font-semibold">
                                             <div class="flex items-center gap-2">
                                                 <span>{{ $group['label'] }}</span>
                                                 @unless ($isSuperadmin)

@@ -56,12 +56,12 @@ new class extends Component {
                  ever rendered (`display:none` keeps the other out of the
                  accessibility tree as well). --}}
             <nav class="grow is-drawer-close:hidden" aria-label="Navigasi utama">
-                <ul class="menu w-full gap-1 rounded-2xl p-2">
+                <ul class="menu w-full gap-1 rounded-xl p-2">
                     @foreach ($groups as $group)
                         <li>
                             <details @if ($group['is_open']) open @endif>
                                 <summary
-                                    class="{{ $group['is_active'] ? 'bg-base-300 text-primary font-semibold' : 'text-stone-700 hover:bg-base-300' }}">
+                                    class="{{ $group['is_active'] ? 'bg-base-300 text-primary font-semibold' : 'hover:bg-base-300' }}">
                                     <i class="{{ $group['icon'] }} text-lg" aria-hidden="true"></i>
                                     <span>{{ $group['label'] }}</span>
                                 </summary>
@@ -98,7 +98,7 @@ new class extends Component {
                                  target for anyone who clicks it. --}}
                             <a wire:navigate href="{{ $railHref }}" aria-haspopup="true"
                                 @if ($group['is_active']) aria-current="true" @endif
-                                class="relative flex h-11 w-full items-center justify-center rounded-box transition-colors {{ $group['is_active'] ? 'bg-base-300 text-primary' : 'text-stone-700 hover:bg-base-300' }}">
+                                class="relative flex h-11 w-full items-center justify-center rounded-box transition-colors {{ $group['is_active'] ? 'bg-base-300 text-primary' : 'hover:bg-base-300' }}">
                                 {{-- Colour alone is a weak signal on a 64px rail
                                      and disappears for colour-blind users, so
                                      the active group also gets a shape cue. --}}
@@ -126,8 +126,8 @@ new class extends Component {
                                  pointer never crosses a dead zone. --}}
                             <div class="invisible absolute start-full top-0 z-50 ps-2 opacity-0 transition-opacity duration-150 group-focus-within/rail:visible group-focus-within/rail:opacity-100 group-hover/rail:visible group-hover/rail:opacity-100"
                                 role="none">
-                                <div
-                                    class="max-h-[70vh] w-64 overflow-y-auto rounded-box bg-base-100 p-2 shadow-lg ring-1 ring-base-300">
+                                {{-- check-ui-allow: panel flyout rail melayang di atas konten. --}}
+                                <div class="max-h-[70vh] w-64 overflow-y-auto rounded-box bg-base-100 p-2 shadow-lg ring-1 ring-base-300">
                                     <p class="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-secondary">
                                         {{ $group['label'] }}
                                     </p>

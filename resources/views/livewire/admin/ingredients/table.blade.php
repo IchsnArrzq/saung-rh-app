@@ -63,7 +63,7 @@
                         <x-button variant="warning" size="sm" :href="route('ingredients.edit', $ingredient)">
                             Edit
                         </x-button>
-                        <x-button variant="error" size="sm" class="text-white"
+                        <x-button variant="error" size="sm"
                             data-confirm="Hapus bahan ini?"
                             wire:click="delete('{{ $ingredient->id }}')"
                             loading="delete('{{ $ingredient->id }}')">

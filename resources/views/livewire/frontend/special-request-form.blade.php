@@ -13,12 +13,12 @@
         <form wire:submit="submit" class="space-y-2">
             <x-select :bare="true" label="Kategori permintaan" name="category" size="sm" class="w-full"
                 wire:model="category" :options="$categories" />
-            <textarea wire:model="description" rows="2" maxlength="280"
+            <x-textarea bare size="sm" name="description" label="Isi permintaan" rows="2" maxlength="280"
                 placeholder="Mis. tolong siapkan kue ulang tahun, atau kecilkan AC..."
-                class="textarea textarea-bordered textarea-sm w-full"></textarea>
+                wire:model="description" />
             @error('description') <span class="text-error text-xs">{{ $message }}</span> @enderror
             <x-button type="submit" variant="accent" size="sm" :block="true" icon="ri-send-plane-2-line" loading="submit">
-                Kirim Permintaan
+                Kirim permintaan
             </x-button>
         </form>
 

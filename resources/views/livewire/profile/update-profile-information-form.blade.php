@@ -87,17 +87,18 @@ new class extends Component
 
             @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
                 <div>
-                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                        {{ __('Your email address is unverified.') }}
+                    <p class="mt-2 text-sm text-base-content/70">
+                        Alamat email ini belum diverifikasi.
 
-                        <button wire:click.prevent="sendVerification" class="underline text-sm  hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                            {{ __('Click here to re-send the verification email.') }}
+                        <button type="button" wire:click.prevent="sendVerification"
+                            class="rounded-field text-sm underline hover:text-base-content focus:outline-none focus:ring-2 focus:ring-primary/40">
+                            Kirim ulang email verifikasi
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                            {{ __('A new verification link has been sent to your email address.') }}
+                        <p class="mt-2 text-sm font-medium text-success">
+                            Tautan verifikasi baru sudah dikirim ke email kamu.
                         </p>
                     @endif
                 </div>

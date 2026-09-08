@@ -34,7 +34,7 @@
                 <div class="space-y-3 rounded-xl border border-dashed border-base-300 p-2 min-h-[160px]">
                     @forelse ($items as $table)
                         @php $statusKey = (string) $table->status; @endphp
-                        <article class="rounded-xl border border-base-300 bg-base-100 p-3 shadow-sm">
+                        <article class="rounded-xl border border-base-300 bg-base-100 p-3">
                             <div class="flex items-start justify-between gap-2">
                                 <div>
                                     <p class="font-semibold">{{ $table->code }}</p>
@@ -84,7 +84,7 @@
 
                 <div class="space-y-3 rounded-xl border border-dashed border-base-300 p-2">
                     @foreach ($unassignedTables as $table)
-                        <article class="rounded-xl border border-base-300 bg-base-100 p-3 shadow-sm">
+                        <article class="rounded-xl border border-base-300 bg-base-100 p-3">
                             <p class="font-semibold">{{ $table->code }}</p>
                             <p class="text-xs text-base-content/60">{{ $table->name ?: 'Tanpa nama meja' }}</p>
                         </article>

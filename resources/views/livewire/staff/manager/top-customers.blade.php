@@ -24,7 +24,7 @@
                     <div class="grow min-w-0">
                         <div class="flex items-center justify-between">
                             <span class="font-semibold truncate">{{ $c['name'] }}</span>
-                            <span class="badge badge-secondary badge-sm">Rp {{ number_format($c['total_spend'], 0, ',', '.') }}</span>
+                            <x-badge color="secondary" size="sm" class="tabular-nums">Rp {{ number_format((float) $c['total_spend'], 0, ',', '.') }}</x-badge>
                         </div>
                         <progress class="progress progress-secondary h-1.5 mt-1" value="{{ $c['total_spend'] }}" max="{{ $maxSpend }}"></progress>
                         <div class="text-xs text-secondary mt-1">{{ $c['orders_count'] }} pesanan selesai</div>

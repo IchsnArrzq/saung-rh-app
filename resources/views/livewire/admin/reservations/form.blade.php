@@ -55,7 +55,7 @@
                                 min="1" max="50" :required="true"
                                 wire:model.defer="items.{{ $index }}.qty" required />
 
-                            <x-button variant="error" size="sm" class="text-white"
+                            <x-button variant="error" size="sm"
                                 wire:click="removeItem({{ $index }})" :disabled="count($items) <= 1">
                                 Hapus
                             </x-button>

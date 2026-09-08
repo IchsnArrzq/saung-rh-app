@@ -66,7 +66,7 @@
                             size="sm" wire:model.defer="items.{{ $index }}.notes" placeholder="Catatan item" />
 
                         <div class="flex items-end justify-end md:col-span-1">
-                            <x-button variant="error" size="sm" class="text-white"
+                            <x-button variant="error" size="sm"
                                 wire:click="removeItem({{ $index }})">
                                 Hapus
                             </x-button>

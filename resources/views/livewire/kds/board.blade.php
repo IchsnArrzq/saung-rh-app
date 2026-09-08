@@ -1,15 +1,15 @@
 <div class="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-9.5rem)]">
     
-    <div class="w-full lg:w-1/4 flex flex-col bg-base-100 shadow-sm rounded-2xl border border-base-300 overflow-hidden h-[400px] lg:h-full">
+    <div class="w-full lg:w-1/4 flex flex-col bg-base-100 rounded-xl border border-base-300 overflow-hidden h-[400px] lg:h-full">
         <div class="flex p-2 gap-2 border-b border-base-300 bg-base-200">
-            <button wire:click="setActiveTab('ongoing')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all {{ $activeTab === 'ongoing' ? 'bg-primary text-primary-content shadow' : 'text-secondary hover:text-base-content hover:bg-base-300' }}">
-                ON-GOING <span class="ml-1 px-2 py-0.5 rounded-full text-[11px] {{ $activeTab === 'ongoing' ? 'bg-base-100 text-primary' : 'bg-base-300' }}">{{ $this->ongoingOrders->count() }}</span>
+            <button wire:click="setActiveTab('ongoing')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all {{ $activeTab === 'ongoing' ? 'bg-primary text-primary-content' : 'text-secondary hover:text-base-content hover:bg-base-300' }}">
+                Berjalan <span class="ml-1 px-2 py-0.5 rounded-full text-[11px] {{ $activeTab === 'ongoing' ? 'bg-base-100 text-primary' : 'bg-base-300' }}">{{ $this->ongoingOrders->count() }}</span>
             </button>
-            <button wire:click="setActiveTab('ready')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all {{ $activeTab === 'ready' ? 'bg-primary text-primary-content shadow' : 'text-secondary hover:text-base-content hover:bg-base-300' }}">
-                READY <span class="ml-1 px-2 py-0.5 rounded-full text-[11px] {{ $activeTab === 'ready' ? 'bg-base-100 text-primary' : 'bg-base-300' }}">{{ $this->readyOrders->count() }}</span>
+            <button wire:click="setActiveTab('ready')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all {{ $activeTab === 'ready' ? 'bg-primary text-primary-content' : 'text-secondary hover:text-base-content hover:bg-base-300' }}">
+                Siap <span class="ml-1 px-2 py-0.5 rounded-full text-[11px] {{ $activeTab === 'ready' ? 'bg-base-100 text-primary' : 'bg-base-300' }}">{{ $this->readyOrders->count() }}</span>
             </button>
-            <button wire:click="setActiveTab('completed')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all {{ $activeTab === 'completed' ? 'bg-primary text-primary-content shadow' : 'text-secondary hover:text-base-content hover:bg-base-300' }}">
-                SELESAI <span class="ml-1 px-2 py-0.5 rounded-full text-[11px] {{ $activeTab === 'completed' ? 'bg-base-100 text-primary' : 'bg-base-300' }}">{{ $this->completedOrders->count() }}</span>
+            <button wire:click="setActiveTab('completed')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all {{ $activeTab === 'completed' ? 'bg-primary text-primary-content' : 'text-secondary hover:text-base-content hover:bg-base-300' }}">
+                Selesai <span class="ml-1 px-2 py-0.5 rounded-full text-[11px] {{ $activeTab === 'completed' ? 'bg-base-100 text-primary' : 'bg-base-300' }}">{{ $this->completedOrders->count() }}</span>
             </button>
         </div>
 
@@ -34,9 +34,8 @@
                         $status === \App\Domains\Order\Enums\OrderStatus::Preparing => 'bg-info',
                         default => 'bg-success',
                     };
-                    $badgeClass = $status->isKitchenBound() ? 'badge-info' : 'badge-success';
                 @endphp
-                <div class="bg-base-100 rounded-xl p-3 shadow-sm relative overflow-hidden {{ $order->is_vip ? 'border-2 border-warning ring-1 ring-warning/40' : 'border border-base-300' }}">
+                <div class="bg-base-100 rounded-xl p-3 relative overflow-hidden {{ $order->is_vip ? 'border-2 border-warning ring-1 ring-warning/40' : 'border border-base-300' }}">
                     <div class="absolute left-0 top-0 bottom-0 w-1.5 {{ $accentClass }}"></div>
 
                     <div class="flex justify-between items-start pl-3">
@@ -49,9 +48,7 @@
                             </h4>
                             <p class="text-xs font-medium text-secondary mt-0.5">#{{ $order->order_number }}</p>
                         </div>
-                        <span class="badge {{ $badgeClass }} badge-sm font-bold uppercase tracking-wider">
-                            {{ $status->label() }}
-                        </span>
+                        <x-status-badge :status="$status" size="sm" />
                     </div>
 
                     <div class="pl-3 mt-3 flex justify-between items-center text-sm">
@@ -72,7 +69,7 @@
         </div>
     </div>
 
-    <div class="w-full lg:w-3/4 flex flex-col bg-base-100 shadow-sm rounded-2xl border border-base-300 overflow-hidden h-[600px] lg:h-full">
+    <div class="w-full lg:w-3/4 flex flex-col bg-base-100 rounded-xl border border-base-300 overflow-hidden h-[600px] lg:h-full">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center p-4 border-b border-base-300 bg-base-200 gap-3">
             <div>
                 <h3 class="text-lg font-bold text-base-content">
@@ -88,7 +85,7 @@
                     @if($activeTab === 'ongoing')
                         Urutan prioritas berdasarkan waktu pemesanan
                     @elseif($activeTab === 'ready')
-                        Klik "Sudah Diantar" jika telah menyerahkan ke pelanggan
+                        Klik "Sudah diantar" jika telah menyerahkan ke pelanggan
                     @else
                         Pesanan yang telah diselesaikan hari ini
                     @endif
@@ -119,13 +116,12 @@
                                 \App\Domains\Order\Enums\OrderStatus::Ready,
                                 \App\Domains\Order\Enums\OrderStatus::Served,
                             ], true);
-                            $badgeClass = $status->isKitchenBound() ? 'badge-info' : 'badge-success';
                         @endphp
-                        <div class="w-[380px] flex-shrink-0 bg-base-100 rounded-2xl shadow-sm flex flex-col overflow-hidden h-full {{ $order->is_vip ? 'border-2 border-warning ring-2 ring-warning/30' : ($isPlated ? 'border border-success' : 'border border-base-300') }}">
+                        <div class="w-[380px] flex-shrink-0 bg-base-100 rounded-xl flex flex-col overflow-hidden h-full {{ $order->is_vip ? 'border-2 border-warning ring-2 ring-warning/30' : ($isPlated ? 'border border-success' : 'border border-base-300') }}">
 
                             @if($order->is_vip)
                                 <div class="flex items-center gap-1.5 bg-warning text-warning-content px-4 py-1.5 text-xs font-bold uppercase tracking-wider">
-                                    <i class="ri-vip-crown-2-fill"></i> Prioritas VIP
+                                    <i class="ri-vip-crown-2-fill" aria-hidden="true"></i> Prioritas VIP
                                 </div>
                             @endif
 
@@ -136,18 +132,16 @@
                                         <p class="text-xs font-semibold text-secondary mt-1">#{{ $order->order_number }}</p>
                                     </div>
                                     <div class="text-right">
-                                        <span class="badge {{ $badgeClass }} font-bold uppercase tracking-wider">
-                                            {{ $status->label() }}
-                                        </span>
+                                        <x-status-badge :status="$status" />
                                     </div>
                                 </div>
 
                                 <div class="flex items-center justify-between mt-2 pt-3 border-t border-base-300">
-                                    <span class="text-xs font-medium text-secondary">Waktu Order: {{ $order->ordered_at->format('H:i') }}</span>
+                                    <span class="text-xs font-medium text-secondary">Waktu pesan: {{ $order->ordered_at->format('H:i') }}</span>
                                     @if($status->isKitchenBound())
                                         <div x-data="{ start: '{{ $order->ordered_at->toIso8601String() }}', timeString: '0m 0s' }"
                                              x-init="setInterval(() => { let diff = Math.floor((new Date() - new Date(start)) / 1000); if (diff < 0) diff = 0; let d = Math.floor(diff / 86400); let h = Math.floor((diff % 86400) / 3600); let m = Math.floor((diff % 3600) / 60); let s = diff % 60; timeString = d > 0 ? d + 'd ' + h + 'h ' + m + 'm ' + s + 's' : (h > 0 ? h + 'h ' + m + 'm ' + s + 's' : m + 'm ' + s + 's'); }, 1000)">
-                                            <span class="text-sm font-bold text-base-content bg-base-100 px-2 py-1 rounded shadow-sm border border-base-300" x-text="timeString"></span>
+                                            <span class="text-sm font-bold text-base-content bg-base-100 px-2 py-1 rounded border border-base-300" x-text="timeString"></span>
                                         </div>
                                     @endif
                                 </div>
@@ -158,7 +152,7 @@
                                     <x-button variant="neutral" size="sm" class="h-auto flex-1 py-2.5 text-sm font-semibold"
                                         wire:click="markAsReady('{{ $order->id }}')"
                                         loading="markAsReady('{{ $order->id }}')">
-                                        Semua Selesai Dimasak
+                                        Semua selesai dimasak
                                     </x-button>
                                     <x-button variant="error" :outline="true" size="sm" class="h-auto py-2.5 text-sm font-semibold"
                                         wire:click="cancelOrder('{{ $order->id }}')"
@@ -171,7 +165,7 @@
                                     <x-button variant="success" size="sm" class="h-auto flex-1 py-2.5 text-sm font-semibold"
                                         wire:click="markOrderAsServed('{{ $order->id }}')"
                                         loading="markOrderAsServed('{{ $order->id }}')">
-                                        Sudah Diantar
+                                        Sudah diantar
                                     </x-button>
                                 </div>
                             @endif
@@ -193,7 +187,7 @@
 
                                         <div class="flex items-center gap-3 w-full">
                                             <div class="flex-shrink-0 text-center">
-                                                <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-base-100 border text-base-content font-bold text-sm shadow-sm {{ $itemDone ? 'border-success text-success' : 'border-base-300' }}">
+                                                <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-base-100 border text-base-content font-bold text-sm {{ $itemDone ? 'border-success text-success' : 'border-base-300' }}">
                                                     {{ $item->qty }}
                                                 </span>
                                             </div>

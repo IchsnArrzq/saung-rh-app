@@ -18,10 +18,10 @@
                 @endforeach
             </x-select>
 
-            <x-field label="Tipe Pembayaran">
-                <input type="text" class="input input-bordered w-full" value="FULL" readonly>
-                <input type="hidden" wire:model.defer="type">
-            </x-field>
+            {{-- Field "Tipe Pembayaran" dihapus: satu-satunya nilai yang diterima validasi
+                 adalah 'full', jadi kotak read-only bertuliskan FULL tidak memberi informasi
+                 apa pun sekaligus memajang nilai internal. Nilainya tetap ikut terkirim. --}}
+            <input type="hidden" wire:model.defer="type">
 
             <x-select label="Status" name="status" :required="true" wire:model.defer="status" required>
                 @foreach ($statusOptions as $statusOption)

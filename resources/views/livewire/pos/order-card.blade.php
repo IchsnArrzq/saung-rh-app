@@ -16,7 +16,7 @@
                 :variant="is_null($activeCategoryId) ? 'primary' : 'ghost'"
                 class="rounded-full {{ is_null($activeCategoryId) ? '' : 'border border-base-300' }}">
                 Semua
-                <span class="badge badge-sm">{{ $totalAvailableMenus }}</span>
+                <x-badge size="sm" class="tabular-nums">{{ $totalAvailableMenus }}</x-badge>
             </x-button>
 
             @foreach ($categories as $category)
@@ -24,7 +24,7 @@
                     :variant="$activeCategoryId === $category->id ? 'primary' : 'ghost'"
                     class="rounded-full {{ $activeCategoryId === $category->id ? '' : 'border border-base-300' }}">
                     {{ $category->name }}
-                    <span class="badge badge-sm">{{ $category->menus_count }}</span>
+                    <x-badge size="sm" class="tabular-nums">{{ $category->menus_count }}</x-badge>
                 </x-button>
             @endforeach
         </div>
@@ -39,11 +39,11 @@
                 'xl:grid-cols-3 2xl:grid-cols-4' => $cartCount <= 0,
             ])>
             @forelse ($menus as $menu)
-                <article class="overflow-hidden rounded-2xl border border-base-200 bg-base-100 shadow-sm">
+                <article class="overflow-hidden rounded-xl border border-base-300 bg-base-100">
                     <div class="relative aspect-[4/3]">
                         @if ($menu->image_url)
                             <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}"
-                                class="h-full w-full rounded-2xl object-cover p-1">
+                                class="h-full w-full rounded-xl object-cover p-1">
                         @else
                             <div class="flex h-full items-center justify-center text-base-content/60">
                                 <i class="ri-image-line text-4xl"></i>
@@ -109,14 +109,15 @@
                     <div class="rounded-xl border border-base-300 bg-base-200/60 p-3">
                         <label class="flex cursor-pointer items-center justify-between gap-3">
                             <span>
-                                <span class="block text-xs font-semibold uppercase tracking-wide text-base-content/70">Pembayaran</span>
-                                <span class="text-sm font-medium text-base-content">Langsung buat payment</span>
+                                <span class="block text-sm font-medium">Langsung catat pembayaran</span>
+                                <span class="text-xs text-base-content/60">Pesanan langsung ditandai dibayar setelah disimpan.</span>
                             </span>
+                            {{-- check-ui-allow: toggle mengirim satu event `change`; debounce hanya menunda tampilnya pilihan metode bayar. --}}
                             <input type="checkbox" class="toggle toggle-primary" wire:model.live="payNow">
                         </label>
 
                         @if ($payNow)
-                            <x-select label="Metode Pembayaran" name="paymentMethod" class="mt-3"
+                            <x-select label="Metode pembayaran" name="paymentMethod" class="mt-3"
                                 wire:model.defer="paymentMethod" :options="[
                                     'cash' => 'Cash',
                                     'qris' => 'QRIS',
@@ -152,7 +153,7 @@
                                 </div>
 
                                 <x-button variant="error" size="sm" shape="square" icon="ri-delete-bin-line"
-                                    label="Hapus {{ $item['name'] }}" class="text-white"
+                                    label="Hapus {{ $item['name'] }}" class="text-error-content"
                                     wire:click="removeCartItem('{{ $item['menu_id'] }}')"
                                     data-confirm="Hapus item ini dari order?" />
                             </div>

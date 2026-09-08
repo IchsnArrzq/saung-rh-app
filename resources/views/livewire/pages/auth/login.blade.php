@@ -51,11 +51,11 @@ new #[Layout('layouts.auth')] class extends Component {
 <div>
     <!-- Heading -->
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-stone-900">
+        <h1 class="text-2xl font-bold text-base-content">
             Selamat datang kembali
             <i class="ri-emotion-happy-line text-primary" aria-hidden="true"></i>
         </h1>
-        <p class="mt-1 text-sm text-stone-500">Masuk untuk melanjutkan ke akun Anda.</p>
+        <p class="mt-1 text-sm text-base-content/60">Masuk untuk melanjutkan ke akun Anda.</p>
     </div>
 
     <!-- Session Status -->
@@ -84,11 +84,11 @@ new #[Layout('layouts.auth')] class extends Component {
                 <input wire:model="form.remember" id="remember" type="checkbox"
                     class="checkbox checkbox-sm checkbox-primary rounded-md border"
                     name="remember">
-                <span class="ms-2 text-sm text-stone-600">{{ __('Remember me') }}</span>
+                <span class="ms-2 text-sm text-base-content/70">{{ __('Remember me') }}</span>
             </label>
 
             @if (Route::has('password.request'))
-                <a class="rounded-md text-sm font-medium text-stone-600 transition hover:text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100"
+                <a class="rounded-md text-sm font-medium text-base-content/70 transition hover:text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100"
                     href="{{ route('password.request') }}" wire:navigate>
                     {{ __('Lupa password?') }}
                 </a>
@@ -104,7 +104,7 @@ new #[Layout('layouts.auth')] class extends Component {
     </form>
 
     @if (Route::has('register'))
-        <p class="mt-6 text-center text-sm text-stone-600">
+        <p class="mt-6 text-center text-sm text-base-content/70">
             {{ __('Belum punya akun?') }}
             <a href="{{ route('register') }}" wire:navigate
                 class="font-semibold text-primary transition hover:underline">{{ __('Daftar sekarang') }}</a>

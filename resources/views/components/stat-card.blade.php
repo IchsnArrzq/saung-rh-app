@@ -34,7 +34,8 @@
         @endif
     </div>
 
-    <p class="mt-2 text-3xl font-semibold {{ $valueColor }}">{{ $value }}</p>
+    {{-- Angka KPI selalu dibandingkan antar kartu, jadi lebarnya harus tetap. --}}
+    <p class="mt-2 text-3xl font-semibold tabular-nums {{ $valueColor }}">{{ $value }}</p>
 
     @if ($description)
         <p class="mt-1 text-sm text-base-content/60">{{ $description }}</p>

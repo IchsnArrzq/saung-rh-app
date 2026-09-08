@@ -56,7 +56,7 @@
                         @endcan
 
                         @can('delete', $menu)
-                            <x-button variant="error" size="sm" class="ml-auto text-white"
+                            <x-button variant="error" size="sm" class="ml-auto"
                                 data-confirm="Hapus menu ini?" wire:click="delete('{{ $menu->id }}')"
                                 loading="delete('{{ $menu->id }}')">
                                 Hapus

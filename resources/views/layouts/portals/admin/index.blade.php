@@ -7,7 +7,7 @@
 
 <div
     @class([
-        'min-h-screen border border-base-300 bg-base-100 shadow-[0_26px_90px_rgba(0,0,0,0.35)]',
+        'min-h-screen border border-base-300 bg-base-100',
         'drawer lg:drawer-open' => $navigationMenuPreference === 'sidebar',
     ])>
     @if ($navigationMenuPreference === 'sidebar')
@@ -20,7 +20,7 @@
         @include('layouts.portals.admin.partials.topbar')
         @isset($header)
             <div class="px-4 pt-5 md:px-6">
-                <div class="rounded-2xl border border-base-300 bg-base-100 px-5 py-4 text-base-content">
+                <div class="rounded-xl border border-base-300 bg-base-100 px-5 py-4 text-base-content">
                     {{ $header }}
                 </div>
             </div>
