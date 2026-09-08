@@ -23,9 +23,9 @@
             <tr>
                 <th>Nama Bahan</th>
                 <th>Satuan</th>
-                <th>Stok Saat Ini</th>
-                <th>Stok Minimum</th>
-                <th>Harga/Satuan</th>
+                <th class="text-right">Stok Saat Ini</th>
+                <th class="text-right">Stok Minimum</th>
+                <th class="text-right">Harga/Satuan</th>
                 <th>Status</th>
                 <th class="text-right">Aksi</th>
             </tr>
@@ -37,16 +37,16 @@
                     <p class="font-semibold">{{ $ingredient->name }}</p>
                 </td>
                 <td>{{ $ingredient->unit }}</td>
-                <td>
+                <td class="text-right tabular-nums">
                     <span class="{{ $ingredient->isLowStock() ? 'font-semibold text-error' : 'text-base-content/80' }}">
-                        {{ number_format((float) $ingredient->stock, 3, ',', '.') }}
+                        {{ \App\Support\Quantity::format($ingredient->stock) }}
                     </span>
                     @if ($ingredient->isLowStock())
                         <x-badge color="error" size="sm" class="ml-1">Rendah</x-badge>
                     @endif
                 </td>
-                <td>{{ number_format((float) $ingredient->min_stock, 3, ',', '.') }}</td>
-                <td>
+                <td class="text-right tabular-nums">{{ \App\Support\Quantity::format($ingredient->min_stock) }}</td>
+                <td class="text-right tabular-nums">
                     @if ($ingredient->cost_per_unit)
                         Rp {{ number_format((float) $ingredient->cost_per_unit, 0, ',', '.') }}
                     @else

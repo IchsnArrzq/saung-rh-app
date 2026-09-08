@@ -4,9 +4,7 @@
             class="drawer-button" icon="ri-menu-line text-xl" label="Buka menu samping" />
 
         <a href="{{ route('public.home') }}" class="flex items-center gap-2 font-bold text-base-content md:hidden">
-            <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-box bg-primary text-sm text-primary-content">
-                {{ $business->initials() }}
-            </span>
+            <x-brand-logo variant="mark" fallback="initials" class="h-9 w-9 text-sm" />
             <span class="truncate">{{ $business->name() }}</span>
         </a>
 

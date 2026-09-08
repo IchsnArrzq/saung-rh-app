@@ -34,8 +34,7 @@
             <div class="flex flex-wrap items-center gap-3">
                 <a href="{{ route('public.home') }}" class="mr-auto inline-flex items-center gap-3"
                     aria-label="{{ $business->name() }}">
-                    <img src="{{ asset('assets/logo-cr-cafe-resto.png') }}" alt="Logo {{ $business->name() }}"
-                        class="h-11 w-auto">
+                    <x-brand-logo class="h-11 w-auto" />
                 </a>
 
                 <nav class="order-3 w-full md:order-none md:w-auto">
@@ -86,8 +85,7 @@
             <div class="grid gap-8 md:grid-cols-4">
                 <div class="md:col-span-2">
                     <div class="inline-flex items-center gap-3">
-                        <img src="{{ asset('assets/logo-cr-mark.png') }}" alt="Logo {{ $business->name() }}"
-                            class="h-10 w-10 rounded-lg border border-base-300 bg-base-100 p-1 object-contain">
+                        <x-brand-logo variant="mark" class="h-10 w-10 rounded-lg border border-base-300 bg-base-100 p-1" />
                         <p class="text-xl font-semibold text-base-content">
                             {{ $business->name() }}
                         </p>

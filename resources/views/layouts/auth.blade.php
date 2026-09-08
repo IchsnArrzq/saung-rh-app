@@ -28,8 +28,7 @@
         <section class="flex items-center px-5 py-10 md:px-10">
             <div class="w-full">
                 <a href="{{ url('/') }}" class="inline-flex items-center" aria-label="{{ $business->name() }}">
-                    <img src="{{ asset('assets/logo-cr-cafe-resto.png') }}" alt="Logo {{ $business->name() }}"
-                        class="h-20 w-auto">
+                    <x-brand-logo class="h-20 w-auto" />
                 </a>
                 <p class="mt-2 text-sm font-medium text-base-content/60 md:hidden">{{ $business->tagline() }}</p>
                 <div class="mt-8 max-w-lg ">

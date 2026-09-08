@@ -52,13 +52,13 @@
                         <x-status-badge :status="$record->type"
                             :enum="\App\Domains\Inventory\Enums\StockMovementType::class" size="sm" />
                     </td>
-                    <td class="text-right tabular-nums">{{ number_format((float) $record->qty_before, 3, ',', '.') }}</td>
+                    <td class="text-right tabular-nums">{{ \App\Support\Quantity::format($record->qty_before) }}</td>
                     <td class="text-right tabular-nums">
                         <span class="font-semibold {{ $record->qty_change >= 0 ? 'text-success' : 'text-error' }}">
-                            {{ $record->qty_change >= 0 ? '+' : '' }}{{ number_format((float) $record->qty_change, 3, ',', '.') }}
+                            {{ \App\Support\Quantity::signed($record->qty_change) }}
                         </span>
                     </td>
-                    <td class="text-right tabular-nums">{{ number_format((float) $record->qty_after, 3, ',', '.') }}</td>
+                    <td class="text-right tabular-nums">{{ \App\Support\Quantity::format($record->qty_after) }}</td>
                     <td class="max-w-xs truncate text-sm text-base-content/70">{{ $record->notes ?: '-' }}</td>
                     <td class="text-sm text-base-content/70">{{ $record->user?->name ?? 'Sistem' }}</td>
                 </tr>

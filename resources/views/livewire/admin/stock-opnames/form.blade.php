@@ -60,7 +60,7 @@
                             {{ $row['name'] }}
                             <span class="text-xs text-base-content/50">({{ $row['unit'] }})</span>
                         </td>
-                        <td class="text-right">{{ number_format((float) $row['system_qty'], 3, ',', '.') }}</td>
+                        <td class="text-right tabular-nums">{{ \App\Support\Quantity::format($row['system_qty']) }}</td>
                         <td class="text-right">
                             <x-input :bare="true" type="number" size="sm" step="0.001" min="0"
                                 class="w-28 text-right" label="Stok fisik {{ $row['name'] }}"
@@ -70,12 +70,12 @@
                                 <p class="mt-1 text-xs text-error">{{ $message }}</p>
                             @enderror
                         </td>
-                        <td class="text-right">
+                        <td class="text-right tabular-nums">
                             @if ($diff === null)
                                 <span class="text-base-content/30">—</span>
                             @else
                                 <span class="font-semibold {{ abs($diff) < 0.0005 ? 'text-base-content/50' : ($diff > 0 ? 'text-success' : 'text-error') }}">
-                                    {{ $diff > 0 ? '+' : '' }}{{ number_format($diff, 3, ',', '.') }}
+                                    {{ \App\Support\Quantity::signed($diff) }}
                                 </span>
                             @endif
                         </td>

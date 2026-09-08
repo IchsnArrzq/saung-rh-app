@@ -55,9 +55,9 @@
                 <td class="font-medium">{{ $ingredient->name }}</td>
                 <td>{{ $ingredient->unit }}</td>
                 <td class="text-right tabular-nums {{ $ingredient->isLowStock() ? 'font-semibold text-error' : '' }}">
-                    {{ number_format((float) $ingredient->stock, 3, ',', '.') }}
+                    {{ \App\Support\Quantity::format($ingredient->stock) }}
                 </td>
-                <td class="text-right tabular-nums">{{ number_format((float) $ingredient->min_stock, 3, ',', '.') }}</td>
+                <td class="text-right tabular-nums">{{ \App\Support\Quantity::format($ingredient->min_stock) }}</td>
                 <td class="text-right tabular-nums">
                     {{ $ingredient->cost_per_unit ? 'Rp '.number_format((float) $ingredient->cost_per_unit, 0, ',', '.') : '-' }}
                 </td>

@@ -26,8 +26,8 @@ class AppSettingsManager extends Component
 
     public function mount(AppSettingRepository $settings): void
     {
-        foreach ($settings->allKeyValue() as $key => $value) {
-            Arr::set($this->values, $key, (string) $value);
+        foreach ($settings->groupedForAdmin()->flatten() as $setting) {
+            Arr::set($this->values, $setting->key, (string) $setting->value);
         }
     }
 
@@ -35,14 +35,16 @@ class AppSettingsManager extends Component
     {
         $payload = [];
 
-        // Drive the write from the keys that exist in the database rather than
+        // Drive the write from the rows this form actually renders rather than
         // from $values: it is a public property, so its shape is whatever the
         // browser last sent, and iterating it would let the form create rows.
-        foreach (array_keys($repository->allKeyValue()) as $key) {
-            $value = Arr::get($this->values, $key);
+        // Rows the form does not render — the logo and mark uploads — stay out
+        // of the payload as well, so saving here never touches them.
+        foreach ($repository->groupedForAdmin()->flatten() as $setting) {
+            $value = Arr::get($this->values, $setting->key);
 
             if (is_scalar($value)) {
-                $payload[$key] = (string) $value;
+                $payload[$setting->key] = (string) $value;
             }
         }
 

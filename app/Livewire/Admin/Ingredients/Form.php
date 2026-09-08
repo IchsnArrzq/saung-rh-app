@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Ingredients;
 
 use App\Models\Ingredient;
+use App\Support\Quantity;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -29,9 +30,9 @@ class Form extends Component
         if ($this->ingredient) {
             $this->name = (string) $this->ingredient->name;
             $this->unit = (string) $this->ingredient->unit;
-            $this->stock = (string) $this->ingredient->stock;
-            $this->min_stock = (string) $this->ingredient->min_stock;
-            $this->cost_per_unit = $this->ingredient->cost_per_unit ? (string) $this->ingredient->cost_per_unit : '';
+            $this->stock = Quantity::input($this->ingredient->stock);
+            $this->min_stock = Quantity::input($this->ingredient->min_stock);
+            $this->cost_per_unit = $this->ingredient->cost_per_unit ? Quantity::input($this->ingredient->cost_per_unit, 2) : '';
             $this->is_active = (bool) $this->ingredient->is_active;
         }
     }

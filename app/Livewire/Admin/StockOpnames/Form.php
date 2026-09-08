@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\StockOpnames;
 
 use App\Models\StockOpname;
+use App\Support\Quantity;
 use App\Domains\Inventory\UseCases\CreateStockOpnameDraftUseCase;
 use App\Domains\Inventory\UseCases\PostStockOpnameUseCase;
 use Illuminate\Support\Carbon;
@@ -39,8 +40,8 @@ class Form extends Component
                     'id' => $item->id,
                     'name' => $item->ingredient?->name ?? '-',
                     'unit' => $item->ingredient?->unit ?? '',
-                    'system_qty' => (string) $item->system_qty,
-                    'physical_qty' => $item->physical_qty !== null ? (string) $item->physical_qty : '',
+                    'system_qty' => Quantity::input($item->system_qty),
+                    'physical_qty' => $item->physical_qty !== null ? Quantity::input($item->physical_qty) : '',
                     'notes' => (string) ($item->notes ?? ''),
                 ])
                 ->all();

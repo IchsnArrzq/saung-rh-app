@@ -3,10 +3,7 @@
 
     <aside class="flex min-h-full w-72 max-w-[85vw] flex-col bg-base-200 px-3 py-4">
         <a href="{{ route('public.home') }}" class="flex items-center gap-3 rounded-box px-3 py-2">
-            <span
-                class="inline-flex h-10 w-10 items-center justify-center rounded-box bg-primary text-lg font-bold text-primary-content">
-                {{ $business->initials() }}
-            </span>
+            <x-brand-logo variant="mark" fallback="initials" class="h-10 w-10 text-lg" />
             <span class="min-w-0">
                 <span class="block truncate text-lg font-bold text-base-content">{{ $business->name() }}</span>
                 <span class="block text-xs font-medium text-secondary">Customer Portal</span>

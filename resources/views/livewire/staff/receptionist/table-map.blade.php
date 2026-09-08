@@ -1,25 +1,21 @@
 <div wire:poll.10s class="space-y-4">
-    {{-- Status summary --}}
-    <div class="flex flex-wrap gap-2">
-        @foreach ($summary as $key => $count)
-            {{-- Label status datang dari Enum; kunci arraynya adalah nilai backing
-                 ("order_in") yang tidak boleh muncul di layar. --}}
-            @php
-                $summaryStatus = \App\Domains\Table\Enums\TableStatus::tryFrom((string) $key);
-            @endphp
-            <x-badge :color="$summaryStatus?->color() ?? 'ghost'" size="lg" class="gap-1">
-                <span class="font-bold tabular-nums">{{ $count }}</span> {{ $summaryStatus?->label() ?? $key }}
+    {{-- Status summary — label & warna sudah diselesaikan di komponen. --}}
+    <div class="flex flex-wrap items-center gap-2">
+        @foreach ($summary as $row)
+            <x-badge :color="$row['color']" size="lg" class="gap-1">
+                <span class="font-bold tabular-nums">{{ $row['count'] }}</span> {{ $row['label'] }}
             </x-badge>
         @endforeach
-        <x-badge color="neutral" size="lg" outline class="ml-auto gap-1" icon="ri-base-station-line">
+        <span class="ml-auto inline-flex items-center gap-1 text-xs text-base-content/60">
+            <i class="ri-base-station-line" aria-hidden="true"></i>
             Diperbarui otomatis tiap 10 detik
-        </x-badge>
+        </span>
     </div>
 
     <div class="grid gap-4 lg:grid-cols-[1fr_300px]">
         {{-- Map canvas --}}
         <div class="card border border-base-300 bg-base-100 rounded-xl p-4 overflow-x-auto">
-            <div class="relative mx-auto" style="height: {{ $rows * 120 + 8 }}px; min-width: {{ 5 * 150 }}px;">
+            <div class="relative mx-auto" style="height: {{ $rows * 120 + 8 }}px; min-width: {{ $columns * 150 }}px;">
                 @foreach ($positioned as $cell)
                     @php
                         $t = $cell['model'];
@@ -39,15 +35,15 @@
                     @endphp
                     <button
                         wire:click="selectTable('{{ $t->id }}')"
-                        class="absolute flex flex-col items-center justify-center rounded-xl border-2 text-center transition {{ $tileClass }} {{ $isSelected ? 'ring-2 ring-primary ring-offset-2' : '' }}"
+                        class="absolute flex flex-col items-center justify-center overflow-hidden rounded-xl border-2 px-2 text-center transition {{ $tileClass }} {{ $isSelected ? 'ring-2 ring-primary ring-offset-2' : '' }}"
                         style="left: {{ $cell['x'] * 150 }}px; top: {{ $cell['y'] * 120 }}px; width: 130px; height: 100px;">
-                        <span class="font-bold text-sm">{{ $t->code }}</span>
-                        <span class="text-[11px] text-secondary leading-tight">{{ $t->name }}</span>
-                        <span class="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide {{ $textClass }}">
-                            <span class="h-2 w-2 rounded-full {{ $dotClass }}"></span>
-                            {{ $status?->label() ?? '—' }}
+                        <span class="w-full truncate font-bold text-sm">{{ $t->code }}</span>
+                        <span class="w-full truncate text-[11px] text-secondary leading-tight">{{ $t->name }}</span>
+                        <span class="mt-1 inline-flex w-full items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide leading-tight {{ $textClass }}">
+                            <span class="h-2 w-2 shrink-0 rounded-full {{ $dotClass }}"></span>
+                            <span class="truncate">{{ $status?->label() ?? '—' }}</span>
                         </span>
-                        <span class="text-[10px] text-secondary mt-0.5"><i class="ri-group-line"></i> {{ $t->capacity }}</span>
+                        <span class="text-[10px] text-secondary mt-0.5"><i class="ri-group-line"></i> <span class="tabular-nums">{{ $t->capacity }}</span></span>
                     </button>
                 @endforeach
             </div>
@@ -61,18 +57,18 @@
 
                 <dl class="mt-4 space-y-2 text-sm">
                     <div class="flex justify-between"><dt class="text-secondary">Status</dt><dd class="font-semibold">{{ $selectedTable['status'] }}</dd></div>
-                    <div class="flex justify-between"><dt class="text-secondary">Kapasitas</dt><dd>{{ $selectedTable['capacity'] }} kursi</dd></div>
+                    <div class="flex justify-between"><dt class="text-secondary">Kapasitas</dt><dd class="tabular-nums">{{ $selectedTable['capacity'] }} kursi</dd></div>
                     <div class="flex justify-between"><dt class="text-secondary">Kategori</dt><dd>{{ $selectedTable['category'] }}</dd></div>
                 </dl>
 
                 <div class="divider my-3 text-xs">Sesi & Order</div>
                 <dl class="space-y-2 text-sm">
-                    <div class="flex justify-between"><dt class="text-secondary">Pengunjung</dt><dd>{{ $selectedTable['session_pax'] ?? '—' }} org</dd></div>
-                    <div class="flex justify-between"><dt class="text-secondary">Mulai sesi</dt><dd>{{ $selectedTable['session_started'] ?? '—' }}</dd></div>
+                    <div class="flex justify-between"><dt class="text-secondary">Pengunjung</dt><dd class="tabular-nums">{{ $selectedTable['session_pax'] ?? '—' }} org</dd></div>
+                    <div class="flex justify-between"><dt class="text-secondary">Mulai sesi</dt><dd class="tabular-nums">{{ $selectedTable['session_started'] ?? '—' }}</dd></div>
                     <div class="flex justify-between"><dt class="text-secondary">Order aktif</dt>
                         <dd>
                             @if ($selectedTable['order_number'])
-                                <span class="font-semibold">#{{ $selectedTable['order_number'] }}</span>
+                                <span class="font-semibold tabular-nums">#{{ $selectedTable['order_number'] }}</span>
                                 <x-status-badge :status="$selectedTable['order_status']"
                                     :enum="\App\Domains\Order\Enums\OrderStatus::class" size="xs" class="ml-1" />
                             @else — @endif
