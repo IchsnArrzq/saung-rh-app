@@ -8,9 +8,8 @@
                     placeholder="Cari kode / catatan..." label="Cari opname" />
 
                 {{-- check-ui-allow: select mengirim satu event `change`, bukan ketikan. --}}
-            {{-- check-ui-allow: select mengirim satu event `change`, bukan ketikan. --}}
-        <x-select :bare="true" class="w-full max-w-64" label="Filter status" wire:model.live="statusFilter"
-                    placeholder="Semua Status" :options="['draft' => 'Draft', 'posted' => 'Diposting']" />
+                <x-select :bare="true" class="w-full max-w-64" label="Filter status" wire:model.live="statusFilter"
+                    placeholder="Semua status" :options="['draft' => 'Draft', 'posted' => 'Diposting']" />
             </div>
 
             <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('stock-opnames.create')">
@@ -39,9 +38,9 @@
                 </td>
                 <td>{{ $opname->items_count }}</td>
                 <td>
-                    <x-badge :color="$opname->status === 'posted' ? 'success' : 'warning'" size="sm">
-                        {{ $opname->status === 'posted' ? 'Diposting' : 'Draft' }}
-                    </x-badge>
+                    {{-- Label & warna status dokumen milik Enum, bukan ternary di view. --}}
+                    <x-status-badge :status="$opname->status"
+                        :enum="\App\Domains\Inventory\Enums\DocumentStatus::class" size="sm" />
                 </td>
                 <td class="text-sm text-base-content/60">{{ $opname->user?->name ?? 'Sistem' }}</td>
                 <td class="text-right">

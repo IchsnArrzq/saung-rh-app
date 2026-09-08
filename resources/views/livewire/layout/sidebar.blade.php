@@ -20,24 +20,26 @@ new class extends Component {
     }
 }; ?>
 @if ($navigationMenuPreference === 'sidebar')
-    {{-- `.drawer-side` is the real scroll container: the <aside> inside it is
-         `min-h-full`, so it grows to its content height and never scrolls
-         itself. The scrollbar treatment has to live here to have any effect.
+    {{-- Yang menggulung adalah <nav> daftar menunya, bukan seluruh drawer: nama
+         aplikasi di atas harus tetap terlihat saat menunya panjang. Karena itu
+         `.drawer-side` hanya menetapkan tinggi, <aside> mengisinya penuh
+         (`h-full`, bukan `min-h-full` yang justru tumbuh mengikuti isi), dan
+         satu-satunya anak yang boleh menyusut adalah nav-nya.
 
-         `is-drawer-close:overflow-visible` is required by the collapsed rail:
-         daisyUI ships `:where(.drawer-side){overflow:hidden}` and only relaxes
-         it to `overflow-y:auto`, so `overflow-x` stays hidden and any flyout
-         would be clipped at the 64px rail edge. The rail only renders group
-         icons, so it never needs to scroll. --}}
-    <div id="admin-sidebar" class="drawer-side sidebar-scroll h-[calc(100vh-0.1rem)] is-drawer-close:overflow-visible"
-        data-floating-scrollbar>
+         `is-drawer-close:overflow-visible` tetap diperlukan rail terlipat:
+         daisyUI mengirim `:where(.drawer-side){overflow:hidden}` dan hanya
+         melonggarkannya ke `overflow-y:auto`, jadi `overflow-x` tetap hidden
+         dan flyout-nya akan terpotong di tepi rail 64px. Rail hanya berisi
+         ikon grup, jadi ia memang tidak pernah perlu menggulung. --}}
+    <div id="admin-sidebar" class="drawer-side h-[calc(100vh-0.1rem)] is-drawer-close:overflow-visible">
         <label for="admin-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
         {{-- `overflow-x-hidden` only applies while expanded; collapsed it would
              clip the flyouts along with the drawer-side rule above. --}}
         <aside
-            class="flex min-h-full max-w-[85vw] flex-col bg-base-200 is-drawer-close:w-16 is-drawer-open:w-72 is-drawer-open:overflow-x-hidden">
+            class="flex h-full max-w-[85vw] flex-col bg-base-200 is-drawer-close:w-16 is-drawer-open:w-72 is-drawer-open:overflow-x-hidden">
+            {{-- shrink-0: kepala tidak ikut mengecil saat daftar menunya panjang. --}}
             <a href="{{ route('public.home') }}"
-                class="flex items-center gap-3 rounded-box px-3 py-2 is-drawer-close:justify-center is-drawer-close:px-2">
+                class="flex shrink-0 items-center gap-3 rounded-box px-3 py-2 is-drawer-close:justify-center is-drawer-close:px-2">
                 <span
                     class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-box bg-primary text-lg font-bold text-primary-content">
                     {{ $business->initials() }}
@@ -55,7 +57,12 @@ new class extends Component {
                  state could never surface its own submenu. Only one tree is
                  ever rendered (`display:none` keeps the other out of the
                  accessibility tree as well). --}}
-            <nav class="grow is-drawer-close:hidden" aria-label="Navigasi utama">
+            {{-- `min-h-0` wajib: anak flex default `min-height:auto`, tanpa ini ia
+                 menolak menyusut di bawah tinggi isinya dan tidak akan pernah
+                 menggulung. Thumb overlay mengikuti elemen ini, jadi ia berhenti
+                 di bawah kepala, bukan menyapu seluruh sidebar. --}}
+            <nav class="sidebar-scroll min-h-0 flex-1 overflow-y-auto is-drawer-close:hidden"
+                data-floating-scrollbar aria-label="Navigasi utama">
                 <ul class="menu w-full gap-1 rounded-xl p-2">
                     @foreach ($groups as $group)
                         <li>
@@ -79,7 +86,7 @@ new class extends Component {
             {{-- The rail only ever shows at >=lg: below that breakpoint an
                  unchecked toggle hides the drawer entirely, so hover-driven
                  flyouts never have to work on touch. --}}
-            <nav class="grow is-drawer-open:hidden" aria-label="Navigasi utama (ringkas)">
+            <nav class="min-h-0 flex-1 is-drawer-open:hidden" aria-label="Navigasi utama (ringkas)">
                 <ul class="flex flex-col gap-1 p-2">
                     @foreach ($groups as $group)
                         @php

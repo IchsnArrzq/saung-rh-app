@@ -8,9 +8,8 @@
                     placeholder="Cari kode / pelanggan / catatan..." label="Cari penjualan" />
 
                 {{-- check-ui-allow: select mengirim satu event `change`, bukan ketikan. --}}
-            {{-- check-ui-allow: select mengirim satu event `change`, bukan ketikan. --}}
-        <x-select :bare="true" class="w-full max-w-64" label="Filter status" wire:model.live="statusFilter"
-                    placeholder="Semua Status" :options="['draft' => 'Draft', 'posted' => 'Diposting']" />
+                <x-select :bare="true" class="w-full max-w-64" label="Filter status" wire:model.live="statusFilter"
+                    placeholder="Semua status" :options="['draft' => 'Draft', 'posted' => 'Diposting']" />
             </div>
 
             <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('sales.create')">
@@ -38,9 +37,9 @@
                 <td>{{ $sale->customer?->name ?? '-' }}</td>
                 <td class="text-right">Rp {{ number_format((float) $sale->total, 0, ',', '.') }}</td>
                 <td>
-                    <x-badge :color="$sale->status === 'posted' ? 'success' : 'warning'" size="sm">
-                        {{ $sale->status === 'posted' ? 'Diposting' : 'Draft' }}
-                    </x-badge>
+                    {{-- Label & warna status dokumen milik Enum, bukan ternary di view. --}}
+                    <x-status-badge :status="$sale->status"
+                        :enum="\App\Domains\Inventory\Enums\DocumentStatus::class" size="sm" />
                 </td>
                 <td class="text-right">
                     <div class="inline-flex gap-2">

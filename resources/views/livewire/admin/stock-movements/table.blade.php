@@ -47,13 +47,10 @@
                         <span class="text-xs text-base-content/60">({{ $record->ingredient?->unit }})</span>
                     </td>
                     <td>
-                        @if ($record->type === 'in')
-                            <x-badge color="success" size="sm">Masuk</x-badge>
-                        @elseif ($record->type === 'out')
-                            <x-badge color="error" size="sm">Keluar</x-badge>
-                        @else
-                            <x-badge color="warning" size="sm">Koreksi</x-badge>
-                        @endif
+                        {{-- Kolom `type` masih string biasa (belum di-cast di model), jadi Enum-nya
+                             diresolusi di sini — label dan warnanya tetap milik Enum. --}}
+                        <x-status-badge :status="$record->type"
+                            :enum="\App\Domains\Inventory\Enums\StockMovementType::class" size="sm" />
                     </td>
                     <td class="text-right tabular-nums">{{ number_format((float) $record->qty_before, 3, ',', '.') }}</td>
                     <td class="text-right tabular-nums">
