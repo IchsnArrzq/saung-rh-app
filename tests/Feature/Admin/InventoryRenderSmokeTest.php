@@ -10,6 +10,7 @@ use App\Models\Ingredient;
 use App\Models\Supplier;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Tests\Concerns\InteractsWithAuthorization;
 use Tests\TestCase;
 
 /**
@@ -17,7 +18,19 @@ use Tests\TestCase;
  */
 class InventoryRenderSmokeTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithAuthorization, RefreshDatabase;
+
+    /**
+     * Yang diuji di berkas ini komponennya dirender, bukan otorisasi. Sejak
+     * Policy dihidupkan, mount() memanggil authorize(), jadi tanpa user yang
+     * login test-nya berhenti sebelum sampai ke render.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAsSuperadmin();
+    }
 
     public function test_list_components_render(): void
     {

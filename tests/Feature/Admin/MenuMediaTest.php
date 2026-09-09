@@ -9,11 +9,24 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Tests\Concerns\InteractsWithAuthorization;
 use Tests\TestCase;
 
 class MenuMediaTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithAuthorization, RefreshDatabase;
+
+    /**
+     * Yang diuji di berkas ini perilaku domainnya, bukan otorisasi. Sejak Policy
+     * dihidupkan, mount() komponennya memanggil authorize(), jadi tanpa user
+     * yang login test-nya berhenti sebelum sampai ke yang mau diuji.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAsSuperadmin();
+    }
 
     private function menu(): Menu
     {
