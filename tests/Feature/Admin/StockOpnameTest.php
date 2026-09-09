@@ -11,11 +11,24 @@ use App\Models\StockOpname;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
+use Tests\Concerns\InteractsWithAuthorization;
 use Tests\TestCase;
 
 class StockOpnameTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithAuthorization, RefreshDatabase;
+
+    /**
+     * Yang diuji di berkas ini perilaku domainnya, bukan otorisasi. Sejak Policy
+     * dihidupkan, mount() komponennya memanggil authorize(), jadi tanpa user
+     * yang login test-nya berhenti sebelum sampai ke yang mau diuji.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAsSuperadmin();
+    }
 
     public function test_create_draft_snapshots_active_ingredients(): void
     {

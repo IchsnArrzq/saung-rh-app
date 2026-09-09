@@ -8,5 +8,10 @@ Route::middleware(['demo.login', 'auth', 'verified', 'role:superadmin|admin|cash
     ->name('pos.')
     ->group(function () {
         Route::get('bills', [PosOrderController::class, 'bills'])->name('bills');
-        Route::resource('order', PosOrderController::class);
+
+        // Kasir memesan lewat keranjang di halaman ini, bukan lewat form
+        // create/edit — jadi hanya index yang ada. Namanya tetap
+        // `pos.order.index`: dipakai navigasi, redirect login kasir, dan
+        // kartu aksi di dashboard admin.
+        Route::get('order', [PosOrderController::class, 'index'])->name('order.index');
     });

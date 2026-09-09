@@ -6,11 +6,12 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
+use Tests\Concerns\InteractsWithAuthorization;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithAuthorization, RefreshDatabase;
 
     public function test_login_screen_can_be_rendered(): void
     {
@@ -59,11 +60,9 @@ class AuthenticationTest extends TestCase
 
     public function test_navigation_menu_can_be_rendered(): void
     {
-        $user = User::factory()->create();
-        Role::query()->firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        $user->assignRole('admin');
-
-        $this->actingAs($user);
+        // Perannya saja tidak cukup: rute dashboard dijaga `can:dashboard.view`,
+        // jadi peran tanpa permission itu dijawab 403 — bukan halaman kosong.
+        $this->actingAsRole('admin', ['dashboard.view']);
 
         $response = $this->get(route('dashboard'));
 
