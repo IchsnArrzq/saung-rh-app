@@ -23,6 +23,11 @@ class Table extends Component
     #[Url(as: 'ingredient', except: '')]
     public string $ingredientFilter = '';
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', StockMovement::class);
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();

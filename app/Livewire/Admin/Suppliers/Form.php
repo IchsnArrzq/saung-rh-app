@@ -31,6 +31,8 @@ class Form extends Component
     {
         $this->supplier = $supplier?->exists ? $supplier : null;
 
+        $this->authorizeWrite();
+
         if ($this->supplier) {
             $this->code = (string) ($this->supplier->code ?? '');
             $this->name = (string) $this->supplier->name;
@@ -43,8 +45,21 @@ class Form extends Component
         }
     }
 
+    /**
+     * Dipanggil di mount() untuk menutup halamannya dan diulang di save():
+     * mount() jalan sekali, save() adalah request HTTP tersendiri sesudahnya.
+     */
+    private function authorizeWrite(): void
+    {
+        $this->supplier
+            ? $this->authorize('update', $this->supplier)
+            : $this->authorize('create', Supplier::class);
+    }
+
     public function save()
     {
+        $this->authorizeWrite();
+
         $validated = $this->validate($this->rules());
 
         $validated['code'] = $validated['code'] ?: null;

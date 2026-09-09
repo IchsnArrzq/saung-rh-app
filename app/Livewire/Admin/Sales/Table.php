@@ -19,6 +19,11 @@ class Table extends Component
     #[Url(as: 'status', except: '')]
     public string $statusFilter = '';
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', Sale::class);
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -32,6 +37,8 @@ class Table extends Component
     public function delete(string $id): void
     {
         $sale = Sale::query()->findOrFail($id);
+
+        $this->authorize('delete', $sale);
 
         if ($sale->isPosted()) {
             session()->flash('error', 'Penjualan yang sudah diposting tidak bisa dihapus.');

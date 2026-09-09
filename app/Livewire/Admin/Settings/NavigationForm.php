@@ -19,6 +19,15 @@ class NavigationForm extends Component
             : 'sidebar';
     }
 
+    /**
+     * Tidak ada `$this->authorize()` di sini dengan sengaja: form ini hanya
+     * menulis preferensi milik user yang sedang login ke barisnya sendiri, dan
+     * setiap role punya entri "Navigation Settings" di navigasinya. Memakai
+     * UserPolicy akan menuntut `user.update` — izin yang hanya dipegang
+     * superadmin dan admin — sehingga kasir, waiter, chef, dan OB kehilangan
+     * pengaturan mereka sendiri. Gerbangnya cukup "sudah login", yang ditegakkan
+     * middleware `auth` di rutenya dan abort(403) di bawah.
+     */
     public function save()
     {
         $validated = $this->validate([

@@ -19,6 +19,8 @@ class Form extends Component
     {
         $this->menu = $menu;
 
+        $this->authorizeWrite();
+
         $this->rows = $menu->menuIngredients()
             ->with('ingredient')
             ->get()
@@ -40,8 +42,20 @@ class Form extends Component
         array_splice($this->rows, $index, 1);
     }
 
+    /**
+     * Mengubah komposisi bahan berarti mengubah menunya, jadi abilitynya
+     * `update` pada Menu — sama dengan gerbang route menus.ingredients.edit.
+     * Diulang di save() karena itu request HTTP tersendiri setelah mount().
+     */
+    private function authorizeWrite(): void
+    {
+        $this->authorize('update', $this->menu);
+    }
+
     public function save()
     {
+        $this->authorizeWrite();
+
         $this->validate([
             'rows.*.ingredient_id' => ['required', 'exists:ingredients,id'],
             'rows.*.qty' => ['required', 'numeric', 'min:0.001'],

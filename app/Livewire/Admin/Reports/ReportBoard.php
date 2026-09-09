@@ -16,6 +16,8 @@ class ReportBoard extends Component
 
     public function mount()
     {
+        $this->authorize('reports.view');
+
         $this->setFilter('today');
     }
 
@@ -48,6 +50,10 @@ class ReportBoard extends Component
 
     public function exportExcel()
     {
+        // Export menarik data penjualan keluar aplikasi, jadi ia diperiksa
+        // sendiri — mount() adalah request yang berbeda dari klik unduh ini.
+        $this->authorize('reports.view');
+
         $fileName = 'Laporan_Penjualan_' . $this->startDate . '_sd_' . $this->endDate . '.xlsx';
         return Excel::download(new SalesReportExport($this->startDate, $this->endDate), $fileName);
     }

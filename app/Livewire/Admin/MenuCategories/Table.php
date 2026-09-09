@@ -18,6 +18,7 @@ class Table extends Component
 
     public function mount(): void
     {
+        $this->authorize('viewAny', MenuCategory::class);
     }
 
     public function updatingSearch(): void
@@ -28,6 +29,9 @@ class Table extends Component
     public function delete(string $id): void
     {
         $menuCategory = MenuCategory::query()->findOrFail($id);
+
+        $this->authorize('delete', $menuCategory);
+
         $menuCategory->delete();
 
         session()->flash('success', 'Kategori berhasil dihapus.');

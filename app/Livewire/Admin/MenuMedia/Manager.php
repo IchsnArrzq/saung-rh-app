@@ -22,6 +22,18 @@ class Manager extends Component
     public function mount(Menu $menu): void
     {
         $this->menu = $menu;
+
+        $this->authorizeWrite();
+    }
+
+    /**
+     * Media adalah bagian dari menunya, jadi abilitynya `update` pada Menu —
+     * sama dengan gerbang route menus.media.edit. Diulang di tiap method tulis
+     * karena masing-masing adalah request HTTP tersendiri setelah mount().
+     */
+    private function authorizeWrite(): void
+    {
+        $this->authorize('update', $this->menu);
     }
 
     public function updatedNewImages(): void
@@ -35,6 +47,8 @@ class Manager extends Component
 
     public function uploadImages(MediaService $mediaService): void
     {
+        $this->authorizeWrite();
+
         $this->validate(
             [
                 'newImages' => ['required', 'array', 'min:1'],
@@ -54,6 +68,8 @@ class Manager extends Component
 
     public function uploadVideo(MediaService $mediaService): void
     {
+        $this->authorizeWrite();
+
         $this->validate(
             ['newVideo' => ['required', 'file', 'mimetypes:video/mp4,video/webm,video/ogg', 'max:51200']], // 50 MB
             [],
@@ -68,12 +84,16 @@ class Manager extends Component
 
     public function setPrimary(string $mediaId, MediaService $mediaService): void
     {
+        $this->authorizeWrite();
+
         $mediaService->setPrimaryImage($this->menu, $mediaId);
         session()->flash('success', 'Gambar utama diperbarui.');
     }
 
     public function remove(string $mediaId, MediaService $mediaService): void
     {
+        $this->authorizeWrite();
+
         $media = $this->menu->media()->findOrFail($mediaId);
         $mediaService->delete($media);
         session()->flash('success', 'Media berhasil dihapus.');

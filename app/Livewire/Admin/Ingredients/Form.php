@@ -27,6 +27,8 @@ class Form extends Component
     {
         $this->ingredient = $ingredient?->exists ? $ingredient : null;
 
+        $this->authorizeWrite();
+
         if ($this->ingredient) {
             $this->name = (string) $this->ingredient->name;
             $this->unit = (string) $this->ingredient->unit;
@@ -37,8 +39,21 @@ class Form extends Component
         }
     }
 
+    /**
+     * Dipanggil di mount() untuk menutup halamannya dan diulang di save():
+     * mount() jalan sekali, save() adalah request HTTP tersendiri sesudahnya.
+     */
+    private function authorizeWrite(): void
+    {
+        $this->ingredient
+            ? $this->authorize('update', $this->ingredient)
+            : $this->authorize('create', Ingredient::class);
+    }
+
     public function save()
     {
+        $this->authorizeWrite();
+
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:150'],
             'unit' => ['required', 'string', 'max:30'],

@@ -32,6 +32,8 @@ class Form extends Component
     {
         $this->customer = $customer?->exists ? $customer : null;
 
+        $this->authorizeWrite();
+
         if ($this->customer) {
             $this->code = (string) ($this->customer->code ?? '');
             $this->name = (string) $this->customer->name;
@@ -43,8 +45,21 @@ class Form extends Component
         }
     }
 
+    /**
+     * Dipanggil di mount() untuk menutup halamannya dan diulang di save():
+     * mount() jalan sekali, save() adalah request HTTP tersendiri sesudahnya.
+     */
+    private function authorizeWrite(): void
+    {
+        $this->customer
+            ? $this->authorize('update', $this->customer)
+            : $this->authorize('create', Customer::class);
+    }
+
     public function save(CreateCustomerUseCase $createCustomer, UpdateCustomerUseCase $updateCustomer)
     {
+        $this->authorizeWrite();
+
         $data = CustomerData::fromValidated($this->validate($this->rules()));
 
         if ($this->customer) {

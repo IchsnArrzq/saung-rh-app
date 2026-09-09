@@ -62,6 +62,10 @@ class PolicyPermissionSeeder extends Seeder
         'view' => ['viewAny', 'view'],
         'edit' => ['viewAny', 'view', 'update'],
         'book' => ['viewAny', 'view', 'create'],
+        // Untuk baris yang boleh dibuat dan diubah tapi tidak boleh dihapus —
+        // lisensi, misalnya: layarnya bisa membuat baris pertama lewat
+        // updateOrCreate, tapi tidak punya tombol hapus dan memang tidak boleh.
+        'maintain' => ['viewAny', 'view', 'create', 'update'],
         'manage' => ['viewAny', 'view', 'create', 'update', 'delete'],
     ];
 
@@ -83,10 +87,17 @@ class PolicyPermissionSeeder extends Seeder
                 Sale::class, SaleItem::class, StockOpname::class, StockOpnameItem::class,
                 Supplier::class, Customer::class, User::class, Shift::class,
             ],
+            // Pengaturan Aplikasi memang dikelola admin (nama & kontak bisnis
+            // dibaca dari sini), jadi 'edit' — bukan sekadar 'view'. Barisnya
+            // di-seed, tidak pernah ditambah atau dihapus dari layar itu.
+            'edit' => [AppSetting::class],
+            // Layar Lisensi bisa membuat baris pertama lewat updateOrCreate,
+            // tapi tidak punya tombol hapus.
+            'maintain' => [Subscription::class],
             'view' => [
                 OrderStatusLog::class, StockMovement::class, TableSession::class, VisitorLog::class,
                 Tip::class, ServiceLog::class, SongRequest::class, SpecialRequest::class,
-                Role::class, Permission::class, AppSetting::class, Subscription::class,
+                Role::class, Permission::class,
             ],
         ],
 

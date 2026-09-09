@@ -34,6 +34,41 @@ return [
             ],
         ],
         [
+            'label' => 'Portal Manager',
+            'icon' => 'ri-briefcase-line',
+            'items' => [
+                ['label' => 'Dashboard Manager', 'icon' => 'ri-dashboard-line', 'route' => 'manager.dashboard', 'active' => ['manager.dashboard']],
+                ['label' => 'Employee Shifting', 'icon' => 'ri-calendar-schedule-line', 'route' => 'manager.shifts', 'active' => ['manager.shifts']],
+                ['label' => 'Employee KPI', 'icon' => 'ri-trophy-line', 'route' => 'manager.kpi', 'active' => ['manager.kpi']],
+                ['label' => 'Top Customer', 'icon' => 'ri-vip-crown-line', 'route' => 'manager.top-customers', 'active' => ['manager.top-customers']],
+                ['label' => 'Special Order Approver', 'icon' => 'ri-checkbox-circle-line', 'route' => 'manager.special-requests', 'active' => ['manager.special-requests']],
+            ],
+        ],
+        [
+            'label' => 'Portal Resepsionis',
+            'icon' => 'ri-customer-service-2-line',
+            'items' => [
+                ['label' => 'Dashboard Resepsionis', 'icon' => 'ri-dashboard-line', 'route' => 'receptionist.dashboard', 'active' => ['receptionist.dashboard']],
+                ['label' => 'Table Map', 'icon' => 'ri-map-2-line', 'route' => 'receptionist.table-map', 'active' => ['receptionist.table-map']],
+                ['label' => 'Booking Management', 'icon' => 'ri-calendar-check-line', 'route' => 'receptionist.bookings', 'active' => ['receptionist.bookings']],
+                ['label' => 'Visitor Counter', 'icon' => 'ri-group-2-line', 'route' => 'receptionist.visitors', 'active' => ['receptionist.visitors']],
+                ['label' => 'F&B Top Analytics', 'icon' => 'ri-bar-chart-box-line', 'route' => 'receptionist.analytics', 'active' => ['receptionist.analytics']],
+            ],
+        ],
+        [
+            'label' => 'Portal Waiter & OB',
+            'icon' => 'ri-walk-line',
+            'items' => [
+                ['label' => 'Portal Waiter', 'icon' => 'ri-walk-line', 'route' => 'waiter.dashboard', 'active' => ['waiter.dashboard']],
+                ['label' => 'Update Status Meja', 'icon' => 'ri-refresh-line', 'route' => 'waiter.tables', 'active' => ['waiter.tables']],
+                ['label' => 'Tips & Service Log', 'icon' => 'ri-hand-coin-line', 'route' => 'waiter.tips', 'active' => ['waiter.tips']],
+                ['label' => 'Permintaan Khusus', 'icon' => 'ri-customer-service-line', 'route' => 'waiter.special-requests', 'active' => ['waiter.special-requests']],
+                ['label' => 'Portal OB', 'icon' => 'ri-brush-line', 'route' => 'ob.dashboard', 'active' => ['ob.dashboard']],
+                ['label' => 'Pembersihan Meja', 'icon' => 'ri-brush-2-line', 'route' => 'ob.tables', 'active' => ['ob.tables']],
+                ['label' => 'Antrean Lagu', 'icon' => 'ri-music-2-line', 'route' => 'songs.queue', 'active' => ['songs.queue']],
+            ],
+        ],
+        [
             'label' => 'Table Management',
             'icon' => 'ri-layout-grid-line',
             'items' => [
@@ -83,6 +118,15 @@ return [
             ],
         ],
         [
+            'label' => 'Halaman Publik',
+            'icon' => 'ri-global-line',
+            'items' => [
+                ['label' => 'Beranda Situs', 'icon' => 'ri-home-4-line', 'route' => 'public.home', 'active' => ['public.home']],
+                ['label' => 'Katalog Menu Publik', 'icon' => 'ri-book-open-line', 'route' => 'public.menu', 'active' => ['public.menu', 'public.menu.show']],
+                ['label' => 'Keranjang Publik', 'icon' => 'ri-shopping-cart-line', 'route' => 'public.cart.index', 'active' => ['public.cart.index']],
+            ],
+        ],
+        [
             'label' => 'Access Control',
             'icon' => 'ri-shield-user-line',
             'items' => [
@@ -128,6 +172,20 @@ return [
                     'active' => ['kds.*'],
                     'badge' => ['type' => 'text', 'value' => 'WS'],
                 ],
+            ],
+        ],
+        [
+            'label' => 'Portal Staf',
+            'icon' => 'ri-team-line',
+            'items' => [
+                ['label' => 'Dashboard Manager', 'icon' => 'ri-briefcase-line', 'route' => 'manager.dashboard', 'active' => ['manager.dashboard']],
+                ['label' => 'Dashboard Resepsionis', 'icon' => 'ri-customer-service-2-line', 'route' => 'receptionist.dashboard', 'active' => ['receptionist.dashboard']],
+                ['label' => 'Booking Management', 'icon' => 'ri-calendar-check-line', 'route' => 'receptionist.bookings', 'active' => ['receptionist.bookings']],
+                ['label' => 'Portal Waiter', 'icon' => 'ri-walk-line', 'route' => 'waiter.dashboard', 'active' => ['waiter.dashboard']],
+                ['label' => 'Update Status Meja', 'icon' => 'ri-refresh-line', 'route' => 'waiter.tables', 'active' => ['waiter.tables']],
+                ['label' => 'Portal OB', 'icon' => 'ri-brush-line', 'route' => 'ob.dashboard', 'active' => ['ob.dashboard']],
+                ['label' => 'Pembersihan Meja', 'icon' => 'ri-brush-2-line', 'route' => 'ob.tables', 'active' => ['ob.tables']],
+                ['label' => 'Antrean Lagu', 'icon' => 'ri-music-2-line', 'route' => 'songs.queue', 'active' => ['songs.queue']],
             ],
         ],
         [
@@ -191,6 +249,23 @@ return [
             ],
         ],
         [
+            'label' => 'Halaman Publik',
+            'icon' => 'ri-global-line',
+            'items' => [
+                ['label' => 'Beranda Situs', 'icon' => 'ri-home-4-line', 'route' => 'public.home', 'active' => ['public.home']],
+                ['label' => 'Katalog Menu Publik', 'icon' => 'ri-book-open-line', 'route' => 'public.menu', 'active' => ['public.menu', 'public.menu.show']],
+                ['label' => 'Keranjang Publik', 'icon' => 'ri-shopping-cart-line', 'route' => 'public.cart.index', 'active' => ['public.cart.index']],
+            ],
+        ],
+        [
+            'label' => 'User Management',
+            'icon' => 'ri-group-line',
+            'items' => [
+                ['label' => 'Admin & Kasir', 'icon' => 'ri-user-settings-line', 'route' => 'admin-users.index', 'active' => ['admin-users.index']],
+                ['label' => 'Customer', 'icon' => 'ri-user-smile-line', 'route' => 'customer-users.index', 'active' => ['customer-users.index']],
+            ],
+        ],
+        [
             'label' => 'Settings',
             'icon' => 'ri-settings-3-line',
             'items' => [
@@ -204,14 +279,35 @@ return [
 
     'cashier' => [
         [
+            'label' => 'Dashboard',
+            'icon' => 'ri-dashboard-line',
+            'items' => [
+                ['label' => 'Dashboard', 'icon' => 'ri-dashboard-line', 'route' => 'dashboard', 'active' => ['dashboard']],
+            ],
+        ],
+        [
             'label' => 'POS',
             'icon' => 'ri-shopping-basket-line',
             'items' => [
                 ['label' => 'POS Order', 'icon' => 'ri-shopping-basket-line', 'route' => 'pos.order.index', 'active' => ['pos.order.*']],
                 ['label' => 'Tagihan Meja', 'icon' => 'ri-cash-line', 'route' => 'pos.bills', 'active' => ['pos.bills']],
                 ['label' => 'Order', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*'], 'badge' => ['type' => 'dynamic', 'resolver' => 'active_orders']],
-                ['label' => 'Order Item', 'icon' => 'ri-list-check-2', 'route' => 'orders.index', 'active' => ['orders.*']],
                 ['label' => 'Payment', 'icon' => 'ri-wallet-3-line', 'route' => 'payments.index', 'active' => ['payments.*']],
+            ],
+        ],
+        [
+            'label' => 'Halaman Publik',
+            'icon' => 'ri-global-line',
+            'items' => [
+                ['label' => 'Beranda Situs', 'icon' => 'ri-home-4-line', 'route' => 'public.home', 'active' => ['public.home']],
+                ['label' => 'Katalog Menu Publik', 'icon' => 'ri-book-open-line', 'route' => 'public.menu', 'active' => ['public.menu', 'public.menu.show']],
+                ['label' => 'Keranjang Publik', 'icon' => 'ri-shopping-cart-line', 'route' => 'public.cart.index', 'active' => ['public.cart.index']],
+            ],
+        ],
+        [
+            'label' => 'Settings',
+            'icon' => 'ri-settings-3-line',
+            'items' => [
                 ['label' => 'Navigation Settings', 'icon' => 'ri-layout-top-line', 'route' => 'settings.navigation', 'active' => ['settings.navigation']],
             ],
         ],

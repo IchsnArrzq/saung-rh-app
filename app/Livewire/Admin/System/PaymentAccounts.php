@@ -28,8 +28,15 @@ class PaymentAccounts extends Component
 
     public bool $is_active = true;
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', PaymentAccount::class);
+    }
+
     public function create(): void
     {
+        $this->authorize('create', PaymentAccount::class);
+
         $this->reset(['editingId', 'label', 'provider', 'account_number', 'account_holder', 'instructions']);
         $this->type = 'bank';
         $this->is_active = true;
@@ -39,6 +46,8 @@ class PaymentAccounts extends Component
     public function edit(string $id): void
     {
         $account = PaymentAccount::query()->findOrFail($id);
+
+        $this->authorize('update', $account);
 
         $this->editingId = $account->id;
         $this->label = $account->label;
@@ -53,6 +62,13 @@ class PaymentAccounts extends Component
 
     public function save(): void
     {
+        // `editingId` ikut dikirim browser, jadi ability-nya ditentukan di sini
+        // sekali lagi — bukan diwarisi dari create()/edit() yang request-nya
+        // sudah berakhir.
+        $this->editingId
+            ? $this->authorize('update', PaymentAccount::query()->findOrFail($this->editingId))
+            : $this->authorize('create', PaymentAccount::class);
+
         $data = $this->validate([
             'label' => ['required', 'string', 'max:80'],
             'type' => ['required', Rule::in(array_keys(PaymentAccount::TYPES))],
@@ -75,11 +91,16 @@ class PaymentAccounts extends Component
     public function toggle(string $id): void
     {
         $account = PaymentAccount::query()->findOrFail($id);
+
+        $this->authorize('update', $account);
+
         $account->update(['is_active' => ! $account->is_active]);
     }
 
     public function delete(string $id): void
     {
+        $this->authorize('delete', PaymentAccount::query()->findOrFail($id));
+
         PaymentAccount::query()->whereKey($id)->delete();
         session()->flash('success', 'Akun pembayaran dihapus.');
     }

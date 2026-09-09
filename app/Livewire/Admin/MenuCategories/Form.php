@@ -25,6 +25,8 @@ class Form extends Component
     {
         $this->menuCategory = $menuCategory?->exists ? $menuCategory : null;
 
+        $this->authorizeWrite();
+
         if ($this->menuCategory) {
 
             $this->name = (string) $this->menuCategory->name;
@@ -37,8 +39,21 @@ class Form extends Component
 
     }
 
+    /**
+     * Dipanggil di mount() untuk menutup halamannya dan diulang di save():
+     * mount() jalan sekali, save() adalah request HTTP tersendiri sesudahnya.
+     */
+    private function authorizeWrite(): void
+    {
+        $this->menuCategory
+            ? $this->authorize('update', $this->menuCategory)
+            : $this->authorize('create', MenuCategory::class);
+    }
+
     public function save()
     {
+        $this->authorizeWrite();
+
         $validated = $this->validate($this->rules());
         $validated['slug'] = Str::slug($validated['slug'] ?: $validated['name']);
         $validated['is_active'] = (bool) $this->is_active;

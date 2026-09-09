@@ -19,6 +19,11 @@ class Table extends Component
     #[Url(as: 'status', except: '')]
     public string $statusFilter = '';
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', Purchase::class);
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -32,6 +37,8 @@ class Table extends Component
     public function delete(string $id): void
     {
         $purchase = Purchase::query()->findOrFail($id);
+
+        $this->authorize('delete', $purchase);
 
         if ($purchase->isPosted()) {
             session()->flash('error', 'Pembelian yang sudah diposting tidak bisa dihapus.');

@@ -19,6 +19,14 @@ class Overview extends Component
     #[Url(as: 'low', except: '')]
     public string $lowOnly = '';
 
+    public function mount(): void
+    {
+        // Halaman ini menampilkan stok bahan, jadi gerbangnya sama dengan
+        // daftar bahan — cocok dengan `->can('viewAny', Ingredient::class)`
+        // pada route stock.index.
+        $this->authorize('viewAny', Ingredient::class);
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();

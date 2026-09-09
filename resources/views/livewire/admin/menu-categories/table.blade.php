@@ -5,9 +5,11 @@
         <x-search-input class="max-w-md" wire:model.live.debounce.300ms="search"
             placeholder="Cari nama, slug, deskripsi..." label="Cari kategori menu" />
 
-        <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('menu-categories.create')">
-            Tambah Kategori
-        </x-button>
+        @can('create', App\Models\MenuCategory::class)
+            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('menu-categories.create')">
+                Tambah Kategori
+            </x-button>
+        @endcan
     </div>
 
     <x-data-table>
@@ -31,15 +33,20 @@
                 </td>
                 <td class="text-right">
                     <div class="inline-flex gap-2">
-                        <x-button variant="warning" size="sm" :href="route('menu-categories.edit', $category)">
-                            Edit
-                        </x-button>
-                        <x-button variant="error" size="sm"
-                            data-confirm="Hapus kategori ini?"
-                            wire:click="delete('{{ $category->id }}')"
-                            loading="delete('{{ $category->id }}')">
-                            Hapus
-                        </x-button>
+                        @can('update', $category)
+                            <x-button variant="warning" size="sm" :href="route('menu-categories.edit', $category)">
+                                Edit
+                            </x-button>
+                        @endcan
+
+                        @can('delete', $category)
+                            <x-button variant="error" size="sm"
+                                data-confirm="Hapus kategori ini?"
+                                wire:click="delete('{{ $category->id }}')"
+                                loading="delete('{{ $category->id }}')">
+                                Hapus
+                            </x-button>
+                        @endcan
                     </div>
                 </td>
             </tr>

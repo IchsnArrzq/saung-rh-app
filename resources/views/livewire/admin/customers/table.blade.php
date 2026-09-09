@@ -12,9 +12,11 @@
                 @endif
             </div>
 
-            <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('customers.create')">
-                Tambah Pelanggan
-            </x-button>
+            @can('create', App\Models\Customer::class)
+                <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('customers.create')">
+                    Tambah Pelanggan
+                </x-button>
+            @endcan
         </div>
     </x-card>
 
@@ -44,15 +46,20 @@
                 </td>
                 <td class="text-right">
                     <div class="inline-flex gap-2">
-                        <x-button variant="warning" size="sm" :href="route('customers.edit', $customer)">
-                            Edit
-                        </x-button>
-                        <x-button variant="error" size="sm"
-                            data-confirm="Hapus pelanggan ini?"
-                            wire:click="delete('{{ $customer->id }}')"
-                            loading="delete('{{ $customer->id }}')">
-                            Hapus
-                        </x-button>
+                        @can('update', $customer)
+                            <x-button variant="warning" size="sm" :href="route('customers.edit', $customer)">
+                                Edit
+                            </x-button>
+                        @endcan
+
+                        @can('delete', $customer)
+                            <x-button variant="error" size="sm"
+                                data-confirm="Hapus pelanggan ini?"
+                                wire:click="delete('{{ $customer->id }}')"
+                                loading="delete('{{ $customer->id }}')">
+                                Hapus
+                            </x-button>
+                        @endcan
                     </div>
                 </td>
             </tr>

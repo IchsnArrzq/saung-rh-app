@@ -29,6 +29,8 @@ class Form extends Component
     {
         $this->opname = $opname?->exists ? $opname : null;
 
+        $this->authorizeWrite();
+
         if ($this->opname) {
             $this->opname_date = $this->opname->opname_date->toDateString();
             $this->notes = (string) ($this->opname->notes ?? '');
@@ -94,8 +96,21 @@ class Form extends Component
         }
     }
 
+    /**
+     * Dipanggil di mount() untuk menutup halamannya dan diulang di save():
+     * mount() jalan sekali, save() adalah request HTTP tersendiri sesudahnya.
+     */
+    private function authorizeWrite(): void
+    {
+        $this->opname
+            ? $this->authorize('update', $this->opname)
+            : $this->authorize('create', StockOpname::class);
+    }
+
     public function save()
     {
+        $this->authorizeWrite();
+
         if (! $this->opname || $this->opname->isPosted()) {
             return;
         }

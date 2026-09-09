@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\System;
 use App\Domains\System\Enums\SubscriptionStatus;
 use App\Domains\System\QueryUseCases\GetLicenseStatusQueryUseCase;
 use App\Domains\System\UseCases\SaveLicenseUseCase;
+use App\Models\Subscription;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -27,6 +28,8 @@ class LicenseManager extends Component
 
     public function mount(GetLicenseStatusQueryUseCase $license): void
     {
+        $this->authorize('viewAny', Subscription::class);
+
         $sub = $license->current();
 
         if ($sub) {
@@ -42,6 +45,13 @@ class LicenseManager extends Component
 
     public function save(SaveLicenseUseCase $saveLicense): void
     {
+        // Diperiksa lagi di sini, bukan hanya di mount(): save() adalah request
+        // HTTP tersendiri, dan `subscriptionId` ikut dikirim browser. Belum ada
+        // baris berarti ini pembuatan lisensi pertama.
+        $this->subscriptionId
+            ? $this->authorize('update', Subscription::query()->findOrFail($this->subscriptionId))
+            : $this->authorize('create', Subscription::class);
+
         $data = $this->validate([
             'plan' => ['required', 'string', 'max:60'],
             'license_key' => ['required', 'string', 'max:120', Rule::unique('subscriptions', 'license_key')->ignore($this->subscriptionId)],

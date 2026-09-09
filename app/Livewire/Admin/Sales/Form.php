@@ -31,6 +31,8 @@ class Form extends Component
     {
         $this->sale = $sale?->exists ? $sale : null;
 
+        $this->authorizeWrite();
+
         if ($this->sale) {
             $this->customer_id = (string) ($this->sale->customer_id ?? '');
             $this->sale_date = $this->sale->sale_date->toDateString();
@@ -70,8 +72,21 @@ class Form extends Component
         }
     }
 
+    /**
+     * Dipanggil di mount() untuk menutup halamannya dan diulang di save():
+     * mount() jalan sekali, save() adalah request HTTP tersendiri sesudahnya.
+     */
+    private function authorizeWrite(): void
+    {
+        $this->sale
+            ? $this->authorize('update', $this->sale)
+            : $this->authorize('create', Sale::class);
+    }
+
     public function save()
     {
+        $this->authorizeWrite();
+
         if ($this->sale && $this->sale->isPosted()) {
             return;
         }

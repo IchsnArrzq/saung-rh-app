@@ -31,6 +31,8 @@ class Form extends Component
     {
         $this->purchase = $purchase?->exists ? $purchase : null;
 
+        $this->authorizeWrite();
+
         if ($this->purchase) {
             $this->supplier_id = (string) ($this->purchase->supplier_id ?? '');
             $this->purchase_date = $this->purchase->purchase_date->toDateString();
@@ -70,8 +72,21 @@ class Form extends Component
         }
     }
 
+    /**
+     * Dipanggil di mount() untuk menutup halamannya dan diulang di save():
+     * mount() jalan sekali, save() adalah request HTTP tersendiri sesudahnya.
+     */
+    private function authorizeWrite(): void
+    {
+        $this->purchase
+            ? $this->authorize('update', $this->purchase)
+            : $this->authorize('create', Purchase::class);
+    }
+
     public function save()
     {
+        $this->authorizeWrite();
+
         if ($this->purchase && $this->purchase->isPosted()) {
             return;
         }

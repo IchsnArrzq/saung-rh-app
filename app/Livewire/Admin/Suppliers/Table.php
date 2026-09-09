@@ -16,6 +16,11 @@ class Table extends Component
     #[Url(as: 'search', except: '')]
     public string $search = '';
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', Supplier::class);
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -24,6 +29,9 @@ class Table extends Component
     public function delete(string $id): void
     {
         $supplier = Supplier::query()->findOrFail($id);
+
+        $this->authorize('delete', $supplier);
+
         $supplier->delete();
 
         session()->flash('success', 'Supplier berhasil dihapus.');
