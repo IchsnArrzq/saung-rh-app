@@ -126,6 +126,11 @@ class OrderRepository
      * Scoped by `customer_id`, not by table: the guest tracker follows a
      * physical seat, but a logged-in customer follows their own account and
      * should still see the round they placed after moving tables.
+     *
+     * Today only, like activeForTable(): an order the floor forgot to close
+     * stays in an in-service status indefinitely, and showing last week's
+     * stuck ticket under "Pesanan berjalan" would present it as happening now.
+     * It still appears in the full history, with its real status.
      */
     public function activeForCustomer(string $customerId): Collection
     {
@@ -133,6 +138,7 @@ class OrderRepository
             ->with(['items:id,order_id,menu_name_snapshot,qty', 'table:id,code'])
             ->where('customer_id', $customerId)
             ->whereIn('status', OrderStatus::inServiceValues())
+            ->whereDate('ordered_at', Carbon::today())
             ->orderByDesc('ordered_at')
             ->get();
     }
