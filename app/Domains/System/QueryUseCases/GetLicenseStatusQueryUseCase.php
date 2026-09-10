@@ -6,11 +6,10 @@ use App\Domains\System\Repositories\SubscriptionRepository;
 use App\Models\Subscription;
 
 /**
- * Licence state for banners and the settings screen.
+ * Licence state for the banner in the admin shell and the settings screen.
  *
- * Replaces App\Services\Settings\LicenseService — all three of its methods were
- * reads, so a QueryUseCase over a repository says the same thing with one class
- * fewer.
+ * Replaces the old LicenseService — all three of its methods were reads, so a
+ * QueryUseCase over a repository says the same thing with one class fewer.
  */
 class GetLicenseStatusQueryUseCase
 {

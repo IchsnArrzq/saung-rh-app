@@ -38,6 +38,19 @@ enum PaymentMethod: string
         return array_column(self::cases(), 'value');
     }
 
+    /**
+     * Nilai => label, bentuk yang diminta prop `:options` pada <x-select>.
+     *
+     * @return array<string, string>
+     */
+    public static function options(): array
+    {
+        return array_combine(
+            self::values(),
+            array_map(fn (self $method) => $method->label(), self::cases()),
+        );
+    }
+
     /** Cash is settled at the counter; the rest clear through a provider. */
     public function isCash(): bool
     {
