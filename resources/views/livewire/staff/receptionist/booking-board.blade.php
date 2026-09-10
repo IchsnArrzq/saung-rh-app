@@ -62,31 +62,33 @@
                 </td>
                 <td>
                     <div class="flex justify-end gap-1">
-                        @if (! $r->has_deposit && ! in_array($r->status, ['cancelled', 'no_show', 'completed']))
-                            <x-button variant="warning" :outline="true" size="xs"
-                                wire:click="openDeposit('{{ $r->id }}')">
-                                Catat DP
-                            </x-button>
-                        @endif
-                        @if ($r->status !== 'confirmed' && $r->status !== 'cancelled')
-                            <x-button variant="info" :outline="true" size="xs"
-                                wire:click="setStatus('{{ $r->id }}', 'confirmed')">
-                                Konfirmasi
-                            </x-button>
-                        @endif
-                        @if ($r->status !== 'seated' && $r->status !== 'cancelled')
-                            <x-button variant="success" :outline="true" size="xs"
-                                wire:click="setStatus('{{ $r->id }}', 'seated')">
-                                Check-in
-                            </x-button>
-                        @endif
-                        @if ($r->status !== 'cancelled')
-                            <x-button variant="error" :outline="true" size="xs"
-                                wire:click="setStatus('{{ $r->id }}', 'cancelled')"
-                                data-confirm="Batalkan reservasi ini?">
-                                Batal
-                            </x-button>
-                        @endif
+                        @can('update', $r)
+                            @if (! $r->has_deposit && ! in_array($r->status, ['cancelled', 'no_show', 'completed']))
+                                <x-button variant="warning" :outline="true" size="xs"
+                                    wire:click="openDeposit('{{ $r->id }}')">
+                                    Catat DP
+                                </x-button>
+                            @endif
+                            @if ($r->status !== 'confirmed' && $r->status !== 'cancelled')
+                                <x-button variant="info" :outline="true" size="xs"
+                                    wire:click="setStatus('{{ $r->id }}', 'confirmed')">
+                                    Konfirmasi
+                                </x-button>
+                            @endif
+                            @if ($r->status !== 'seated' && $r->status !== 'cancelled')
+                                <x-button variant="success" :outline="true" size="xs"
+                                    wire:click="setStatus('{{ $r->id }}', 'seated')">
+                                    Check-in
+                                </x-button>
+                            @endif
+                            @if ($r->status !== 'cancelled')
+                                <x-button variant="error" :outline="true" size="xs"
+                                    wire:click="setStatus('{{ $r->id }}', 'cancelled')"
+                                    data-confirm="Batalkan reservasi ini?">
+                                    Batal
+                                </x-button>
+                            @endif
+                        @endcan
                     </div>
                 </td>
             </tr>
@@ -109,14 +111,15 @@
                     <x-input label="Nominal DP" name="depositAmount" type="number" min="1" step="1000"
                         wire:model="depositAmount" placeholder="50000" />
 
-                    <x-select label="Metode" name="depositMethod" wire:model="depositMethod" :options="[
-                        'transfer' => 'Transfer',
-                        'qris' => 'QRIS',
-                        'cash' => 'Tunai',
-                        'ewallet' => 'E-Wallet',
-                        'debit_card' => 'Kartu Debit',
-                        'credit_card' => 'Kartu Kredit',
-                    ]" />
+                    {{-- check-ui-allow: select sekali klik, bukan ketikan — rekening tujuan di bawahnya harus ikut berubah saat itu juga. --}}
+                    <x-select label="Metode" name="depositMethod" wire:model.live="depositMethod"
+                        :options="$methodOptions" />
+
+                    {{-- Ganti metode memicu pembacaan rekening di server, jadi panelnya
+                         diredupkan selama request supaya isinya tidak berganti diam-diam. --}}
+                    <div wire:loading.class="opacity-50" wire:target="depositMethod">
+                        <x-payment-accounts :accounts="$accounts" :expected="$accountExpected" />
+                    </div>
 
                     <div class="flex justify-end gap-2">
                         <x-button variant="ghost" size="sm" wire:click="closeDeposit">Batal</x-button>

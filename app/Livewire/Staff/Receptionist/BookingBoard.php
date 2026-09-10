@@ -2,12 +2,15 @@
 
 namespace App\Livewire\Staff\Receptionist;
 
+use App\Domains\Payment\Enums\PaymentMethod;
 use App\Domains\Reservation\Enums\ReservationStatus;
 use App\Domains\Reservation\QueryUseCases\GetReservationListQueryUseCase;
-use App\Models\Reservation;
-use App\Domains\Payment\Enums\PaymentMethod;
 use App\Domains\Reservation\Repositories\ReservationRepository;
 use App\Domains\Reservation\UseCases\RecordReservationDepositUseCase;
+use App\Domains\System\QueryUseCases\GetPaymentAccountsQueryUseCase;
+use App\Domains\Table\Enums\TableStatus;
+use App\Models\Reservation;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -58,6 +61,12 @@ class BookingBoard extends Component
         }
 
         $reservation = Reservation::query()->with('table')->findOrFail($id);
+
+        // Diadili di sini, bukan cuma di rute: Livewire memanggil method ini
+        // lewat POST /livewire/update, yang tidak melewati `can:reservations.manage`
+        // milik rute resepsionis.
+        $this->authorize('update', $reservation);
+
         $reservation->status = $status;
 
         // Keep the table lock in sync with the booking lifecycle.
@@ -76,6 +85,11 @@ class BookingBoard extends Component
     public function openDeposit(string $id): void
     {
         $reservation = Reservation::query()->findOrFail($id);
+
+        // Membuka form DP sudah menyingkap nomor rekening bisnis, jadi diadili
+        // di sini juga — bukan hanya saat menyimpannya.
+        $this->authorize('update', $reservation);
+
         $this->depositFor = $reservation->id;
         $this->depositAmount = (string) ($reservation->deposit_amount ?? config('reservations.default_deposit_amount'));
         $this->depositMethod = 'transfer';
@@ -101,6 +115,10 @@ class BookingBoard extends Component
             return;
         }
 
+        // Diulang di sini: openDeposit() adalah request tersendiri, dan
+        // `depositFor` ikut dikirim browser — jangan percaya sisa state-nya.
+        $this->authorize('update', $reservation);
+
         $recordDeposit->handle(
             $reservation,
             (float) $this->depositAmount,
@@ -108,7 +126,7 @@ class BookingBoard extends Component
             verifiedBy: auth()->user(),
         );
 
-        session()->flash('success', "DP Rp ".number_format((float) $this->depositAmount, 0, ',', '.')." dicatat untuk {$reservation->customer_name}.");
+        session()->flash('success', 'DP Rp '.number_format((float) $this->depositAmount, 0, ',', '.')." dicatat untuk {$reservation->customer_name}.");
 
         $this->closeDeposit();
     }
@@ -122,7 +140,7 @@ class BookingBoard extends Component
     private function onSeated(Reservation $reservation): void
     {
         $reservation->table?->update([
-            'status' => \App\Domains\Table\Enums\TableStatus::Occupied->value,
+            'status' => TableStatus::Occupied->value,
         ]);
     }
 
@@ -133,14 +151,24 @@ class BookingBoard extends Component
         $reservation->releaseTable();
     }
 
-    public function render(GetReservationListQueryUseCase $reservationList): View
-    {
+    public function render(
+        GetReservationListQueryUseCase $reservationList,
+        GetPaymentAccountsQueryUseCase $paymentAccounts,
+    ): View {
         $search = trim($this->search);
 
         return view('livewire.staff.receptionist.booking-board', [
             'reservations' => $reservationList->forBoard($search, $this->statusFilter),
             'counts' => $reservationList->countsByStatus(),
             'todayCount' => $reservationList->countToday(),
+            'methodOptions' => PaymentMethod::options(),
+            // Rekening tujuan hanya dibaca selagi form DP terbuka; papan
+            // reservasi sendiri tidak memerlukannya.
+            'accounts' => $this->depositFor
+                ? $paymentAccounts->forMethod($this->depositMethod)
+                : new Collection,
+            'accountExpected' => $this->depositFor !== null
+                && $paymentAccounts->expectsAccount($this->depositMethod),
         ]);
     }
 }

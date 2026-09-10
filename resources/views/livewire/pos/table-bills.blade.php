@@ -72,10 +72,12 @@
                         </div>
                     </div>
 
-                    <x-button variant="primary" size="sm" :block="true" class="mt-4" icon="ri-cash-line"
-                        wire:click="openSettle('{{ $bill['id'] }}')">
-                        Tutup Tagihan
-                    </x-button>
+                    @can('create', App\Models\Payment::class)
+                        <x-button variant="primary" size="sm" :block="true" class="mt-4" icon="ri-cash-line"
+                            wire:click="openSettle('{{ $bill['id'] }}')">
+                            Tutup Tagihan
+                        </x-button>
+                    @endcan
                 </article>
             @endforeach
         </div>
@@ -115,14 +117,22 @@
                     </div>
                 </div>
 
+                {{-- Ganti metode memicu pembacaan rekening di server, jadi panelnya
+                     diredupkan selama request supaya isinya tidak berganti diam-diam. --}}
+                <div wire:loading.class="opacity-50" wire:target="method">
+                    <x-payment-accounts :accounts="$accounts" :expected="$accountExpected" />
+                </div>
+
                 @error('settle')<p class="text-sm text-error">{{ $message }}</p>@enderror
 
-                <x-button variant="primary" :block="true" icon="ri-checkbox-circle-line"
-                    wire:click="settle" loading="settle"
-                    data-confirm="Konfirmasi pembayaran tagihan ini?"
-                    data-confirm-title="Konfirmasi Pembayaran" data-confirm-yes="Ya, Bayar">
-                    Konfirmasi Pembayaran
-                </x-button>
+                @can('create', App\Models\Payment::class)
+                    <x-button variant="primary" :block="true" icon="ri-checkbox-circle-line"
+                        wire:click="settle" loading="settle"
+                        data-confirm="Konfirmasi pembayaran tagihan ini?"
+                        data-confirm-title="Konfirmasi Pembayaran" data-confirm-yes="Ya, Bayar">
+                        Konfirmasi Pembayaran
+                    </x-button>
+                @endcan
             </div>
         @endif
     </x-modal>
