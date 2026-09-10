@@ -1,5 +1,8 @@
 <div class="drawer lg:drawer-open min-h-screen bg-neutral text-base-content">
-    <input id="customer-drawer" checked type="checkbox" class="drawer-toggle">
+    {{-- Tanpa `checked`: di lg ke atas drawer sudah selalu terbuka lewat
+         lg:drawer-open, jadi atribut itu hanya berpengaruh di layar kecil —
+         dan di sana membuat sidebar menutupi halaman di setiap pemuatan. --}}
+    <input id="customer-drawer" type="checkbox" class="drawer-toggle">
 
     <div class="drawer-content flex min-h-screen flex-col">
             @include('layouts.portals.customer.partials.top-nav')
