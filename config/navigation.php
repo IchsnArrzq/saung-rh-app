@@ -394,6 +394,7 @@ return [
                 ['label' => 'Dashboard', 'icon' => 'ri-dashboard-line', 'route' => 'customer.dashboard', 'active' => ['customer.dashboard']],
                 ['label' => 'Pilih Meja', 'icon' => 'ri-layout-grid-line', 'route' => 'customer.menus.tables', 'active' => ['customer.menus.tables']],
                 ['label' => 'Pesan Menu', 'icon' => 'ri-bowl-line', 'route' => 'customer.menus.index', 'active' => ['customer.menus.*']],
+                ['label' => 'Riwayat Pesanan', 'icon' => 'ri-receipt-line', 'route' => 'customer.orders.index', 'active' => ['customer.orders.*']],
                 ['label' => 'Booking', 'icon' => 'ri-calendar-check-line', 'route' => 'customer.bookings.create', 'active' => ['customer.bookings.*']],
             ],
         ],

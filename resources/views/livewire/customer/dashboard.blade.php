@@ -1,4 +1,39 @@
 <div>
+    {{-- "Pesanan saya sampai mana?" adalah pertanyaan pertama pelanggan, jadi
+         blok ini duduk di atas segalanya (DESIGN.md § portal customer). Hanya
+         dirender kalau memang ada yang sedang berjalan — pelanggan baru tidak
+         perlu disambut dua empty state berturut-turut. --}}
+    @if ($activeOrders->isNotEmpty())
+        <section class="mb-6" wire:poll.visible.30s>
+            <x-card title="Pesanan berjalan">
+                <x-slot:actions>
+                    <x-button variant="ghost" size="sm" icon="ri-receipt-line"
+                        :href="route('customer.orders.index')" wire:navigate>
+                        Riwayat
+                    </x-button>
+                </x-slot:actions>
+
+                <div class="space-y-3">
+                    @foreach ($activeOrders as $order)
+                        <div class="flex flex-wrap items-start justify-between gap-2 rounded-xl border border-base-300 p-4">
+                            <div>
+                                <p class="font-semibold">{{ $order->order_number }}</p>
+                                <p class="text-sm text-base-content/70">
+                                    <span class="tabular-nums">{{ $order->items->sum('qty') }}</span> item
+                                    @if ($order->table?->code)
+                                        &middot; Meja {{ $order->table->code }}
+                                    @endif
+                                    &middot; {{ $order->ordered_at?->format('H:i') ?? '-' }}
+                                </p>
+                            </div>
+                            <x-status-badge :status="$order->status" />
+                        </div>
+                    @endforeach
+                </div>
+            </x-card>
+        </section>
+    @endif
+
     <section class="grid gap-4 md:grid-cols-3">
         <x-stat-card title="Booking Aktif" :value="$stats['active_booking']" icon="ri-calendar-check-line" color="primary" />
         <x-stat-card title="Total Booking" :value="$stats['total_booking']" icon="ri-calendar-2-line" />

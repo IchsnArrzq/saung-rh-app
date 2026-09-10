@@ -120,6 +120,34 @@ class OrderRepository
             ->get();
     }
 
+    /**
+     * In-progress orders belonging to one customer account — their tracker.
+     *
+     * Scoped by `customer_id`, not by table: the guest tracker follows a
+     * physical seat, but a logged-in customer follows their own account and
+     * should still see the round they placed after moving tables.
+     */
+    public function activeForCustomer(string $customerId): Collection
+    {
+        return Order::query()
+            ->with(['items:id,order_id,menu_name_snapshot,qty', 'table:id,code'])
+            ->where('customer_id', $customerId)
+            ->whereIn('status', OrderStatus::inServiceValues())
+            ->orderByDesc('ordered_at')
+            ->get();
+    }
+
+    /** Everything one customer has ordered, newest first. */
+    public function paginateForCustomer(string $customerId, int $perPage = 10): LengthAwarePaginator
+    {
+        return Order::query()
+            ->with(['items:id,order_id,menu_name_snapshot,qty,price,line_total', 'table:id,code'])
+            ->where('customer_id', $customerId)
+            ->orderByDesc('ordered_at')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
     /** Orders live on the floor right now, newest first — the waiter's picker. */
     public function inServiceRecent(int $limit = 50): Collection
     {

@@ -34,6 +34,13 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ route('customer.orders.index') }}"
+                        class="{{ request()->routeIs('customer.orders.*') ? 'active bg-primary text-primary-content' : 'text-base-content hover:bg-base-300' }}">
+                        <i class="ri-receipt-line text-lg"></i>
+                        Riwayat Pesanan
+                    </a>
+                </li>
+                <li>
                     <a href="{{ route('customer.bookings.create') }}"
                         class="{{ request()->routeIs('customer.bookings.*') ? 'active bg-primary text-primary-content' : 'text-base-content hover:bg-base-300' }}">
                         <i class="ri-calendar-check-line text-lg"></i>

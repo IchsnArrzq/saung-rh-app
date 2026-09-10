@@ -1,5 +1,5 @@
 <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-base-300 bg-base-100/95 backdrop-blur md:hidden">
-    <ul class="mx-auto grid w-full max-w-6xl grid-cols-5 text-xs font-semibold">
+    <ul class="mx-auto grid w-full max-w-6xl grid-cols-6 text-xs font-semibold">
         <li>
             <a href="{{ route('customer.dashboard') }}" class="flex flex-col items-center gap-1 py-3 {{ request()->routeIs('customer.dashboard') ? 'text-primary' : 'text-base-content/60' }}">
                 <i class="ri-home-5-line text-lg"></i>
@@ -16,6 +16,12 @@
             <a href="{{ route('customer.menus.index') }}" class="flex flex-col items-center gap-1 py-3 {{ request()->routeIs('customer.menus.index') ? 'text-primary' : 'text-base-content/60' }}">
                 <i class="ri-restaurant-line text-lg"></i>
                 <span>Menu</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('customer.orders.index') }}" class="flex flex-col items-center gap-1 py-3 {{ request()->routeIs('customer.orders.*') ? 'text-primary' : 'text-base-content/60' }}">
+                <i class="ri-receipt-line text-lg"></i>
+                <span>Pesanan</span>
             </a>
         </li>
         <li>
