@@ -18,6 +18,7 @@
     @endif
     <div class="drawer-content">
         @include('layouts.portals.admin.partials.topbar')
+        <x-license-banner />
         @isset($header)
             <div class="px-4 pt-5 md:px-6">
                 <div class="rounded-xl border border-base-300 bg-base-100 px-5 py-4 text-base-content">
