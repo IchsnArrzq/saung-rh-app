@@ -2,10 +2,10 @@
 
 use App\Livewire\Actions\Logout;
 use App\Support\SidebarNavigation;
+use Livewire\Attributes\On;
 use Livewire\Volt\Component;
 
 new class extends Component {
-    public $initial;
     public $profileUrl;
     public ?string $settingsUrl = null;
     public string $navigationMenuPreference = 'sidebar';
@@ -15,7 +15,6 @@ new class extends Component {
 
     public function mount(SidebarNavigation $navigation): void
     {
-        $this->initial = strtoupper(substr(auth()->user()->name ?? 'A', 0, 1));
         $this->profileUrl = route('profile');
         // null, bukan '#': item menunya tidak dirender sama sekali kalau rutenya tidak ada.
         $this->settingsUrl = Route::has('settings.navigation') ? route('settings.navigation') : null;
@@ -26,6 +25,18 @@ new class extends Component {
             ? $preference
             : 'sidebar';
     }
+    /** Foto profil diganti di halaman Profil — render ulang supaya pojok kanan atas ikut berganti. */
+    #[On('profile-photo-updated')]
+    public function refreshAvatar(): void
+    {
+    }
+
+    /** Nama diganti di halaman Profil — sama. */
+    #[On('profile-updated')]
+    public function refreshName(): void
+    {
+    }
+
     /**
      * Log the current user out of the application.
      */
@@ -74,10 +85,7 @@ new class extends Component {
             <details class="dropdown dropdown-end">
             <summary
                 class="flex cursor-pointer list-none items-center gap-2 rounded-xl bg-base-100 px-2 py-1 pr-3">
-                <span
-                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-content">
-                    {{ $initial }}
-                </span>
+                <x-avatar :user="auth()->user()" size="sm" />
                 <span class="hidden text-left md:block">
                     <span class="block text-sm font-semibold">{{ auth()->user()->name ?? 'Admin' }}</span>
                     <span class="block text-xs text-base-content/60">{{ auth()->user()->email ?? '-' }}</span>

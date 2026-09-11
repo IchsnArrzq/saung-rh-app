@@ -16,6 +16,8 @@ new #[Layout('layouts.auth')] class extends Component
     {
         $this->validate([
             'password' => ['required', 'string'],
+        ], [
+            'password.required' => 'Masukkan kata sandi Anda.',
         ]);
 
         if (! Auth::guard('web')->validate([
@@ -23,7 +25,7 @@ new #[Layout('layouts.auth')] class extends Component
             'password' => $this->password,
         ])) {
             throw ValidationException::withMessages([
-                'password' => __('auth.password'),
+                'password' => 'Kata sandi tidak cocok.',
             ]);
         }
 
@@ -34,28 +36,21 @@ new #[Layout('layouts.auth')] class extends Component
 }; ?>
 
 <div>
-    <!-- Heading -->
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-base-content">Konfirmasi password</h1>
+        <h1 class="text-2xl font-bold text-base-content">Konfirmasi kata sandi</h1>
         <p class="mt-1 text-sm text-base-content/60">
-            Ini adalah area aman. Silakan konfirmasi password Anda sebelum melanjutkan.
+            Halaman berikutnya berisi pengaturan penting. Masukkan kata sandi Anda sekali lagi untuk melanjutkan.
         </p>
     </div>
 
     <form wire:submit="confirmPassword" class="space-y-4">
-        <!-- Password -->
-        <div>
-            <x-input-label for="password" :value="__('Password')" class="font-bold" />
-            <x-password-input wire:model="password" id="password" class="block mt-1 w-full"
-                name="password" required autocomplete="current-password" placeholder="Masukkan password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+        <x-field label="Kata sandi" name="password" for="confirm-password" required>
+            <x-password-input id="confirm-password" wire:model="password" autocomplete="current-password" autofocus />
+        </x-field>
 
-        <x-primary-button class="w-full justify-center" wire:target="confirmPassword" wire:loading.attr="disabled">
-            <span wire:loading.remove wire:target="confirmPassword">{{ __('Konfirmasi') }}</span>
-            <span wire:loading wire:target="confirmPassword" class="inline-flex items-center gap-2">
-                <span class="loading loading-spinner loading-xs"></span> {{ __('Memproses...') }}
-            </span>
-        </x-primary-button>
+        <x-button type="submit" variant="primary" :block="true" icon="ri-shield-check-line" loading="confirmPassword"
+            class="min-h-11">
+            Konfirmasi
+        </x-button>
     </form>
 </div>

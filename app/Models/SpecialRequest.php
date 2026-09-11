@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Domains\Social\Enums\SpecialRequestCategory;
 use App\Domains\Social\Enums\SpecialRequestStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -24,12 +23,15 @@ class SpecialRequest extends Model
         'table_id',
         'table_code',
         'requested_by',
-        'category',
+        'special_request_category_id',
         'description',
+        'staff_note',
         'is_paid',
         'price',
         'status',
+        // Sisa alur persetujuan manajer yang lama — tidak diisi lagi.
         'approved_by',
+        // Staf yang menangani (menandai ditangani/selesai/ditolak). Dasar skor KPI.
         'assigned_to',
         'handled_at',
     ];
@@ -41,7 +43,6 @@ class SpecialRequest extends Model
             'price' => 'decimal:2',
             'handled_at' => 'datetime',
             'status' => SpecialRequestStatus::class,
-            'category' => SpecialRequestCategory::class,
         ];
     }
 
@@ -55,6 +56,11 @@ class SpecialRequest extends Model
         return $this->belongsTo(Table::class);
     }
 
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(SpecialRequestCategory::class, 'special_request_category_id');
+    }
+
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
@@ -66,20 +72,12 @@ class SpecialRequest extends Model
     }
 
     /**
-     * @param  Builder<SpecialRequest>  $query
-     */
-    public function scopePending(Builder $query): Builder
-    {
-        return $query->where('status', SpecialRequestStatus::Pending->value);
-    }
-
-    /**
-     * Requests a waiter still needs to act on.
+     * Masih menunggu atau sedang ditangani.
      *
      * @param  Builder<SpecialRequest>  $query
      */
-    public function scopeOpenFor(Builder $query, string $waiterId): Builder
+    public function scopeOpen(Builder $query): Builder
     {
-        return $query->where('assigned_to', $waiterId)->where('status', SpecialRequestStatus::Assigned->value);
+        return $query->whereIn('status', SpecialRequestStatus::openValues());
     }
 }

@@ -191,14 +191,8 @@
                 @forelse ($relatedMenus as $relatedMenu)
                     <a href="{{ $relatedUrl($relatedMenu) }}"
                         class="group flex gap-3 rounded-xl border border-base-300 bg-base-100 p-3 transition hover:border-primary hover:bg-base-200">
-                        @if ($relatedMenu->image_url)
-                            <img src="{{ $relatedMenu->image_url }}" alt="{{ $relatedMenu->name }}"
-                                class="h-20 w-24 shrink-0 rounded-lg object-cover">
-                        @else
-                            <span class="flex h-20 w-24 shrink-0 items-center justify-center rounded-lg bg-base-200 text-base-content/40">
-                                <i class="ri-image-line text-2xl" aria-hidden="true"></i>
-                            </span>
-                        @endif
+                        <x-menu-photo :src="$relatedMenu->display_image_url" :alt="$relatedMenu->name" compact
+                            class="h-20 w-24 shrink-0 rounded-lg" />
                         <div class="min-w-0">
                             <p class="font-semibold group-hover:text-primary">{{ $relatedMenu->name }}</p>
                             <p class="mt-1 text-xs text-secondary">{{ $relatedMenu->category->name ?? 'Menu' }}</p>

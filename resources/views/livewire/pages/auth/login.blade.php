@@ -22,21 +22,14 @@ new #[Layout('layouts.auth')] class extends Component {
         $user = auth()->user();
         $isStaff = $user && ! $user->hasRole('customer');
 
-        $redirectTo = match (true) {
-            $user?->hasRole('cashier') => route('pos.order.index', absolute: false),
-            $user?->hasRole('manager') => route('manager.dashboard', absolute: false),
-            $user?->hasRole('receptionist') => route('receptionist.dashboard', absolute: false),
-            $user?->hasRole('waiter') => route('waiter.dashboard', absolute: false),
-            $user?->hasRole('chef') => route('kds.index', absolute: false),
-            $user?->hasRole('ob') => route('ob.dashboard', absolute: false),
-            $user?->hasAnyRole(['superadmin', 'admin']) => route('dashboard', absolute: false),
-            default => route('customer.dashboard', absolute: false),
-        };
+        // Peran bawaan mendarat di tempat yang sama seperti dulu; peran buatan layar
+        // Peran & hak akses mendarat di halaman pertama yang memang boleh dibukanya.
+        $redirectTo = \App\Support\PortalHome::url($user);
 
         $intended = (string) session()->get('url.intended', '');
         $intendedPath = (string) parse_url($intended, PHP_URL_PATH);
         $intendedIsCustomer = str_starts_with($intendedPath, '/customer');
-        $intendedIsStaff = (bool) preg_match('#^/(admin|manager|receptionist|waiter|ob)#', $intendedPath);
+        $intendedIsStaff = (bool) preg_match('#^/(admin|manager|receptionist|waiter|ob|panel-meja|song-queue)#', $intendedPath);
 
         // Prevent role mismatch redirect loops that end in 403 pages.
         // Staf tidak boleh diarahkan ke portal customer, dan sebaliknya.
@@ -49,65 +42,42 @@ new #[Layout('layouts.auth')] class extends Component {
 }; ?>
 
 <div>
-    <!-- Heading -->
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-base-content">
-            Selamat datang kembali
-            <i class="ri-emotion-happy-line text-primary" aria-hidden="true"></i>
-        </h1>
+        <h1 class="text-2xl font-bold text-base-content">Selamat datang kembali</h1>
         <p class="mt-1 text-sm text-base-content/60">Masuk untuk melanjutkan ke akun Anda.</p>
     </div>
 
-    <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <form wire:submit="login" class="space-y-4">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" class="font-bold" />
-            <x-text-input wire:model.blur="form.email" id="email" class="block mt-1 w-full" type="email" name="email"
-                required autofocus autocomplete="username" placeholder="email@example.com" />
-            <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
-        </div>
+        <x-input label="Email" name="form.email" type="email" icon="ri-mail-line" wire:model.blur="form.email"
+            required autofocus autocomplete="username" placeholder="nama@contoh.com" />
 
-        <!-- Password -->
-        <div>
-            <x-input-label for="password" :value="__('Password')" class="font-bold" />
-            <x-password-input wire:model.blur="form.password" id="password" class="block mt-1 w-full"
-                name="password" required autocomplete="current-password" placeholder="Masukkan password" />
-            <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
-        </div>
+        <x-field label="Kata sandi" name="form.password" for="login-password" required>
+            <x-password-input id="login-password" wire:model.blur="form.password" autocomplete="current-password"
+                placeholder="Masukkan kata sandi" />
+        </x-field>
 
-        <!-- Remember Me + Forgot password -->
-        <div class="flex items-center justify-between">
-            <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox"
-                    class="checkbox checkbox-sm checkbox-primary rounded-md border"
-                    name="remember">
-                <span class="ms-2 text-sm text-base-content/70">{{ __('Remember me') }}</span>
-            </label>
+        <div class="flex items-center justify-between gap-3">
+            <x-checkbox name="form.remember" wire:model="form.remember" label="Ingat saya di perangkat ini" size="sm" />
 
             @if (Route::has('password.request'))
-                <a class="rounded-md text-sm font-medium text-base-content/70 transition hover:text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100"
-                    href="{{ route('password.request') }}" wire:navigate>
-                    {{ __('Lupa password?') }}
+                <a href="{{ route('password.request') }}" wire:navigate
+                    class="link link-hover shrink-0 text-sm font-medium text-base-content/70 hover:text-primary">
+                    Lupa kata sandi?
                 </a>
             @endif
         </div>
 
-        <x-primary-button class="w-full justify-center" wire:target="login" wire:loading.attr="disabled">
-            <span wire:loading.remove wire:target="login">{{ __('Masuk') }}</span>
-            <span wire:loading wire:target="login" class="inline-flex items-center gap-2">
-                <span class="loading loading-spinner loading-xs"></span> {{ __('Memproses...') }}
-            </span>
-        </x-primary-button>
+        <x-button type="submit" variant="primary" :block="true" icon="ri-login-box-line" loading="login" class="min-h-11">
+            Masuk
+        </x-button>
     </form>
 
     @if (Route::has('register'))
         <p class="mt-6 text-center text-sm text-base-content/70">
-            {{ __('Belum punya akun?') }}
-            <a href="{{ route('register') }}" wire:navigate
-                class="font-semibold text-primary transition hover:underline">{{ __('Daftar sekarang') }}</a>
+            Belum punya akun?
+            <a href="{{ route('register') }}" wire:navigate class="link link-hover font-semibold text-primary">Daftar sekarang</a>
         </p>
     @endif
 </div>

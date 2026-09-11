@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Domains\Employee\Enums\ShiftStatus;
 use App\Models\Shift;
 use App\Models\SpecialRequest;
+use App\Models\SpecialRequestCategory;
 use App\Models\TableSession;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -48,7 +49,8 @@ class Fase6DemoSeeder extends Seeder
                 ]);
             }
 
-            // Guarantee at least one waiter is on shift today for matchmaking.
+            // Guarantee at least one waiter is on shift today, so the shift board
+            // and staff KPI have someone to show.
             if ($person->hasRole('waiter')) {
                 Shift::query()->firstOrCreate([
                     'user_id' => $person->id,
@@ -71,13 +73,15 @@ class Fase6DemoSeeder extends Seeder
 
         $session = TableSession::query()->active()->with('table')->first();
         $waiter = User::query()->role('waiter')->first();
-        $manager = User::query()->role('manager')->first();
+
+        // Kategori bawaan dibuat oleh migrasi create_special_request_categories.
+        $categoryIds = SpecialRequestCategory::query()->pluck('id', 'slug');
 
         $samples = [
-            ['category' => 'celebration', 'description' => 'Tolong siapkan kejutan kue ulang tahun jam 8 malam.', 'status' => 'pending'],
-            ['category' => 'ambience', 'description' => 'Mohon kecilkan volume musik di area kami.', 'status' => 'pending'],
-            ['category' => 'service', 'description' => 'Minta tambahan tisu dan air putih.', 'status' => 'assigned'],
-            ['category' => 'kitchen', 'description' => 'Nasi goreng tanpa bawang, alergi.', 'status' => 'done'],
+            ['category' => 'perayaan', 'description' => 'Tolong siapkan kejutan kue ulang tahun jam 8 malam.', 'status' => 'pending'],
+            ['category' => 'suasana', 'description' => 'Mohon kecilkan volume musik di area kami.', 'status' => 'pending'],
+            ['category' => 'pelayanan', 'description' => 'Minta tambahan tisu dan air putih.', 'status' => 'assigned'],
+            ['category' => 'dapur', 'description' => 'Nasi goreng tanpa bawang, alergi.', 'status' => 'done'],
         ];
 
         foreach ($samples as $sample) {
@@ -86,12 +90,11 @@ class Fase6DemoSeeder extends Seeder
                 'table_id' => $session?->table_id,
                 'table_code' => $session?->table?->code ?? 'T-01',
                 'requested_by' => 'Tamu Demo',
-                'category' => $sample['category'],
+                'special_request_category_id' => $categoryIds[$sample['category']] ?? null,
                 'description' => $sample['description'],
-                'is_paid' => $sample['category'] === 'celebration',
-                'price' => $sample['category'] === 'celebration' ? 150000 : null,
+                'is_paid' => $sample['category'] === 'perayaan',
+                'price' => $sample['category'] === 'perayaan' ? 150000 : null,
                 'status' => $sample['status'],
-                'approved_by' => in_array($sample['status'], ['assigned', 'done'], true) ? $manager?->id : null,
                 'assigned_to' => in_array($sample['status'], ['assigned', 'done'], true) ? $waiter?->id : null,
                 'handled_at' => $sample['status'] === 'done' ? now()->subHours(2) : null,
             ]);

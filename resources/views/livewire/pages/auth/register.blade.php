@@ -30,10 +30,33 @@ new #[Layout('layouts.auth')] class extends Component
     }
 
     /**
+     * @return array<string, string>
+     */
+    protected function messages(): array
+    {
+        return [
+            'name.required' => 'Nama wajib diisi.',
+            'name.max' => 'Nama maksimal 255 karakter.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email belum benar, mis. nama@contoh.com.',
+            'email.unique' => 'Email ini sudah terdaftar. Masuk saja, atau pakai email lain.',
+            'password.required' => 'Buat kata sandi untuk akun Anda.',
+            'password.confirmed' => 'Ulangan kata sandi belum sama.',
+            'password.min' => 'Kata sandi minimal :min karakter.',
+        ];
+    }
+
+    /**
      * Validate a single field as the user leaves it (wire:model.blur).
      */
     public function updated(string $property): void
     {
+        if ($property === 'email') {
+            // Dinormalkan dulu: aturan `lowercase` jadi tidak pernah menolak tamu
+            // hanya karena ponselnya menulis huruf besar di awal email.
+            $this->email = mb_strtolower(trim($this->email));
+        }
+
         $this->validateOnly($property);
     }
 
@@ -42,6 +65,8 @@ new #[Layout('layouts.auth')] class extends Component
      */
     public function register(): void
     {
+        $this->email = mb_strtolower(trim($this->email));
+
         $validated = $this->validate();
 
         $validated['password'] = Hash::make($validated['password']);
@@ -68,54 +93,34 @@ new #[Layout('layouts.auth')] class extends Component
 }; ?>
 
 <div>
-    <!-- Heading -->
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-base-content">Buat akun baru</h1>
-        <p class="mt-1 text-sm text-base-content/60">Daftar untuk mulai memesan dengan lebih mudah.</p>
+        <p class="mt-1 text-sm text-base-content/60">Daftar untuk memesan dan memantau pesanan Anda dengan lebih mudah.</p>
     </div>
 
     <form wire:submit="register" class="space-y-4">
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Nama lengkap')" class="font-bold" />
-            <x-text-input wire:model.blur="name" id="name" class="block mt-1 w-full" type="text" name="name" required autofocus autocomplete="name" placeholder="Nama Anda" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-        </div>
+        <x-input label="Nama lengkap" name="name" icon="ri-user-line" wire:model.blur="name" required autofocus
+            autocomplete="name" placeholder="Nama Anda" />
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" class="font-bold" />
-            <x-text-input wire:model.blur="email" id="email" class="block mt-1 w-full" type="email" name="email" required autocomplete="username" placeholder="email@example.com" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <x-input label="Email" name="email" type="email" icon="ri-mail-line" wire:model.blur="email" required
+            autocomplete="username" placeholder="nama@contoh.com" />
 
-        <!-- Password -->
-        <div>
-            <x-input-label for="password" :value="__('Password')" class="font-bold" />
-            <x-password-input wire:model.blur="password" id="password" class="block mt-1 w-full"
-                name="password" required autocomplete="new-password" placeholder="Minimal 8 karakter" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+        <x-field label="Kata sandi" name="password" for="register-password" required hint="Minimal 8 karakter.">
+            <x-password-input id="register-password" wire:model.blur="password" autocomplete="new-password" />
+        </x-field>
 
-        <!-- Confirm Password -->
-        <div>
-            <x-input-label for="password_confirmation" :value="__('Konfirmasi Password')" class="font-bold" />
-            <x-password-input wire:model.blur="password_confirmation" id="password_confirmation" class="block mt-1 w-full"
-                name="password_confirmation" required autocomplete="new-password" placeholder="Ulangi password" />
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
+        <x-field label="Ulangi kata sandi" name="password_confirmation" for="register-password-confirmation" required>
+            <x-password-input id="register-password-confirmation" wire:model.blur="password_confirmation"
+                autocomplete="new-password" />
+        </x-field>
 
-        <x-primary-button class="w-full justify-center" wire:target="register" wire:loading.attr="disabled">
-            <span wire:loading.remove wire:target="register">{{ __('Daftar') }}</span>
-            <span wire:loading wire:target="register" class="inline-flex items-center gap-2">
-                <span class="loading loading-spinner loading-xs"></span> {{ __('Memproses...') }}
-            </span>
-        </x-primary-button>
+        <x-button type="submit" variant="primary" :block="true" icon="ri-user-add-line" loading="register" class="min-h-11">
+            Daftar
+        </x-button>
     </form>
 
     <p class="mt-6 text-center text-sm text-base-content/70">
-        {{ __('Sudah punya akun?') }}
-        <a href="{{ route('login') }}" wire:navigate
-            class="font-semibold text-primary transition hover:underline">{{ __('Masuk di sini') }}</a>
+        Sudah punya akun?
+        <a href="{{ route('login') }}" wire:navigate class="link link-hover font-semibold text-primary">Masuk di sini</a>
     </p>
 </div>

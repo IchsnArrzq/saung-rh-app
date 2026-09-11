@@ -51,10 +51,10 @@ class Table extends Component
             ->with('category')
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('sku', 'like', '%'.$search.'%')
-                        ->orWhere('description', 'like', '%'.$search.'%')
-                        ->orWhereHas('category', fn (Builder $category) => $category->where('name', 'like', '%'.$search.'%'));
+                    $inner->whereLike('name', '%'.$search.'%')
+                        ->orWhereLike('sku', '%'.$search.'%')
+                        ->orWhereLike('description', '%'.$search.'%')
+                        ->orWhereHas('category', fn (Builder $category) => $category->whereLike('name', '%'.$search.'%'));
                 });
             })
             ->latest()

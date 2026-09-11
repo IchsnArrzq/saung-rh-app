@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Frontend;
 
-use App\Events\ChatMessagePosted;
-use App\Models\Table;
+use App\Domains\Social\QueryUseCases\GetTableChatDirectoryQueryUseCase;
 use App\Domains\Social\Services\ChatService;
 use App\Domains\Table\QueryUseCases\GetTableSessionQueryUseCase;
+use App\Events\ChatMessagePosted;
+use App\Events\FloorActivity;
+use App\Models\Table;
+use App\Support\LiveUpdate;
 use App\Support\TableSessionContext;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -17,15 +20,18 @@ use RuntimeException;
 
 /**
  * WhatsApp-style table chat. A list of conversations lets a guest open their own
- * table's private room (people seated together) or a direct chat with any other
- * table that is currently occupied.
+ * table's private room (people seated together, plus replies from floor staff)
+ * or a direct chat with any other table that is currently occupied.
+ *
+ * Tables are read through GetTableChatDirectoryQueryUseCase — never with
+ * Table::query() in render() (AGENTS.md § Livewire Rules).
  */
 class TableChat extends Component
 {
-    /** Table statuses that count as "occupied" and thus reachable for a DM. */
-    private const OCCUPIED_STATUS_KEYS = ['occupied', 'order_in'];
-
-    #[Validate('required|string|max:280')]
+    #[Validate('required|string|max:280', message: [
+        'required' => 'Tulis pesan dulu.',
+        'max' => 'Pesan maksimal 280 karakter.',
+    ])]
     public string $body = '';
 
     /** Locked: the room a guest posts to is their session's table, never one they type in. */
@@ -64,12 +70,13 @@ class TableChat extends Component
 
     /**
      * Refresh whenever a message is broadcast to this table's channel — covers
-     * both our own room and any DM we take part in.
+     * both our own room and any DM we take part in. The re-render pulls the
+     * latest messages from Redis; the panel lights the chat tab if it is closed.
      */
     #[On('echo:chat.table.{tableId},ChatMessagePosted')]
     public function onBroadcast(): void
     {
-        // Re-render pulls the latest messages from Redis.
+        $this->dispatch('table-panel-activity', tab: 'chat');
     }
 
     public function saveName(): void
@@ -85,7 +92,7 @@ class TableChat extends Component
         $this->activeConversation = 'room';
     }
 
-    public function openDm(string $otherTableId): void
+    public function openDm(string $otherTableId, GetTableChatDirectoryQueryUseCase $directory): void
     {
         $this->resetErrorBag();
         $this->reset('body');
@@ -95,12 +102,7 @@ class TableChat extends Component
         }
 
         // Only allow DMs to tables that are actually occupied right now.
-        $reachable = Table::query()
-            ->whereKey($otherTableId)
-            ->whereIn('status', self::OCCUPIED_STATUS_KEYS)
-            ->exists();
-
-        if (! $reachable) {
+        if (! $directory->isOccupied($otherTableId)) {
             $this->activeConversation = null;
 
             return;
@@ -116,7 +118,7 @@ class TableChat extends Component
         $this->activeConversation = null;
     }
 
-    public function send(ChatService $chat, GetTableSessionQueryUseCase $sessions): void
+    public function send(ChatService $chat, GetTableChatDirectoryQueryUseCase $directory, GetTableSessionQueryUseCase $sessions): void
     {
         if (! $this->tableId || $this->activeConversation === null) {
             return;
@@ -142,7 +144,7 @@ class TableChat extends Component
 
                 $participants = [$this->tableId];
             } else {
-                $other = Table::query()->find($this->activeConversation);
+                $other = $directory->find($this->activeConversation);
 
                 if (! $other) {
                     $this->addError('body', 'Meja tujuan tidak ditemukan.');
@@ -168,12 +170,20 @@ class TableChat extends Component
             return;
         }
 
-        ChatMessagePosted::dispatch($participants, $message);
+        // Broadcast immediately (ShouldBroadcastNow) — there is no queue worker,
+        // and a queued broadcast never reached the other devices.
+        LiveUpdate::send(new ChatMessagePosted($participants, $message));
+
+        // The staff Panel meja watches table rooms (not private DMs) for guests
+        // waiting on a reply.
+        if ($this->activeConversation === 'room') {
+            LiveUpdate::send(new FloorActivity($this->tableId, FloorActivity::CHAT, FloorActivity::NEW, $this->tableCode));
+        }
 
         $this->reset('body');
     }
 
-    public function render(ChatService $chat, GetTableSessionQueryUseCase $sessions): View
+    public function render(ChatService $chat, GetTableChatDirectoryQueryUseCase $directory, GetTableSessionQueryUseCase $sessions): View
     {
         $available = $chat->available();
         $sessionOpen = $this->sessionOpen($sessions);
@@ -187,7 +197,7 @@ class TableChat extends Component
         if ($this->tableId && $sessionOpen && $available) {
             if ($this->activeConversation === null) {
                 $roomPreview = $chat->roomLastMessage($this->tableId);
-                $conversations = $this->occupiedTables()
+                $conversations = $directory->occupiedExcept($this->tableId)
                     ->map(fn (Table $t): array => [
                         'id' => (string) $t->id,
                         'code' => (string) $t->code,
@@ -201,7 +211,7 @@ class TableChat extends Component
                 $activeType = 'room';
                 $activeHeader = 'Meja '.$this->tableCode;
             } else {
-                $other = Table::query()->find($this->activeConversation);
+                $other = $directory->find($this->activeConversation);
                 $messages = $other ? $chat->dmMessages($this->tableId, (string) $other->id) : [];
                 $activeType = 'dm';
                 $activeHeader = $other ? 'Meja '.$other->code : 'Meja';
@@ -229,19 +239,5 @@ class TableChat extends Component
         $session = $sessions->active(TableSessionContext::sessionId());
 
         return $session !== null && $session->table_id === $this->tableId;
-    }
-
-    /**
-     * Other tables that are currently occupied (reachable for a DM).
-     *
-     * @return \Illuminate\Support\Collection<int, Table>
-     */
-    private function occupiedTables()
-    {
-        return Table::query()
-            ->whereKeyNot($this->tableId)
-            ->whereIn('status', self::OCCUPIED_STATUS_KEYS)
-            ->orderBy('code')
-            ->get();
     }
 }

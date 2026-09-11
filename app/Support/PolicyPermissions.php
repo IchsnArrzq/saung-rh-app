@@ -27,6 +27,7 @@ use App\Models\ServiceLog;
 use App\Models\Shift;
 use App\Models\SongRequest;
 use App\Models\SpecialRequest;
+use App\Models\SpecialRequestCategory;
 use App\Models\StockMovement;
 use App\Models\StockOpname;
 use App\Models\StockOpnameItem;
@@ -74,6 +75,7 @@ class PolicyPermissions
         Shift::class,
         SongRequest::class,
         SpecialRequest::class,
+        SpecialRequestCategory::class,
         StockMovement::class,
         StockOpname::class,
         StockOpnameItem::class,

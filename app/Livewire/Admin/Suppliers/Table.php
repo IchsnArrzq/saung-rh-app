@@ -44,10 +44,10 @@ class Table extends Component
         $suppliers = Supplier::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('code', 'like', '%'.$search.'%')
-                        ->orWhere('contact_person', 'like', '%'.$search.'%')
-                        ->orWhere('phone', 'like', '%'.$search.'%');
+                    $inner->whereLike('name', '%'.$search.'%')
+                        ->orWhereLike('code', '%'.$search.'%')
+                        ->orWhereLike('contact_person', '%'.$search.'%')
+                        ->orWhereLike('phone', '%'.$search.'%');
                 });
             })
             ->latest()

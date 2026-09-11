@@ -37,7 +37,7 @@ class PublicMenuController extends Controller
         $menu->loadMissing(['category', 'images', 'videos']);
 
         $relatedMenus = Menu::query()
-            ->with('category')
+            ->with(['category', 'images'])
             ->available()
             ->whereKeyNot($menu->id)
             ->when($menu->menu_category_id, fn ($query) => $query->where('menu_category_id', $menu->menu_category_id))

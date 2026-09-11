@@ -5,7 +5,7 @@
     <x-card class="space-y-4">
         <div class="flex items-center justify-between">
             <h3 class="font-semibold">
-                <i class="ri-image-line"></i> Galeri Gambar
+                <i class="ri-image-line" aria-hidden="true"></i> Galeri gambar
             </h3>
             <span class="text-xs text-base-content/60">{{ $images->count() }} gambar</span>
         </div>
@@ -42,20 +42,28 @@
             </div>
         @endif
 
-        <form wire:submit="uploadImages" class="space-y-3 border-t border-base-300 pt-4">
-            <x-field label="Tambah Gambar (bisa pilih beberapa)" name="newImages.*"
-                hint="JPG, PNG, WEBP — maks 4 MB / gambar.">
-                <input type="file" class="file-input file-input-bordered w-full" accept="image/*"
-                    multiple wire:model="newImages">
-            </x-field>
+        <form wire:submit="uploadImages" class="space-y-3 pt-2">
+            <x-image-upload name="newImages" wire:model="newImages" label="Tambah gambar" prompt="Pilih gambar" multiple
+                hint="Bisa pilih beberapa sekaligus. JPG, PNG, atau WEBP — maks 4 MB per gambar. Gambar pertama yang diunggah menjadi gambar utama bila belum ada." />
 
-            <div wire:loading wire:target="newImages" class="text-sm text-base-content/60">
-                <x-spinner size="xs" /> Mengunggah...
-            </div>
+            @if (count($newImages) > 0 && ! $errors->has('newImages.*'))
+                {{-- Pratinjau gambar yang sudah terunggah tapi belum disimpan ke menu. --}}
+                <div class="flex flex-wrap gap-2" aria-label="Gambar siap disimpan">
+                    @foreach ($newImages as $pending)
+                        @if (method_exists($pending, 'isPreviewable') && $pending->isPreviewable())
+                            <img src="{{ $pending->temporaryUrl() }}" alt="{{ $pending->getClientOriginalName() }}"
+                                class="h-16 w-16 rounded-lg object-cover">
+                        @endif
+                    @endforeach
+                </div>
+                <p class="text-sm text-base-content/70">
+                    <span class="tabular-nums">{{ count($newImages) }}</span> gambar siap disimpan.
+                </p>
+            @endif
 
             <x-button type="submit" variant="primary" size="sm" icon="ri-upload-2-line"
                 loading="uploadImages, newImages">
-                Simpan Gambar
+                Simpan gambar
             </x-button>
         </form>
     </x-card>
@@ -88,19 +96,18 @@
             </div>
         @endif
 
-        <form wire:submit="uploadVideo" class="space-y-3 border-t border-base-300 pt-4">
-            <x-field label="Tambah Video" name="newVideo" hint="MP4 atau WEBM — maks 50 MB.">
-                <input type="file" class="file-input file-input-bordered w-full" accept="video/mp4,video/webm"
-                    wire:model="newVideo">
-            </x-field>
+        <form wire:submit="uploadVideo" class="space-y-3 pt-2">
+            <x-image-upload name="newVideo" wire:model="newVideo" label="Tambah video" icon="ri-film-line"
+                prompt="Pilih video" accept="video/mp4,video/webm"
+                hint="MP4 atau WEBM — maks 50 MB. Video pertama tampil di detail menu, dengan gambar utama sebagai sampulnya." />
 
-            <div wire:loading wire:target="newVideo" class="text-sm text-base-content/60">
-                <x-spinner size="xs" /> Mengunggah...
-            </div>
+            @if ($newVideo && ! $errors->has('newVideo'))
+                <p class="text-sm text-base-content/70">{{ $newVideo->getClientOriginalName() }} siap disimpan.</p>
+            @endif
 
             <x-button type="submit" variant="primary" size="sm" icon="ri-upload-2-line"
                 loading="uploadVideo, newVideo">
-                Simpan Video
+                Simpan video
             </x-button>
         </form>
     </x-card>

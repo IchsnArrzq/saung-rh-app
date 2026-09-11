@@ -64,15 +64,9 @@
             ])>
                 @forelse ($menus as $menu)
                     <article class="overflow-hidden rounded-xl border border-base-300 bg-base-100">
-                        <div class="relative aspect-[4/3]">
-                            @if ($menu->image_url)
-                                <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}"
-                                    class="h-full w-full rounded-xl object-cover p-1">
-                            @else
-                                <div class="flex h-full items-center justify-center rounded-xl bg-base-200 text-base-content/40">
-                                    <i class="ri-image-line text-4xl"></i>
-                                </div>
-                            @endif
+                        <div class="relative aspect-[4/3] p-1">
+                            <x-menu-photo :src="$menu->display_image_url" :alt="$menu->name"
+                                class="h-full w-full rounded-xl" />
 
                             <x-button variant="neutral" size="sm" shape="circle" icon="ri-information-line"
                                 label="Lihat detail {{ $menu->name }}" class="absolute right-2 top-2 z-10 opacity-90"
@@ -127,16 +121,8 @@
                             <article class="rounded-xl border border-base-300 p-3">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="flex items-start gap-3">
-                                        <div class="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-base-200">
-                                            @if ($item['image_url'])
-                                                <img src="{{ $item['image_url'] }}" alt="{{ $item['name'] }}"
-                                                    class="h-full w-full object-cover">
-                                            @else
-                                                <div class="flex h-full items-center justify-center text-base-content/40">
-                                                    <i class="ri-image-line text-xl"></i>
-                                                </div>
-                                            @endif
-                                        </div>
+                                        <x-menu-photo :src="$item['image_url']" :alt="$item['name']" compact
+                                            class="h-16 w-16 shrink-0 rounded-lg" />
                                         <div>
                                             <p class="font-medium leading-tight">{{ $item['name'] }}</p>
                                             <p class="mt-0.5 text-sm text-base-content/60">
@@ -200,16 +186,15 @@
                         label="Tutup" wire:click="closeMenuDetail" />
                 </div>
 
-                <div class="aspect-[16/10] overflow-hidden rounded-xl bg-base-200">
-                    @if ($selectedMenu['image_url'] !== '')
-                        <img src="{{ $selectedMenu['image_url'] }}" alt="{{ $selectedMenu['name'] }}"
-                            class="h-full w-full object-cover">
-                    @else
-                        <div class="flex h-full items-center justify-center text-base-content/40">
-                            <i class="ri-image-line text-5xl"></i>
-                        </div>
-                    @endif
-                </div>
+                @if (($selectedMenu['video_url'] ?? '') !== '')
+                    {{-- Video menu, dengan foto utamanya sebagai sampul sebelum diputar. --}}
+                    <video src="{{ $selectedMenu['video_url'] }}" controls playsinline preload="metadata"
+                        @if ($selectedMenu['image_url'] !== '') poster="{{ $selectedMenu['image_url'] }}" @endif
+                        class="aspect-[16/10] w-full rounded-xl bg-base-300 object-cover"></video>
+                @else
+                    <x-menu-photo :src="$selectedMenu['image_url']" :alt="$selectedMenu['name']"
+                        class="aspect-[16/10] w-full rounded-xl" />
+                @endif
 
                 <div>
                     <p class="text-2xl font-bold">

@@ -104,7 +104,8 @@ class OrderCard extends Component
             'name' => (string) $menu->name,
             'price' => (float) $menu->price,
             'description' => (string) ($menu->description ?? ''),
-            'image_url' => (string) ($menu->image_url ?? ''),
+            'image_url' => (string) ($menu->display_image_url ?? ''),
+            'video_url' => (string) ($menu->videos->first()?->url ?? ''),
             'is_available' => (bool) $menu->is_available,
             'category_name' => (string) ($menu->category?->name ?? 'Uncategorized'),
             'status_name' => $availability?->label()

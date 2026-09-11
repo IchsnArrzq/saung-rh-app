@@ -53,22 +53,6 @@ class ShiftRepository
     }
 
     /**
-     * Which of the given users are rostered (still `scheduled`) on a date.
-     *
-     * @param  array<int, string>  $userIds
-     * @return array<int, string>
-     */
-    public function onShiftUserIdsForDate(array $userIds, CarbonInterface $date): array
-    {
-        return Shift::query()
-            ->forDate($date)
-            ->where('status', ShiftStatus::Scheduled->value)
-            ->whereIn('user_id', $userIds)
-            ->pluck('user_id')
-            ->all();
-    }
-
-    /**
      * @param  array<string, mixed>  $attributes
      */
     public function create(array $attributes): Shift

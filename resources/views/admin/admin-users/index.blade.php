@@ -1,79 +1,150 @@
 <x-admin-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
-            <h2 class="text-xl font-semibold">Manajemen Admin & Kasir</h2>
-        </div>
+        <h2 class="text-xl font-semibold">Karyawan</h2>
     </x-slot>
 
-    @include('admin.partials.flash')
+    @php
+        $filtered = $search !== '' || $role !== '';
+        $actor = auth()->user();
+        $actorIsSuperadmin = $actor->hasRole(\App\Models\Role::LOCKED);
+    @endphp
 
-    @if (session('error'))
-        <x-alert type="error" class="mb-4">{{ session('error') }}</x-alert>
-    @endif
+    <div class="space-y-5">
+        @include('admin.partials.flash')
 
-    <div class="flex justify-between">
-        <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('admin-users.create')">
-            Tambah Akun
-        </x-button>
-    </div>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <form method="GET" action="{{ route('admin-users.index') }}" role="search"
+                class="flex flex-1 flex-wrap items-center gap-2">
+                <x-search-input name="q" value="{{ $search }}" placeholder="Cari nama, email, atau nomor HP"
+                    label="Cari karyawan" class="sm:max-w-xs" />
 
-    <x-data-table class="mt-5">
-        <x-slot:head>
-            <tr>
-                <th>Nama</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th class="text-center">Status</th>
-                <th class="text-right">Aksi</th>
-            </tr>
-        </x-slot:head>
+                <div class="w-full sm:w-52">
+                    <x-select :bare="true" name="peran" label="Saring menurut peran" :options="$roleOptions"
+                        :selected="$role" placeholder="Semua peran" class="w-full" />
+                </div>
 
-        @forelse($users as $user)
-            <tr>
-                <td class="font-semibold">{{ $user->name }}</td>
-                <td class="text-base-content/70">{{ $user->email }}</td>
-                <td class="capitalize">
-                    <x-badge color="ghost" size="sm" class="font-medium">
-                        {{ $user->roles->pluck('name')->join(', ') }}
-                    </x-badge>
-                </td>
-                <td class="text-center">
-                    @if (!$user->hasRole('superadmin'))
-                        <form action="{{ route('admin-users.status', $user) }}" method="POST" class="inline">
-                            @csrf
-                            @method('PATCH')
-                            <x-button type="submit" variant="{{ $user->is_active ? 'success' : 'error' }}"
-                                :outline="true" size="xs">
-                                {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
-                            </x-button>
-                        </form>
+                <x-button type="submit" variant="outline" icon="ri-filter-3-line">Terapkan</x-button>
+
+                @if ($filtered)
+                    <x-button variant="ghost" :href="route('admin-users.index')">Reset</x-button>
+                @endif
+            </form>
+
+            @can('create', \App\Models\User::class)
+                <x-button variant="primary" icon="ri-user-add-line" :href="route('admin-users.create')">
+                    Tambah karyawan
+                </x-button>
+            @endcan
+        </div>
+
+        @if ($users->isEmpty())
+            <x-empty-state icon="ri-team-line"
+                :title="$filtered ? 'Tidak ada karyawan yang cocok' : 'Belum ada akun karyawan'"
+                :description="$filtered
+                    ? 'Coba kata kunci atau peran lain.'
+                    : 'Tambahkan akun untuk kasir, pelayan, resepsionis, dan staf lainnya.'">
+                <x-slot:actions>
+                    @if ($filtered)
+                        <x-button variant="outline" :href="route('admin-users.index')">Tampilkan semua karyawan</x-button>
                     @else
-                        <div class="inline-flex items-center justify-center gap-1.5 font-semibold text-success"
-                            title="Akun Superadmin diproteksi oleh sistem">
-                            <i class="ri-shield-star-line text-lg"></i>
-                            <span>Aktif</span>
-                        </div>
+                        @can('create', \App\Models\User::class)
+                            <x-button icon="ri-user-add-line" :href="route('admin-users.create')">Tambah karyawan pertama</x-button>
+                        @endcan
                     @endif
-                </td>
-                <td class="text-right">
-                    <div class="inline-flex gap-2">
-                        <x-button variant="ghost" size="sm" :href="route('admin-users.edit', $user)">Edit</x-button>
+                </x-slot:actions>
+            </x-empty-state>
+        @else
+            <x-data-table>
+                <x-slot:head>
+                    <tr>
+                        <th>Karyawan</th>
+                        <th>Peran</th>
+                        <th>Status</th>
+                        <th class="w-px text-right">Aksi</th>
+                    </tr>
+                </x-slot:head>
 
-                        @if (!$user->hasRole('superadmin'))
-                            <form action="{{ route('admin-users.destroy', $user) }}" method="POST"
-                                data-confirm="Yakin ingin menghapus admin ini?" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <x-button type="submit" variant="error" size="sm">Hapus</x-button>
-                            </form>
-                        @endif
-                    </div>
-                </td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="5" class="py-6 text-center text-base-content/50">Belum ada data akun.</td>
-            </tr>
-        @endforelse
-    </x-data-table>
+                @foreach ($users as $user)
+                    @php
+                        $isSuperadmin = $user->hasRole(\App\Models\Role::LOCKED);
+                        $isSelf = $user->is($actor);
+                        $canEdit = $actor->can('update', $user) && (! $isSuperadmin || $actorIsSuperadmin);
+                        $toggleIcon = $user->is_active ? 'ri-user-unfollow-line' : 'ri-user-follow-line';
+                        $toggleLabel = ($user->is_active ? 'Nonaktifkan akun ' : 'Aktifkan akun ').$user->name;
+                    @endphp
+
+                    <tr>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <x-avatar :user="$user" size="sm" />
+                                <div class="min-w-0">
+                                    <p class="truncate font-medium">
+                                        {{ $user->name }}
+                                        @if ($isSelf)
+                                            <span class="font-normal text-base-content/60">(Anda)</span>
+                                        @endif
+                                    </p>
+                                    <p class="truncate text-sm text-base-content/60">
+                                        {{ $user->email }}@if ($user->phone) · {{ $user->phone }}@endif
+                                    </p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="flex flex-wrap gap-1">
+                                @forelse ($user->roles as $userRole)
+                                    @if ($userRole->name === \App\Models\Role::LOCKED)
+                                        <x-badge color="warning" size="sm" icon="ri-shield-star-line">Superadmin</x-badge>
+                                    @else
+                                        <x-badge color="ghost" size="sm">{{ \App\Models\Role::labelFor($userRole->name) }}</x-badge>
+                                    @endif
+                                @empty
+                                    <span class="text-sm text-base-content/60">Belum ada peran</span>
+                                @endforelse
+                            </div>
+                        </td>
+                        <td>
+                            <x-badge size="sm" :color="$user->is_active ? 'success' : 'ghost'">
+                                {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
+                            </x-badge>
+                        </td>
+                        <td>
+                            <div class="flex justify-end gap-1">
+                                @if ($canEdit)
+                                    <x-button variant="ghost" size="sm" shape="square" icon="ri-pencil-line"
+                                        label="Ubah akun {{ $user->name }}" :href="route('admin-users.edit', $user)" />
+                                @endif
+
+                                @if (! $isSuperadmin && ! $isSelf)
+                                    @can('update', $user)
+                                        <form method="POST" action="{{ route('admin-users.status', $user) }}"
+                                            data-confirm="{{ $user->is_active
+                                                ? 'Nonaktifkan akun '.$user->name.'? Ia tidak bisa masuk sampai diaktifkan lagi.'
+                                                : 'Aktifkan lagi akun '.$user->name.'?' }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <x-button type="submit" variant="ghost" size="sm" shape="square"
+                                                :label="$toggleLabel" :icon="$toggleIcon" />
+                                        </form>
+                                    @endcan
+
+                                    @can('delete', $user)
+                                        <form method="POST" action="{{ route('admin-users.destroy', $user) }}"
+                                            data-confirm="Hapus akun {{ $user->name }}? Akun yang masih tercatat di pesanan, shift, atau tip tidak bisa dihapus — nonaktifkan saja.">
+                                            @csrf
+                                            @method('DELETE')
+                                            <x-button type="submit" variant="error" outline size="sm" shape="square"
+                                                icon="ri-delete-bin-line" label="Hapus akun {{ $user->name }}" />
+                                        </form>
+                                    @endcan
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </x-data-table>
+
+            {{ $users->links() }}
+        @endif
+    </div>
 </x-admin-layout>

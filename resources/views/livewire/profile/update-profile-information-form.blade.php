@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -10,14 +11,18 @@ new class extends Component
 {
     public string $name = '';
     public string $email = '';
+    public string $phone = '';
 
     /**
      * Mount the component.
      */
     public function mount(): void
     {
-        $this->name = Auth::user()->name;
-        $this->email = Auth::user()->email;
+        $user = Auth::user();
+
+        $this->name = (string) $user->name;
+        $this->email = (string) $user->email;
+        $this->phone = (string) ($user->phone ?? '');
     }
 
     /**
@@ -27,10 +32,25 @@ new class extends Component
     {
         $user = Auth::user();
 
+        // Dinormalkan sebelum cek unik — users.email di Postgres peka huruf besar-kecil.
+        $this->email = mb_strtolower(trim($this->email));
+
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+()\-\s]+$/'],
+        ], [
+            'name.required' => 'Nama wajib diisi.',
+            'name.max' => 'Nama maksimal 255 karakter.',
+            'email.required' => 'Email wajib diisi — dipakai untuk masuk.',
+            'email.email' => 'Format email belum benar, mis. nama@contoh.com.',
+            'email.unique' => 'Email ini sudah dipakai akun lain.',
+            'phone.regex' => 'Nomor HP hanya boleh berisi angka, spasi, +, -, dan tanda kurung.',
+            'phone.max' => 'Nomor HP maksimal 30 karakter.',
         ]);
+
+        $validated['name'] = trim($validated['name']);
+        $validated['phone'] = filled($validated['phone'] ?? null) ? trim((string) $validated['phone']) : null;
 
         $user->fill($validated);
 
@@ -60,57 +80,66 @@ new class extends Component
 
         Session::flash('status', 'verification-link-sent');
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function with(): array
+    {
+        $user = Auth::user();
+
+        return [
+            'roleLabels' => $user->roles->map(fn ($role) => Role::labelFor((string) $role->name))->implode(', '),
+            'memberSince' => $user->created_at?->format('d/m/Y'),
+        ];
+    }
 }; ?>
 
-<section>
-    <header>
-        <h2 class="text-lg font-medium">
-            {{ __('Profile Information') }}
-        </h2>
+<form wire:submit="updateProfileInformation" class="space-y-4">
+    <div class="grid gap-4 md:grid-cols-2">
+        <x-input label="Nama lengkap" name="name" wire:model="name" required autocomplete="name" />
 
-        <p class="mt-1 text-sm ">
-            {{ __("Update your account's profile information and email address.") }}
-        </p>
-    </header>
+        <x-input label="Nomor HP" name="phone" type="tel" inputmode="numeric" wire:model="phone" autocomplete="tel"
+            hint="Opsional." />
 
-    <form wire:submit="updateProfileInformation" class="mt-6 space-y-6">
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input wire:model="name" id="name" name="name" type="text" class="mt-1 block w-full" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
-        </div>
+        <x-input label="Email" name="email" type="email" wire:model="email" required autocomplete="username"
+            hint="Dipakai untuk masuk ke aplikasi." field-class="md:col-span-2" />
+    </div>
 
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" name="email" type="email" class="mt-1 block w-full" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-
-            @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
-                <div>
-                    <p class="mt-2 text-sm text-base-content/70">
-                        Alamat email ini belum diverifikasi.
-
-                        <button type="button" wire:click.prevent="sendVerification"
-                            class="rounded-field text-sm underline hover:text-base-content focus:outline-none focus:ring-2 focus:ring-primary/40">
-                            Kirim ulang email verifikasi
-                        </button>
-                    </p>
-
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 text-sm font-medium text-success">
-                            Tautan verifikasi baru sudah dikirim ke email kamu.
-                        </p>
-                    @endif
-                </div>
+    @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
+        <x-alert type="warning" title="Email belum diverifikasi">
+            <span class="block">Buka tautan verifikasi yang kami kirim ke email Anda.</span>
+            @if (session('status') === 'verification-link-sent')
+                <span class="mt-1 block font-medium">Tautan verifikasi baru sudah dikirim.</span>
+            @else
+                <x-button variant="link" size="sm" class="mt-1 px-0" wire:click="sendVerification" loading="sendVerification">
+                    Kirim ulang email verifikasi
+                </x-button>
             @endif
-        </div>
+        </x-alert>
+    @endif
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
-
-            <x-action-message class="me-3" on="profile-updated">
-                {{ __('Saved.') }}
-            </x-action-message>
+    <dl class="grid gap-3 rounded-lg bg-base-200 p-3 text-sm sm:grid-cols-2">
+        <div>
+            <dt class="text-base-content/60">Peran</dt>
+            <dd class="font-medium">{{ $roleLabels !== '' ? $roleLabels : 'Belum ada peran' }}</dd>
         </div>
-    </form>
-</section>
+        <div>
+            <dt class="text-base-content/60">Terdaftar sejak</dt>
+            <dd class="font-medium tabular-nums">{{ $memberSince ?? '—' }}</dd>
+        </div>
+    </dl>
+
+    <div class="flex flex-wrap items-center justify-end gap-3">
+        <p x-data="{ shown: false, timer: null }"
+            x-on:profile-updated.window="shown = true; clearTimeout(timer); timer = setTimeout(() => shown = false, 2500)"
+            x-show="shown" x-transition.opacity.duration.200ms style="display: none"
+            class="inline-flex items-center gap-1 text-sm text-success" role="status">
+            <i class="ri-checkbox-circle-line" aria-hidden="true"></i> Data diri tersimpan.
+        </p>
+
+        <x-button type="submit" variant="primary" icon="ri-save-line" loading="updateProfileInformation">
+            Simpan data diri
+        </x-button>
+    </div>
+</form>

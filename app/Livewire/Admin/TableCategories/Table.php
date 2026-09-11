@@ -51,9 +51,9 @@ class Table extends Component
         $tableCategories = TableCategory::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('slug', 'like', '%'.$search.'%')
-                        ->orWhere('description', 'like', '%'.$search.'%');
+                    $inner->whereLike('name', '%'.$search.'%')
+                        ->orWhereLike('slug', '%'.$search.'%')
+                        ->orWhereLike('description', '%'.$search.'%');
                 });
             })
             ->orderBy('sort_order')

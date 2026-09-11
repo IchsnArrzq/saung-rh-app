@@ -77,7 +77,8 @@ class MenuOrder extends Component
             'name' => (string) $menu->name,
             'price' => (float) $menu->price,
             'description' => (string) ($menu->description ?? ''),
-            'image_url' => (string) ($menu->image_url ?? ''),
+            'image_url' => (string) ($menu->display_image_url ?? ''),
+            'video_url' => (string) ($menu->videos->first()?->url ?? ''),
             'category_name' => (string) ($menu->category?->name ?? 'Uncategorized'),
         ];
         $this->detailQty = 1;
@@ -197,7 +198,7 @@ class MenuOrder extends Component
             'id' => (string) $menu->id,
             'name' => (string) $menu->name,
             'price' => (float) $menu->price,
-            'image_url' => $menu->image_url,
+            'image_url' => $menu->display_image_url,
         ], $qty, $notes);
     }
 }

@@ -4,41 +4,26 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
-use App\Support\PolicyPermissions;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
+/**
+ * Pembungkus halaman Peran & hak akses. Daftar, form, dan penyimpanannya hidup
+ * di App\Livewire\Admin\Roles\{Table,Form}.
+ */
 class RolePermissionController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        $roles = Role::with('permissions')->orderBy('name')->get();
-
-        $permissionGroups = PolicyPermissions::groups();
-
-        return view('admin.settings.roles-permissions', compact('roles', 'permissionGroups'));
+        return view('admin.settings.roles.index');
     }
 
-    public function update(Request $request, Role $role)
+    public function create(): View
     {
-        abort_if($role->name === 'superadmin', 403, 'Permission Superadmin tidak dapat diubah.');
+        return view('admin.settings.roles.create');
+    }
 
-        $managedPermissions = PolicyPermissions::names();
-
-        $validated = $request->validate([
-            'permissions' => ['array'],
-            'permissions.*' => ['string', Rule::in($managedPermissions)],
-        ]);
-
-        // This screen only manages the policy-based permission matrix. Any
-        // other permission the role already has (e.g. legacy feature-level
-        // permissions) falls outside that matrix and must be preserved.
-        $untouchedPermissions = $role->permissions->pluck('name')
-            ->reject(fn (string $name) => in_array($name, $managedPermissions, true))
-            ->all();
-
-        $role->syncPermissions([...$untouchedPermissions, ...($validated['permissions'] ?? [])]);
-
-        return back()->with('success', "Permission untuk role \"{$role->name}\" berhasil diperbarui.");
+    public function edit(Role $role): View
+    {
+        return view('admin.settings.roles.edit', ['role' => $role]);
     }
 }

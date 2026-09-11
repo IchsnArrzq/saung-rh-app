@@ -53,8 +53,8 @@ class Table extends Component
             ->when($this->ingredientFilter !== '', fn (Builder $q) => $q->where('ingredient_id', $this->ingredientFilter))
             ->when($search !== '', function (Builder $q) use ($search): void {
                 $q->where(function (Builder $inner) use ($search): void {
-                    $inner->where('notes', 'like', '%'.$search.'%')
-                        ->orWhereHas('ingredient', fn (Builder $i) => $i->where('name', 'like', '%'.$search.'%'));
+                    $inner->whereLike('notes', '%'.$search.'%')
+                        ->orWhereHas('ingredient', fn (Builder $i) => $i->whereLike('name', '%'.$search.'%'));
                 });
             })
             ->latest()

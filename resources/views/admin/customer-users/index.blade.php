@@ -1,7 +1,7 @@
 <x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3">
-            <h2 class="text-xl font-semibold">Manajemen Customer</h2>
+            <h2 class="text-xl font-semibold">Akun pelanggan</h2>
         </div>
     </x-slot>
 
@@ -9,7 +9,7 @@
 
     <div class="flex justify-between">
         <x-button variant="primary" size="sm" icon="ri-add-line" :href="route('customer-users.create')">
-            Tambah Customer
+            Tambah akun pelanggan
         </x-button>
     </div>
 

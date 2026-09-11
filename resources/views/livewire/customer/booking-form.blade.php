@@ -68,15 +68,9 @@
                     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         @forelse ($menus as $menu)
                             <article class="overflow-hidden rounded-xl border border-base-300 bg-base-100">
-                                <div class="aspect-[4/3] bg-base-200">
-                                    @if ($menu->image_url)
-                                        <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}"
-                                            class="h-full w-full rounded-xl object-cover p-1">
-                                    @else
-                                        <div class="flex h-full items-center justify-center text-base-content/40">
-                                            <i class="ri-image-line text-4xl"></i>
-                                        </div>
-                                    @endif
+                                <div class="aspect-[4/3] p-1">
+                                    <x-menu-photo :src="$menu->display_image_url" :alt="$menu->name"
+                                        class="h-full w-full rounded-xl" />
                                 </div>
                                 <div class="space-y-2 p-3">
                                     <div>
@@ -121,16 +115,8 @@
                                 <article class="rounded-xl border border-base-300 p-3" wire:key="item-{{ $item['menu_id'] }}">
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="flex items-start gap-3">
-                                            <div class="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-base-200">
-                                                @if ($item['image_url'])
-                                                    <img src="{{ $item['image_url'] }}" alt="{{ $item['name'] }}"
-                                                        class="h-full w-full object-cover">
-                                                @else
-                                                    <div class="flex h-full items-center justify-center text-base-content/40">
-                                                        <i class="ri-image-line"></i>
-                                                    </div>
-                                                @endif
-                                            </div>
+                                            <x-menu-photo :src="$item['image_url']" :alt="$item['name']" compact
+                                                class="h-14 w-14 shrink-0 rounded-lg" />
                                             <div>
                                                 <p class="font-medium leading-tight">{{ $item['name'] }}</p>
                                                 <p class="mt-0.5 text-sm text-base-content/60">

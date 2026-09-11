@@ -38,15 +38,8 @@
                 @forelse ($cartItems as $item)
                     <div class="rounded-xl border border-base-300 p-3">
                         <div class="flex items-start gap-3">
-                            <div class="h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-base-200">
-                                @if ($item['image_url'])
-                                    <img src="{{ $item['image_url'] }}" alt="{{ $item['name'] }}" class="h-full w-full object-cover">
-                                @else
-                                    <div class="flex h-full items-center justify-center text-base-content/40">
-                                        <i class="ri-image-line text-xl"></i>
-                                    </div>
-                                @endif
-                            </div>
+                            <x-menu-photo :src="$item['image_url']" :alt="$item['name']" compact
+                                class="h-16 w-20 shrink-0 rounded-lg" />
                             <div class="min-w-0 flex-1">
                                 <a href="{{ route('public.menu.show', ['menu' => $item['menu_id']]) }}"
                                     class="font-semibold hover:text-primary hover:underline">

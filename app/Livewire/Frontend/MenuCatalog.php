@@ -37,8 +37,10 @@ class MenuCatalog extends Component
 
     public function showMenuDetail(string $menuId): void
     {
+        // `status` adalah kolom biasa (MenuAvailability), bukan relasi — dulu
+        // eager-load-nya melempar setiap kali tombol detail ditekan.
         $menu = Menu::query()
-            ->with(['category:id,name', 'status:id,name,key,color'])
+            ->with(['category:id,name', 'images', 'videos'])
             ->findOrFail($menuId);
 
         $this->selectedMenu = [
@@ -46,7 +48,8 @@ class MenuCatalog extends Component
             'name' => (string) $menu->name,
             'price' => (float) $menu->price,
             'description' => (string) ($menu->description ?? ''),
-            'image_url' => (string) ($menu->image_url ?? ''),
+            'image_url' => (string) ($menu->display_image_url ?? ''),
+            'video_url' => (string) ($menu->videos->first()?->url ?? ''),
             'is_available' => (bool) $menu->is_available,
             'category_name' => (string) ($menu->category?->name ?? 'Uncategorized'),
             'sku' => (string) ($menu->sku ?? '-'),
@@ -133,15 +136,15 @@ class MenuCatalog extends Component
         $search = trim($this->search);
 
         return Menu::query()
-            ->with('category:id,name')
+            ->with(['category:id,name', 'images'])
             ->available()
             ->when($this->activeCategoryId, fn ($q) => $q->where('menu_category_id', $this->activeCategoryId))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
-                    $inner->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('description', 'like', '%'.$search.'%')
-                        ->orWhere('sku', 'like', '%'.$search.'%')
-                        ->orWhereHas('category', fn ($c) => $c->where('name', 'like', '%'.$search.'%'));
+                    $inner->whereLike('name', '%'.$search.'%')
+                        ->orWhereLike('description', '%'.$search.'%')
+                        ->orWhereLike('sku', '%'.$search.'%')
+                        ->orWhereHas('category', fn ($c) => $c->whereLike('name', '%'.$search.'%'));
                 });
             })
             ->orderBy('name')

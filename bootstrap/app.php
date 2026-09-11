@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\DemoLoginMiddleware;
+use App\Http\Middleware\EnsureAccountIsActive;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Akun yang dinonaktifkan di halaman Karyawan langsung keluar.
+        $middleware->web(append: [EnsureAccountIsActive::class]);
+
         $middleware->alias([
             'demo.login' => DemoLoginMiddleware::class,
             'role' => RoleMiddleware::class,

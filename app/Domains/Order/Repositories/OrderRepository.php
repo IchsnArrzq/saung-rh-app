@@ -401,12 +401,12 @@ class OrderRepository
         }
 
         $query->where(function (Builder $inner) use ($search, $withStatus): void {
-            $inner->where('order_number', 'like', '%'.$search.'%')
-                ->orWhere('customer_name', 'like', '%'.$search.'%')
-                ->orWhereHas('table', fn (Builder $table) => $table->where('code', 'like', '%'.$search.'%'));
+            $inner->whereLike('order_number', '%'.$search.'%')
+                ->orWhereLike('customer_name', '%'.$search.'%')
+                ->orWhereHas('table', fn (Builder $table) => $table->whereLike('code', '%'.$search.'%'));
 
             if ($withStatus) {
-                $inner->orWhere('status', 'like', '%'.$search.'%');
+                $inner->orWhereLike('status', '%'.$search.'%');
             }
         });
     }

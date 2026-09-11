@@ -48,7 +48,7 @@ class BookingForm extends Component
             'menu_id' => (string) $menu->id,
             'name' => (string) $menu->name,
             'price' => (float) $menu->price,
-            'image_url' => $menu->image_url,
+            'image_url' => $menu->display_image_url,
             'qty' => 1,
             'notes' => '',
         ];

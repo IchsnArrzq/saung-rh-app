@@ -24,10 +24,9 @@
         @forelse ($menus as $menu)
             <article class="overflow-hidden rounded-xl border border-base-300 bg-base-100"
                 wire:key="menu-card-{{ $menu->id }}">
-                <div class="aspect-[4/3] w-full bg-base-200">
-                    <img src="{{ $menu->image_url ?: 'https://picsum.photos/seed/' . urlencode((string) $menu->id) . '/800/600' }}"
-                        alt="{{ $menu->name }}" class="h-full w-full object-cover">
-                </div>
+                {{-- Foto utama dari Media menu. Dulu cadangannya foto acak picsum per id —
+                     admin melihat hidangan yang bukan menunya dan mengira unggahannya gagal. --}}
+                <x-menu-photo :src="$menu->display_image_url" :alt="$menu->name" class="aspect-[4/3] w-full" />
 
                 <div class="p-4">
                     <div class="flex items-start justify-between gap-2">

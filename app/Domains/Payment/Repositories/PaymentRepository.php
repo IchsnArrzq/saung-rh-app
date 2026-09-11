@@ -24,10 +24,10 @@ class PaymentRepository
             ->with('order')
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('method', 'like', '%'.$search.'%')
-                        ->orWhere('status', 'like', '%'.$search.'%')
-                        ->orWhere('reference', 'like', '%'.$search.'%')
-                        ->orWhereHas('order', fn (Builder $order) => $order->where('order_number', 'like', '%'.$search.'%'));
+                    $inner->whereLike('method', '%'.$search.'%')
+                        ->orWhereLike('status', '%'.$search.'%')
+                        ->orWhereLike('reference', '%'.$search.'%')
+                        ->orWhereHas('order', fn (Builder $order) => $order->whereLike('order_number', '%'.$search.'%'));
                 });
             })
             ->latest()

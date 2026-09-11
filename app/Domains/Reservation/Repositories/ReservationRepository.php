@@ -198,12 +198,12 @@ class ReservationRepository
         }
 
         $query->where(function (Builder $inner) use ($search, $withStatus): void {
-            $inner->where('customer_name', 'like', '%'.$search.'%')
-                ->orWhere('phone', 'like', '%'.$search.'%')
-                ->orWhereHas('table', fn (Builder $table) => $table->where('code', 'like', '%'.$search.'%'));
+            $inner->whereLike('customer_name', '%'.$search.'%')
+                ->orWhereLike('phone', '%'.$search.'%')
+                ->orWhereHas('table', fn (Builder $table) => $table->whereLike('code', '%'.$search.'%'));
 
             if ($withStatus) {
-                $inner->orWhere('status', 'like', '%'.$search.'%');
+                $inner->orWhereLike('status', '%'.$search.'%');
             }
         });
     }
