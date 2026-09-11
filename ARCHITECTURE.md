@@ -65,6 +65,22 @@ Customer → Create Reservation → Choose Table → Choose Menu
 → Create Order → Send to Kitchen → Payment → Order Completed → Table Released
 
 
+### QR Table Session Flow
+
+Guest scans table QR → Session **pending** (name + party size; table still free)
+→ Cashier / Receptionist approves → Session **active**, table Occupied, visit counted
+→ Friends' phones join with the 4-digit code shown on the first phone
+→ Order / chat / songs / requests — each re-checks that the session is active
+→ Bill settled (`TableBillsCleared`) or staff mark the table free / cleaning
+→ Session **closed**
+
+The printed QR never changes, so on its own it proves nothing — a photo of it
+works from anywhere. Staff approval is what ties a session to someone actually
+seated. A session is also the only way to place a guest order: there is no
+table picker, and `?table_id=` links are ignored. Staff can end a session by
+hand from Admin → Sesi Meja; rejected or ended sessions stay in that history.
+
+
 ### Kitchen Flow
 
 Order Created → Kitchen Ticket Generated → WebSocket Event

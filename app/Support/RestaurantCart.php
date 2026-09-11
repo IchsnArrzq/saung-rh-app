@@ -3,7 +3,6 @@
 namespace App\Support;
 
 use App\Models\Menu;
-use App\Models\Table;
 use Illuminate\Http\Request;
 
 class RestaurantCart
@@ -17,14 +16,20 @@ class RestaurantCart
     public const MODE_OFFLINE = 'offline';
 
     /**
+     * The table is never taken from the URL or a picker: only a QR check-in
+     * binds one (TableSessionContext), so a guest cannot put an order on a
+     * table they are not sitting at. `?table_id=` links are simply ignored.
+     *
      * @return array{mode:string,table_id:?string}
      */
     public static function context(): array
     {
-        return session(self::SESSION_CONTEXT_KEY, [
-            'mode' => self::MODE_ONLINE,
-            'table_id' => null,
-        ]);
+        $tableId = TableSessionContext::current()['table_id'] ?? null;
+
+        return [
+            'mode' => $tableId ? self::MODE_OFFLINE : session(self::SESSION_CONTEXT_KEY.'.mode', self::MODE_ONLINE),
+            'table_id' => $tableId,
+        ];
     }
 
     /**
@@ -32,29 +37,7 @@ class RestaurantCart
      */
     public static function syncContextFromRequest(Request $request): array
     {
-        $context = self::context();
-
-        $mode = $request->query('mode');
-        if (in_array($mode, [self::MODE_ONLINE, self::MODE_OFFLINE], true)) {
-            $context['mode'] = $mode;
-
-            if ($mode === self::MODE_ONLINE) {
-                $context['table_id'] = null;
-            }
-        }
-
-        if ($request->filled('table_id')) {
-            $table = Table::query()->find($request->string('table_id')->toString());
-            $context['table_id'] = $table?->id;
-
-            if ($table) {
-                $context['mode'] = self::MODE_OFFLINE;
-            }
-        }
-
-        session([self::SESSION_CONTEXT_KEY => $context]);
-
-        return $context;
+        return self::setMode((string) $request->query('mode'));
     }
 
     /**
@@ -62,38 +45,11 @@ class RestaurantCart
      */
     public static function setMode(string $mode): array
     {
-        $context = self::context();
-
-        if (! in_array($mode, [self::MODE_ONLINE, self::MODE_OFFLINE], true)) {
-            return $context;
+        if (in_array($mode, [self::MODE_ONLINE, self::MODE_OFFLINE], true)) {
+            session([self::SESSION_CONTEXT_KEY => ['mode' => $mode]]);
         }
 
-        $context['mode'] = $mode;
-
-        if ($mode === self::MODE_ONLINE) {
-            $context['table_id'] = null;
-        }
-
-        session([self::SESSION_CONTEXT_KEY => $context]);
-
-        return $context;
-    }
-
-    /**
-     * @return array{mode:string,table_id:?string}
-     */
-    public static function setTableId(?string $tableId): array
-    {
-        $context = self::context();
-        $context['table_id'] = $tableId;
-
-        if ($tableId) {
-            $context['mode'] = self::MODE_OFFLINE;
-        }
-
-        session([self::SESSION_CONTEXT_KEY => $context]);
-
-        return $context;
+        return self::context();
     }
 
     /**

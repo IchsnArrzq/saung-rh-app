@@ -26,5 +26,6 @@ final readonly class CreateOrderData
         public ?string $orderedAt = null,
         public ?string $cashierId = null,
         public ?string $customerId = null,
+        public ?string $tableSessionId = null,
     ) {}
 }

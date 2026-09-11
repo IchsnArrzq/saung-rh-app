@@ -62,6 +62,20 @@ class PolicyPermissionMatrixTest extends TestCase
         $this->assertFalse($cashier->hasPermissionTo('menu.delete'));
     }
 
+    public function test_kasir_dan_resepsionis_menyetujui_sesi_meja_pelayan_tidak(): void
+    {
+        foreach (['admin', 'cashier', 'receptionist'] as $name) {
+            $this->assertTrue(
+                $this->role($name)->hasPermissionTo('table_session.update'),
+                "{$name} harus bisa menyetujui sesi meja."
+            );
+        }
+
+        $this->assertTrue($this->role('waiter')->hasPermissionTo('table_session.viewAny'));
+        $this->assertFalse($this->role('waiter')->hasPermissionTo('table_session.update'));
+        $this->assertFalse($this->role('cashier')->hasPermissionTo('table_session.delete'));
+    }
+
     public function test_chef_hanya_menggerakkan_order_bukan_membuat_atau_menghapus(): void
     {
         $chef = $this->role('chef');

@@ -6,8 +6,11 @@ use App\Models\Table;
 use App\Models\TableSession;
 
 /**
- * Stores the active table-session (from QR check-in) in the browser session.
- * Used as the "physical presence" binding for inter-table chat & song requests.
+ * Remembers, in this browser's server-side session, which QR table session the
+ * device belongs to. It only ever holds the id — whether that session is still
+ * waiting, active or over is read fresh from the database on every action
+ * (GetTableSessionQueryUseCase), so a phone taken home loses access the moment
+ * staff close the session, not when its cookie expires.
  */
 class TableSessionContext
 {
@@ -17,31 +20,23 @@ class TableSessionContext
     {
         session()->put(self::KEY, [
             'session_id' => $session->id,
-            'token' => $session->token,
             'table_id' => $table->id,
             'table_code' => $table->code,
+            'qr_token' => $table->qr_token,
         ]);
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return array{session_id: string, table_id: string, table_code: ?string, qr_token: ?string}|null
      */
     public static function current(): ?array
     {
         return session()->get(self::KEY);
     }
 
-    public static function activeSession(): ?TableSession
+    public static function sessionId(): ?string
     {
-        $context = self::current();
-
-        if (! $context || empty($context['session_id'])) {
-            return null;
-        }
-
-        return TableSession::query()
-            ->active()
-            ->find($context['session_id']);
+        return self::current()['session_id'] ?? null;
     }
 
     public static function clear(): void

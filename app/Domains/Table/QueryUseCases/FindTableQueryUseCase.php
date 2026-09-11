@@ -21,6 +21,12 @@ class FindTableQueryUseCase
         return $this->tables->find($tableId);
     }
 
+    /** The table behind a printed QR code. */
+    public function byQrToken(string $token): ?Table
+    {
+        return $this->tables->findByQrToken($token);
+    }
+
     /** A table a seated party may keep ordering on (available, occupied, order_in). */
     public function orderable(string $tableId): ?Table
     {

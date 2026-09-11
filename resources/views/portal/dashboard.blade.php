@@ -6,6 +6,15 @@
         </div>
     </x-slot>
 
+    {{-- Hanya dashboard yang meminta (resepsionis): tamu QR yang menunggu dikonfirmasi. --}}
+    @if (! empty($approvals))
+        @can('viewAny', App\Models\TableSession::class)
+            <div class="mb-6">
+                <livewire:staff.table-session-approvals />
+            </div>
+        @endcan
+    @endif
+
     <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         @foreach ($modules as $module)
             @php

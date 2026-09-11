@@ -27,6 +27,7 @@ class PortalController extends Controller
         return view('portal.dashboard', [
             'title' => 'Dashboard Resepsionis',
             'subtitle' => 'Monitoring operasional cafe secara real-time.',
+            'approvals' => true,
             'modules' => [
                 ['label' => 'Monitor dapur', 'icon' => 'ri-radar-line', 'desc' => 'Pantau status makanan dari dapur.', 'route' => 'kds.index'],
                 ['label' => 'Peta meja', 'icon' => 'ri-layout-grid-line', 'desc' => 'Peta visual meja kosong/terisi.', 'route' => 'receptionist.table-map'],

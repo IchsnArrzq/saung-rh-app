@@ -1,4 +1,8 @@
 <div wire:poll.10s class="space-y-4">
+    @can('viewAny', App\Models\TableSession::class)
+        <livewire:staff.table-session-approvals wire:key="table-session-approvals" />
+    @endcan
+
     {{-- Status summary — label & warna sudah diselesaikan di komponen. --}}
     <div class="flex flex-wrap items-center gap-2">
         @foreach ($summary as $row)

@@ -1,10 +1,26 @@
 <x-guest-layout>
+    @if ($tableSession?->isPending())
+        {{-- Sesi menunggu kasir: menu boleh dilihat, panel meja belum dibuka. --}}
+        <x-alert type="warning" class="mb-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <span>
+                    Meja {{ $tableSession->table->code }} menunggu konfirmasi kasir. Pesanan, chat, dan permintaan
+                    terbuka setelah disetujui.
+                </span>
+                <x-button variant="ghost" size="sm" icon="ri-time-line"
+                    :href="route('checkin.show', ['token' => $tableSession->table->qr_token])">
+                    Lihat status
+                </x-button>
+            </div>
+        </x-alert>
+    @endif
+
     <div>
         <livewire:frontend.menu-catalog />
     </div>
 
-    @if (\App\Support\TableSessionContext::current())
-        @php $tableCode = \App\Support\TableSessionContext::current()['table_code'] ?? null; @endphp
+    @if ($tableSession?->isActive())
+        @php $tableCode = $tableSession->table->code; @endphp
 
         <style>[x-cloak]{display:none!important}</style>
 
@@ -35,13 +51,17 @@
                     {{-- Handle + header --}}
                     <div class="relative shrink-0 px-4 pt-3">
                         <div class="mx-auto mb-2 h-1.5 w-12 rounded-full bg-base-300"></div>
-                        <div class="flex items-center justify-between">
-                            <h2 class="text-base font-bold">
-                                <i class="ri-sparkling-2-line text-primary" aria-hidden="true"></i> Panel meja
-                                @if ($tableCode)
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h2 class="text-base font-bold">
+                                    <i class="ri-sparkling-2-line text-primary" aria-hidden="true"></i> Panel meja
                                     <x-badge color="primary" size="sm" class="align-middle">Meja {{ $tableCode }}</x-badge>
-                                @endif
-                            </h2>
+                                </h2>
+                                <p class="mt-1 text-sm text-base-content/70">
+                                    Kode gabung untuk teman satu meja:
+                                    <span class="font-semibold tabular-nums tracking-widest text-base-content">{{ $tableSession->join_code }}</span>
+                                </p>
+                            </div>
                             <x-button variant="ghost" size="sm" shape="circle" icon="ri-close-line text-lg"
                                 label="Tutup panel" x-on:click="open = false" />
                         </div>
