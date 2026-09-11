@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\TableController;
 use App\Livewire\Admin\TableQrPage;
 use App\Models\Table;
 use App\Models\TableCategory;
+use App\Models\TableSession;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -47,3 +48,9 @@ Route::get('table-categories/create', [TableCategoryController::class, 'create']
 Route::get('table-categories/{tableCategory}/edit', [TableCategoryController::class, 'edit'])
     ->name('table-categories.edit')
     ->can('update', 'tableCategory');
+
+// Riwayat sesi QR meja + baki persetujuan. Tulisannya (setujui, tolak,
+// nonaktifkan) dijaga lagi di dalam method Livewire dengan ability `update`.
+Route::view('table-sessions', 'admin.table-sessions.index')
+    ->name('table-sessions.index')
+    ->can('viewAny', TableSession::class);

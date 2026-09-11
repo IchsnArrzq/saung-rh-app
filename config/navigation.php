@@ -74,6 +74,7 @@ return [
             'items' => [
                 ['label' => 'Table', 'icon' => 'ri-layout-grid-line', 'route' => 'tables.index', 'active' => ['tables.*']],
                 ['label' => 'Table Category', 'icon' => 'ri-layout-2-line', 'route' => 'table-categories.index', 'active' => ['table-categories.*']],
+                ['label' => 'Sesi Meja', 'icon' => 'ri-qr-scan-2-line', 'route' => 'table-sessions.index', 'active' => ['table-sessions.*']],
             ],
         ],
         [
@@ -194,6 +195,7 @@ return [
             'items' => [
                 ['label' => 'Table', 'icon' => 'ri-layout-grid-line', 'route' => 'tables.index', 'active' => ['tables.*']],
                 ['label' => 'Table Category', 'icon' => 'ri-layout-2-line', 'route' => 'table-categories.index', 'active' => ['table-categories.*']],
+                ['label' => 'Sesi Meja', 'icon' => 'ri-qr-scan-2-line', 'route' => 'table-sessions.index', 'active' => ['table-sessions.*']],
             ],
         ],
         [
@@ -293,6 +295,7 @@ return [
                 ['label' => 'Tagihan Meja', 'icon' => 'ri-cash-line', 'route' => 'pos.bills', 'active' => ['pos.bills']],
                 ['label' => 'Order', 'icon' => 'ri-file-list-3-line', 'route' => 'orders.index', 'active' => ['orders.*'], 'badge' => ['type' => 'dynamic', 'resolver' => 'active_orders']],
                 ['label' => 'Payment', 'icon' => 'ri-wallet-3-line', 'route' => 'payments.index', 'active' => ['payments.*']],
+                ['label' => 'Sesi Meja', 'icon' => 'ri-qr-scan-2-line', 'route' => 'table-sessions.index', 'active' => ['table-sessions.*']],
             ],
         ],
         [

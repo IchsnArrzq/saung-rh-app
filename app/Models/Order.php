@@ -22,6 +22,7 @@ class Order extends Model
         'cashier_id',
         'customer_id',
         'table_id',
+        'table_session_id',
         'order_number',
         'customer_name',
         'status',
@@ -48,6 +49,12 @@ class Order extends Model
     public function table(): BelongsTo
     {
         return $this->belongsTo(Table::class);
+    }
+
+    /** The QR session a guest ordered from; null for POS and customer-portal orders. */
+    public function tableSession(): BelongsTo
+    {
+        return $this->belongsTo(TableSession::class);
     }
 
     public function items(): HasMany

@@ -15,6 +15,18 @@ class TableRepository
         return Table::query()->find($id);
     }
 
+    /** The table behind a printed QR code. */
+    public function findByQrToken(string $token): ?Table
+    {
+        return Table::query()->where('qr_token', $token)->first();
+    }
+
+    /** Locked until the surrounding transaction ends. */
+    public function findForUpdate(string $id): ?Table
+    {
+        return Table::query()->lockForUpdate()->find($id);
+    }
+
     /** Tables in a given status, ordered by code. */
     public function byStatus(string $status): Collection
     {
@@ -105,13 +117,5 @@ class TableRepository
         $table->update($attributes);
 
         return $table;
-    }
-
-    /** Ends every active QR session on a table. */
-    public function closeActiveSessions(Table $table): void
-    {
-        $table->tableSessions()
-            ->where('status', 'active')
-            ->update(['status' => 'closed', 'closed_at' => now()]);
     }
 }

@@ -5,9 +5,11 @@ namespace App\Livewire\Frontend;
 use App\Events\ChatMessagePosted;
 use App\Models\Table;
 use App\Domains\Social\Services\ChatService;
+use App\Domains\Table\QueryUseCases\GetTableSessionQueryUseCase;
 use App\Support\TableSessionContext;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -26,8 +28,11 @@ class TableChat extends Component
     #[Validate('required|string|max:280')]
     public string $body = '';
 
+    /** Locked: the room a guest posts to is their session's table, never one they type in. */
+    #[Locked]
     public ?string $tableId = null;
 
+    #[Locked]
     public ?string $tableCode = null;
 
     /** Per-device identity so people sharing a table are distinguishable. */
@@ -111,9 +116,15 @@ class TableChat extends Component
         $this->activeConversation = null;
     }
 
-    public function send(ChatService $chat): void
+    public function send(ChatService $chat, GetTableSessionQueryUseCase $sessions): void
     {
         if (! $this->tableId || $this->activeConversation === null) {
+            return;
+        }
+
+        if (! $this->sessionOpen($sessions)) {
+            $this->addError('body', 'Sesi meja Anda sudah berakhir. Scan QR di meja untuk mulai lagi.');
+
             return;
         }
 
@@ -162,9 +173,10 @@ class TableChat extends Component
         $this->reset('body');
     }
 
-    public function render(ChatService $chat): View
+    public function render(ChatService $chat, GetTableSessionQueryUseCase $sessions): View
     {
         $available = $chat->available();
+        $sessionOpen = $this->sessionOpen($sessions);
 
         $conversations = [];
         $messages = [];
@@ -172,7 +184,7 @@ class TableChat extends Component
         $activeHeader = null;
         $roomPreview = null;
 
-        if ($this->tableId && $available) {
+        if ($this->tableId && $sessionOpen && $available) {
             if ($this->activeConversation === null) {
                 $roomPreview = $chat->roomLastMessage($this->tableId);
                 $conversations = $this->occupiedTables()
@@ -198,12 +210,25 @@ class TableChat extends Component
 
         return view('livewire.frontend.table-chat', [
             'available' => $available,
+            'sessionOpen' => $sessionOpen,
             'conversations' => $conversations,
             'roomPreview' => $roomPreview,
             'messages' => $messages,
             'activeType' => $activeType,
             'activeHeader' => $activeHeader,
         ]);
+    }
+
+    /**
+     * The phone's session is approved, still open, and for the table this chat
+     * was opened on. Read fresh each time — the panel may have been left open
+     * long after staff closed the session.
+     */
+    private function sessionOpen(GetTableSessionQueryUseCase $sessions): bool
+    {
+        $session = $sessions->active(TableSessionContext::sessionId());
+
+        return $session !== null && $session->table_id === $this->tableId;
     }
 
     /**

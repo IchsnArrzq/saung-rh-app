@@ -90,12 +90,14 @@ class PolicyPermissionSeeder extends Seeder
             // Pengaturan Aplikasi memang dikelola admin (nama & kontak bisnis
             // dibaca dari sini), jadi 'edit' — bukan sekadar 'view'. Barisnya
             // di-seed, tidak pernah ditambah atau dihapus dari layar itu.
-            'edit' => [AppSetting::class],
+            // TableSession: menyetujui, menolak, dan menonaktifkan sesi QR meja
+            // (ability `update`), sama seperti kasir dan resepsionis di depan.
+            'edit' => [AppSetting::class, TableSession::class],
             // Layar Lisensi bisa membuat baris pertama lewat updateOrCreate,
             // tapi tidak punya tombol hapus.
             'maintain' => [Subscription::class],
             'view' => [
-                OrderStatusLog::class, StockMovement::class, TableSession::class, VisitorLog::class,
+                OrderStatusLog::class, StockMovement::class, VisitorLog::class,
                 Tip::class, ServiceLog::class, SongRequest::class, SpecialRequest::class,
                 Role::class, Permission::class,
             ],
@@ -112,12 +114,15 @@ class PolicyPermissionSeeder extends Seeder
 
         'receptionist' => [
             'manage' => [Reservation::class, ReservationItem::class, Table::class, TableCategory::class],
-            'edit' => [Order::class],
-            'view' => [OrderItem::class, TableSession::class, VisitorLog::class, Menu::class, Customer::class],
+            // TableSession: resepsionis menyetujui tamu yang scan QR meja.
+            'edit' => [Order::class, TableSession::class],
+            'view' => [OrderItem::class, VisitorLog::class, Menu::class, Customer::class],
         ],
 
         'cashier' => [
             'manage' => [Order::class, OrderItem::class, OrderNote::class, Payment::class],
+            // TableSession: kasir menyetujui tamu yang scan QR meja dari layar POS.
+            'edit' => [TableSession::class],
             'view' => [
                 Menu::class, MenuCategory::class, Table::class, Customer::class,
                 PaymentAccount::class, OrderStatusLog::class,

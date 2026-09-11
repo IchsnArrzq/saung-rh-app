@@ -16,14 +16,14 @@
     <x-page-header title="Cart Pesanan" description="Pesan langsung ke dapur untuk meja Anda (dine-in).">
         <x-slot:actions>
             <x-button variant="ghost" size="sm" icon="ri-arrow-left-line"
-                :href="route('public.menu', ['table_id' => $tableId])">
+                :href="route('public.menu')">
                 Kembali ke Menu
             </x-button>
         </x-slot:actions>
 
         <div class="mt-4 rounded-xl border border-info/30 bg-info/10 p-4 text-sm text-base-content/80">
             <p class="font-semibold"><i class="ri-information-line"></i> Pesan Sekarang (Dine-in)</p>
-            <p class="mt-1">Pilih menu, pastikan meja Anda terpilih, lalu kirim pesanan. Order langsung masuk ke dapur.</p>
+            <p class="mt-1">Pesanan dikirim ke meja tempat Anda scan QR, setelah kasir mengonfirmasi meja itu. Order langsung masuk ke dapur.</p>
             <p class="mt-2">
                 Ingin <span class="font-semibold">reservasi meja untuk nanti</span>?
                 <a href="{{ route('login') }}" class="link link-primary font-semibold">Masuk / Daftar</a>
@@ -48,7 +48,7 @@
                                 @endif
                             </div>
                             <div class="min-w-0 flex-1">
-                                <a href="{{ route('public.menu.show', ['menu' => $item['menu_id'], 'table_id' => $tableId]) }}"
+                                <a href="{{ route('public.menu.show', ['menu' => $item['menu_id']]) }}"
                                     class="font-semibold hover:text-primary hover:underline">
                                     {{ $item['name'] }}
                                 </a>
@@ -78,7 +78,7 @@
                         description="Silakan pilih menu dulu.">
                         <x-slot:actions>
                             <x-button variant="primary" size="sm" icon="ri-restaurant-line"
-                                :href="route('public.menu', ['table_id' => $tableId])">
+                                :href="route('public.menu')">
                                 Lihat Menu
                             </x-button>
                         </x-slot:actions>
@@ -93,18 +93,23 @@
             </p>
 
             <div class="mt-4 space-y-4">
+                {{-- Tidak ada pemilih meja: meja selalu milik sesi QR perangkat ini. --}}
                 <div>
-                    <p class="text-sm font-semibold">Pilih Meja</p>
-                    <div class="mt-2 grid grid-cols-2 gap-2">
-                        @foreach ($tables as $table)
-                            <button type="button" wire:click="selectTable('{{ $table->id }}')"
-                                aria-pressed="{{ (string) $tableId === (string) $table->id ? 'true' : 'false' }}"
-                                class="rounded-xl border p-3 text-left text-sm transition {{ (string) $tableId === (string) $table->id ? 'border-primary bg-primary/10' : 'border-base-300 bg-base-100 hover:border-primary/50' }}">
-                                <p class="font-semibold">{{ $table->code }}</p>
-                                <p class="text-xs text-base-content/60">{{ $table->capacity }} orang</p>
-                            </button>
-                        @endforeach
-                    </div>
+                    <p class="text-sm font-semibold">Meja</p>
+                    @if ($tableSession?->isActive())
+                        <p class="mt-1 text-sm">
+                            Meja <span class="font-semibold tabular-nums">{{ $tableSession->table->code }}</span>
+                            &middot; atas nama {{ $tableSession->customer_name }}
+                        </p>
+                    @elseif ($tableSession)
+                        <x-alert type="warning" class="mt-2">
+                            Meja {{ $tableSession->table->code }} masih menunggu konfirmasi kasir. Siapkan pesanan dulu, lalu kirim setelah disetujui.
+                        </x-alert>
+                    @else
+                        <x-alert type="info" class="mt-2">
+                            Scan QR yang ada di meja Anda untuk bisa mengirim pesanan.
+                        </x-alert>
+                    @endif
                 </div>
 
                 <x-input label="Nama Pemesan (opsional)" name="customerName" wire:model="customerName"
@@ -114,6 +119,7 @@
                     placeholder="opsional" />
 
                 <x-button variant="primary" :block="true" icon="ri-send-plane-2-line"
+                    :disabled="! $tableSession?->isActive()"
                     wire:click="checkout" loading="checkout"
                     data-confirm="Kirim pesanan ini ke dapur?">
                     Kirim Pesanan ke Dapur

@@ -32,6 +32,7 @@ class CreateOrderUseCase
                 'cashier_id' => $data->cashierId ?? Auth::id(),
                 'customer_id' => $data->customerId,
                 'table_id' => $data->tableId,
+                'table_session_id' => $data->tableSessionId,
                 'order_number' => $this->generateOrderNumber->handle(),
                 'customer_name' => $data->customerName,
                 'status' => $data->status->value,

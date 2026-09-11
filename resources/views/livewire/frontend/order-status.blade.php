@@ -6,7 +6,7 @@
         @endif
     </div>
 
-    @if (! $tableId)
+    @if (! $tableId || ! $sessionOpen)
         <div class="alert alert-info text-sm">
             <i class="ri-qr-scan-2-line"></i>
             <span>Pindai QR di meja untuk memantau status pesanan.</span>

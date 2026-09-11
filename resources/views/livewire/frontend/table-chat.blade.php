@@ -1,5 +1,5 @@
 <div class="flex flex-col h-full" wire:key="table-chat">
-    @if (! $tableId)
+    @if (! $tableId || ! $sessionOpen)
         <div class="alert alert-info text-sm">
             <i class="ri-qr-scan-2-line"></i>
             <span>Scan QR meja Anda untuk membuka obrolan meja.</span>

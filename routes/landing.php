@@ -1,15 +1,16 @@
 <?php
 
-use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\PublicHomeController;
 use App\Http\Controllers\PublicMenuCartController;
 use App\Http\Controllers\PublicMenuController;
 use App\Http\Controllers\PwaManifestController;
 use App\Livewire\Frontend\CartCheckout;
+use App\Livewire\Frontend\TableCheckIn;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', PublicHomeController::class)->name('public.home');
-Route::get('t/{token}', CheckInController::class)->name('checkin.show');
+// Printed table QR codes point here — keep the URL and name stable.
+Route::get('t/{token}', TableCheckIn::class)->name('checkin.show');
 Route::get('menu', PublicMenuController::class)->name('public.menu');
 Route::get('menu/{menu}', [PublicMenuController::class, 'show'])->name('public.menu.show');
 Route::post('menu/{menu}/cart', [PublicMenuCartController::class, 'store'])->name('public.menu.cart.store');

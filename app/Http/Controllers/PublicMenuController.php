@@ -2,18 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Domains\Table\QueryUseCases\GetTableSessionQueryUseCase;
 use App\Models\Menu;
 use App\Support\RestaurantCart;
+use App\Support\TableSessionContext;
 use Illuminate\Http\Request;
 
 class PublicMenuController extends Controller
 {
     /**
-     * Handle the incoming request.
+     * The catalog, plus the table panel when this phone's QR session is live.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, GetTableSessionQueryUseCase $sessions)
     {
-        return view('public.menu');
+        $tableSession = $sessions->live(TableSessionContext::sessionId());
+
+        // A phone still carrying a finished session is no longer at that
+        // table: forget it, so the menu stops presenting itself as the table's.
+        if (! $tableSession) {
+            TableSessionContext::clear();
+        }
+
+        return view('public.menu', ['tableSession' => $tableSession]);
     }
 
     public function show(Request $request, Menu $menu)
