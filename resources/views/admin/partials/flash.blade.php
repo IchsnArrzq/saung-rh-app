@@ -2,6 +2,10 @@
     <x-alert type="success" class="mb-4">{{ session('success') }}</x-alert>
 @endif
 
+@if (session('error'))
+    <x-alert type="error" class="mb-4">{{ session('error') }}</x-alert>
+@endif
+
 @if ($errors->any())
     <x-alert type="error" class="mb-4" title="Periksa kembali input berikut:">
         <ul class="mt-2 list-disc pl-5">

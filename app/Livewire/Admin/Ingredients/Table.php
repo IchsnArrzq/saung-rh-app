@@ -44,8 +44,8 @@ class Table extends Component
         $ingredients = Ingredient::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('unit', 'like', '%'.$search.'%');
+                    $inner->whereLike('name', '%'.$search.'%')
+                        ->orWhereLike('unit', '%'.$search.'%');
                 });
             })
             ->latest()

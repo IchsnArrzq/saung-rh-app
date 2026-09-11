@@ -160,6 +160,17 @@ body {
     box-shadow: 0 0 0 3px rgb(255 79 85 / 0.12);
 }
 
+/* Pembungkus `.input` berisi ikon + <input> (pola daisyUI 5, dipakai
+   <x-search-input> dan <x-input icon>): bingkai dan cincin fokus milik
+   pembungkusnya lewat :focus-within di atas. Tanpa pengecualian ini aturan
+   `input:not(...)` di atas ikut memberi <input> di dalamnya bingkai kedua. */
+[data-theme="cr-cafe-resto"] .input :where(input),
+[data-theme="cr-cafe-resto"] .input :where(input):focus {
+    border: 0;
+    box-shadow: none;
+    outline: none;
+}
+
 [data-theme="cr-cafe-resto-dark"] body {
     background: #070616;
 }

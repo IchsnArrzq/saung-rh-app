@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Actions\Logout;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Volt\Component;
 
@@ -13,66 +14,65 @@ new class extends Component
      */
     public function deleteUser(Logout $logout): void
     {
+        $user = Auth::user();
+
+        // Akun karyawan — apalagi Superadmin — tidak menghapus dirinya sendiri; ia
+        // dikelola admin di halaman Karyawan. Menghapusnya dari sini bisa mengunci
+        // restoran keluar dari aplikasinya sendiri. Formnya juga tidak ditawarkan
+        // (profile.blade.php); pengecekan ini untuk request langsung.
+        if ($this->holdsStaffRole($user)) {
+            $this->addError('password', 'Akun karyawan tidak bisa dihapus dari sini. Minta admin menonaktifkannya di halaman Karyawan.');
+
+            return;
+        }
+
         $this->validate([
             'password' => ['required', 'string', 'current_password'],
+        ], [
+            'password.required' => 'Masukkan kata sandi untuk memastikan ini memang Anda.',
+            'password.current_password' => 'Kata sandi tidak cocok.',
         ]);
 
-        tap(Auth::user(), $logout(...))->delete();
+        tap($user, $logout(...))->delete();
 
         $this->redirect('/', navigate: true);
     }
+
+    /** Memegang peran apa pun selain pelanggan = akun karyawan. */
+    private function holdsStaffRole(User $user): bool
+    {
+        return $user->roles->contains(fn ($role) => $role->name !== 'customer');
+    }
 }; ?>
 
-<section class="space-y-6">
-    <header>
-        <h2 class="text-lg font-medium ">
-            {{ __('Delete Account') }}
-        </h2>
+<section class="space-y-4">
+    <p class="text-sm text-base-content/70">
+        Akun Anda dan data yang terhubung dengannya dihapus permanen. Tindakan ini tidak bisa dibatalkan.
+    </p>
 
-        <p class="mt-1 text-sm ">
-            {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
-        </p>
-    </header>
+    <x-button variant="error" outline icon="ri-delete-bin-line" x-data
+        x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
+        Hapus akun saya
+    </x-button>
 
-    <x-danger-button
-        x-data=""
-        x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-    >{{ __('Delete Account') }}</x-danger-button>
-
-    <x-modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable>
-        <form wire:submit="deleteUser" class="p-6">
-
-            <h2 class="text-lg font-medium ">
-                {{ __('Are you sure you want to delete your account?') }}
-            </h2>
-
-            <p class="mt-1 text-sm ">
-                {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
-            </p>
-
-            <div class="mt-6">
-                <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
-
-                <x-text-input
-                    wire:model="password"
-                    id="password"
-                    name="password"
-                    type="password"
-                    class="mt-1 block w-3/4"
-                    placeholder="{{ __('Password') }}"
-                />
-
-                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+    <x-modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" maxWidth="md" focusable>
+        <form wire:submit="deleteUser" class="space-y-4">
+            <div>
+                <h3 class="text-lg font-semibold">Hapus akun Anda?</h3>
+                <p class="mt-1 text-sm text-base-content/70">
+                    Masukkan kata sandi untuk memastikan ini memang Anda. Akun yang sudah dihapus tidak bisa dikembalikan.
+                </p>
             </div>
 
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
-                    {{ __('Cancel') }}
-                </x-secondary-button>
+            <x-field label="Kata sandi" name="password" for="delete-account-password" required>
+                <x-password-input id="delete-account-password" wire:model="password" autocomplete="current-password" />
+            </x-field>
 
-                <x-danger-button class="ms-3">
-                    {{ __('Delete Account') }}
-                </x-danger-button>
+            <div class="flex flex-wrap justify-end gap-2">
+                <x-button variant="ghost" x-on:click="$dispatch('close')">Batal</x-button>
+                <x-button type="submit" variant="error" icon="ri-delete-bin-line" loading="deleteUser">
+                    Hapus akun permanen
+                </x-button>
             </div>
         </form>
     </x-modal>

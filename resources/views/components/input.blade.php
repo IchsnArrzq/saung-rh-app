@@ -16,6 +16,11 @@
     `bare`       melepas pembungkus label/hint/error — untuk kontrol inline di dalam tabel.
     `fieldClass` kelas untuk pembungkus (mis. `md:col-span-2` di dalam grid);
                  `class` biasa tetap menempel ke elemen input-nya.
+    `icon`       memakai pola daisyUI 5: `.input` menjadi <label> pembungkus berisi
+                 ikon + <input>. Ikon absolut di atas <input> tertimpa latar `.input`
+                 (yang di v5 sendiri `position: relative`) dan tidak pernah terlihat.
+                 Pada varian ini `class` menempel ke pembungkusnya — itulah kotak
+                 yang terlihat.
 --}}
 
 @php
@@ -29,11 +34,10 @@
         'lg' => 'input-lg',
     ][$size] ?? '';
 
-    $classes = implode(' ', array_filter([
+    $boxClasses = implode(' ', array_filter([
         'input input-bordered',
         $bare ? null : 'w-full',
         $sizeClass,
-        $icon ? 'pl-10' : null,
         $errorMessage ? 'input-error' : null,
     ]));
 
@@ -46,27 +50,43 @@
         'name' => $name,
         'required' => $required ?: null,
     ]);
+
+    $iconBoxClasses = trim($boxClasses . ' ' . $attributes->get('class', ''));
 @endphp
 
 @if ($bare)
-    <input type="{{ $type }}" @disabled($disabled)
-        @if ($inputId) id="{{ $inputId }}" @endif
-        @if ($errorMessage) aria-invalid="true" @endif
-        @if ($label) aria-label="{{ $label }}" @endif
-        {{ $attributes->except('id')->merge($nativeAttributes)->merge(['class' => $classes]) }}>
-@else
-    <x-field :label="$label" :name="$name" :hint="$hint" :error="$error" :required="$required" :for="$inputId"
-        class="{{ $fieldClass }}">
-        <div @class(['relative' => (bool) $icon])>
-            @if ($icon)
-                <i class="{{ $icon }} pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40"
-                    aria-hidden="true"></i>
-            @endif
-
+    @if ($icon)
+        <label class="{{ $iconBoxClasses }}">
+            <i class="{{ $icon }} shrink-0 text-base-content/50" aria-hidden="true"></i>
             <input type="{{ $type }}" @disabled($disabled)
                 @if ($inputId) id="{{ $inputId }}" @endif
                 @if ($errorMessage) aria-invalid="true" @endif
-                {{ $attributes->except('id')->merge($nativeAttributes)->merge(['class' => $classes]) }}>
-        </div>
+                @if ($label) aria-label="{{ $label }}" @endif
+                {{ $attributes->except(['id', 'class'])->merge($nativeAttributes)->merge(['class' => 'min-w-0 grow']) }}>
+        </label>
+    @else
+        <input type="{{ $type }}" @disabled($disabled)
+            @if ($inputId) id="{{ $inputId }}" @endif
+            @if ($errorMessage) aria-invalid="true" @endif
+            @if ($label) aria-label="{{ $label }}" @endif
+            {{ $attributes->except('id')->merge($nativeAttributes)->merge(['class' => $boxClasses]) }}>
+    @endif
+@else
+    <x-field :label="$label" :name="$name" :hint="$hint" :error="$error" :required="$required" :for="$inputId"
+        class="{{ $fieldClass }}">
+        @if ($icon)
+            <label class="{{ $iconBoxClasses }}">
+                <i class="{{ $icon }} shrink-0 text-base-content/50" aria-hidden="true"></i>
+                <input type="{{ $type }}" @disabled($disabled)
+                    @if ($inputId) id="{{ $inputId }}" @endif
+                    @if ($errorMessage) aria-invalid="true" @endif
+                    {{ $attributes->except(['id', 'class'])->merge($nativeAttributes)->merge(['class' => 'min-w-0 grow']) }}>
+            </label>
+        @else
+            <input type="{{ $type }}" @disabled($disabled)
+                @if ($inputId) id="{{ $inputId }}" @endif
+                @if ($errorMessage) aria-invalid="true" @endif
+                {{ $attributes->except('id')->merge($nativeAttributes)->merge(['class' => $boxClasses]) }}>
+        @endif
     </x-field>
 @endif

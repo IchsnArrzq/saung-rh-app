@@ -27,8 +27,8 @@ class IngredientRepository
         return Ingredient::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('unit', 'like', '%'.$search.'%');
+                    $inner->whereLike('name', '%'.$search.'%')
+                        ->orWhereLike('unit', '%'.$search.'%');
                 });
             })
             ->orderBy('name')
@@ -76,9 +76,9 @@ class IngredientRepository
             ->with('ingredient')
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('type', 'like', '%'.$search.'%')
-                        ->orWhere('notes', 'like', '%'.$search.'%')
-                        ->orWhereHas('ingredient', fn (Builder $ing) => $ing->where('name', 'like', '%'.$search.'%'));
+                    $inner->whereLike('type', '%'.$search.'%')
+                        ->orWhereLike('notes', '%'.$search.'%')
+                        ->orWhereHas('ingredient', fn (Builder $ing) => $ing->whereLike('name', '%'.$search.'%'));
                 });
             })
             ->latest()

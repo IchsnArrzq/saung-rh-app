@@ -31,6 +31,11 @@ class PermissionSeeder extends Seeder
             'users.manage',
             'customer.booking.view',
             'customer.booking.create',
+            // Gerbang kasar area /admin untuk role buatan layar Peran & hak
+            // akses (routes/admin.php). Role bawaan tetap lolos lewat namanya.
+            'backoffice.access',
+            // Membalas & membersihkan obrolan meja dari Panel meja (TablePolicy::moderateChat).
+            'table_chat.moderate',
         ];
 
         foreach ($permissions as $permissionName) {
@@ -104,11 +109,14 @@ class PermissionSeeder extends Seeder
 
         $assignments = [
             'superadmin' => $permissions,
-            'admin' => array_merge($adminPermissions, ['kitchen.view', 'reports.view', 'users.manage', 'tables.status.update']),
-            'manager' => $managerPermissions,
-            'receptionist' => $receptionistPermissions,
-            'cashier' => $cashierPermissions,
-            'waiter' => $waiterPermissions,
+            'admin' => array_merge($adminPermissions, [
+                'kitchen.view', 'reports.view', 'users.manage', 'tables.status.update',
+                'backoffice.access', 'table_chat.moderate',
+            ]),
+            'manager' => array_merge($managerPermissions, ['table_chat.moderate']),
+            'receptionist' => array_merge($receptionistPermissions, ['table_chat.moderate']),
+            'cashier' => array_merge($cashierPermissions, ['backoffice.access', 'table_chat.moderate']),
+            'waiter' => array_merge($waiterPermissions, ['table_chat.moderate']),
             'chef' => $chefPermissions,
             'ob' => $obPermissions,
             'customer' => $customerPermissions,

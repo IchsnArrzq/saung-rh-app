@@ -4,81 +4,27 @@ namespace App\Domains\Social\Repositories;
 
 use App\Domains\Social\Enums\SpecialRequestStatus;
 use App\Models\SpecialRequest;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Str;
 
 class SpecialRequestRepository
 {
     public function find(string $id): ?SpecialRequest
     {
-        return SpecialRequest::query()->find($id);
-    }
-
-    /** One request, but only if it belongs to this waiter. */
-    public function findAssignedTo(string $id, string $waiterId): ?SpecialRequest
-    {
-        return SpecialRequest::query()
-            ->where('assigned_to', $waiterId)
-            ->find($id);
+        return Str::isUuid($id) ? SpecialRequest::query()->find($id) : null;
     }
 
     /**
-     * @return Collection<int, SpecialRequest>
-     */
-    public function pending(): Collection
-    {
-        return SpecialRequest::query()
-            ->where('status', SpecialRequestStatus::Pending->value)
-            ->latest()
-            ->get();
-    }
-
-    /**
-     * Everything past the manager's desk, newest activity first.
-     *
-     * @return Collection<int, SpecialRequest>
-     */
-    public function recentlyHandled(int $limit = 10): Collection
-    {
-        return SpecialRequest::query()
-            ->whereIn('status', SpecialRequestStatus::handledValues())
-            ->with('assignee')
-            ->latest('updated_at')
-            ->limit($limit)
-            ->get();
-    }
-
-    /**
-     * Still on one waiter's plate.
-     *
-     * @return Collection<int, SpecialRequest>
-     */
-    public function openFor(string $waiterId): Collection
-    {
-        return SpecialRequest::query()
-            ->where('assigned_to', $waiterId)
-            ->where('status', SpecialRequestStatus::Assigned->value)
-            ->latest()
-            ->get();
-    }
-
-    public function countDoneTodayFor(string $waiterId): int
-    {
-        return SpecialRequest::query()
-            ->where('assigned_to', $waiterId)
-            ->where('status', SpecialRequestStatus::Done->value)
-            ->whereDate('handled_at', today())
-            ->count();
-    }
-
-    /**
-     * One table's own requests, newest first.
+     * One table's own requests, newest first — the guest's panel.
      *
      * @return Collection<int, SpecialRequest>
      */
     public function forSession(string $sessionId, int $limit = 8): Collection
     {
         return SpecialRequest::query()
+            ->with('category')
             ->where('table_session_id', $sessionId)
             ->latest()
             ->limit($limit)
@@ -86,20 +32,50 @@ class SpecialRequestRepository
     }
 
     /**
-     * How many open requests each of the given waiters is already carrying:
-     * user_id => count. Missing keys mean zero.
+     * Open requests at a table's current (active) session, oldest first — whoever
+     * has waited longest is served first. A request left over from an earlier
+     * session is not "happening at this table now", so it is not shown.
      *
-     * @param  array<int, string>  $waiterIds
+     * @return Collection<int, SpecialRequest>
+     */
+    public function openForTable(string $tableId): Collection
+    {
+        return $this->atActiveSession($tableId)
+            ->with(['category', 'assignee:id,name'])
+            ->whereIn('status', SpecialRequestStatus::openValues())
+            ->oldest()
+            ->get();
+    }
+
+    /**
+     * The last few handled at the same session, for context under the open list.
+     *
+     * @return Collection<int, SpecialRequest>
+     */
+    public function recentlyClosedForTable(string $tableId, int $limit = 5): Collection
+    {
+        return $this->atActiveSession($tableId)
+            ->with(['category', 'assignee:id,name'])
+            ->whereIn('status', SpecialRequestStatus::closedValues())
+            ->latest('handled_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * table_id => open request count, active sessions only. Missing keys mean zero.
+     *
      * @return SupportCollection<string, int>
      */
-    public function activeLoadByAssignee(array $waiterIds): SupportCollection
+    public function openCountsByTable(): SupportCollection
     {
         return SpecialRequest::query()
-            ->where('status', SpecialRequestStatus::Assigned->value)
-            ->whereIn('assigned_to', $waiterIds)
-            ->selectRaw('assigned_to, count(*) as c')
-            ->groupBy('assigned_to')
-            ->pluck('c', 'assigned_to')
+            ->whereIn('status', SpecialRequestStatus::openValues())
+            ->whereNotNull('table_id')
+            ->whereHas('tableSession', fn (Builder $session) => $session->active())
+            ->selectRaw('table_id, count(*) as c')
+            ->groupBy('table_id')
+            ->pluck('c', 'table_id')
             ->map(fn ($count) => (int) $count);
     }
 
@@ -119,5 +95,15 @@ class SpecialRequestRepository
         $request->update($attributes);
 
         return $request;
+    }
+
+    /**
+     * @return Builder<SpecialRequest>
+     */
+    private function atActiveSession(string $tableId): Builder
+    {
+        return SpecialRequest::query()
+            ->where('table_id', $tableId)
+            ->whereHas('tableSession', fn (Builder $session) => $session->active());
     }
 }

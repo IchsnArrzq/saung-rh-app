@@ -61,9 +61,9 @@ class Table extends Component
             ->when($this->statusFilter !== '', fn (Builder $q) => $q->where('status', $this->statusFilter))
             ->when($search !== '', function (Builder $q) use ($search): void {
                 $q->where(function (Builder $inner) use ($search): void {
-                    $inner->where('code', 'like', '%'.$search.'%')
-                        ->orWhere('notes', 'like', '%'.$search.'%')
-                        ->orWhereHas('customer', fn (Builder $c) => $c->where('name', 'like', '%'.$search.'%'));
+                    $inner->whereLike('code', '%'.$search.'%')
+                        ->orWhereLike('notes', '%'.$search.'%')
+                        ->orWhereHas('customer', fn (Builder $c) => $c->whereLike('name', '%'.$search.'%'));
                 });
             })
             ->latest('sale_date')

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
@@ -80,6 +81,31 @@ class ProfileTest extends TestCase
 
         $this->assertGuest();
         $this->assertNull($user->fresh());
+    }
+
+    /**
+     * Akun karyawan — apalagi Superadmin — dikelola admin di halaman Karyawan.
+     * Menghapus diri sendiri dari Profil bisa mengunci restoran keluar dari
+     * aplikasinya, jadi formnya tidak ditawarkan dan request langsung ditolak.
+     */
+    public function test_akun_karyawan_tidak_bisa_menghapus_dirinya_sendiri(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole(Role::query()->firstOrCreate(['name' => 'waiter', 'guard_name' => 'web']));
+
+        $this->actingAs($user);
+
+        $this->get('/profile')
+            ->assertOk()
+            ->assertDontSee('profile.delete-user-form');
+
+        Volt::test('profile.delete-user-form')
+            ->set('password', 'password')
+            ->call('deleteUser')
+            ->assertHasErrors('password')
+            ->assertNoRedirect();
+
+        $this->assertNotNull($user->fresh());
     }
 
     public function test_correct_password_must_be_provided_to_delete_account(): void

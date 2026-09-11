@@ -1,60 +1,77 @@
 <?php
 
 use App\Http\Controllers\PortalController;
+use App\Models\SongRequest;
+use App\Models\SpecialRequest;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Portal staf lantai
+|--------------------------------------------------------------------------
+|
+| Setiap rute dijaga permission (`can:`), bukan daftar role. Gerbang lama
+| `role:superadmin|admin|waiter` mengunci role baru dari layar Peran & hak
+| akses di luar, seberapa lengkap pun permission-nya (AGENTS.md § Role gates
+| in routes). Superadmin lolos lewat Gate::before.
+|
+| Permission fitur (`waiter.operate`, `receptionist.monitor`, …) dibuat oleh
+| PermissionSeeder; permission model (`special_request.viewAny`) oleh
+| PolicyPermissionSeeder.
+*/
+
 Route::middleware(['demo.login', 'auth', 'verified'])->group(function () {
-    Route::middleware('role:superadmin|admin|manager')
-        ->prefix('manager')
+    // Kartu meja realtime + permintaan khusus, lagu, dan obrolan per meja.
+    // Tidak ada lagi meja persetujuan manajer: pelayan, resepsionis, dan kasir
+    // menangani permintaan langsung dari sini.
+    Route::get('panel-meja', [PortalController::class, 'floor'])
+        ->name('floor.index')
+        ->can('viewAny', SpecialRequest::class);
+
+    Route::get('song-queue', [PortalController::class, 'songQueue'])
+        ->name('songs.queue')
+        ->can('viewAny', SongRequest::class);
+
+    Route::prefix('manager')
+        ->middleware('can:manager.dashboard')
         ->group(function () {
             Route::get('dashboard', [PortalController::class, 'manager'])->name('manager.dashboard');
-
-            Route::middleware('can:manager.dashboard')->group(function () {
-                Route::get('shifts', [PortalController::class, 'managerShifts'])->name('manager.shifts');
-                Route::get('kpi', [PortalController::class, 'managerKpi'])->name('manager.kpi');
-                Route::get('top-customers', [PortalController::class, 'managerTopCustomers'])->name('manager.top-customers');
-                Route::get('special-requests', [PortalController::class, 'managerSpecialRequests'])->name('manager.special-requests');
-            });
+            Route::get('shifts', [PortalController::class, 'managerShifts'])->name('manager.shifts');
+            Route::get('kpi', [PortalController::class, 'managerKpi'])->name('manager.kpi');
+            Route::get('top-customers', [PortalController::class, 'managerTopCustomers'])->name('manager.top-customers');
         });
 
-    Route::middleware('role:superadmin|admin|receptionist|manager')
-        ->prefix('receptionist')
-        ->group(function () {
+    Route::prefix('receptionist')->group(function () {
+        Route::middleware('can:receptionist.monitor')->group(function () {
             Route::get('dashboard', [PortalController::class, 'receptionist'])->name('receptionist.dashboard');
-
-            Route::middleware('can:receptionist.monitor')->group(function () {
-                Route::get('table-map', [PortalController::class, 'receptionistTableMap'])->name('receptionist.table-map');
-                Route::get('visitors', [PortalController::class, 'receptionistVisitors'])->name('receptionist.visitors');
-                Route::get('analytics', [PortalController::class, 'receptionistAnalytics'])->name('receptionist.analytics');
-            });
-
-            Route::middleware('can:reservations.manage')
-                ->get('bookings', [PortalController::class, 'receptionistBookings'])->name('receptionist.bookings');
+            Route::get('table-map', [PortalController::class, 'receptionistTableMap'])->name('receptionist.table-map');
+            Route::get('visitors', [PortalController::class, 'receptionistVisitors'])->name('receptionist.visitors');
+            Route::get('analytics', [PortalController::class, 'receptionistAnalytics'])->name('receptionist.analytics');
         });
 
-    Route::middleware('role:superadmin|admin|manager|receptionist|waiter')
-        ->get('song-queue', [PortalController::class, 'songQueue'])->name('songs.queue');
+        Route::get('bookings', [PortalController::class, 'receptionistBookings'])
+            ->name('receptionist.bookings')
+            ->middleware('can:reservations.manage');
+    });
 
-    Route::middleware('role:superadmin|admin|waiter')
-        ->prefix('waiter')
-        ->group(function () {
-            Route::get('dashboard', [PortalController::class, 'waiter'])->name('waiter.dashboard');
+    Route::prefix('waiter')->group(function () {
+        Route::get('dashboard', [PortalController::class, 'waiter'])
+            ->name('waiter.dashboard')
+            ->middleware('can:waiter.operate');
 
-            Route::middleware('can:tables.status.update')
-                ->get('tables', [PortalController::class, 'waiterTables'])->name('waiter.tables');
+        Route::get('tables', [PortalController::class, 'waiterTables'])
+            ->name('waiter.tables')
+            ->middleware('can:tables.status.update');
 
-            Route::middleware('can:waiter.operate')->group(function () {
-                Route::get('tips', [PortalController::class, 'waiterTips'])->name('waiter.tips');
-                Route::get('special-requests', [PortalController::class, 'waiterSpecialRequests'])->name('waiter.special-requests');
-            });
-        });
+        Route::get('tips', [PortalController::class, 'waiterTips'])
+            ->name('waiter.tips')
+            ->middleware('can:waiter.operate');
+    });
 
-    Route::middleware('role:superadmin|admin|ob')
-        ->prefix('ob')
+    Route::prefix('ob')
+        ->middleware('can:tables.status.update')
         ->group(function () {
             Route::get('dashboard', [PortalController::class, 'ob'])->name('ob.dashboard');
-
-            Route::middleware('can:tables.status.update')
-                ->get('tables', [PortalController::class, 'obTables'])->name('ob.tables');
+            Route::get('tables', [PortalController::class, 'obTables'])->name('ob.tables');
         });
 });

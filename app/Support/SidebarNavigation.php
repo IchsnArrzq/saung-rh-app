@@ -8,6 +8,13 @@ use Illuminate\Support\Facades\Route;
 
 class SidebarNavigation
 {
+    /**
+     * Peran bawaan punya susunan navigasinya sendiri di config/navigation.php,
+     * dicoba berurutan. Peran buatan layar Peran & hak akses tidak punya — ia
+     * memakai susunan terlengkap (superadmin), yang lalu disaring per akses.
+     */
+    private const SECTIONS = ['superadmin', 'admin', 'manager', 'receptionist', 'cashier', 'waiter', 'chef', 'ob', 'customer'];
+
     public function forCurrentUser(): array
     {
         return $this->for($this->resolveSection());
@@ -32,15 +39,13 @@ class SidebarNavigation
             return 'admin';
         }
 
-        $priority = ['superadmin', 'admin', 'manager', 'receptionist', 'cashier', 'waiter', 'chef', 'ob', 'customer'];
-
-        foreach ($priority as $role) {
+        foreach (self::SECTIONS as $role) {
             if ($user->hasRole($role)) {
                 return $role;
             }
         }
 
-        return 'admin';
+        return 'superadmin';
     }
 
     private function resolveGroup(array $group): array
@@ -71,7 +76,12 @@ class SidebarNavigation
             ->filter(fn ($pattern) => is_string($pattern) && $pattern !== '')
             ->values();
 
-        $item['url'] = $routeName && Route::has($routeName) ? route($routeName) : null;
+        // Tautan yang akan berakhir di 403 tidak dirender: RouteAccess membaca
+        // middleware rutenya, jadi navigasi dan gerbang halaman tidak bisa
+        // berbeda pendapat.
+        $item['url'] = $routeName && Route::has($routeName) && RouteAccess::allows($routeName)
+            ? route($routeName)
+            : null;
         $item['is_active'] = $patterns->contains(fn ($pattern) => request()->routeIs($pattern));
         $item['badge_value'] = $this->resolveBadgeValue($item['badge'] ?? null);
 

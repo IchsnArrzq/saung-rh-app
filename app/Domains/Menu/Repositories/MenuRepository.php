@@ -15,10 +15,13 @@ class MenuRepository
         return Menu::query()->find($id);
     }
 
-    /** One item with its category loaded — the menu detail modal. */
+    /**
+     * One item with its category and media loaded — the menu detail modal shows
+     * the primary photo (`display_image_url`) and the first video.
+     */
     public function findWithCategory(string $id): ?Menu
     {
-        return Menu::query()->with('category:id,name')->find($id);
+        return Menu::query()->with(['category:id,name', 'images', 'videos'])->find($id);
     }
 
     /**
@@ -52,7 +55,7 @@ class MenuRepository
     public function available(): Collection
     {
         return Menu::query()
-            ->with('category:id,name')
+            ->with(['category:id,name', 'images'])
             ->available()
             ->orderBy('name')
             ->get();
@@ -64,15 +67,15 @@ class MenuRepository
         $search = trim($search);
 
         return Menu::query()
-            ->with('category:id,name')
+            ->with(['category:id,name', 'images'])
             ->available()
             ->when($categoryId, fn (Builder $query) => $query->where('menu_category_id', $categoryId))
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('name', 'ilike', '%'.$search.'%')
-                        ->orWhere('description', 'ilike', '%'.$search.'%')
-                        ->orWhere('sku', 'ilike', '%'.$search.'%')
-                        ->orWhereHas('category', fn (Builder $category) => $category->where('name', 'ilike', '%'.$search.'%'));
+                    $inner->whereLike('name', '%'.$search.'%')
+                        ->orWhereLike('description', '%'.$search.'%')
+                        ->orWhereLike('sku', '%'.$search.'%')
+                        ->orWhereHas('category', fn (Builder $category) => $category->whereLike('name', '%'.$search.'%'));
                 });
             })
             ->orderBy('name')
@@ -85,15 +88,15 @@ class MenuRepository
         $search = trim($search);
 
         return Menu::query()
-            ->with('category:id,name')
+            ->with(['category:id,name', 'images'])
             ->available()
             ->when($categoryId, fn (Builder $query) => $query->where('menu_category_id', $categoryId))
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('description', 'like', '%'.$search.'%')
-                        ->orWhere('sku', 'like', '%'.$search.'%')
-                        ->orWhereHas('category', fn (Builder $category) => $category->where('name', 'like', '%'.$search.'%'));
+                    $inner->whereLike('name', '%'.$search.'%')
+                        ->orWhereLike('description', '%'.$search.'%')
+                        ->orWhereLike('sku', '%'.$search.'%')
+                        ->orWhereHas('category', fn (Builder $category) => $category->whereLike('name', '%'.$search.'%'));
                 });
             })
             ->orderBy('name')
@@ -110,10 +113,10 @@ class MenuRepository
             ->with('category:id,name')
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('sku', 'like', '%'.$search.'%')
-                        ->orWhere('status', 'like', '%'.$search.'%')
-                        ->orWhereHas('category', fn (Builder $category) => $category->where('name', 'like', '%'.$search.'%'));
+                    $inner->whereLike('name', '%'.$search.'%')
+                        ->orWhereLike('sku', '%'.$search.'%')
+                        ->orWhereLike('status', '%'.$search.'%')
+                        ->orWhereHas('category', fn (Builder $category) => $category->whereLike('name', '%'.$search.'%'));
                 });
             })
             ->orderBy('name')
@@ -125,7 +128,7 @@ class MenuRepository
     public function featured(int $limit = 8): Collection
     {
         return Menu::query()
-            ->with('category:id,name')
+            ->with(['category:id,name', 'images'])
             ->available()
             ->orderBy('name')
             ->limit($limit)

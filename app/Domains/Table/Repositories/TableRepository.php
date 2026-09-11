@@ -7,6 +7,7 @@ use App\Models\Table;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 
 class TableRepository
 {
@@ -52,6 +53,45 @@ class TableRepository
     }
 
     /**
+     * Every table with its current QR session — the staff Panel meja.
+     * `tableSessions` holds only active sessions, newest first (normally one).
+     */
+    public function allWithActiveSession(): Collection
+    {
+        return Table::query()
+            ->with(['tableCategory', 'tableSessions' => fn ($query) => $query->active()->latest('started_at')])
+            ->orderBy('code')
+            ->get();
+    }
+
+    /** One table with its current QR session; null for an unknown or malformed id. */
+    public function findWithActiveSession(string $id): ?Table
+    {
+        if (! Str::isUuid($id)) {
+            return null;
+        }
+
+        return Table::query()
+            ->with(['tableCategory', 'tableSessions' => fn ($query) => $query->active()->latest('started_at')])
+            ->find($id);
+    }
+
+    /**
+     * Tables in any of the given statuses except one — e.g. the occupied tables a
+     * guest can open a table-to-table chat with.
+     *
+     * @param  array<int, string>  $statuses
+     */
+    public function inStatusesExcept(array $statuses, string $exceptId): Collection
+    {
+        return Table::query()
+            ->whereIn('status', $statuses)
+            ->whereKeyNot($exceptId)
+            ->orderBy('code')
+            ->get();
+    }
+
+    /**
      * Full (unpaginated) list filtered by code, name, capacity, status or
      * category — floor tools show every table and never paginate.
      */
@@ -63,11 +103,11 @@ class TableRepository
             ->with('tableCategory')
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('code', 'like', '%'.$search.'%')
-                        ->orWhere('name', 'like', '%'.$search.'%')
-                        ->orWhere('capacity', 'like', '%'.$search.'%')
-                        ->orWhere('status', 'like', '%'.$search.'%')
-                        ->orWhereHas('tableCategory', fn (Builder $category) => $category->where('name', 'like', '%'.$search.'%'));
+                    $inner->whereLike('code', '%'.$search.'%')
+                        ->orWhereLike('name', '%'.$search.'%')
+                        ->orWhereLike('capacity', '%'.$search.'%')
+                        ->orWhereLike('status', '%'.$search.'%')
+                        ->orWhereHas('tableCategory', fn (Builder $category) => $category->whereLike('name', '%'.$search.'%'));
                 });
             })
             ->orderBy('code')
@@ -98,10 +138,10 @@ class TableRepository
             ->with('tableCategory')
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('code', 'like', '%'.$search.'%')
-                        ->orWhere('name', 'like', '%'.$search.'%')
-                        ->orWhere('status', 'like', '%'.$search.'%')
-                        ->orWhereHas('tableCategory', fn (Builder $category) => $category->where('name', 'like', '%'.$search.'%'));
+                    $inner->whereLike('code', '%'.$search.'%')
+                        ->orWhereLike('name', '%'.$search.'%')
+                        ->orWhereLike('status', '%'.$search.'%')
+                        ->orWhereHas('tableCategory', fn (Builder $category) => $category->whereLike('name', '%'.$search.'%'));
                 });
             })
             ->orderBy('code')

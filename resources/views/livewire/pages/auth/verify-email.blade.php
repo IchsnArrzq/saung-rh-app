@@ -35,31 +35,28 @@ new #[Layout('layouts.auth')] class extends Component {
 }; ?>
 
 <div>
-    <!-- Heading -->
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-base-content">Verifikasi email Anda</h1>
         <p class="mt-1 text-sm text-base-content/60">
-            Terima kasih telah mendaftar! Sebelum mulai, silakan verifikasi email Anda melalui tautan yang baru saja kami kirim. Jika belum menerimanya, kami dengan senang hati mengirim ulang.
+            Kami sudah mengirim tautan verifikasi ke email Anda. Buka tautan itu untuk mulai memakai akun.
+            Belum menerima? Kirim ulang dari sini.
         </p>
     </div>
 
     @if (session('status') == 'verification-link-sent')
-        <div class="alert alert-success mb-4 text-sm">
-            {{ __('Tautan verifikasi baru telah dikirim ke email yang Anda gunakan saat mendaftar.') }}
-        </div>
+        <x-alert type="success" class="mb-4">
+            Tautan verifikasi baru sudah dikirim ke email yang Anda pakai saat mendaftar.
+        </x-alert>
     @endif
 
     <div class="flex flex-col gap-3">
-        <x-primary-button class="w-full justify-center" wire:click="sendVerification" wire:target="sendVerification" wire:loading.attr="disabled">
-            <span wire:loading.remove wire:target="sendVerification">{{ __('Kirim ulang email verifikasi') }}</span>
-            <span wire:loading wire:target="sendVerification" class="inline-flex items-center gap-2">
-                <span class="loading loading-spinner loading-xs"></span> {{ __('Mengirim...') }}
-            </span>
-        </x-primary-button>
+        <x-button variant="primary" :block="true" icon="ri-mail-send-line" wire:click="sendVerification"
+            loading="sendVerification" class="min-h-11">
+            Kirim ulang email verifikasi
+        </x-button>
 
-        <button wire:click="logout" type="submit"
-            class="rounded-md text-sm font-medium text-base-content/70 underline transition hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100">
-            {{ __('Keluar') }}
-        </button>
+        <x-button variant="ghost" :block="true" icon="ri-logout-box-r-line" wire:click="logout" loading="logout">
+            Keluar
+        </x-button>
     </div>
 </div>

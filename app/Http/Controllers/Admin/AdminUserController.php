@@ -2,100 +2,98 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Domains\System\DTO\StaffUserData;
+use App\Domains\System\QueryUseCases\GetStaffUsersQueryUseCase;
+use App\Domains\System\UseCases\DeleteStaffUserUseCase;
+use App\Domains\System\UseCases\SaveStaffUserUseCase;
+use App\Domains\System\UseCases\SetStaffUserActiveUseCase;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StaffUserRequest;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\View\View;
 
+/**
+ * Layar Karyawan — semua akun staf restoran apa pun perannya, termasuk peran
+ * buatan layar Peran & hak akses (dulu hanya admin & kasir). Rute + UserPolicy
+ * menjaga siapa yang boleh membukanya; aturan Superadmin dan akun sendiri ada di
+ * UseCase. ValidationException dari UseCase otomatis kembali ke form beserta
+ * pesannya.
+ */
 class AdminUserController extends Controller
 {
-    public function index()
+    public function index(Request $request, GetStaffUsersQueryUseCase $staff): View
     {
-        $users = User::role(['admin', 'superadmin', 'cashier'])->latest()->get();
-        return view('admin.admin-users.index', compact('users'));
-    }
+        $search = trim((string) $request->query('q', ''));
+        $role = (string) $request->query('peran', '');
 
-    public function create()
-    {
-        return view('admin.admin-users.create');
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'confirmed', Password::defaults()],
-            'role' => ['required', 'in:admin,cashier'],
+        return view('admin.admin-users.index', [
+            'users' => $staff->paginate($search, $role),
+            'roleOptions' => $staff->filterRoleOptions(),
+            'search' => $search,
+            'role' => $role,
         ]);
-
-        $role = $validated['role'];
-        unset($validated['role']);
-
-        $validated['is_active'] = $request->has('is_active');
-
-        $user = User::create($validated);
-        $user->assignRole($role);
-
-        $label = $role === 'cashier' ? 'Kasir' : 'Admin';
-
-        return redirect()->route('admin-users.index')->with('success', "Akun {$label} berhasil ditambahkan.");
     }
 
-    public function edit(User $admin_user)
+    public function create(GetStaffUsersQueryUseCase $staff): View
     {
-        return view('admin.admin-users.edit', compact('admin_user'));
-    }
-
-    public function update(Request $request, User $admin_user)
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$admin_user->id],
+        return view('admin.admin-users.create', [
+            'roleOptions' => $staff->assignableRoleOptions(),
         ]);
-
-        $validated['is_active'] = $request->has('is_active');
-
-        if ($request->filled('password')) {
-            $request->validate([
-                'password' => ['required', 'confirmed', Password::defaults()],
-            ]);
-            $validated['password'] = $request->password;
-        }
-
-        $admin_user->update($validated);
-
-        // Superadmin role is protected and cannot be reassigned.
-        if (! $admin_user->hasRole('superadmin')) {
-            $roleData = $request->validate([
-                'role' => ['required', 'in:admin,cashier'],
-            ]);
-            $admin_user->syncRoles([$roleData['role']]);
-        }
-
-        return redirect()->route('admin-users.index')->with('success', 'Data berhasil diperbarui.');
     }
 
-    public function destroy(User $admin_user)
+    public function store(StaffUserRequest $request, SaveStaffUserUseCase $saveUser): RedirectResponse
     {
-        if ($admin_user->hasRole('superadmin')) {
-            return back()->with('error', 'Superadmin tidak dapat dihapus.');
-        }
-        
-        $admin_user->delete();
-        return redirect()->route('admin-users.index')->with('success', 'Admin berhasil dihapus.');
+        $user = $saveUser->handle($this->data($request), $request->user());
+
+        return redirect()->route('admin-users.index')->with('success', 'Akun '.$user->name.' ditambahkan.');
     }
 
-    public function updateStatus(User $admin_user)
+    public function edit(User $admin_user, GetStaffUsersQueryUseCase $staff): View
     {
-        if ($admin_user->hasRole('superadmin')) {
-            return back()->with('error', 'Status Superadmin tidak dapat dinonaktifkan.');
-        }
-
-        $admin_user->update([
-            'is_active' => !$admin_user->is_active
+        return view('admin.admin-users.edit', [
+            'admin_user' => $admin_user->loadMissing('roles'),
+            'roleOptions' => $staff->assignableRoleOptions(),
         ]);
+    }
 
-        return back()->with('success', 'Status Admin berhasil diubah.');
+    public function update(StaffUserRequest $request, User $admin_user, SaveStaffUserUseCase $saveUser): RedirectResponse
+    {
+        $user = $saveUser->handle($this->data($request), $request->user(), $admin_user);
+
+        return redirect()->route('admin-users.index')->with('success', 'Akun '.$user->name.' diperbarui.');
+    }
+
+    public function destroy(Request $request, User $admin_user, DeleteStaffUserUseCase $deleteUser): RedirectResponse
+    {
+        $name = $admin_user->name;
+
+        $deleteUser->handle($admin_user, $request->user());
+
+        return redirect()->route('admin-users.index')->with('success', 'Akun '.$name.' dihapus.');
+    }
+
+    public function updateStatus(Request $request, User $admin_user, SetStaffUserActiveUseCase $setActive): RedirectResponse
+    {
+        $user = $setActive->handle($admin_user, ! $admin_user->is_active, $request->user());
+
+        return back()->with('success', $user->is_active
+            ? 'Akun '.$user->name.' diaktifkan lagi.'
+            : 'Akun '.$user->name.' dinonaktifkan — ia tidak bisa masuk sampai diaktifkan lagi.');
+    }
+
+    private function data(StaffUserRequest $request): StaffUserData
+    {
+        $validated = $request->validated();
+
+        return new StaffUserData(
+            name: trim((string) $validated['name']),
+            email: (string) $validated['email'],
+            phone: filled($validated['phone'] ?? null) ? trim((string) $validated['phone']) : null,
+            password: filled($validated['password'] ?? null) ? (string) $validated['password'] : null,
+            role: filled($validated['role'] ?? null) ? (string) $validated['role'] : null,
+            isActive: (bool) ($validated['is_active'] ?? false),
+        );
     }
 }

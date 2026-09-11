@@ -3,14 +3,16 @@
 namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
 
-class SongQueueUpdated implements ShouldBroadcast
+/**
+ * Papan DJ (Antrean lagu) mendengarkan kanal publik `songs`. Siaran langsung,
+ * bukan lewat antrean — lihat App\Support\LiveUpdate.
+ */
+class SongQueueUpdated implements ShouldBroadcastNow
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
 
     /**
      * @return array<int, Channel>

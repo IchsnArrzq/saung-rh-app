@@ -14,6 +14,9 @@ new #[Layout('layouts.auth')] class extends Component {
     {
         $this->validate([
             'email' => ['required', 'string', 'email'],
+        ], [
+            'email.required' => 'Masukkan email akun Anda.',
+            'email.email' => 'Format email belum benar, mis. nama@contoh.com.',
         ]);
 
         // We will send the password reset link to this user. Once we have attempted
@@ -34,37 +37,28 @@ new #[Layout('layouts.auth')] class extends Component {
 }; ?>
 
 <div>
-    <!-- Heading -->
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-base-content">Lupa password?</h1>
+        <h1 class="text-2xl font-bold text-base-content">Lupa kata sandi?</h1>
         <p class="mt-1 text-sm text-base-content/60">
-            Tidak masalah. Masukkan email Anda dan kami akan mengirim tautan untuk mengatur ulang password.
+            Masukkan email akun Anda. Kami kirimkan tautan untuk membuat kata sandi baru.
         </p>
     </div>
 
-    <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <form wire:submit="sendPasswordResetLink" class="space-y-4">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" class="font-bold" />
-            <x-text-input wire:model.blur="email" id="email" class="block mt-1 w-full" type="email" name="email" required
-                autofocus placeholder="email@example.com" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <x-input label="Email" name="email" type="email" icon="ri-mail-line" wire:model.blur="email" required autofocus
+            autocomplete="username" placeholder="nama@contoh.com" />
 
-        <x-primary-button class="w-full justify-center" wire:target="sendPasswordResetLink" wire:loading.attr="disabled">
-            <span wire:loading.remove wire:target="sendPasswordResetLink">{{ __('Kirim tautan reset') }}</span>
-            <span wire:loading wire:target="sendPasswordResetLink" class="inline-flex items-center gap-2">
-                <span class="loading loading-spinner loading-xs"></span> {{ __('Mengirim...') }}
-            </span>
-        </x-primary-button>
+        <x-button type="submit" variant="primary" :block="true" icon="ri-mail-send-line" loading="sendPasswordResetLink"
+            class="min-h-11">
+            Kirim tautan
+        </x-button>
     </form>
 
     <p class="mt-6 text-center text-sm text-base-content/70">
-        <a href="{{ route('login') }}" wire:navigate
-            class="inline-flex items-center gap-1 font-semibold text-primary transition hover:underline">
-            <i class="ri-arrow-left-line"></i> {{ __('Kembali ke halaman masuk') }}</a>
+        <a href="{{ route('login') }}" wire:navigate class="link link-hover inline-flex items-center gap-1 font-semibold text-primary">
+            <i class="ri-arrow-left-line" aria-hidden="true"></i> Kembali ke halaman masuk
+        </a>
     </p>
 </div>

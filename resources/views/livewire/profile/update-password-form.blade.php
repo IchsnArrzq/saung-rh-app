@@ -21,6 +21,12 @@ new class extends Component
             $validated = $this->validate([
                 'current_password' => ['required', 'string', 'current_password'],
                 'password' => ['required', 'string', Password::defaults(), 'confirmed'],
+            ], [
+                'current_password.required' => 'Masukkan kata sandi Anda yang sekarang.',
+                'current_password.current_password' => 'Kata sandi sekarang tidak cocok.',
+                'password.required' => 'Masukkan kata sandi baru.',
+                'password.confirmed' => 'Ulangan kata sandi baru belum sama.',
+                'password.min' => 'Kata sandi baru minimal :min karakter.',
             ]);
         } catch (ValidationException $e) {
             $this->reset('current_password', 'password', 'password_confirmation');
@@ -38,42 +44,32 @@ new class extends Component
     }
 }; ?>
 
-<section>
-    <header>
-        <h2 class="text-lg font-medium ">
-            {{ __('Update Password') }}
-        </h2>
+<form wire:submit="updatePassword" class="space-y-4">
+    <x-field label="Kata sandi sekarang" name="current_password" for="profile-current-password" required>
+        <x-password-input id="profile-current-password" wire:model="current_password" autocomplete="current-password" />
+    </x-field>
 
-        <p class="mt-1 text-sm ">
-            {{ __('Ensure your account is using a long, random password to stay secure.') }}
+    <div class="grid gap-4 md:grid-cols-2">
+        <x-field label="Kata sandi baru" name="password" for="profile-new-password" required hint="Minimal 8 karakter.">
+            <x-password-input id="profile-new-password" wire:model="password" autocomplete="new-password" />
+        </x-field>
+
+        <x-field label="Ulangi kata sandi baru" name="password_confirmation" for="profile-new-password-confirmation" required>
+            <x-password-input id="profile-new-password-confirmation" wire:model="password_confirmation"
+                autocomplete="new-password" />
+        </x-field>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-end gap-3">
+        <p x-data="{ shown: false, timer: null }"
+            x-on:password-updated.window="shown = true; clearTimeout(timer); timer = setTimeout(() => shown = false, 2500)"
+            x-show="shown" x-transition.opacity.duration.200ms style="display: none"
+            class="inline-flex items-center gap-1 text-sm text-success" role="status">
+            <i class="ri-checkbox-circle-line" aria-hidden="true"></i> Kata sandi diganti.
         </p>
-    </header>
 
-    <form wire:submit="updatePassword" class="mt-6 space-y-6">
-        <div>
-            <x-input-label for="update_password_current_password" :value="__('Current Password')" />
-            <x-text-input wire:model="current_password" id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
-            <x-input-error :messages="$errors->get('current_password')" class="mt-2" />
-        </div>
-
-        <div>
-            <x-input-label for="update_password_password" :value="__('New Password')" />
-            <x-text-input wire:model="password" id="update_password_password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <div>
-            <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" />
-            <x-text-input wire:model="password_confirmation" id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
-
-            <x-action-message class="me-3" on="password-updated">
-                {{ __('Saved.') }}
-            </x-action-message>
-        </div>
-    </form>
-</section>
+        <x-button type="submit" variant="outline" icon="ri-lock-password-line" loading="updatePassword">
+            Ganti kata sandi
+        </x-button>
+    </div>
+</form>

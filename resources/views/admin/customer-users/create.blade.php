@@ -1,6 +1,6 @@
 <x-admin-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold">Tambah Customer Baru</h2>
+        <h2 class="text-xl font-semibold">Tambah akun pelanggan</h2>
     </x-slot>
 
     @include('admin.partials.flash')
@@ -11,7 +11,7 @@
             
             @include('admin.customer-users._form')
 
-            <x-form-actions submit-label="Simpan Customer" :cancel-href="route('customer-users.index')" />
+            <x-form-actions submit-label="Tambah akun" :cancel-href="route('customer-users.index')" />
         </form>
     </x-card>
 </x-admin-layout>

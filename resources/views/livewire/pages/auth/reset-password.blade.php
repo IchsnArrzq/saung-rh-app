@@ -37,6 +37,12 @@ new #[Layout('layouts.auth')] class extends Component
             'token' => ['required'],
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'email.required' => 'Masukkan email akun Anda.',
+            'email.email' => 'Format email belum benar, mis. nama@contoh.com.',
+            'password.required' => 'Buat kata sandi baru.',
+            'password.confirmed' => 'Ulangan kata sandi belum sama.',
+            'password.min' => 'Kata sandi minimal :min karakter.',
         ]);
 
         // Here we will attempt to reset the user's password. If it is successful we
@@ -70,40 +76,26 @@ new #[Layout('layouts.auth')] class extends Component
 }; ?>
 
 <div>
-    <!-- Heading -->
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-base-content">Atur ulang password</h1>
-        <p class="mt-1 text-sm text-base-content/60">Buat password baru untuk akun Anda.</p>
+        <h1 class="text-2xl font-bold text-base-content">Buat kata sandi baru</h1>
+        <p class="mt-1 text-sm text-base-content/60">Setelah tersimpan, masuk dengan kata sandi yang baru.</p>
     </div>
 
     <form wire:submit="resetPassword" class="space-y-4">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" class="font-bold" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <x-input label="Email" name="email" type="email" icon="ri-mail-line" wire:model="email" required autofocus
+            autocomplete="username" />
 
-        <!-- Password -->
-        <div>
-            <x-input-label for="password" :value="__('Password baru')" class="font-bold" />
-            <x-password-input wire:model="password" id="password" class="block mt-1 w-full" name="password" required autocomplete="new-password" placeholder="Minimal 8 karakter" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+        <x-field label="Kata sandi baru" name="password" for="reset-password" required hint="Minimal 8 karakter.">
+            <x-password-input id="reset-password" wire:model="password" autocomplete="new-password" />
+        </x-field>
 
-        <!-- Confirm Password -->
-        <div>
-            <x-input-label for="password_confirmation" :value="__('Konfirmasi Password')" class="font-bold" />
-            <x-password-input wire:model="password_confirmation" id="password_confirmation" class="block mt-1 w-full"
-                name="password_confirmation" required autocomplete="new-password" placeholder="Ulangi password baru" />
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
+        <x-field label="Ulangi kata sandi baru" name="password_confirmation" for="reset-password-confirmation" required>
+            <x-password-input id="reset-password-confirmation" wire:model="password_confirmation" autocomplete="new-password" />
+        </x-field>
 
-        <x-primary-button class="w-full justify-center" wire:target="resetPassword" wire:loading.attr="disabled">
-            <span wire:loading.remove wire:target="resetPassword">{{ __('Simpan password baru') }}</span>
-            <span wire:loading wire:target="resetPassword" class="inline-flex items-center gap-2">
-                <span class="loading loading-spinner loading-xs"></span> {{ __('Menyimpan...') }}
-            </span>
-        </x-primary-button>
+        <x-button type="submit" variant="primary" :block="true" icon="ri-lock-password-line" loading="resetPassword"
+            class="min-h-11">
+            Simpan kata sandi baru
+        </x-button>
     </form>
 </div>

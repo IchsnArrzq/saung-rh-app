@@ -15,7 +15,7 @@ class PortalController extends Controller
                 ['label' => 'Jadwal shift staf', 'icon' => 'ri-calendar-schedule-line', 'desc' => 'Atur jadwal kerja staf.', 'route' => 'manager.shifts'],
                 ['label' => 'KPI pegawai', 'icon' => 'ri-trophy-line', 'desc' => 'Ringkasan performa pegawai.', 'route' => 'manager.kpi'],
                 ['label' => 'Pelanggan paling sering datang', 'icon' => 'ri-vip-crown-line', 'desc' => 'Pelanggan dengan kunjungan terbanyak.', 'route' => 'manager.top-customers'],
-                ['label' => 'Persetujuan permintaan khusus', 'icon' => 'ri-checkbox-circle-line', 'desc' => 'Setujui atau tolak permintaan khusus.', 'route' => 'manager.special-requests'],
+                ['label' => 'Panel meja', 'icon' => 'ri-layout-grid-line', 'desc' => 'Permintaan, lagu, dan obrolan dari setiap meja.', 'route' => 'floor.index'],
                 ['label' => 'Menu paling laku', 'icon' => 'ri-bar-chart-box-line', 'desc' => 'Menu & minuman terlaris.', 'route' => 'receptionist.analytics'],
                 ['label' => 'Kelola reservasi', 'icon' => 'ri-calendar-check-line', 'desc' => 'Kelola reservasi masuk.', 'route' => 'receptionist.bookings'],
             ],
@@ -29,6 +29,7 @@ class PortalController extends Controller
             'subtitle' => 'Monitoring operasional cafe secara real-time.',
             'approvals' => true,
             'modules' => [
+                ['label' => 'Panel meja', 'icon' => 'ri-layout-grid-line', 'desc' => 'Permintaan, lagu, dan obrolan dari setiap meja.', 'route' => 'floor.index'],
                 ['label' => 'Monitor dapur', 'icon' => 'ri-radar-line', 'desc' => 'Pantau status makanan dari dapur.', 'route' => 'kds.index'],
                 ['label' => 'Peta meja', 'icon' => 'ri-layout-grid-line', 'desc' => 'Peta visual meja kosong/terisi.', 'route' => 'receptionist.table-map'],
                 ['label' => 'Kelola reservasi', 'icon' => 'ri-calendar-check-line', 'desc' => 'Kelola reservasi masuk.', 'route' => 'receptionist.bookings'],
@@ -45,10 +46,10 @@ class PortalController extends Controller
             'title' => 'Portal pelayan',
             'subtitle' => 'Bantuan mobilitas pelayanan di area resto.',
             'modules' => [
+                ['label' => 'Panel meja', 'icon' => 'ri-layout-grid-line', 'desc' => 'Permintaan, lagu, dan obrolan dari setiap meja.', 'route' => 'floor.index'],
                 ['label' => 'Ubah status meja', 'icon' => 'ri-refresh-line', 'desc' => 'Ubah status meja secara instan.', 'route' => 'waiter.tables'],
                 ['label' => 'Catatan tip & layanan', 'icon' => 'ri-hand-coin-line', 'desc' => 'Catat layanan & tip.', 'route' => 'waiter.tips'],
                 ['label' => 'Antrean lagu', 'icon' => 'ri-music-2-line', 'desc' => 'Kelola permintaan lagu dari meja.', 'route' => 'songs.queue'],
-                ['label' => 'Permintaan khusus pelanggan', 'icon' => 'ri-customer-service-2-line', 'desc' => 'Terima instruksi pelanggan.', 'route' => 'waiter.special-requests'],
             ],
         ]);
     }
@@ -156,23 +157,17 @@ class PortalController extends Controller
         ]);
     }
 
-    public function managerSpecialRequests(): View
+    /**
+     * Panel meja — menggantikan dua layar lama (persetujuan manajer dan daftar
+     * tugas pelayan): permintaan kini langsung ditangani staf lantai.
+     */
+    public function floor(): View
     {
         return view('staff.page', [
-            'title' => 'Persetujuan permintaan khusus',
-            'subtitle' => 'Setujui atau tolak permintaan khusus, lalu cocokkan ke waiter.',
-            'icon' => 'ri-checkbox-circle-line',
-            'livewireComponent' => 'staff.manager.special-request-approver',
-        ]);
-    }
-
-    public function waiterSpecialRequests(): View
-    {
-        return view('staff.page', [
-            'title' => 'Permintaan khusus pelanggan',
-            'subtitle' => 'Permintaan khusus yang ditugaskan kepada Anda.',
-            'icon' => 'ri-customer-service-2-line',
-            'livewireComponent' => 'staff.waiter.special-request-handler',
+            'title' => 'Panel meja',
+            'subtitle' => 'Permintaan khusus, lagu, dan obrolan dari setiap meja.',
+            'icon' => 'ri-layout-grid-line',
+            'livewireComponent' => 'staff.floor-board',
         ]);
     }
 

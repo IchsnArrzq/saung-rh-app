@@ -3,14 +3,18 @@
 namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
 
-class ChatMessagePosted implements ShouldBroadcast
+/**
+ * ShouldBroadcastNow, bukan ShouldBroadcast: aplikasi ini tidak menjalankan
+ * queue worker, jadi siaran yang diantrekan menumpuk di tabel `jobs` dan tidak
+ * pernah sampai ke browser — obrolan meja hanya berganti saat halaman dimuat
+ * ulang. Kirim lewat App\Support\LiveUpdate::send().
+ */
+class ChatMessagePosted implements ShouldBroadcastNow
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
 
     /**
      * Broadcasts to every table taking part in the conversation. A room message

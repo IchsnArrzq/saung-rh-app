@@ -56,14 +56,9 @@
 
                 <div class="flex items-center gap-2">
                     @auth
-                        @php
-                            $dashboardRoute = auth()->user()->hasAnyRole(['superadmin', 'admin'])
-                                ? route('dashboard')
-                                : (auth()->user()->hasRole('cashier')
-                                    ? route('pos.order.index')
-                                    : route('customer.dashboard'));
-                        @endphp
-                        <x-button variant="primary" size="sm" :href="$dashboardRoute">Dashboard</x-button>
+                        {{-- Halaman pertama yang boleh dibuka akun ini. Dulu pelayan, resepsionis,
+                             dan peran lain diarahkan ke dashboard pelanggan lalu 403. --}}
+                        <x-button variant="primary" size="sm" :href="\App\Support\PortalHome::url(auth()->user())">Dashboard</x-button>
                     @else
                         @if (Route::has('login'))
                             <x-button variant="outline" size="sm" :href="route('login')">Masuk</x-button>

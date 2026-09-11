@@ -4,9 +4,11 @@ namespace App\Domains\Social\UseCases;
 
 use App\Domains\Social\Enums\SongStatus;
 use App\Domains\Social\Repositories\SongRequestRepository;
+use App\Events\FloorActivity;
 use App\Events\SongQueueUpdated;
 use App\Models\SongRequest;
 use App\Models\TableSession;
+use App\Support\LiveUpdate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -38,7 +40,10 @@ class RequestSongUseCase
             'status' => SongStatus::Queued->value,
         ]));
 
-        DB::afterCommit(fn () => SongQueueUpdated::dispatch());
+        DB::afterCommit(function () use ($song): void {
+            LiveUpdate::send(new SongQueueUpdated);
+            LiveUpdate::send(new FloorActivity($song->table_id, FloorActivity::SONG, FloorActivity::NEW, $song->table_code));
+        });
 
         return $song;
     }

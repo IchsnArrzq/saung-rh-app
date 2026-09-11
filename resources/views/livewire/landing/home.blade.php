@@ -77,10 +77,8 @@
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             @forelse ($menus as $menu)
                 <article class="flex flex-col overflow-hidden rounded-xl border border-base-300 bg-base-100 p-2">
-                    <div class="aspect-[4/3] w-full overflow-hidden rounded-xl bg-base-200">
-                        <img src="{{ $menu->image_url ?: asset('assets/media/stock/900x600/12.jpg') }}"
-                            alt="{{ $menu->name }}" class="h-full w-full object-cover">
-                    </div>
+                    <x-menu-photo :src="$menu->display_image_url" :alt="$menu->name"
+                        class="aspect-[4/3] w-full rounded-xl" />
 
                     <div class="flex flex-1 flex-col p-4">
                         <p class="text-xs text-base-content/60">{{ $menu->category->name ?? 'Menu' }}</p>

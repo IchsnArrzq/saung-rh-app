@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -29,6 +30,7 @@ class User extends Authenticatable
         'phone',
         'status',
         'navigation_menu_preference',
+        'avatar_path',
     ];
 
     /**
@@ -54,6 +56,18 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'navigation_menu_preference' => 'string',
         ];
+    }
+
+    /**
+     * URL foto profil, atau null bila belum ada (tampil inisial). Dibangun dari
+     * host request yang sedang berjalan — seperti Media::getUrlAttribute — supaya
+     * tetap terjangkau saat aplikasi dibuka lewat IP LAN, bukan hanya APP_URL.
+     */
+    protected function avatarUrl(): Attribute
+    {
+        return Attribute::get(fn (): ?string => $this->avatar_path
+            ? asset('storage/'.ltrim((string) $this->avatar_path, '/'))
+            : null);
     }
 
     public function reservations(): HasMany

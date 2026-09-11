@@ -43,7 +43,7 @@ class Overview extends Component
 
         $query = Ingredient::query()
             ->where('is_active', true)
-            ->when($search !== '', fn (Builder $q) => $q->where('name', 'like', '%'.$search.'%'))
+            ->when($search !== '', fn (Builder $q) => $q->whereLike('name', '%'.$search.'%'))
             ->when($this->lowOnly !== '', fn (Builder $q) => $q->whereColumn('stock', '<=', 'min_stock'));
 
         $ingredients = (clone $query)->orderBy('name')->paginate(20);

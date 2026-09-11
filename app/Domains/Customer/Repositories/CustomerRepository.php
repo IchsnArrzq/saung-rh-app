@@ -24,10 +24,10 @@ class CustomerRepository
         return Customer::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
-                    $inner->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('code', 'like', '%'.$search.'%')
-                        ->orWhere('phone', 'like', '%'.$search.'%')
-                        ->orWhere('email', 'like', '%'.$search.'%');
+                    $inner->whereLike('name', '%'.$search.'%')
+                        ->orWhereLike('code', '%'.$search.'%')
+                        ->orWhereLike('phone', '%'.$search.'%')
+                        ->orWhereLike('email', '%'.$search.'%');
                 });
             })
             ->latest()

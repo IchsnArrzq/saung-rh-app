@@ -3,16 +3,17 @@
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\CustomerUserController;
 use App\Http\Controllers\Admin\RolePermissionController;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 /*
 | Pola otorisasi: lihat routes/admin/menus.php dan AGENTS.md § Authorization.
 |
-| Kedua layar mengelola baris `users` yang sama — yang membedakan hanya role
-| yang ditampilkan — jadi keduanya dijaga UserPolicy. Tanpa gerbang ini kasir
-| ikut lolos dari `role:…|cashier` di routes/admin.php dan bisa membuka, membuat,
-| serta menghapus akun.
+| Karyawan (`admin-users`) dan Akun pelanggan (`customer-users`) mengelola baris
+| `users` yang sama — yang membedakan hanya peran yang ditampilkan — jadi
+| keduanya dijaga UserPolicy. Tanpa gerbang ini kasir ikut lolos dari gerbang
+| kasar di routes/admin.php dan bisa membuka, membuat, serta menghapus akun.
 |
 | `middlewareFor` dipakai supaya tiap aksi resource memanggil ability-nya
 | sendiri (index → viewAny, store → create, destroy → delete), bukan satu
@@ -44,8 +45,24 @@ Route::resource('customer-users', CustomerUserController::class)
     ->middlewareFor(['edit', 'update'], 'can:update,customer')
     ->middlewareFor('destroy', 'can:delete,customer');
 
-// Roles & Permissions management (superadmin only)
-Route::middleware('role:superadmin')->prefix('settings')->name('settings.')->group(function () {
-    Route::get('roles-permissions', [RolePermissionController::class, 'index'])->name('roles-permissions');
-    Route::patch('roles-permissions/{role}', [RolePermissionController::class, 'update'])->name('roles-permissions.update');
+/*
+| Peran & hak akses — dijaga RolePolicy, bukan `role:superadmin` lagi, supaya
+| peran lain bisa diberi akses lihat/ubah dari layar itu sendiri. Admin memegang
+| role.viewAny/view (lihat saja) dari PolicyPermissionSeeder. Peran Superadmin
+| tetap terkunci di SaveRoleUseCase/DeleteRoleUseCase, apa pun permission-nya.
+| Penyimpanan lewat komponen Livewire App\Livewire\Admin\Roles\Form.
+*/
+Route::prefix('settings')->name('settings.')->group(function () {
+    Route::get('roles-permissions', [RolePermissionController::class, 'index'])
+        ->name('roles-permissions')
+        ->can('viewAny', Role::class);
+
+    Route::get('roles-permissions/create', [RolePermissionController::class, 'create'])
+        ->name('roles-permissions.create')
+        ->can('create', Role::class);
+
+    Route::get('roles-permissions/{role}', [RolePermissionController::class, 'edit'])
+        ->name('roles-permissions.edit')
+        ->whereUuid('role')
+        ->can('view', 'role');
 });

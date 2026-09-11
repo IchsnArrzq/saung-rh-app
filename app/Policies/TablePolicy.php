@@ -62,4 +62,14 @@ class TablePolicy
     {
         return $user->checkPermissionTo('table.forceDelete');
     }
+
+    /**
+     * Membalas dan membersihkan obrolan meja dari Panel meja. Obrolan tidak
+     * punya model (tersimpan di Redis), jadi kemampuannya menumpang di meja
+     * yang memilikinya dengan permission fitur tersendiri.
+     */
+    public function moderateChat(User $user, Table $table): bool
+    {
+        return $user->checkPermissionTo('table_chat.moderate');
+    }
 }

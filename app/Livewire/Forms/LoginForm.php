@@ -12,10 +12,13 @@ use Livewire\Form;
 
 class LoginForm extends Form
 {
-    #[Validate('required|string|email')]
+    #[Validate('required|string|email', message: [
+        'required' => 'Masukkan email akun Anda.',
+        'email' => 'Format email belum benar, mis. nama@contoh.com.',
+    ])]
     public string $email = '';
 
-    #[Validate('required|string')]
+    #[Validate('required|string', message: ['required' => 'Masukkan kata sandi Anda.'])]
     public string $password = '';
 
     #[Validate('boolean')]
@@ -24,17 +27,26 @@ class LoginForm extends Form
     /**
      * Attempt to authenticate the request's credentials.
      *
+     * Akun yang dinonaktifkan di halaman Karyawan tidak bisa masuk: `is_active`
+     * ikut jadi syarat attempt(). Kata sandinya tetap dicek lebih dulu, jadi pesan
+     * "dinonaktifkan" hanya muncul untuk pemilik kata sandi yang benar — orang lain
+     * tetap hanya melihat "email atau kata sandi salah".
+     *
      * @throws ValidationException
      */
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only(['email', 'password']), $this->remember)) {
+        $credentials = $this->only(['email', 'password']);
+
+        if (! Auth::attempt([...$credentials, 'is_active' => true], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'form.email' => trans('auth.failed'),
+                'form.email' => Auth::validate($credentials)
+                    ? 'Akun ini sedang dinonaktifkan. Hubungi admin restoran untuk mengaktifkannya lagi.'
+                    : 'Email atau kata sandi salah.',
             ]);
         }
 
@@ -55,10 +67,7 @@ class LoginForm extends Form
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'form.email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'form.email' => 'Terlalu banyak percobaan masuk. Coba lagi dalam '.$seconds.' detik.',
         ]);
     }
 

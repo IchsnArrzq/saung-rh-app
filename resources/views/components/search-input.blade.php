@@ -10,6 +10,14 @@
     <x-search-input wire:model.live.debounce.300ms="search" placeholder="Cari menu..." />
 
     Debounce 300ms wajib untuk input live — DESIGN.md "Doherty Threshold".
+
+    Ikon hidup DI DALAM pembungkus `.input` (pola daisyUI 5), bukan diposisikan
+    absolut di atas <input>. Di daisyUI 5 `.input` sendiri `position: relative`
+    dengan latar base-100, jadi ikon absolut yang ditaruh sebelum <input>
+    tertimpa latarnya dan tidak pernah terlihat.
+
+    `class` menempel ke pembungkus (itulah kotak yang terlihat); atribut lain —
+    wire:model, placeholder, dst. — ke <input> di dalamnya.
 --}}
 
 @php
@@ -20,10 +28,9 @@
     ][$size] ?? '';
 @endphp
 
-<div {{ $attributes->only('class')->merge(['class' => 'relative w-full']) }}>
-    <i class="{{ $icon }} pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40"
-        aria-hidden="true"></i>
+<label {{ $attributes->only('class')->merge(['class' => trim('input w-full ' . $sizeClass)]) }}>
+    <i class="{{ $icon }} shrink-0 text-base text-base-content/50" aria-hidden="true"></i>
 
-    <input type="text" aria-label="{{ $label }}" placeholder="{{ $placeholder }}"
-        {{ $attributes->except('class')->merge(['class' => trim('input input-bordered w-full pl-10 ' . $sizeClass)]) }}>
-</div>
+    <input type="search" aria-label="{{ $label }}" placeholder="{{ $placeholder }}" autocomplete="off"
+        {{ $attributes->except('class')->merge(['class' => 'min-w-0 grow']) }}>
+</label>

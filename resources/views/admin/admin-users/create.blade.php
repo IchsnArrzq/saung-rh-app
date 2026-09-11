@@ -1,17 +1,14 @@
 <x-admin-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold">Tambah Akun Admin / Kasir</h2>
+        <h2 class="text-xl font-semibold">Tambah karyawan</h2>
     </x-slot>
 
-    @include('admin.partials.flash')
+    <form method="POST" action="{{ route('admin-users.store') }}" class="space-y-6">
+        @csrf
 
-    <x-card class="mt-5">
-        <form method="POST" action="{{ route('admin-users.store') }}" class="space-y-5">
-            @csrf
-            
-            @include('admin.admin-users._form')
+        @include('admin.partials.flash')
+        @include('admin.admin-users._form')
 
-            <x-form-actions submit-label="Simpan Akun" :cancel-href="route('admin-users.index')" />
-        </form>
-    </x-card>
+        <x-form-actions submit-label="Tambah karyawan" :cancel-href="route('admin-users.index')" />
+    </form>
 </x-admin-layout>

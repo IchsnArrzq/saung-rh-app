@@ -68,7 +68,7 @@ class RestaurantCart
         $cart[$menu->id] = [
             'menu_id' => $menu->id,
             'name' => $menu->name,
-            'image_url' => $menu->image_url,
+            'image_url' => $menu->display_image_url,
             'price' => (float) $menu->price,
             'qty' => min($existingQty + $qty, 50),
             'notes' => $notes ?: ($cart[$menu->id]['notes'] ?? null),

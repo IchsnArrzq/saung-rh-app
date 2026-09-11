@@ -27,6 +27,7 @@ use App\Models\ServiceLog;
 use App\Models\Shift;
 use App\Models\SongRequest;
 use App\Models\SpecialRequest;
+use App\Models\SpecialRequestCategory;
 use App\Models\StockMovement;
 use App\Models\StockOpname;
 use App\Models\StockOpnameItem;
@@ -86,6 +87,8 @@ class PolicyPermissionSeeder extends Seeder
                 Reservation::class, ReservationItem::class, Purchase::class, PurchaseItem::class,
                 Sale::class, SaleItem::class, StockOpname::class, StockOpnameItem::class,
                 Supplier::class, Customer::class, User::class, Shift::class,
+                // Panel meja: tanpa persetujuan manajer, admin ikut menangani.
+                SpecialRequest::class, SongRequest::class, SpecialRequestCategory::class,
             ],
             // Pengaturan Aplikasi memang dikelola admin (nama & kontak bisnis
             // dibaca dari sini), jadi 'edit' — bukan sekadar 'view'. Barisnya
@@ -98,7 +101,7 @@ class PolicyPermissionSeeder extends Seeder
             'maintain' => [Subscription::class],
             'view' => [
                 OrderStatusLog::class, StockMovement::class, VisitorLog::class,
-                Tip::class, ServiceLog::class, SongRequest::class, SpecialRequest::class,
+                Tip::class, ServiceLog::class,
                 Role::class, Permission::class,
             ],
         ],
@@ -109,18 +112,25 @@ class PolicyPermissionSeeder extends Seeder
                 Order::class, OrderItem::class, Payment::class, Sale::class, Purchase::class,
                 Customer::class, Tip::class, ServiceLog::class, Table::class, TableSession::class,
                 VisitorLog::class, Menu::class, User::class,
+                SpecialRequest::class, SongRequest::class,
             ],
         ],
 
         'receptionist' => [
-            'manage' => [Reservation::class, ReservationItem::class, Table::class, TableCategory::class],
+            'manage' => [
+                Reservation::class, ReservationItem::class, Table::class, TableCategory::class,
+                SpecialRequest::class, SongRequest::class,
+            ],
             // TableSession: resepsionis menyetujui tamu yang scan QR meja.
             'edit' => [Order::class, TableSession::class],
             'view' => [OrderItem::class, VisitorLog::class, Menu::class, Customer::class],
         ],
 
         'cashier' => [
-            'manage' => [Order::class, OrderItem::class, OrderNote::class, Payment::class],
+            'manage' => [
+                Order::class, OrderItem::class, OrderNote::class, Payment::class,
+                SpecialRequest::class, SongRequest::class,
+            ],
             // TableSession: kasir menyetujui tamu yang scan QR meja dari layar POS.
             'edit' => [TableSession::class],
             'view' => [
