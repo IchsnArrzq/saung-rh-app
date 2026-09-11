@@ -15,7 +15,8 @@
 
                 <div class="space-y-3">
                     @foreach ($activeOrders as $order)
-                        <div class="flex flex-wrap items-start justify-between gap-2 rounded-xl border border-base-300 p-4">
+                        <div wire:key="active-order-{{ $order->id }}"
+                            class="flex flex-wrap items-start justify-between gap-2 rounded-xl border border-base-300 p-4">
                             <div>
                                 <p class="font-semibold">{{ $order->order_number }}</p>
                                 <p class="text-sm text-base-content/70">
